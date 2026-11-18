@@ -558,7 +558,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         )}
                       >
                         <div className={clsx("flex items-center gap-2", isCollapsed && "justify-center w-full")}>
-                          <Icon className="w-4 h-4 shrink-0" />
+                          <Icon className={clsx("w-4 h-4 shrink-0 transition-colors", isActive ? "text-[#93C573]" : "text-slate-300")} />
                           {!isCollapsed && <span className="truncate">{item.name}</span>}
                         </div>
                         {/* Badge */}
@@ -605,11 +605,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               <div
                 onMouseEnter={() => setShowHipaaTooltip(true)}
                 onMouseLeave={() => setShowHipaaTooltip(false)}
-                className="bg-[#0e354a] rounded-xl p-3 flex items-center justify-center border border-sidebar-active/60 cursor-pointer hover:bg-sidebar-active/50 transition-colors relative"
+                className="bg-[#14280E]/90 rounded-xl p-3 flex items-center justify-center border border-sidebar-active/60 cursor-pointer hover:bg-sidebar-active/50 transition-colors relative"
               >
                 <div className="relative">
-                  <ShieldCheck className="w-5 h-5 text-brand-teal" />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full ring-2 ring-sidebar-bg"></span>
+                  <ShieldCheck className="w-5 h-5 text-[#93C573]" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#93C573] rounded-full ring-2 ring-sidebar-bg"></span>
                 </div>
 
                 <AnimatePresence>
@@ -622,7 +622,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       className="absolute left-full ml-4 bottom-0 w-56 bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-2xl z-50 text-left pointer-events-none"
                     >
                       <div className="flex items-center gap-2 text-xs font-bold text-white mb-1">
-                        <ShieldCheck className="w-4 h-4 text-brand-teal" />
+                        <ShieldCheck className="w-4 h-4 text-[#93C573]" />
                         {safeUser?.role === "CAREGIVER" ? "EVV & HIPAA Compliant" : safeUser?.role === "SCHEDULER" ? "HIPAA Protected" : "HIPAA Compliant"}
                       </div>
                       <p className="text-[11px] text-slate-300 leading-normal">
@@ -633,8 +633,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 </AnimatePresence>
               </div>
             ) : (
-              <div className="bg-[#0e354a] rounded-xl p-4 flex items-start gap-3 border border-sidebar-active">
-                <ShieldCheck className="w-5 h-5 text-brand-teal shrink-0 mt-0.5" />
+              <div className="bg-[#14280E]/90 rounded-xl p-4 flex items-start gap-3 border border-sidebar-active">
+                <ShieldCheck className="w-5 h-5 text-[#93C573] shrink-0 mt-0.5" />
                 <div>
                   <div className="text-sm font-medium text-white">
                     {safeUser?.role === "CAREGIVER" ? "EVV & HIPAA Compliant" : safeUser?.role === "SCHEDULER" ? "HIPAA Protected" : "HIPAA Compliant"}

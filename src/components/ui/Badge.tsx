@@ -9,13 +9,13 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  success: "bg-accent-green/20 text-accent-green",
-  warning: "bg-accent-amber/20 text-accent-amber",
-  error: "bg-accent-red/20 text-accent-red",
-  info: "bg-accent-blue/20 text-accent-blue",
-  default: "bg-slate-100 text-slate-600",
-  neutral: "bg-slate-100 text-slate-600",
-  brand: "bg-brand-teal/20 text-brand-teal",
+  success: "bg-[#E3F1D9] text-[#1E5622] border border-[#1E5622]/15",
+  warning: "bg-[#FEF3C7] text-[#9A5B00] border border-[#9A5B00]/15",
+  error: "bg-[#FEE2E2] text-[#B91C1C] border border-[#B91C1C]/15",
+  info: "bg-[#E0F2F5] text-[#0F5E6E] border border-[#0F5E6E]/15",
+  default: "bg-[#F7F9F8] text-[#4A5D52] border border-[#D5DFDA]",
+  neutral: "bg-[#F7F9F8] text-[#4A5D52] border border-[#D5DFDA]",
+  brand: "bg-[#E3F1D9] text-[#3D6B22] border border-[#3D6B22]/20 font-medium",
 };
 
 export function Badge({ variant = "default", className, children, ...props }: BadgeProps) {

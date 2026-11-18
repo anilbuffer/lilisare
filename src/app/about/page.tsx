@@ -38,13 +38,13 @@ export default function AboutPage() {
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Dashboard</span>
           </Link>
-          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#E3F1D9] text-[#1E5622] border border-[#1E5622]/20">
             About Our Company
           </span>
         </div>
 
         {/* Hero Banner */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#062425] via-[#0b3336] to-[#041d1f] text-white p-8 sm:p-12 border border-teal-200/30 shadow-xl">
+        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-[#1B3414] via-[#24461B] to-[#14280E] text-white p-8 sm:p-12 border border-[#93C573]/30 shadow-xl">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#93C573]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-[#FF6E61]/10 rounded-full blur-2xl pointer-events-none" />
 

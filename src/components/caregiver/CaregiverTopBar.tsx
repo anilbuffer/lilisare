@@ -56,7 +56,7 @@ export function CaregiverTopBar({
   };
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200/80 px-4 lg:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+    <header className="h-16 bg-white border-b border-[#D5DFDA]/70 px-4 lg:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}

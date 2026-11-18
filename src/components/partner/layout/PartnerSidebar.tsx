@@ -193,8 +193,8 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
               isCollapsed && "justify-center"
             )}
           >
-            <div className="w-9 h-9 rounded-full bg-slate-600 shrink-0 overflow-hidden flex items-center justify-center ring-2 ring-brand-teal/40">
-              <User className="w-4.5 h-4.5 text-slate-300" />
+            <div className="w-9 h-9 rounded-full bg-sidebar-active shrink-0 overflow-hidden flex items-center justify-center ring-2 ring-[#93C573]/40">
+              <User className="w-4.5 h-4.5 text-emerald-200" />
             </div>
             {!isCollapsed && (
               <>
@@ -222,7 +222,7 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
                 className={clsx(
-                  "absolute bg-slate-800 border border-slate-700/80 rounded-2xl shadow-xl overflow-hidden z-50 p-1.5",
+                  "absolute bg-[#14280E] border border-sidebar-active/80 rounded-2xl shadow-xl overflow-hidden z-50 p-1.5",
                   isCollapsed
                     ? "left-full ml-4 bottom-3 w-48"
                     : "bottom-[calc(100%-10px)] left-3 right-3 mb-2"

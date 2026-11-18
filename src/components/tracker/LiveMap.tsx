@@ -214,7 +214,7 @@ export function LiveMap({
           <div
             className="ml-1.5 text-[9px] font-medium tracking-wide whitespace-nowrap"
             style={{
-              color: poi.type === 'shopping' ? '#f97316' : poi.type === 'food' ? '#60a5fa' : poi.type === 'medical' ? '#2dd4bf' : '#94a3b8',
+              color: poi.type === 'shopping' ? '#f97316' : poi.type === 'food' ? '#60a5fa' : poi.type === 'medical' ? '#93C573' : '#94a3b8',
               textShadow: '0 1px 2px rgba(0,0,0,0.9), 0 0 1px rgba(0,0,0,1)'
             }}
           >

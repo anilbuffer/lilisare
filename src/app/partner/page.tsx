@@ -74,11 +74,11 @@ export default function PartnerDashboard() {
             </motion.div>
 
             {/* Agency Updates */}
-            <motion.div variants={itemVariants} className="bg-gradient-to-br from-[#0e354a] to-slate-900 rounded-2xl p-4 text-white shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden flex-1">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/20 rounded-bl-full -z-0" />
+            <motion.div variants={itemVariants} className="bg-gradient-to-br from-[#1B3414] via-[#24461B] to-[#14280E] rounded-2xl p-4 text-white shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] border border-[#93C573]/30 hover:shadow-[0_4px_12px_-1px_rgba(17,28,22,0.08)] transition-all duration-300 relative overflow-hidden flex-1">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#93C573]/20 rounded-bl-full -z-0" />
               <div className="relative z-10 flex items-center gap-2 mb-3">
-                <Bell className="w-5 h-5 text-brand-teal" />
-                <h3 className="font-semibold text-lg">Agency Updates</h3>
+                <Bell className="w-5 h-5 text-[#93C573]" />
+                <h3 className="font-semibold text-lg text-white">Agency Updates</h3>
               </div>
               <p className="text-xs text-slate-300 mb-3 lg:mb-4 leading-relaxed">
                 We've recently expanded our service area to include the North County region. You can now refer patients in zip codes starting with 902xx.

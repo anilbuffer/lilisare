@@ -71,10 +71,36 @@
   --color-status-info-bg: #E0F2F5;
   --color-status-info-text: #0F5E6E;
 
-  /* Backward-compatible Sidebar Theme */
+  /* Backward-compatible Brand & Sidebar Theme */
   --color-sidebar-bg: #1B3414;
   --color-sidebar-active: #274C1D;
   --color-brand-teal: #3D6B22;
+
+  /* LiliSare Brand-Harmonized Teal Ramp (Replaces legacy cold cyan with warm sage/forest) */
+  --color-teal-50: #F2F8EE;
+  --color-teal-100: #E3F1D9;
+  --color-teal-200: #C7E4B3;
+  --color-teal-300: #ADD591;
+  --color-teal-400: #93C573;
+  --color-teal-500: #62963B;
+  --color-teal-600: #3D6B22;
+  --color-teal-700: #2C5217;
+  --color-teal-800: #213F11;
+  --color-teal-900: #1B3414;
+  --color-teal-950: #0E1D0A;
+
+  /* LiliSare Brand-Harmonized Emerald Ramp */
+  --color-emerald-50: #F2F8EE;
+  --color-emerald-100: #E3F1D9;
+  --color-emerald-200: #C7E4B3;
+  --color-emerald-300: #ADD591;
+  --color-emerald-400: #93C573;
+  --color-emerald-500: #62963B;
+  --color-emerald-600: #3D6B22;
+  --color-emerald-700: #2C5217;
+  --color-emerald-800: #213F11;
+  --color-emerald-900: #1B3414;
+  --color-emerald-950: #0E1D0A;
 
   /* Accents */
   --color-accent-purple: #7C3AED;

@@ -38,8 +38,8 @@ export function PatientSatisfaction() {
                 dataKey="value"
                 stroke="none"
               >
-                <Cell fill="#0EA383" />
-                <Cell fill="#E5E9EC" className="dark:fill-slate-700" />
+                <Cell fill="#3D6B22" />
+                <Cell fill="#D5DFDA" />
               </Pie>
             </PieChart>
           </ResponsiveContainer>

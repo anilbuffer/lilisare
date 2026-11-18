@@ -23,7 +23,7 @@ export function CaregiverLayout({
   const [localPendingSync, setLocalPendingSync] = useState(pendingSyncCount);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F4F6F8]">
+    <div className="flex h-screen overflow-hidden bg-page-bg">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         <CaregiverTopBar

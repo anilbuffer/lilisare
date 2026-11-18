@@ -585,7 +585,7 @@ export default function LoginPage() {
     <div className="flex flex-col space-y-2.5">
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-semibold uppercase tracking-wider text-emerald-200/90 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-[#2dd4bf]" />
+          <Sparkles className="w-3.5 h-3.5 text-[#93C573]" />
           Select Workspace Role:
         </span>
         <span className="text-[11px] text-emerald-300/70 hidden sm:inline-block">
@@ -604,12 +604,12 @@ export default function LoginPage() {
               type="button"
               onClick={() => handleRoleSelect(roleKey)}
               className={`p-2 sm:px-3 sm:py-2 rounded-xl border text-left transition-all duration-150 flex items-center space-x-2 cursor-pointer ${isSel
-                ? "bg-[#0e4d4c] border-[#2dd4bf] text-white shadow-md ring-1 ring-[#2dd4bf]/40"
-                : "bg-[#0a2f30]/60 hover:bg-[#0e4d4c]/50 border-[#144747] text-gray-300 hover:text-white"
+                ? "bg-[#274C1D] border-[#93C573] text-white shadow-md ring-1 ring-[#93C573]/40"
+                : "bg-[#14280E]/70 hover:bg-[#274C1D]/60 border-[#274C1D] text-emerald-100/70 hover:text-white"
                 }`}
             >
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${isSel ? "bg-[#2dd4bf] text-[#062425]" : "bg-[#144747] text-emerald-200"
+                className={`p-1.5 rounded-lg shrink-0 ${isSel ? "bg-[#93C573] text-[#1B3414]" : "bg-[#14280E] text-[#93C573]"
                   }`}
               >
                 <RIcon className="w-4 h-4" />
@@ -653,7 +653,7 @@ export default function LoginPage() {
         {/* Main Header (Visible on Mobile & Tablet above split, hidden on Desktop left panel) */}
         <div className="lg:hidden w-full bg-gradient-to-r from-[#1B3414] via-[#24461B] to-[#14280E] rounded-xl sm:rounded-2xl p-3 sm:p-3 text-white mb-3 sm:mb-3 border border-[#93C573]/30 flex items-center justify-between shadow-xs">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 p-1.5 flex items-center justify-center border border-[#166361] shadow-brand-teal/30 shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 p-1.5 flex items-center justify-center border border-[#93C573]/30 shadow-md shadow-brand-teal/20 shrink-0">
               <img src="/logo-mark.svg" alt="LiliSare" className="w-8 h-8 object-contain" />
             </div>
             <div className="flex flex-col">
@@ -670,13 +670,13 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowStoryModal(true)}
-              className="bg-[#0EA383]/20 hover:bg-[#0EA383]/30 text-[#2dd4bf] px-2.5 py-1 rounded-full border border-[#166361]/60 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+              className="bg-[#93C573]/20 hover:bg-[#93C573]/30 text-[#93C573] px-2.5 py-1 rounded-full border border-[#93C573]/40 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
             >
               <Heart className="w-3 h-3 text-[#FF6E61]" />
               <span>Our Story</span>
             </button>
-            <div className="flex items-center space-x-1.5 bg-[#0e4d4c]/80 text-[#2dd4bf] px-2.5 py-1 rounded-full border border-[#166361]/60 text-[11px] font-semibold">
-              <span className="w-2 h-2 rounded-full bg-[#2dd4bf] animate-pulse" />
+            <div className="flex items-center space-x-1.5 bg-[#14280E]/80 text-[#93C573] px-2.5 py-1 rounded-full border border-[#93C573]/40 text-[11px] font-semibold">
+              <span className="w-2 h-2 rounded-full bg-[#93C573] animate-pulse" />
               <span className="hidden sm:inline">Operational</span>
             </div>
           </div>
@@ -702,7 +702,7 @@ export default function LoginPage() {
               {/* Desktop Header Bar (Hidden on mobile/tablet as they have top header) */}
               <div className="hidden lg:flex justify-between items-center w-full gap-4">
                 <div className="flex items-center space-x-4">
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 p-2 flex items-center justify-center border border-[#166361] shadow-brand-teal/30 shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 p-2 flex items-center justify-center border border-[#93C573]/30 shadow-md shadow-brand-teal/20 shrink-0">
                     <img src="/logo-mark.svg" alt="LiliSare" className="w-10 h-10 object-contain" />
                   </div>
                   <div>
@@ -720,14 +720,14 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowStoryModal(true)}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-[#0EA383]/20 to-[#0e4d4c] hover:from-[#0EA383]/30 hover:to-[#125c5b] text-white px-3.5 py-1.5 rounded-full border border-[#2dd4bf]/40 text-xs font-semibold cursor-pointer transition-all shadow-xs group"
+                    className="flex items-center space-x-2 bg-gradient-to-r from-[#93C573]/20 to-[#274C1D]/60 hover:from-[#93C573]/30 hover:to-[#274C1D]/80 text-white px-3.5 py-1.5 rounded-full border border-[#93C573]/40 text-xs font-semibold cursor-pointer transition-all shadow-xs group"
                   >
                     <Heart className="w-3.5 h-3.5 text-[#FF6E61] group-hover:scale-110 transition-transform" />
                     <span>Who We Are & Mission</span>
                   </button>
 
-                  <div className="flex items-center space-x-2 bg-[#0e4d4c]/80 text-[#2dd4bf] px-3.5 py-1.5 rounded-full border border-[#166361]/60 text-xs font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-[#2dd4bf] animate-pulse" />
+                  <div className="flex items-center space-x-2 bg-[#14280E]/80 text-[#93C573] px-3.5 py-1.5 rounded-full border border-[#93C573]/40 text-xs font-semibold">
+                    <span className="w-2 h-2 rounded-full bg-[#93C573] animate-pulse" />
                     <span>Systems Operational (99.99%)</span>
                   </div>
                 </div>
@@ -748,14 +748,14 @@ export default function LoginPage() {
                   transition={{ duration: 0.2 }}
                   className="mb-4 lg:mb-6"
                 >
-                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#2dd4bf]/10 text-[#2dd4bf] border border-[#2dd4bf]/20 mb-3">
+                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#93C573]/15 text-[#93C573] border border-[#93C573]/30 mb-3">
                     <CurrentRoleIcon className="w-3.5 h-3.5" />
                     <span>{currentRoleInfo.title}</span>
                   </div>
 
                   <h1 className="text-xl sm:text-3xl lg:text-5xl font-bold text-white tracking-tight leading-[1.15] mb-2 sm:mb-4">
                     {currentRoleInfo.spotlightTitle}{" "}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0EA383] via-[#2dd4bf] to-[#38bdf8]">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#93C573] via-[#C7E4B3] to-[#FF6E61]">
                       {currentRoleInfo.spotlightHighlight}
                     </span>
                   </h1>
@@ -780,16 +780,16 @@ export default function LoginPage() {
                     return (
                       <div
                         key={idx}
-                        className="bg-[#0a2f30]/50 border border-[#144747]/70 p-3 rounded-xl flex flex-col lg:flex-row gap-3 lg:gap-4 justify-between space-y-1.5"
+                        className="bg-[#14280E]/70 border border-[#274C1D] p-3 rounded-xl flex flex-col lg:flex-row gap-3 lg:gap-4 justify-between space-y-1.5"
                       >
-                        <div className="w-7 h-7 rounded-lg bg-[#0e4d4c] text-[#2dd4bf] flex items-center justify-center shrink-0 border border-[#166361]">
+                        <div className="w-7 h-7 rounded-lg bg-[#274C1D] text-[#93C573] flex items-center justify-center shrink-0 border border-[#93C573]/30">
                           <FeatIcon className="w-4 h-4" />
                         </div>
                         <div>
                           <div className="font-bold text-xs text-white mb-0.5 leading-snug">
                             {feat.title}
                           </div>
-                          <div className="text-[10px] sm:text-[11px] text-emerald-100/60 leading-relaxed line-clamp-2 sm:line-clamp-3">
+                          <div className="text-[10px] sm:text-[11px] text-emerald-100/70 leading-relaxed line-clamp-2 sm:line-clamp-3">
                             {feat.desc}
                           </div>
                         </div>
@@ -800,7 +800,7 @@ export default function LoginPage() {
               </AnimatePresence>
             </div>
             {/* Left Panel Footer */}
-            <div className="pt-4 lg:pt-6 mt-6 border-t border-[#124445] flex flex-wrap flex-col lg:flex-row items-center justify-between w-full text-xs text-[#527d7e] gap-2">
+            <div className="pt-4 lg:pt-6 mt-6 border-t border-[#274C1D] flex flex-wrap flex-col lg:flex-row items-center justify-between w-full text-xs text-emerald-200/60 gap-2">
               <div className="flex items-center gap-3">
                 <span>&copy; 2026 LiliSare. All rights reserved.</span>
                 <span>•</span>
@@ -814,7 +814,7 @@ export default function LoginPage() {
               </div>
               <div className="flex items-center space-x-3 text-[11px] text-emerald-200/60">
                 <span className="flex items-center space-x-1">
-                  <LockKeyhole className="w-3.5 h-3.5 text-[#2dd4bf]" />
+                  <LockKeyhole className="w-3.5 h-3.5 text-[#93C573]" />
                   <span>256-Bit SSL</span>
                 </span>
                 <span>•</span>
@@ -953,7 +953,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(true)}
-                    className="font-bold text-[#0EA383] hover:underline cursor-pointer"
+                    className="font-bold text-brand-primary hover:text-brand-primary-hover hover:underline cursor-pointer"
                   >
                     Request Access
                   </button>
@@ -1040,12 +1040,12 @@ export default function LoginPage() {
               {/* Header */}
               <div className="flex items-start justify-between pb-4 border-b border-slate-100 mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 p-2 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-[#E3F1D9] border border-[#93C573]/30 p-2 flex items-center justify-center shadow-xs">
                     <img src="/logo-mark.svg" alt="LiliSare" className="w-8 h-8 object-contain" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 leading-tight">LiliSare</h3>
-                    <p className="text-xs font-semibold text-brand-teal">
+                    <p className="text-xs font-semibold text-brand-primary">
                       Live-In Caregivers, Family Caregivers, and Family Friends
                     </p>
                   </div>
@@ -1061,7 +1061,7 @@ export default function LoginPage() {
               </div>
 
               {/* Belief Banner */}
-              <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-4 sm:p-5 mb-6 text-sm text-emerald-950 leading-relaxed shadow-xs">
+              <div className="bg-[#E3F1D9]/70 border border-[#93C573]/40 rounded-2xl p-4 sm:p-5 mb-6 text-sm text-[#1E5622] leading-relaxed shadow-xs">
                 <p className="font-medium">
                   At LiliSare, we believe caregiving comes in many forms. Whether you&apos;re a family member or a close friend, we&apos;re here to support you. We value the strength of community and the deep bond between those who provide care and those who receive it. No matter your role, we&apos;re here to guide and empower you every step of the way.
                 </p>
@@ -1083,22 +1083,22 @@ export default function LoginPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <div className="flex items-center gap-2 font-bold text-brand-teal text-sm">
-                      <Compass className="w-4 h-4 text-brand-teal" />
+                  <div className="p-4 bg-[#F7F9F8] rounded-2xl border border-[#D5DFDA] space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-brand-primary text-sm">
+                      <Compass className="w-4 h-4 text-brand-primary" />
                       <h5>Mission Statement</h5>
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-xs text-text-secondary leading-relaxed">
                       At LiliSare, our mission is to care for the whole family—both the loved one receiving care and the caregiver giving it. We share what we&apos;ve learned, navigate services alongside you, and offer the knowledge, guidance, and support that help your family thrive together.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <div className="flex items-center gap-2 font-bold text-emerald-700 text-sm">
-                      <Eye className="w-4 h-4 text-emerald-600" />
+                  <div className="p-4 bg-[#F7F9F8] rounded-2xl border border-[#D5DFDA] space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-brand-primary text-sm">
+                      <Eye className="w-4 h-4 text-brand-primary" />
                       <h5>Vision Statement</h5>
                     </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-xs text-text-secondary leading-relaxed">
                       We envision a world where no one in a caregiving family is overlooked—where the person receiving care is seen and valued, and the caregiver is supported, never depleted, and never alone. We treat your family like our own: lifting one another through compassion, connection, and community.
                     </p>
                   </div>
@@ -1109,7 +1109,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowStoryModal(false)}
-                  className="px-5 py-2.5 bg-brand-teal hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+                  className="px-5 py-2.5 bg-brand-primary hover:bg-brand-primary-hover text-white font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
                 >
                   Back to Login
                 </button>

@@ -60,7 +60,7 @@ export function MobileBottomNav() {
   const currentNavItems = getNavItems();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 min-[1120px]:hidden bg-slate-900/90 backdrop-blur-lg border-t border-slate-800 px-3 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] text-white shadow-2xl">
+    <div className="fixed bottom-0 left-0 right-0 z-40 min-[1120px]:hidden bg-[#1B3414]/95 backdrop-blur-lg border-t border-[#274C1D] px-3 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] text-white shadow-2xl">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {currentNavItems.map((item) => {
           const active = isItemActive(item.pattern);
@@ -72,13 +72,13 @@ export function MobileBottomNav() {
               href={item.href}
               className={clsx(
                 "relative flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-200 min-h-[44px] min-w-[56px] text-center select-none active:scale-95",
-                active ? "text-brand-teal font-bold" : "text-slate-400 hover:text-slate-200"
+                active ? "text-[#93C573] font-bold" : "text-emerald-100/60 hover:text-white"
               )}
             >
               {active && (
                 <motion.div
                   layoutId="activeMobileNavTab"
-                  className="absolute inset-0 bg-brand-teal/15 rounded-xl border border-brand-teal/30"
+                  className="absolute inset-0 bg-[#93C573]/20 rounded-xl border border-[#93C573]/40"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}

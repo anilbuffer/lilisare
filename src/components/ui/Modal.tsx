@@ -65,7 +65,7 @@ export function Modal({
   const modalContent = (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[#111C16]/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           {/* Backdrop (click to close handled in outer div if needed, but standard is to close on icon or escape) */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -83,19 +83,19 @@ export function Modal({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, type: "spring", bounce: 0, damping: 20 }}
             className={cn(
-              "relative w-full bg-white rounded-[16px] shadow-[0_24px_64px_rgba(0,0,0,0.12)] border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden",
+              "relative w-full bg-white rounded-[20px] shadow-[0_24px_64px_rgba(17,28,22,0.14)] border border-[#D5DFDA] flex flex-col max-h-[90vh] overflow-hidden",
               maxWidthClasses[maxWidth]
             )}
             onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 p-3 sm:p-4 shrink-0 bg-white z-10">
+            <div className="flex items-center justify-between border-b border-[#D5DFDA] p-3 sm:p-4 shrink-0 bg-white z-10">
               <div className="flex items-center gap-3">
                 {icon}
                 <div>
-                  <h3 className="font-semibold text-slate-900 text-base tracking-tight">{title}</h3>
+                  <h3 className="font-semibold text-text-primary text-base tracking-tight">{title}</h3>
                   {description && (
-                    <div className="text-[12px] text-slate-500 font-medium mt-0.5">{description}</div>
+                    <div className="text-[12px] text-text-secondary font-medium mt-0.5">{description}</div>
                   )}
                 </div>
               </div>
@@ -103,7 +103,7 @@ export function Modal({
                 {headerAction}
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="p-2 rounded-full hover:bg-[#F7F9F8] text-text-muted hover:text-text-primary transition-colors"
                   aria-label="Close modal"
                 >
                   <X className="w-5 h-5" />
@@ -118,7 +118,7 @@ export function Modal({
 
             {/* Footer */}
             {footer && (
-              <div className="flex flex-col sm:flex-row justify-end gap-3 p-3 sm:p-4 border-t border-slate-100 shrink-0 bg-slate-50 rounded-b-[24px] z-10">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 p-3 sm:p-4 border-t border-[#D5DFDA] shrink-0 bg-[#F7F9F8] rounded-b-[20px] z-10">
                 {footer}
               </div>
             )}

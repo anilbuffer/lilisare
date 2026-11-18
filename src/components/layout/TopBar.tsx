@@ -50,7 +50,7 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
   };
 
   return (
-    <header className="h-16 sm:h-20 px-3 sm:px-6 flex items-center justify-between bg-page-bg/90 backdrop-blur-md sticky top-0 z-30 transition-all duration-300 border-b border-slate-200/50">
+    <header className="h-16 sm:h-20 px-3 sm:px-6 flex items-center justify-between bg-page-bg/90 backdrop-blur-md sticky top-0 z-30 transition-all duration-300 border-b border-[#D5DFDA]/70">
       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         <button
           onClick={onMenuClick}

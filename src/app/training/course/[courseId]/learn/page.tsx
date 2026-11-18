@@ -110,7 +110,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ courseI
   };
 
   return (
-    <div className="flex lg:h-screen bg-[#F4F6F8] overflow-hidden backdrop-blur-xl rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+    <div className="flex lg:h-screen bg-page-bg overflow-hidden backdrop-blur-xl rounded-2xl border border-[#D5DFDA] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)]">
 
       {/* Mobile Sidebar Toggle */}
       <div className="lg:hidden fixed top-4 right-4 z-50">

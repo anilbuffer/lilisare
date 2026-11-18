@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
                   cursor={{ fill: '#f8fafc' }}
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                 />
-                <Bar dataKey="volume" fill="#0ea383" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="volume" fill="#3D6B22" radius={[4, 4, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>

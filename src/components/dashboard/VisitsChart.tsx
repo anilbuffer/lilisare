@@ -25,16 +25,16 @@ export function VisitsChart() {
       <div className="flex-1 min-h-[250px] w-full mt-4 -ml-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E9EC" />
-            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7684" }} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6B7684" }} />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#D5DFDA" />
+            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#4A5D52" }} dy={10} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#4A5D52" }} />
             <Tooltip
-              cursor={{ fill: "#F4F6F8" }}
-              contentStyle={{ borderRadius: "12px", border: "1px solid #E5E9EC", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+              cursor={{ fill: "#EEF2F0" }}
+              contentStyle={{ borderRadius: "12px", border: "1px solid #D5DFDA", boxShadow: "0 2px 8px rgba(17,28,22,0.06)" }}
             />
-            <Legend iconType="circle" wrapperStyle={{ fontSize: "12px", color: "#6B7684", paddingTop: "20px" }} />
-            <Bar dataKey="Scheduled" fill="#E5E9EC" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Completed" fill="#0EA383" radius={[4, 4, 0, 0]} />
+            <Legend iconType="circle" wrapperStyle={{ fontSize: "12px", color: "#4A5D52", paddingTop: "20px" }} />
+            <Bar dataKey="Scheduled" fill="#D5DFDA" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Completed" fill="#3D6B22" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

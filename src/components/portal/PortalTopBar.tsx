@@ -29,7 +29,7 @@ export function PortalTopBar({ onMenuClick }: { onMenuClick?: () => void }) {
   };
 
   return (
-    <header className="h-16 sm:h-20 px-4 sm:px-6 flex items-center justify-between bg-page-bg/80 backdrop-blur-md sticky top-0 z-30 transition-all duration-300">
+    <header className="h-16 sm:h-20 px-4 sm:px-6 flex items-center justify-between bg-page-bg/90 backdrop-blur-md sticky top-0 z-30 transition-all duration-300 border-b border-[#D5DFDA]/70">
       <div className="flex items-center gap-3 sm:gap-4">
         <button
           onClick={onMenuClick}

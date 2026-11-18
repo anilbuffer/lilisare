@@ -67,10 +67,10 @@ export function QualityTrends() {
                 type="monotone"
                 dataKey="complaints"
                 name="Complaints"
-                stroke="#0EA383"
+                stroke="#3D6B22"
                 strokeWidth={3}
                 dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
-                activeDot={{ r: 6, stroke: '#0EA383', strokeWidth: 2 }}
+                activeDot={{ r: 6, stroke: '#3D6B22', strokeWidth: 2 }}
                 animationDuration={1500}
               />
             </LineChart>

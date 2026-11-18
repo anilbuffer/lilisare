@@ -13,19 +13,19 @@ export default function ReferLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#F4F6F8] font-sans text-slate-900">
+    <div className="min-h-screen bg-page-bg font-sans text-text-primary">
       {/* Minimal Header */}
-      <header className="bg-white border-b border-slate-200">
+      <header className="bg-white border-b border-[#D5DFDA]">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/refer" className="flex items-center gap-2 group">
-            <div className="bg-teal-600 text-white p-1.5 rounded-lg group-hover:bg-teal-700 transition-colors">
+            <div className="bg-brand-primary text-white p-1.5 rounded-lg group-hover:bg-brand-primary-hover transition-colors shadow-xs">
               <Activity className="w-5 h-5" />
             </div>
-            <span className="font-semibold text-xl tracking-tight text-slate-800">
+            <span className="font-semibold text-xl tracking-tight text-text-primary">
               LiliSare
             </span>
           </Link>
-          <div className="text-sm text-slate-500">
+          <div className="text-sm text-text-secondary">
             Provider Referral Portal
           </div>
         </div>

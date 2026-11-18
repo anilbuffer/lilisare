@@ -3,28 +3,44 @@
 import React from "react";
 import Link from "next/link";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Star } from "lucide-react";
+import { Heart, Star, ArrowRight } from "lucide-react";
 
 export function PatientSatisfaction() {
   const score = 4.8;
   const maxScore = 5.0;
   const percentage = (score / maxScore) * 100;
 
-  // Recharts pie chart for half circle gauge
   const data = [
     { value: percentage },
-    { value: 100 - percentage }
+    { value: 100 - percentage },
   ];
 
   return (
-    <Card className="flex flex-col h-full bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden">
-      <CardHeader title="Patient Satisfaction" action={<Link href="/quality-assurance"><span className="text-brand-teal text-sm font-medium hover:underline cursor-pointer">View all →</span></Link>} />
+    <Card className="flex flex-col h-full bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm transition-all duration-300">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-rose-50 text-rose-600 rounded-xl">
+            <Heart className="w-5 h-5 fill-current text-rose-500" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900">Client & Family Satisfaction</h3>
+            <p className="text-xs text-slate-500">Family-centred care sentiment score</p>
+          </div>
+        </div>
 
-      {/* Gauge Area */}
-      <div className="relative h-[150px] flex items-end justify-center mb-4">
-        <div className="absolute inset-0 top-2">
+        <Link
+          href="/reports-analytics"
+          className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 transition-colors"
+        >
+          View all <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+
+      {/* Half-Circle Gauge */}
+      <div className="relative h-[130px] flex items-end justify-center my-2">
+        <div className="absolute inset-0 top-0">
           <ResponsiveContainer width="100%" height="200%">
             <PieChart>
               <Pie
@@ -33,50 +49,54 @@ export function PatientSatisfaction() {
                 cy="50%"
                 startAngle={180}
                 endAngle={0}
-                innerRadius={80}
-                outerRadius={100}
+                innerRadius={72}
+                outerRadius={90}
                 dataKey="value"
                 stroke="none"
               >
                 <Cell fill="#3D6B22" />
-                <Cell fill="#D5DFDA" />
+                <Cell fill="#E2E8F0" />
               </Pie>
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="text-center z-10 flex flex-col items-center translate-y-2">
-          <div className="text-4xl font-bold text-text-primary tracking-tight">{score.toFixed(1)}</div>
-          <div className="flex items-center gap-1 text-accent-amber mt-1.5">
+        <div className="text-center z-10 flex flex-col items-center translate-y-1">
+          <div className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            {score.toFixed(1)}
+          </div>
+          <div className="flex items-center gap-1 text-amber-500 mt-1">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className="w-4 h-4 fill-current" />
+              <Star key={s} className="w-3.5 h-3.5 fill-current" />
             ))}
           </div>
-          <div className="text-xs font-medium text-text-secondary mt-1">out of {maxScore.toFixed(1)}</div>
+          <div className="text-[11px] font-medium text-slate-400 mt-0.5">out of {maxScore.toFixed(1)}</div>
         </div>
       </div>
 
-      {/* Sub metrics */}
-      <div className="space-y-4 mt-auto">
+      {/* Sub-Metrics Progress Bars */}
+      <div className="space-y-3 mt-auto pt-3 border-t border-slate-100">
         <div>
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-text-secondary">Punctuality</span>
-            <span className="font-medium">4.9</span>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-slate-600 font-medium">Caregiver Punctuality</span>
+            <span className="font-bold text-slate-900">4.9 / 5.0</span>
           </div>
-          <ProgressBar progress={98} />
+          <ProgressBar progress={98} color="bg-[#3D6B22]" height="h-2" />
         </div>
+
         <div>
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-text-secondary">Care Quality</span>
-            <span className="font-medium">4.8</span>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-slate-600 font-medium">Care Quality & Empathy</span>
+            <span className="font-bold text-slate-900">4.8 / 5.0</span>
           </div>
-          <ProgressBar progress={96} />
+          <ProgressBar progress={96} color="bg-[#3D6B22]" height="h-2" />
         </div>
+
         <div>
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-text-secondary">Communication</span>
-            <span className="font-medium">4.6</span>
+          <div className="flex justify-between text-xs mb-1">
+            <span className="text-slate-600 font-medium">Agency & Family Communication</span>
+            <span className="font-bold text-slate-900">4.6 / 5.0</span>
           </div>
-          <ProgressBar progress={92} color="bg-accent-amber" />
+          <ProgressBar progress={92} color="bg-amber-500" height="h-2" />
         </div>
       </div>
     </Card>

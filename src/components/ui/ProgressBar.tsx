@@ -6,12 +6,17 @@ import { cn } from "./Card";
 
 interface ProgressBarProps {
   progress: number; // 0 to 100
-  color?: string; // e.g., "bg-brand-teal"
+  color?: string; // e.g., "bg-[#3D6B22]"
   className?: string;
   height?: string;
 }
 
-export function ProgressBar({ progress, color = "bg-brand-teal", className, height = "h-2" }: ProgressBarProps) {
+export function ProgressBar({
+  progress,
+  color = "bg-[#3D6B22]",
+  className,
+  height = "h-1.5",
+}: ProgressBarProps) {
   return (
     <div className={cn("w-full bg-slate-100 rounded-full overflow-hidden", height, className)}>
       <motion.div

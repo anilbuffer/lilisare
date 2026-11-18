@@ -74,13 +74,13 @@ export function PatientSatisfaction() {
       </div>
 
       {/* Sub-Metrics Progress Bars */}
-      <div className="space-y-3 mt-auto pt-3 border-t border-slate-100">
+      <div className="space-y-2.5 mt-auto pt-3 border-t border-slate-100">
         <div>
           <div className="flex justify-between text-xs mb-1">
             <span className="text-slate-600 font-medium">Caregiver Punctuality</span>
             <span className="font-bold text-slate-900">4.9 / 5.0</span>
           </div>
-          <ProgressBar progress={98} color="bg-[#3D6B22]" height="h-2" />
+          <ProgressBar progress={98} color="bg-[#3D6B22]" height="h-1.5" />
         </div>
 
         <div>
@@ -88,7 +88,7 @@ export function PatientSatisfaction() {
             <span className="text-slate-600 font-medium">Care Quality & Empathy</span>
             <span className="font-bold text-slate-900">4.8 / 5.0</span>
           </div>
-          <ProgressBar progress={96} color="bg-[#3D6B22]" height="h-2" />
+          <ProgressBar progress={96} color="bg-[#3D6B22]" height="h-1.5" />
         </div>
 
         <div>
@@ -96,7 +96,7 @@ export function PatientSatisfaction() {
             <span className="text-slate-600 font-medium">Agency & Family Communication</span>
             <span className="font-bold text-slate-900">4.6 / 5.0</span>
           </div>
-          <ProgressBar progress={92} color="bg-amber-500" height="h-2" />
+          <ProgressBar progress={92} color="bg-[#D99B26]" height="h-1.5" />
         </div>
       </div>
     </Card>

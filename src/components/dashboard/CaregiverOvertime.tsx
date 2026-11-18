@@ -1,92 +1,334 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Avatar } from "@/components/ui/Avatar";
-import { AlertTriangle, CheckCircle2, ArrowRight, UserX, Clock } from "lucide-react";
+import {
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowRight,
+  TrendingDown,
+  Users,
+  DollarSign,
+  ShieldCheck,
+  Calendar,
+  Check,
+} from "lucide-react";
+
+interface OvertimeCaregiver {
+  id: string;
+  name: string;
+  initials: string;
+  totalHours: number;
+  otHours: number;
+  client: string;
+  role: string;
+  reassigned?: boolean;
+}
+
+interface WatchlistCaregiver {
+  id: string;
+  name: string;
+  initials: string;
+  currentHours: number;
+  remainingHours: number;
+  upcomingShift: string;
+  client: string;
+}
+
+const INITIAL_OT_CAREGIVERS: OvertimeCaregiver[] = [
+  {
+    id: "cg-ot-1",
+    name: "Jessica Miller",
+    initials: "JM",
+    totalHours: 42.5,
+    otHours: 2.5,
+    client: "Client PT-101 (Eleanor Vance)",
+    role: "HHA • Live-in",
+    reassigned: false,
+  },
+  {
+    id: "cg-ot-2",
+    name: "Thomas Wright",
+    initials: "TW",
+    totalHours: 41.0,
+    otHours: 1.0,
+    client: "Client PT-104 (Arthur Davis)",
+    role: "CNA • Family Caregiver",
+    reassigned: false,
+  },
+];
+
+const WATCHLIST_CAREGIVERS: WatchlistCaregiver[] = [
+  {
+    id: "cg-wl-1",
+    name: "Sarah Jenkins",
+    initials: "SJ",
+    currentHours: 38.5,
+    remainingHours: 1.5,
+    upcomingShift: "4h shift scheduled Friday",
+    client: "Client PT-102 (Maya Lin)",
+  },
+  {
+    id: "cg-wl-2",
+    name: "Marcus Turner",
+    initials: "MT",
+    currentHours: 37.5,
+    remainingHours: 2.5,
+    upcomingShift: "5h shift scheduled Saturday",
+    client: "Client PT-105 (David Kim)",
+  },
+  {
+    id: "cg-wl-3",
+    name: "Emily Rodriguez",
+    initials: "ER",
+    currentHours: 36.0,
+    remainingHours: 4.0,
+    upcomingShift: "6h shift scheduled Sunday",
+    client: "Client PT-106 (Grace Hopper)",
+  },
+];
 
 export function CaregiverOvertime() {
+  const [otList, setOtList] = useState<OvertimeCaregiver[]>(INITIAL_OT_CAREGIVERS);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
+
+  const handleReassign = (caregiver: OvertimeCaregiver) => {
+    setOtList((prev) =>
+      prev.map((c) =>
+        c.id === caregiver.id ? { ...c, reassigned: true, otHours: 0, totalHours: 40.0 } : c
+      )
+    );
+    setActionNotice(
+      `Shift reallocated for ${caregiver.name}: 2.5h reassigned to available PRN caregiver. 0h overtime pending.`
+    );
+    setTimeout(() => setActionNotice(null), 4000);
+  };
+
+  const activeOtCount = otList.filter((c) => !c.reassigned).length;
+  const currentOtHours = otList
+    .filter((c) => !c.reassigned)
+    .reduce((acc, c) => acc + c.otHours, 0) + (activeOtCount === 0 ? 0 : 11.0); // 14.5 total agency pool
+  const currentOtCost = (currentOtHours * 37.5).toFixed(2); // 1.5x average wage premium
+
   return (
-    <Card className="flex flex-col h-full bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm transition-all duration-300">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-amber-50 text-amber-700 rounded-xl">
-            <Clock className="w-5 h-5" />
+    <Card className="flex flex-col w-full bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm transition-all duration-300 space-y-6">
+      {/* 01. Full-Row Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-amber-50 text-amber-700 rounded-xl shrink-0">
+            <Clock className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">Caregiver Overtime</h3>
-            <p className="text-xs text-slate-500">40-Hour Medicaid cap & payroll protection</p>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h3 className="text-lg font-bold text-slate-900">
+                Caregiver Overtime & Utilization
+              </h3>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#E3F1D9] text-[#1E5622] border border-[#93C573]/30 text-xs font-bold rounded-full">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#3D6B22]" />
+                98% of active staff under 40 hours
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Medicaid waiver 40-hour cap governance, proactive shift reallocation & payroll leakage mitigation
+            </p>
           </div>
         </div>
 
-        <Link
-          href="/scheduling"
-          className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 transition-colors"
-        >
-          Schedule <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </div>
-
-      <div className="space-y-2.5 my-3.5 flex-1">
-        {/* Caregiver Alert 1 */}
-        <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <Avatar fallback="JM" name="Jessica Miller" size="sm" />
-            <div className="truncate">
-              <div className="font-semibold text-xs text-slate-900">Jessica Miller</div>
-              <div className="text-[11px] text-rose-600 font-medium flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> 42.5 hrs (+2.5 hrs OT)
-              </div>
-            </div>
-          </div>
+        <div className="flex items-center gap-3">
           <Link
             href="/scheduling"
-            className="text-[11px] font-bold text-rose-700 hover:underline bg-white px-2 py-1 rounded-lg border border-rose-200 shadow-2xs shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition-colors"
           >
-            Reassign
+            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+            Open Scheduling Board
           </Link>
-        </div>
 
-        {/* Caregiver Alert 2 */}
-        <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <Avatar fallback="TW" name="Thomas Wright" size="sm" />
-            <div className="truncate">
-              <div className="font-semibold text-xs text-slate-900">Thomas Wright</div>
-              <div className="text-[11px] text-rose-600 font-medium flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> 41.0 hrs (+1.0 hr OT)
-              </div>
-            </div>
-          </div>
           <Link
-            href="/scheduling"
-            className="text-[11px] font-bold text-rose-700 hover:underline bg-white px-2 py-1 rounded-lg border border-rose-200 shadow-2xs shrink-0"
+            href="/payroll"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] transition-colors"
           >
-            Reassign
+            Overtime Report <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-        </div>
-
-        {/* Healthy Indicator */}
-        <div className="bg-emerald-50/90 text-emerald-800 border border-emerald-200/80 rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-semibold">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>98% of active caregivers under 40 hours</span>
         </div>
       </div>
 
-      {/* Metrics footer */}
-      <div className="space-y-2 pt-3 border-t border-slate-100 text-xs">
-        <div className="flex justify-between items-center text-slate-600">
-          <span>Total Overtime Hours</span>
-          <span className="font-bold text-slate-900">14.5 hrs</span>
+      {actionNotice && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium rounded-xl flex items-center justify-between animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{actionNotice}</span>
+          </div>
+          <button
+            onClick={() => setActionNotice(null)}
+            className="text-emerald-700 hover:text-emerald-900 font-bold"
+          >
+            Dismiss
+          </button>
         </div>
-        <div className="flex justify-between items-center text-slate-600">
-          <span>Estimated Overtime Cost</span>
-          <span className="font-bold text-rose-600">$543.75</span>
+      )}
+
+      {/* 02. Four-Metric KPI Bar across full width */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="p-3.5 bg-slate-50/90 rounded-xl border border-slate-200/80">
+          <div className="flex items-center justify-between text-slate-500 text-xs mb-1">
+            <span>Total OT Hours</span>
+            <Clock className="w-3.5 h-3.5 text-slate-400" />
+          </div>
+          <div className="text-xl font-extrabold text-slate-900">{currentOtHours} hrs</div>
+          <div className="text-[11px] text-amber-700 font-medium mt-0.5">Across active shifts</div>
         </div>
-        <div className="flex justify-between items-center text-slate-600">
-          <span>Approaching Limit (36-40 hrs)</span>
-          <span className="font-bold text-amber-700">5 caregivers</span>
+
+        <div className="p-3.5 bg-rose-50/70 rounded-xl border border-rose-200/80">
+          <div className="flex items-center justify-between text-rose-700 text-xs mb-1">
+            <span>Est. Overtime Cost</span>
+            <DollarSign className="w-3.5 h-3.5 text-rose-600" />
+          </div>
+          <div className="text-xl font-extrabold text-rose-700">${currentOtCost}</div>
+          <div className="text-[11px] text-rose-600 font-medium mt-0.5">Non-reimbursable risk</div>
+        </div>
+
+        <div className="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200/80">
+          <div className="flex items-center justify-between text-amber-800 text-xs mb-1">
+            <span>Exceeding 40h Limit</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+          </div>
+          <div className="text-xl font-extrabold text-amber-900">{activeOtCount} caregivers</div>
+          <div className="text-[11px] text-amber-700 font-medium mt-0.5">Action required</div>
+        </div>
+
+        <div className="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80">
+          <div className="flex items-center justify-between text-emerald-800 text-xs mb-1">
+            <span>Approaching (36-40h)</span>
+            <Users className="w-3.5 h-3.5 text-emerald-600" />
+          </div>
+          <div className="text-xl font-extrabold text-emerald-950">5 staff</div>
+          <div className="text-[11px] text-emerald-700 font-medium mt-0.5">Proactive watchlist</div>
+        </div>
+      </div>
+
+      {/* 03. Two-Column Operational Workbench */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
+        {/* Left Column: Active Breaches (Requires Immediate Reassignment) */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+              Active Overtime Breaches ({activeOtCount})
+            </span>
+            <span className="text-[11px] text-slate-400">Reassign shift to PRN pool</span>
+          </div>
+
+          <div className="space-y-2.5">
+            {otList.map((caregiver) => (
+              <div
+                key={caregiver.id}
+                className={`p-3.5 rounded-xl border transition-all ${
+                  caregiver.reassigned
+                    ? "bg-slate-50/60 border-slate-200 opacity-60"
+                    : "bg-rose-50/60 border-rose-200/80 hover:border-rose-300"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar fallback={caregiver.initials} name={caregiver.name} size="sm" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-slate-900">{caregiver.name}</span>
+                        <span className="text-[10px] text-slate-500 font-medium">{caregiver.role}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-600 truncate mt-0.5">
+                        {caregiver.client}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    {caregiver.reassigned ? (
+                      <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-lg flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-700" /> Reassigned
+                      </span>
+                    ) : (
+                      <>
+                        <div className="text-right">
+                          <span className="text-xs font-bold text-rose-700 block">
+                            {caregiver.totalHours} hrs
+                          </span>
+                          <span className="text-[10px] font-semibold text-rose-600 block">
+                            (+{caregiver.otHours}h OT)
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleReassign(caregiver)}
+                          className="px-2.5 py-1.5 bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold shadow-2xs transition-colors cursor-pointer active:scale-95"
+                        >
+                          Reassign
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="p-3 bg-emerald-50/60 border border-emerald-200/80 rounded-xl flex items-center gap-2 text-xs text-emerald-800 font-medium">
+            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+            <span>884 of 902 caregivers are fully compliant within authorized weekly limits.</span>
+          </div>
+        </div>
+
+        {/* Right Column: Approaching Limit Watchlist (36-40 Hours) */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-600" />
+              Approaching 40h Limit Watchlist (36–40h)
+            </span>
+            <span className="text-[11px] text-slate-400">Preventative management</span>
+          </div>
+
+          <div className="space-y-2">
+            {WATCHLIST_CAREGIVERS.map((item) => (
+              <div
+                key={item.id}
+                className="p-3 bg-slate-50/80 border border-slate-200/80 rounded-xl flex items-center justify-between text-xs"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar fallback={item.initials} name={item.name} size="xs" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-slate-900 truncate">{item.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 bg-amber-100 text-amber-800 font-bold rounded">
+                        {item.currentHours}h
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                      {item.upcomingShift} • {item.client}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0 pl-2">
+                  <span className="text-[11px] font-bold text-amber-800 block">
+                    {item.remainingHours}h remaining
+                  </span>
+                  <Link
+                    href="/scheduling"
+                    className="text-[10px] text-[#3D6B22] font-semibold hover:underline"
+                  >
+                    Adjust shift →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="p-3 bg-amber-50/60 border border-amber-200/70 rounded-xl text-[11px] text-amber-900 leading-relaxed">
+            <strong className="font-semibold">Medicaid Compliance Note:</strong> Overtime premiums cannot be billed to Medicaid Waiver programs. Proactively swapping weekend shifts for staff above 36 hours protects your operational margin.
+          </div>
         </div>
       </div>
     </Card>

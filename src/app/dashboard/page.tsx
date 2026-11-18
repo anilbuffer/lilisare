@@ -82,24 +82,28 @@ export default function DashboardPage() {
         <OnboardingIntakePipes />
       </section>
 
-      {/* 07. Authorizations & Overtime Governance */}
-      <section aria-label="Authorizations and Overtime Governance" className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+      {/* 07. Authorizations & Compliance Cards in one full row */}
+      <section aria-label="Authorizations and Compliance">
         <AuthorizationsComplianceCard />
+      </section>
+
+      {/* 08. Caregiver Overtime Cards: Full one row */}
+      <section aria-label="Caregiver Overtime and Utilization">
         <CaregiverOvertime />
       </section>
 
-      {/* 08. Revenue Cycle & Client/Family Sentiment */}
+      {/* 09. Revenue Cycle & Client/Family Sentiment */}
       <section aria-label="Financial Health and Family Satisfaction" className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <FinancialHealth />
         <PatientSatisfaction />
       </section>
 
-      {/* 09. Insights & Live Activity Feed */}
+      {/* 10. Operational Intelligence & Live Activity Feed */}
       <section aria-label="Operational Insights and Live Activity">
         <InsightsLiveActivityFeed />
       </section>
 
-      {/* 10. Bottom Automation Summary */}
+      {/* 11. Bottom Automation Summary */}
       <section aria-label="Automation Summary">
         <AutomationSummaryCard />
       </section>

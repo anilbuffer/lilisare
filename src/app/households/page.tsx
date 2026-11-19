@@ -777,13 +777,12 @@ export default function HouseholdsPage() {
                           </span>
                           <span className="text-slate-400 text-[10px] block">Weekly Hours</span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedHousehold(hh)}
+                        <Link
+                          href={`/households/${hh.id}`}
                           className="px-3 py-1.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm shadow-[#1B3414]/20 active:scale-95 cursor-pointer"
                         >
                           Manage <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -858,13 +857,12 @@ export default function HouseholdsPage() {
                             {hh.scheduledHoursPerWeek} / {hh.authorizedHoursPerWeek} hrs
                           </td>
                           <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedHousehold(hh)}
-                              className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                            <Link
+                              href={`/households/${hh.id}`}
+                              className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1"
                             >
                               Manage
-                            </button>
+                            </Link>
                           </td>
                         </tr>
                       ))}

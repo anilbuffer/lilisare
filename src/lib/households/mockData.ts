@@ -230,3 +230,19 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     lastVisitDate: "Today, 10:15 AM",
   },
 ];
+
+export function getHouseholdById(id: string): Household | undefined {
+  const cleanId = id.toLowerCase();
+  return MOCK_HOUSEHOLDS.find(
+    (h) => h.id.toLowerCase() === cleanId || h.code.toLowerCase() === cleanId
+  );
+}
+
+export function getAllHouseholdIds(): string[] {
+  const ids: string[] = [];
+  MOCK_HOUSEHOLDS.forEach((h) => {
+    ids.push(h.id);
+    ids.push(h.code);
+  });
+  return Array.from(new Set(ids));
+}

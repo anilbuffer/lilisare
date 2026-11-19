@@ -6,15 +6,11 @@ import {
   Search,
   LayoutGrid,
   List,
-  Filter,
   Users,
   FilterX,
   ChevronRight,
   ShieldAlert,
   AlertCircle,
-  Home,
-  CheckCircle2,
-  Clock,
   ArrowRight,
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
@@ -34,6 +30,16 @@ const CARE_TYPE_OPTIONS = [
   { id: "Family Friend Care", label: "Family Friend Care" },
 ];
 
+const formatShortProgram = (program?: string): string => {
+  if (!program) return "General Care";
+  if (program.includes("CCSP")) return "CCSP Waiver";
+  if (program.includes("SOURCE")) return "SOURCE Waiver";
+  if (program.includes("Private Pay")) return "Private Pay";
+  if (program.includes("VA")) return "VA Aid & Attend";
+  if (program.includes("GAPP")) return "GAPP Pediatric";
+  return program.split("(")[0].trim() || program;
+};
+
 export function ClientManagementWorkspace({
   clients,
   selectedStatusFilter,
@@ -41,7 +47,7 @@ export function ClientManagementWorkspace({
   selectedClientId,
   onSelectClient,
 }: ClientManagementWorkspaceProps) {
-  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCareType, setSelectedCareType] = useState("ALL");
 
@@ -147,7 +153,7 @@ export function ClientManagementWorkspace({
   return (
     <section aria-label="Client Management Workspace" className="space-y-4">
       {/* Workspace Container matching InquiryManagementWorkspace */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
         {/* Workspace Toolbar Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
@@ -192,33 +198,33 @@ export function ClientManagementWorkspace({
               </select>
             </div>
 
-            {/* View Mode Toggle (Table vs Grid) */}
+            {/* View Mode Toggle (Grid vs Table) */}
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
-              <button
-                type="button"
-                onClick={() => setViewMode("table")}
-                title="Table View"
-                className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                  viewMode === "table"
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
-              >
-                <List className="w-4 h-4" />
-                <span className="hidden sm:inline text-[11px]">Table</span>
-              </button>
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
                 title="Grid View"
                 className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                   viewMode === "grid"
-                    ? "bg-white text-slate-900 shadow-xs"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
                     : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 <LayoutGrid className="w-4 h-4" />
                 <span className="hidden sm:inline text-[11px]">Grid</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                title="Table View"
+                className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  viewMode === "table"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                <List className="w-4 h-4" />
+                <span className="hidden sm:inline text-[11px]">Table</span>
               </button>
             </div>
           </div>
@@ -487,42 +493,30 @@ export function ClientManagementWorkspace({
                   <div
                     key={client.id}
                     onClick={() => onSelectClient(client)}
-                    className={`h-full bg-white rounded-2xl p-4 sm:p-5 border transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
+                    className={`bg-white rounded-2xl p-5 border shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 ${
                       isSelected
-                        ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-md -translate-y-0.5"
-                        : "border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300"
+                        ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white -translate-y-0.5"
+                        : "border-slate-200 hover:border-[#3D6B22]/60"
                     }`}
                   >
                     <div>
-                      {/* Card Header: Client Info & Status */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0">
-                            {client.avatarUrl ? (
-                              <img
-                                src={client.avatarUrl}
-                                alt={client.name}
-                                className="w-full h-full object-cover"
+                      {/* Top: Client Title + Status Badge */}
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <h3 className="text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
+                              {client.name}
+                            </h3>
+                            {hasAttention && (
+                              <span
+                                className="w-2 h-2 rounded-full bg-amber-500 shrink-0"
+                                title="Needs Attention"
                               />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center font-bold text-xs text-slate-600 bg-slate-200">
-                                {client.name.charAt(0)}
-                              </div>
                             )}
                           </div>
-                          <div>
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-                              <span>{client.name}</span>
-                              {hasAttention && (
-                                <span title="Needs Attention" className="text-amber-600">
-                                  <ShieldAlert className="w-3.5 h-3.5" />
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[11px] font-mono text-slate-400">
-                              {client.id} • Age {client.age}
-                            </span>
-                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5 truncate">
+                            {client.household.name} · Age {client.age}
+                          </p>
                         </div>
 
                         <span
@@ -534,57 +528,43 @@ export function ClientManagementWorkspace({
                         </span>
                       </div>
 
-                      {/* Badges strip: Care Type & Household */}
-                      <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
-                        <span
-                          className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${getCareTypeBadge(
-                            client.careType
-                          )}`}
-                        >
+                      {/* Compact Tags */}
+                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 flex-wrap">
+                        <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200/60">
+                          {client.carePlan.authorizedWeeklyHours} hrs/wk
+                        </span>
+                        <span className="text-[11px] font-medium bg-[#E3F1D9] text-[#1E5622] px-2.5 py-0.5 rounded-lg border border-[#3D6B22]/20">
                           {client.careType}
                         </span>
-
-                        <div className="flex items-center gap-1 text-[11px] text-slate-600 font-medium bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200/80">
-                          <Home className="w-3 h-3 text-slate-400" />
-                          <span className="truncate max-w-[130px]">{client.household.name}</span>
-                        </div>
-                      </div>
-
-                      {/* Caregiver & Hours summary */}
-                      <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-2 text-xs">
-                        <div className="flex items-center justify-between text-slate-600">
-                          <span className="text-slate-400 text-[11px]">Caregiver:</span>
-                          {client.assignedCareTeam.primaryCaregiver ? (
-                            <span className="font-semibold text-slate-800 truncate max-w-[160px]">
-                              {client.assignedCareTeam.primaryCaregiver.name}
-                            </span>
-                          ) : (
-                            <span className="font-bold text-rose-600 text-[11px] flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" />
-                              Unassigned
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-between text-slate-600">
-                          <span className="text-slate-400 text-[11px]">Auth Hours:</span>
-                          <span className="font-bold text-slate-800">
-                            {client.carePlan.authorizedWeeklyHours} hrs/wk
+                        {client.assignedCareTeam.primaryCaregiver ? (
+                          <span className="text-[11px] font-medium text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-lg border border-slate-200/60 truncate max-w-[150px]">
+                            {client.assignedCareTeam.primaryCaregiver.name}
                           </span>
-                        </div>
+                        ) : (
+                          <span className="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-200">
+                            Unassigned
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    {/* Footer Actions */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-400">{client.updatedAtRelative}</span>
+                    {/* Card Footer: Minimal metadata + Profile link */}
+                    <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="font-mono text-slate-600 font-medium">{client.id}</span>
+                        <span>·</span>
+                        <span>{formatShortProgram(client.carePlan.program)}</span>
+                        <span>·</span>
+                        <span>{client.updatedAtRelative}</span>
+                      </div>
+
                       <Link
                         href={`/clients/${client.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] group-hover:translate-x-1 transition-transform"
+                        className="inline-flex items-center gap-1 font-semibold text-[#3D6B22] group-hover:translate-x-1 transition-transform shrink-0"
                       >
-                        Full Profile
-                        <ArrowRight className="w-3 h-3" />
+                        <span>Profile</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>

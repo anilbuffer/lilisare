@@ -69,7 +69,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="max-w-full mx-auto space-y-6">
+    <div className="max-w-full max-w-7xl mx-auto space-y-6">
       {/* Top Header Banner matching Caregiver & Portal Settings layout */}
       <div className="bg-white/80 backdrop-blur-xl p-4 lg:p-6 rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

@@ -9,7 +9,7 @@ interface PageProps {
 
 export default async function InquiryDetailPage({ params }: PageProps) {
   const resolvedParams = await params;
-  const inquiry = getInquiryById(resolvedParams.id) || INITIAL_INQUIRIES.find((i) => i.id === resolvedParams.id) || INITIAL_INQUIRIES[0];
+  const inquiry = getInquiryById(resolvedParams.id) || INITIAL_INQUIRIES.find((i) => i.id.toLowerCase() === resolvedParams.id.toLowerCase()) || INITIAL_INQUIRIES[0];
 
   if (!inquiry) {
     notFound();
@@ -18,7 +18,7 @@ export default async function InquiryDetailPage({ params }: PageProps) {
   return (
     <InquiryDetailsPage
       initialInquiry={inquiry}
-      backHref="/intake/pipeline"
+      backHref="/intake/pipeline/"
       backLabel="Back to Pipeline & Inquiries"
     />
   );

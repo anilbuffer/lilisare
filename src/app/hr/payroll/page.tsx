@@ -683,7 +683,7 @@ export default function HrPayrollPage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="w-full mx-auto space-y-6 pb-12"
+      className="w-full max-w-7xl mx-auto space-y-6 pb-12"
     >
       {/* Toast Notification */}
       <AnimatePresence>

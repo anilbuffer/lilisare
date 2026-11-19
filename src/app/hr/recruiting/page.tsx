@@ -17,7 +17,7 @@ function RecruitingContent() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="w-full mx-auto space-y-6"
+      className="w-full max-w-7xl mx-auto space-y-6"
     >
       {/* Header & Quick Metrics */}
       <div className="bg-white backdrop-blur-2xl p-4 lg:p-6 rounded-xl border border-slate-200 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex flex-col xl:flex-row xl:items-center justify-between gap-6 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(0,0,0,0.06)]">

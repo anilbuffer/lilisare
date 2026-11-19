@@ -6,8 +6,8 @@ import { NewReferralFullPage } from "@/components/intake/NewReferralFullPage";
 export default function NewReferralRoutePage() {
   return (
     <NewReferralFullPage
-      backHref="/intake/pipeline"
-      onSuccessRedirectHref="/intake/pipeline"
+      backHref="/intake/pipeline/"
+      onSuccessRedirectHref="/intake/pipeline/"
     />
   );
 }

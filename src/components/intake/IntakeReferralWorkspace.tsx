@@ -111,18 +111,18 @@ export function IntakeReferralWorkspace() {
   };
 
   const handleSelectInquiryById = (id: string) => {
-    router.push(`/intake/pipeline/${id}`);
+    router.push(`/intake/pipeline/${id}/`);
   };
 
   const handleTaskAction = (task: FollowUpTask) => {
-    router.push(`/intake/pipeline/${task.inquiryId}`);
+    router.push(`/intake/pipeline/${task.inquiryId}/`);
   };
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-5 pb-12 animate-in fade-in duration-200">
       {/* 01. Page Header */}
       <IntakePageHeader
-        newReferralHref="/intake/pipeline/new"
+        newReferralHref="/intake/pipeline/new/"
         selectedBranch={selectedBranch}
         onBranchChange={setSelectedBranch}
         selectedDateRange={selectedDateRange}

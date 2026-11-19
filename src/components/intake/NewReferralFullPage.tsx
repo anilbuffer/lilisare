@@ -23,8 +23,8 @@ interface NewReferralFullPageProps {
 }
 
 export function NewReferralFullPage({
-  backHref = "/intake/pipeline",
-  onSuccessRedirectHref = "/intake/pipeline",
+  backHref = "/intake/pipeline/",
+  onSuccessRedirectHref = "/intake/pipeline/",
 }: NewReferralFullPageProps) {
   const router = useRouter();
   const [step, setStep] = useState<number>(1);

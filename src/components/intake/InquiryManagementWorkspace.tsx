@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { InquiryRecord, InquiryStage } from "@/types/intake";
 import {
@@ -83,8 +84,13 @@ export function InquiryManagementWorkspace({
     });
   }, [inquiries, currentStage, searchQuery]);
 
+  const getDetailsHref = (id: string) => {
+    const cleanPath = baseDetailsPath.replace(/\/$/, "");
+    return `${cleanPath}/${id}/`;
+  };
+
   const handleRowClick = (id: string) => {
-    router.push(`${baseDetailsPath}/${id}`);
+    router.push(getDetailsHref(id));
   };
 
   return (
@@ -226,12 +232,13 @@ export function InquiryManagementWorkspace({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
           {filteredInquiries.map((inquiry, index) => {
             const badge = STAGE_BADGES[inquiry.stage];
+            const detailsHref = getDetailsHref(inquiry.id);
 
             return (
-              <div
+              <Link
                 key={inquiry.id}
-                onClick={() => handleRowClick(inquiry.id)}
-                className="bg-white border border-slate-200/80 hover:border-[#3D6B22]/50 hover:shadow-md rounded-2xl p-4 sm:p-4.5 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                href={detailsHref}
+                className="bg-white border border-slate-200/80 hover:border-[#3D6B22]/50 hover:shadow-md rounded-2xl p-4 sm:p-4.5 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
               >
                 <div>
                   {/* Top: Record Label + Stage Badge */}
@@ -299,7 +306,7 @@ export function InquiryManagementWorkspace({
                     <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -323,6 +330,7 @@ export function InquiryManagementWorkspace({
               <tbody className="divide-y divide-slate-100">
                 {filteredInquiries.map((inquiry) => {
                   const badge = STAGE_BADGES[inquiry.stage];
+                  const detailsHref = getDetailsHref(inquiry.id);
 
                   return (
                     <tr
@@ -331,9 +339,12 @@ export function InquiryManagementWorkspace({
                       className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
                     >
                       <td className="py-3 px-4">
-                        <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                        <Link
+                          href={detailsHref}
+                          className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors hover:underline block"
+                        >
                           {inquiry.familyName}
-                        </div>
+                        </Link>
                         <div className="text-[11px] text-slate-500">
                           Client: {inquiry.familyInfo.clientInfo.name} ({inquiry.familyInfo.clientInfo.age}y)
                         </div>
@@ -391,10 +402,13 @@ export function InquiryManagementWorkspace({
                       </td>
 
                       <td className="py-3 px-4 text-right">
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D6B22] group-hover:translate-x-1 transition-transform">
+                        <Link
+                          href={detailsHref}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D6B22] group-hover:translate-x-1 transition-transform"
+                        >
                           <span>View</span>
                           <ChevronRight className="w-3.5 h-3.5" />
-                        </span>
+                        </Link>
                       </td>
                     </tr>
                   );

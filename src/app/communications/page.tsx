@@ -4,7 +4,7 @@ import { MessageSquare } from "lucide-react";
 
 export default function CommunicationsPage() {
   return (
-    <div className="w-full mx-auto space-y-6 flex flex-col h-[calc(100vh-140px)]">
+    <div className="w-full max-w-7xl mx-auto space-y-6 flex flex-col h-[calc(100vh-140px)]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2 lg:mb-4 shrink-0">
         <div>

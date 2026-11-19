@@ -18,7 +18,7 @@ interface IntakePageHeaderProps {
 
 export function IntakePageHeader({
   onNewReferral,
-  newReferralHref = "/intake/pipeline/new",
+  newReferralHref = "/intake/pipeline/new/",
   selectedBranch,
   onBranchChange,
   selectedDateRange,

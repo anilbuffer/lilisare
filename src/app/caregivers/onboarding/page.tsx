@@ -10,7 +10,7 @@ export default function OnboardingPage() {
   const [activeKpiFilter, setActiveKpiFilter] = useState<"all" | "completed" | "missing">("all");
 
   return (
-    <div className="w-full mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
       <HRNavHeader activeTab="onboarding" />
 
       {/* Interactive KPI Cards */}

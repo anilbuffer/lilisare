@@ -24,7 +24,7 @@ export default function CaregiverRosterPage() {
   );
 
   return (
-    <div className="w-full mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
       <HRNavHeader activeTab="roster" />
 
       {/* Header */}
@@ -34,7 +34,7 @@ export default function CaregiverRosterPage() {
           <p className="text-sm text-text-secondary mt-1">{caregiversList.length} active caregivers in roster.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-brand-teal text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-brand-teal/90 transition-colors shadow-[0_6px_32px_rgba(0,0,0,0.06)] shadow-brand-teal/20 whitespace-nowrap"
           >
@@ -237,9 +237,9 @@ export default function CaregiverRosterPage() {
         )}
       </AnimatePresence>
 
-      <AddCaregiverModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <AddCaregiverModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
       />
     </div>
   );

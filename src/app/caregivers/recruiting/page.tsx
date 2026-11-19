@@ -12,7 +12,7 @@ export default function RecruitingPage() {
   const [isAddApplicantModalOpen, setIsAddApplicantModalOpen] = useState(false);
 
   return (
-    <div className="w-full mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
       <HRNavHeader activeTab="recruiting" />
 
       {/* Header Controls */}
@@ -26,7 +26,7 @@ export default function RecruitingPage() {
               className="w-full pl-9 pr-4 py-2.5 bg-white rounded-full border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all"
             />
           </div>
-          <button 
+          <button
             onClick={() => toast.info("Filters functionality coming soon")}
             className="px-4 py-2.5 rounded-full bg-white border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap"
           >
@@ -34,7 +34,7 @@ export default function RecruitingPage() {
             Filters
           </button>
         </div>
-        <button 
+        <button
           onClick={() => setIsAddApplicantModalOpen(true)}
           className="flex items-center gap-2 bg-brand-teal text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-brand-teal/90 transition-colors shadow-[0_6px_32px_rgba(0,0,0,0.06)] shadow-brand-teal/20 whitespace-nowrap"
         >
@@ -46,7 +46,7 @@ export default function RecruitingPage() {
       {/* Pipeline Board */}
       <PipelineBoard onAddApplicant={() => setIsAddApplicantModalOpen(true)} />
 
-      <AddApplicantModal 
+      <AddApplicantModal
         isOpen={isAddApplicantModalOpen}
         onClose={() => setIsAddApplicantModalOpen(false)}
       />

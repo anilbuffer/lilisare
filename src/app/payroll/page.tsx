@@ -83,7 +83,7 @@ export default function PayrollPage() {
 
   return (
     <div className="flex-1 bg-page-bg min-h-screen">
-      <div className="max-w-full mx-auto space-y-6">
+      <div className="max-w-full max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>

@@ -7,7 +7,7 @@ import { Clock, CalendarCheck, CalendarX } from "lucide-react";
 
 export default function TimeOffPage() {
   return (
-    <div className="w-full mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
       <HRNavHeader activeTab="time-off" />
 
       {/* KPI Cards */}

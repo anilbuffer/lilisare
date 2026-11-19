@@ -9,7 +9,7 @@ export default function ProfilePage() {
   const { currentUser } = useAuth();
 
   return (
-    <div className="w-full mx-auto space-y-6">
+    <div className="w-full max-w-7xl mx-auto space-y-6">
       <div>
         <h2 className="text-xl font-bold text-text-primary">My Profile</h2>
         <p className="text-sm text-text-secondary mt-1">Manage your personal information and preferences.</p>

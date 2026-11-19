@@ -21,7 +21,7 @@ export default function HrTrainingPage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="w-full mx-auto space-y-6"
+      className="w-full max-w-7xl mx-auto space-y-6"
     >
       {/* Header & Navigation Bar */}
       <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)] flex flex-col lg:flex-row lg:items-center justify-between gap-4">

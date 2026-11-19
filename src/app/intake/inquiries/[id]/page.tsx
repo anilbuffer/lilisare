@@ -18,7 +18,7 @@ export default async function InquiryDetailsHubPage({ params }: PageProps) {
   return (
     <InquiryDetailsPage
       initialInquiry={inquiry}
-      backHref="/intake/pipeline"
+      backHref="/intake/pipeline/"
       backLabel="Back to Pipeline & Inquiries"
     />
   );

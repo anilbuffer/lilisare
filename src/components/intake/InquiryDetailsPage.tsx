@@ -48,7 +48,7 @@ const STAGE_STYLES: Record<InquiryStage, { bg: string; text: string; border: str
 
 export function InquiryDetailsPage({
   initialInquiry,
-  backHref = "/intake/pipeline",
+  backHref = "/intake/pipeline/",
   backLabel = "Back to Pipeline & Inquiries",
 }: InquiryDetailsPageProps) {
   const router = useRouter();
@@ -124,8 +124,8 @@ export function InquiryDetailsPage({
             d.status === "Received"
               ? "Missing"
               : d.status === "Missing"
-              ? "Pending Review"
-              : "Received";
+                ? "Pending Review"
+                : "Received";
           return { ...d, status: nextStatus };
         }
         return d;
@@ -264,9 +264,8 @@ export function InquiryDetailsPage({
                     <button
                       key={stg}
                       onClick={() => handleUpdateStatus(stg)}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 ${
-                        inquiry.stage === stg ? "font-semibold text-[#3D6B22] bg-emerald-50/50" : "text-slate-800"
-                      }`}
+                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 ${inquiry.stage === stg ? "font-semibold text-[#3D6B22] bg-emerald-50/50" : "text-slate-800"
+                        }`}
                     >
                       <span>{stg}</span>
                       {inquiry.stage === stg && <CheckCircle2 className="w-3.5 h-3.5 text-[#3D6B22]" />}
@@ -524,13 +523,12 @@ export function InquiryDetailsPage({
                 D. Documents & Assessment
               </h2>
               <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                  inquiry.assessmentStatus === "Completed"
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                    : inquiry.assessmentStatus === "Scheduled"
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${inquiry.assessmentStatus === "Completed"
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  : inquiry.assessmentStatus === "Scheduled"
                     ? "bg-sky-50 text-sky-800 border-sky-200"
                     : "bg-amber-50 text-amber-800 border-amber-200"
-                }`}
+                  }`}
               >
                 {inquiry.assessmentStatus}
               </span>
@@ -559,13 +557,12 @@ export function InquiryDetailsPage({
                 <div
                   key={doc.id}
                   onClick={() => handleToggleDocStatus(doc.id)}
-                  className={`p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition-colors ${
-                    doc.status === "Received"
-                      ? "bg-emerald-50/50 border-emerald-200"
-                      : doc.status === "Pending Review"
+                  className={`p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition-colors ${doc.status === "Received"
+                    ? "bg-emerald-50/50 border-emerald-200"
+                    : doc.status === "Pending Review"
                       ? "bg-amber-50/50 border-amber-200"
                       : "bg-rose-50/50 border-rose-200"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     {doc.status === "Received" ? (
@@ -578,13 +575,12 @@ export function InquiryDetailsPage({
                     <span className="font-semibold text-slate-800 truncate">{doc.name}</span>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                      doc.status === "Received"
-                        ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                        : doc.status === "Pending Review"
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${doc.status === "Received"
+                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                      : doc.status === "Pending Review"
                         ? "bg-amber-100 text-amber-800 border-amber-300"
                         : "bg-rose-100 text-rose-800 border-rose-300"
-                    }`}
+                      }`}
                   >
                     {doc.status}
                   </span>
@@ -645,15 +641,14 @@ export function InquiryDetailsPage({
               {inquiry.timeline.map((entry) => (
                 <div key={entry.id} className="relative text-xs">
                   <div
-                    className={`absolute -left-5 top-1 w-2.5 h-2.5 rounded-full border-2 border-white shadow-xs ${
-                      entry.type === "call"
-                        ? "bg-[#3D6B22]"
-                        : entry.type === "assessment"
+                    className={`absolute -left-5 top-1 w-2.5 h-2.5 rounded-full border-2 border-white shadow-xs ${entry.type === "call"
+                      ? "bg-[#3D6B22]"
+                      : entry.type === "assessment"
                         ? "bg-sky-600"
                         : entry.type === "status_change"
-                        ? "bg-amber-600"
-                        : "bg-slate-400"
-                    }`}
+                          ? "bg-amber-600"
+                          : "bg-slate-400"
+                      }`}
                   />
                   <div>
                     <div className="flex items-center justify-between gap-1">

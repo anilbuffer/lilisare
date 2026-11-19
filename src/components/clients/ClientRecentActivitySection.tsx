@@ -94,7 +94,7 @@ export function ClientRecentActivitySection({
   const displayedActivities = showAll ? activities : activities.slice(0, 4);
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
       <div>
         {/* Header matching RecentActivitySection */}
         <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">

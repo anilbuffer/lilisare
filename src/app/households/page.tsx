@@ -10,19 +10,14 @@ import {
   Calendar,
   Clock,
   Search,
-  Filter,
   Plus,
   ArrowRight,
   AlertCircle,
   CheckCircle2,
-  Phone,
-  Mail,
   MapPin,
   ChevronRight,
-  ExternalLink,
   Sparkles,
   ArrowUpRight,
-  Inbox,
   Download,
   ChevronDown,
   FileSpreadsheet,
@@ -34,9 +29,9 @@ import {
   FilterX,
   FileWarning,
   UserCheck,
+  ClipboardCheck,
 } from "lucide-react";
 import { MOCK_HOUSEHOLDS, Household } from "@/lib/households/mockData";
-import { Card } from "@/components/ui/Card";
 import { toast } from "sonner";
 
 export default function HouseholdsPage() {
@@ -104,6 +99,16 @@ export default function HouseholdsPage() {
       label: "Pending Auth",
       count: MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length,
     },
+    {
+      id: "STUCK",
+      label: "Delayed & Stuck",
+      count: MOCK_HOUSEHOLDS.filter(
+        (h) =>
+          Boolean(h.triJourneyStatus.bottleneckMessage) ||
+          h.authStatus === "Expired" ||
+          h.authStatus === "Expiring Soon"
+      ).length,
+    },
   ];
 
   // Filter logic
@@ -123,6 +128,13 @@ export default function HouseholdsPage() {
       }
       if (selectedTab === "PENDING_AUTH" && hh.authStatus === "Approved") {
         return false;
+      }
+      if (selectedTab === "STUCK") {
+        const isStuck =
+          Boolean(hh.triJourneyStatus.bottleneckMessage) ||
+          hh.authStatus === "Expired" ||
+          hh.authStatus === "Expiring Soon";
+        if (!isStuck) return false;
       }
 
       // Program filter
@@ -288,11 +300,10 @@ export default function HouseholdsPage() {
                       setSelectedDateRange(opt.id);
                       setIsDateOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      selectedDateRange === opt.id
-                        ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedDateRange === opt.id
+                      ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
+                      : "text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     <span>{opt.label}</span>
                     {selectedDateRange === opt.id && <Check className="w-3 h-3" />}
@@ -327,11 +338,10 @@ export default function HouseholdsPage() {
                       setSelectedBranch(b.id);
                       setIsBranchOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      selectedBranch === b.id
-                        ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedBranch === b.id
+                      ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
+                      : "text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     <span>{b.label}</span>
                     {selectedBranch === b.id && <Check className="w-3 h-3" />}
@@ -386,25 +396,7 @@ export default function HouseholdsPage() {
             )}
           </div>
 
-          {/* Intake Pipeline Journey Link */}
-          <Link
-            href="/intake/pipeline"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all"
-          >
-            <Inbox className="w-3.5 h-3.5 text-slate-500" />
-            <span>Intake Pipeline</span>
-          </Link>
-
-          {/* Clients Workspace Journey Link */}
-          <Link
-            href="/clients"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all"
-          >
-            <Users className="w-3.5 h-3.5 text-slate-500" />
-            <span>Clients Workspace</span>
-          </Link>
-
-          {/* Register Household CTA */}
+          {/* Register Household CTA (Dedicated Action) */}
           <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/25 hover:shadow-md active:scale-95 cursor-pointer">
             <Plus className="w-4 h-4 text-[#93C573]" />
             Register Household
@@ -412,132 +404,114 @@ export default function HouseholdsPage() {
         </div>
       </header>
 
-      {/* 02. KPI Stats Strip - Uniform styling with Dashboard AdminKpiRow & Caregivers */}
-      <section aria-label="Household Key Performance Indicators" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-        {/* Total Households */}
-        <button
-          type="button"
-          onClick={() => setSelectedTab(selectedTab === "ALL" ? "ALL" : "ALL")}
-          className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
-            selectedTab === "ALL"
-              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
-              : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-              Total Households
-            </span>
-            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-[#3D6B22]/10 text-[#3D6B22]">
-              <Home className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-              {MOCK_HOUSEHOLDS.length}
-            </span>
-            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
-            <span className="text-slate-400 font-medium truncate pr-1">Registered family units</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-[#E3F1D9] text-[#1E5622] border-[#3D6B22]/20">
-              {MOCK_HOUSEHOLDS.length} Active
-            </span>
-          </div>
-        </button>
+      {/* 02. KPI Stats Strip - Uniform styling matching LiliSare KPI cards */}
+      <section aria-label="Household Key Performance Indicators" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        {[
+          {
+            id: "ALL",
+            label: "Total Households",
+            value: MOCK_HOUSEHOLDS.length.toLocaleString(),
+            icon: Home,
+            tone: "forest" as const,
+          },
+          {
+            id: "CARE_ACTIVE",
+            label: "Active Care Units",
+            value: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage === "Care Active").length.toLocaleString(),
+            icon: Heart,
+            tone: "forest" as const,
+          },
+          {
+            id: "PENDING_AUTH",
+            label: "Pending Authorisations",
+            value: MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length.toLocaleString(),
+            icon: ClipboardCheck,
+            tone: "amber" as const,
+          },
+          {
+            id: "ONBOARDING",
+            label: "In Onboarding",
+            value: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage !== "Care Active").length.toLocaleString(),
+            icon: Clock,
+            tone: "amber" as const,
+          },
+          {
+            id: "STUCK",
+            label: "Households Stuck",
+            value: MOCK_HOUSEHOLDS.filter(
+              (h) =>
+                Boolean(h.triJourneyStatus.bottleneckMessage) ||
+                h.authStatus === "Expired" ||
+                h.authStatus === "Expiring Soon"
+            ).length.toLocaleString(),
+            icon: Home,
+            tone: "coral" as const,
+          },
+        ].map((kpi) => {
+          const Icon = kpi.icon;
+          const isSelected = selectedTab === kpi.id;
 
-        {/* Family Caregivers */}
-        <button
-          type="button"
-          onClick={() => setSelectedTab(selectedTab === "CARE_ACTIVE" ? "ALL" : "CARE_ACTIVE")}
-          className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
-            selectedTab === "CARE_ACTIVE"
-              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
-              : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-              Family Caregivers
-            </span>
-            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-rose-100 text-rose-700">
-              <Heart className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-              {MOCK_HOUSEHOLDS.filter((h) => h.primaryCaregiver).length}
-            </span>
-            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
-            <span className="text-slate-400 font-medium truncate pr-1">Linked family & guardians</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-rose-50 text-rose-700 border-rose-200/70">
-              {MOCK_HOUSEHOLDS.filter((h) => h.primaryCaregiver).length} W-2 Paid
-            </span>
-          </div>
-        </button>
+          const toneStyles = {
+            forest: {
+              cardBorder: "border-slate-200 hover:border-[#3D6B22]/50",
+              iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
+              valText: "text-slate-900",
+              selected:
+                "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 shadow-md bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white -translate-y-0.5",
+            },
+            amber: {
+              cardBorder: "border-amber-300 hover:border-amber-400 bg-white",
+              iconBg: "bg-amber-100 text-amber-800",
+              valText: "text-amber-900",
+              selected:
+                "border-amber-400 ring-2 ring-amber-400/20 shadow-md bg-gradient-to-b from-amber-50/70 via-white to-white -translate-y-0.5",
+            },
+            coral: {
+              cardBorder: "border-rose-300 hover:border-rose-400 bg-white",
+              iconBg: "bg-rose-100 text-rose-700",
+              valText: "text-rose-900",
+              selected:
+                "border-rose-400 ring-2 ring-rose-400/20 shadow-md bg-gradient-to-b from-rose-50/70 via-white to-white -translate-y-0.5",
+            },
+          }[kpi.tone];
 
-        {/* Authorized Weekly Hours */}
-        <div className="group text-left focus:outline-none w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60 transition-all duration-300 relative overflow-hidden flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-              Authorized Weekly Hours
-            </span>
-            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-sky-100 text-sky-700">
-              <Clock className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-              {MOCK_HOUSEHOLDS.reduce((sum, h) => sum + h.authorizedHoursPerWeek, 0)}
-            </span>
-            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
-            <span className="text-slate-400 font-medium truncate pr-1">Approved weekly care hours</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-sky-50 text-sky-800 border-sky-200/70">
-              100% Tracked
-            </span>
-          </div>
-        </div>
+          return (
+            <button
+              key={kpi.id}
+              type="button"
+              onClick={() => setSelectedTab(selectedTab === kpi.id ? "ALL" : kpi.id)}
+              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-2xl p-4 sm:p-4.5 border transition-all duration-200 relative overflow-hidden flex flex-col justify-between ${isSelected
+                ? toneStyles.selected
+                : `${toneStyles.cardBorder} shadow-sm hover:shadow-md hover:-translate-y-0.5`
+                }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+                  {kpi.label}
+                </span>
+                <div
+                  className={`p-1.5 rounded-lg shrink-0 transition-transform group-hover:scale-105 ${toneStyles.iconBg}`}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+              </div>
 
-        {/* Pending Case Mgr Auths */}
-        <button
-          type="button"
-          onClick={() => setSelectedTab(selectedTab === "PENDING_AUTH" ? "ALL" : "PENDING_AUTH")}
-          className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
-            selectedTab === "PENDING_AUTH"
-              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
-              : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-              Pending Case Mgr Auths
-            </span>
-            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-amber-100 text-amber-800">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-              {MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length}
-            </span>
-            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-          </div>
-          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
-            <span className="text-slate-400 font-medium truncate pr-1">Awaiting CM sign-off</span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-amber-50 text-amber-800 border-amber-200/70">
-              {MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length} Approvals Due
-            </span>
-          </div>
-        </button>
+              <div className="flex items-baseline justify-between mt-1">
+                <span
+                  className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${toneStyles.valText}`}
+                >
+                  {kpi.value}
+                </span>
+                <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-slate-500 transition-opacity" />
+              </div>
+            </button>
+          );
+        })}
       </section>
 
       {/* 03. Household Management Workspace Card */}
       <section aria-label="Household Management Workspace" className="space-y-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
           {/* Workspace Toolbar Row */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div>
@@ -587,11 +561,10 @@ export default function HouseholdsPage() {
                   type="button"
                   onClick={() => setViewMode("grid")}
                   title="Grid View"
-                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                    viewMode === "grid"
-                      ? "bg-white text-slate-900 shadow-xs"
-                      : "text-slate-500 hover:text-slate-900"
-                  }`}
+                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${viewMode === "grid"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                    }`}
                 >
                   <LayoutGrid className="w-4 h-4" />
                   <span className="hidden sm:inline text-[11px]">Grid</span>
@@ -600,11 +573,10 @@ export default function HouseholdsPage() {
                   type="button"
                   onClick={() => setViewMode("table")}
                   title="Table View"
-                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                    viewMode === "table"
-                      ? "bg-white text-slate-900 shadow-xs"
-                      : "text-slate-500 hover:text-slate-900"
-                  }`}
+                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${viewMode === "table"
+                    ? "bg-white text-slate-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                    }`}
                 >
                   <List className="w-4 h-4" />
                   <span className="hidden sm:inline text-[11px]">Table</span>
@@ -623,19 +595,17 @@ export default function HouseholdsPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setSelectedTab(tab.id)}
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      isActive
-                        ? "bg-[#1B3414] text-white shadow-xs"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                    }`}
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${isActive
+                      ? "bg-[#1B3414] text-white shadow-xs"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
                   >
                     <span>{tab.label}</span>
                     <span
-                      className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
+                      className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 text-slate-600"
+                        }`}
                     >
                       {tab.count}
                     </span>
@@ -679,7 +649,7 @@ export default function HouseholdsPage() {
                 {filteredHouseholds.map((hh) => (
                   <div
                     key={hh.id}
-                    className="h-full bg-white backdrop-blur-xl rounded-2xl p-5 border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden space-y-3.5"
+                    className="h-full bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group relative overflow-hidden space-y-3.5"
                   >
                     {/* Header: Name, Code & Program */}
                     <div className="flex items-start justify-between">
@@ -704,11 +674,10 @@ export default function HouseholdsPage() {
 
                       <div className="text-right">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                            hh.authStatus === "Approved"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-amber-50 text-amber-700 border border-amber-200"
-                          }`}
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${hh.authStatus === "Approved"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}
                         >
                           {hh.authStatus === "Approved" ? (
                             <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -821,7 +790,7 @@ export default function HouseholdsPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
@@ -877,11 +846,10 @@ export default function HouseholdsPage() {
                           </td>
                           <td className="py-3.5 px-4">
                             <span
-                              className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                                hh.authStatus === "Approved"
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                  : "bg-amber-50 text-amber-700 border-amber-200"
-                              }`}
+                              className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${hh.authStatus === "Approved"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : "bg-amber-50 text-amber-700 border-amber-200"
+                                }`}
                             >
                               {hh.authStatus}
                             </span>
@@ -912,7 +880,7 @@ export default function HouseholdsPage() {
       {/* 04. Secondary Sections: Household Bottlenecks & Coordination Activity matching /intake/pipeline & /clients */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Actionable Bottlenecks Card */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -927,7 +895,7 @@ export default function HouseholdsPage() {
             </div>
 
             <div className="mt-3.5 space-y-2">
-              <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/40 text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-rose-300 bg-rose-50/30 text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-rose-100 text-rose-700 transition-transform group-hover:scale-105">
                     <ShieldCheck className="w-4 h-4" />
@@ -950,7 +918,7 @@ export default function HouseholdsPage() {
                 </Link>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/40 text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50/30 text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-amber-100 text-amber-800 transition-transform group-hover:scale-105">
                     <Clock className="w-4 h-4" />
@@ -973,7 +941,7 @@ export default function HouseholdsPage() {
                 </Link>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-white text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-sky-100 text-sky-800 transition-transform group-hover:scale-105">
                     <FileWarning className="w-4 h-4" />
@@ -1000,7 +968,7 @@ export default function HouseholdsPage() {
         </div>
 
         {/* Right: Recent Household Activity Feed */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2">

@@ -1,245 +1,429 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, Plus, LayoutGrid, List, MoreVertical, Star, ShieldAlert, ArrowRight } from "lucide-react";
-import { mockCaregivers, Caregiver } from "@/lib/caregivers/mockData";
-import { Badge } from "@/components/ui/Badge";
-import { Avatar } from "@/components/ui/Avatar";
-import { Card } from "@/components/ui/Card";
+import { useRouter } from "next/navigation";
+import {
+  Users,
+  Plus,
+  HeartHandshake,
+  Download,
+  Calendar,
+  MapPin,
+  ChevronDown,
+  FileSpreadsheet,
+  FileText,
+  Printer,
+  Check,
+  FolderInput,
+  UserPlus,
+  ShieldCheck,
+  Search,
+  Filter,
+} from "lucide-react";
+import { CaregiverRecord } from "@/types/caregiver";
+import {
+  getCaregiversFromStorage,
+  CAREGIVER_RECENT_ACTIVITIES,
+  INITIAL_CAREGIVERS,
+} from "@/lib/caregivers/mockData";
 import { CaregiverKpiStrip } from "@/components/caregivers/CaregiverKpiStrip";
-import { cn } from "@/components/ui/Card";
-import { AddCaregiverModal } from "@/components/caregivers/AddCaregiverModal";
-import { HRNavHeader } from "@/components/caregivers/HRNavHeader";
+import { CaregiverAttentionSection } from "@/components/caregivers/CaregiverAttentionSection";
+import { CaregiverRecentActivitySection } from "@/components/caregivers/CaregiverRecentActivitySection";
+import { CaregiverManagementWorkspace } from "@/components/caregivers/CaregiverManagementWorkspace";
+import { CaregiverContextualDrawer } from "@/components/caregivers/CaregiverContextualDrawer";
+import { toast } from "sonner";
 
-export default function CaregiverRosterPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function CaregiversPage() {
+  const router = useRouter();
 
-  const caregiversList = Object.values(mockCaregivers).filter(cg =>
-    cg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cg.role.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [caregivers, setCaregivers] = useState<CaregiverRecord[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Filter States
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState<string | null>(null);
+  const [activeAttentionCategory, setActiveAttentionCategory] = useState<string | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState("All Branches");
+  const [selectedDateRange, setSelectedDateRange] = useState("30d");
+
+  // Dropdown states for header controls
+  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isBranchOpen, setIsBranchOpen] = useState(false);
+  const [isDateOpen, setIsDateOpen] = useState(false);
+
+  const addMenuRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
+  const branchRef = useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
+
+  const dateOptions = [
+    { id: "7d", label: "Last 7 Days" },
+    { id: "30d", label: "Last 30 Days" },
+    { id: "90d", label: "Last 90 Days" },
+    { id: "ytd", label: "Year to Date" },
+  ];
+
+  // Contextual Profile Drawer (Caregiver Overview Quick Inspector)
+  const [selectedCaregiver, setSelectedCaregiver] = useState<CaregiverRecord | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const data = getCaregiversFromStorage();
+    setCaregivers(data);
+
+    function handleClickOutside(event: MouseEvent) {
+      if (addMenuRef.current && !addMenuRef.current.contains(event.target as Node)) {
+        setIsAddMenuOpen(false);
+      }
+      if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
+        setIsExportOpen(false);
+      }
+      if (branchRef.current && !branchRef.current.contains(event.target as Node)) {
+        setIsBranchOpen(false);
+      }
+      if (dateRef.current && !dateRef.current.contains(event.target as Node)) {
+        setIsDateOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelectCaregiver = (cg: CaregiverRecord) => {
+    setSelectedCaregiver(cg);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSelectCaregiverId = (id: string) => {
+    const found = caregivers.find((c) => c.id.toLowerCase() === id.toLowerCase());
+    if (found) {
+      setSelectedCaregiver(found);
+      setIsDrawerOpen(true);
+    } else {
+      router.push(`/caregivers/${id}`);
+    }
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+  };
+
+  // Branch filtered caregivers
+  const branchFilteredCaregivers = useMemo(() => {
+    if (selectedBranch === "All Branches") return caregivers;
+    return caregivers.filter((c) => c.branch === selectedBranch);
+  }, [caregivers, selectedBranch]);
+
+  // Handle clicking Attention issue
+  const handleAttentionCategorySelect = (category: string) => {
+    setActiveAttentionCategory(category);
+    // Smooth scroll down to the directory table
+    const el = document.getElementById("caregiver-directory-anchor");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+    toast.info(`Filtered directory for: ${category.replace(/_/g, " ")}`);
+  };
+
+  // Handle CSV Export
+  const handleExportCSV = () => {
+    setIsExportOpen(false);
+    try {
+      const headers = [
+        "Caregiver ID",
+        "Name",
+        "Classification",
+        "Type",
+        "Status",
+        "Branch",
+        "Assigned Client",
+        "Credentials Status",
+        "Phone",
+        "Email",
+      ];
+      const rows = branchFilteredCaregivers.map((cg) => [
+        cg.id,
+        `"${cg.name}"`,
+        cg.employmentClassification,
+        cg.type,
+        cg.status,
+        cg.branch,
+        cg.availabilityAssignments.assignedClient?.id || "Unassigned",
+        cg.documentsCredentials.overallStatus,
+        `"${cg.personalInfo.phone}"`,
+        `"${cg.personalInfo.email}"`,
+      ]);
+
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `LiliSare_Caregivers_Roster_${new Date().toISOString().split("T")[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Caregiver roster CSV exported successfully");
+    } catch {
+      toast.error("Failed to generate CSV export");
+    }
+  };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6">
-      <HRNavHeader activeTab="roster" />
-
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2 mt-2">
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-16">
+      {/* Top Header Bar */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text-primary">Roster Details</h2>
-          <p className="text-sm text-text-secondary mt-1">{caregiversList.length} active caregivers in roster.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-brand-teal text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-brand-teal/90 transition-colors shadow-[0_6px_32px_rgba(0,0,0,0.06)] shadow-brand-teal/20 whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" />
-            Add Caregiver
-          </button>
-        </div>
-      </div>
-
-      <CaregiverKpiStrip />
-
-      {/* Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 mt-4">
-        <div className="flex flex-1 items-center gap-3 max-w-xl">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search caregivers by name or role..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-white rounded-full border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all"
-            />
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold text-[#3D6B22] uppercase tracking-wider flex items-center gap-1.5">
+              <HeartHandshake className="w-3.5 h-3.5" />
+              LiliSare Workforce Management
+            </span>
           </div>
-          <button className="px-3.5 py-2.5 rounded-full bg-white border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm font-medium ">
-            <Filter className="w-4 h-4" />
-            Filters
-          </button>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Caregivers
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl leading-relaxed">
+            Central workforce workspace managing caregiver profiles, onboarding, screening, credentials, training, and client assignments across Family Caregivers, Live-In aides, and Family Friends.
+          </p>
         </div>
-        <div className="flex items-center bg-white p-1 rounded-full border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={cn("p-2 rounded-full transition-all", viewMode === "grid" ? "bg-brand-teal/20 text-brand-teal shadow-[0_6px_32px_rgba(0,0,0,0.06)]" : "text-slate-500 hover:text-slate-700")}
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setViewMode("table")}
-            className={cn("p-2 rounded-full transition-all", viewMode === "table" ? "bg-brand-teal/20 text-brand-teal shadow-[0_6px_32px_rgba(0,0,0,0.06)]" : "text-slate-500 hover:text-slate-700")}
-          >
-            <List className="w-4 h-4" />
-          </button>
+
+        {/* Action Controls */}
+        <div className="flex items-center flex-wrap gap-2.5">
+          {/* Date Range Filter */}
+          <div className="relative" ref={dateRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsDateOpen(!isDateOpen);
+                setIsBranchOpen(false);
+                setIsExportOpen(false);
+              }}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
+            >
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <span>{dateOptions.find((d) => d.id === selectedDateRange)?.label || "Date Range"}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+            {isDateOpen && (
+              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                {dateOptions.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedDateRange(opt.id);
+                      setIsDateOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${
+                      selectedDateRange === opt.id
+                        ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    {selectedDateRange === opt.id && <Check className="w-3 h-3" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Branch Filter Dropdown */}
+          <div className="relative" ref={branchRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsBranchOpen(!isBranchOpen);
+                setIsDateOpen(false);
+                setIsExportOpen(false);
+              }}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
+            >
+              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+              <span>{selectedBranch}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+
+            {isBranchOpen && (
+              <div className="absolute right-0 mt-1.5 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 animate-fadeIn text-xs">
+                {["All Branches", "Mountain Lane", "North Metro", "Valley View", "Westside"].map(
+                  (br) => (
+                    <button
+                      key={br}
+                      type="button"
+                      onClick={() => {
+                        setSelectedBranch(br);
+                        setIsBranchOpen(false);
+                      }}
+                      className={`w-full px-3.5 py-2 text-left flex items-center justify-between transition-colors ${
+                        selectedBranch === br
+                          ? "bg-[#F2F8EE] text-[#3D6B22] font-bold"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span>{br}</span>
+                      {selectedBranch === br && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
+                    </button>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Export Dropdown */}
+          <div className="relative" ref={exportRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsExportOpen(!isExportOpen);
+                setIsDateOpen(false);
+                setIsBranchOpen(false);
+              }}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-400" />
+              <span>Export</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+
+            {isExportOpen && (
+              <div className="absolute right-0 mt-1.5 w-44 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 animate-fadeIn text-xs">
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  className="w-full px-3.5 py-2 text-left flex items-center gap-2 text-slate-700 hover:bg-slate-50 font-medium"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Export as CSV</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportOpen(false);
+                    toast.info("Generating Caregiver Summary PDF...");
+                    setTimeout(() => toast.success("Caregiver Summary PDF ready"), 1000);
+                  }}
+                  className="w-full px-3.5 py-2 text-left flex items-center gap-2 text-slate-700 hover:bg-slate-50 font-medium"
+                >
+                  <FileText className="w-3.5 h-3.5 text-sky-600" />
+                  <span>Export as PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportOpen(false);
+                    window.print();
+                  }}
+                  className="w-full px-3.5 py-2 text-left flex items-center gap-2 text-slate-700 hover:bg-slate-50 font-medium border-t border-slate-100"
+                >
+                  <Printer className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Print View</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Add Caregiver CTA (Dedicated Action) */}
+          <div className="relative" ref={addMenuRef}>
+            <button
+              type="button"
+              onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/25 hover:shadow-md active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-[#93C573]" />
+              <span>Add Caregiver</span>
+              <ChevronDown className="w-3.5 h-3.5 text-white/80" />
+            </button>
+
+            {isAddMenuOpen && (
+              <div className="absolute right-0 mt-1.5 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-30 animate-fadeIn text-xs">
+                <Link
+                  href="/caregivers/new"
+                  onClick={() => setIsAddMenuOpen(false)}
+                  className="block px-3.5 py-2.5 text-left hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="w-4 h-4 text-[#3D6B22]" />
+                    <span className="font-bold text-slate-900">Register New Caregiver</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5 pl-6">
+                    Direct registration for family or professional caregivers
+                  </p>
+                </Link>
+
+                <div className="h-px bg-slate-100 my-1" />
+
+                <Link
+                  href="/caregivers/new"
+                  onClick={() => setIsAddMenuOpen(false)}
+                  className="block px-3.5 py-2.5 text-left hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <FolderInput className="w-4 h-4 text-emerald-600" />
+                    <span className="font-bold text-slate-900">Convert Application</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5 pl-6">
+                    Convert candidate from onboarding pipeline to prevent duplicates
+                  </p>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Roster View */}
-      <AnimatePresence mode="wait">
-        {viewMode === "grid" ? (
-          <motion.div
-            key="grid"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
-          >
-            {caregiversList.map((cg, index) => (
-              <motion.div
-                key={cg.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2, delay: index * 0.03 }}
-              >
-                <Link href={`/caregivers/${cg.id}`} className="block h-full group">
-                  <Card className="h-full bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden flex flex-col">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-4">
-                        <Avatar src={cg.avatarUrl} alt={cg.name} fallback={cg.name.substring(0, 2)} size="lg" />
-                        <div>
-                          <h3 className="font-semibold text-text-primary group-hover:text-brand-teal transition-colors">{cg.name}</h3>
-                          <p className="text-xs text-text-secondary line-clamp-1">{cg.role}</p>
-                        </div>
-                      </div>
-                    </div>
+      {/* 1. KPI Strip answering the 5 administrative questions immediately */}
+      <CaregiverKpiStrip
+        caregivers={branchFilteredCaregivers}
+        activeStatusFilter={selectedStatusFilter || "ALL"}
+        onSelectStatus={(status) => {
+          if (status === "ALL" || selectedStatusFilter === status) {
+            setSelectedStatusFilter(null);
+          } else {
+            setSelectedStatusFilter(status);
+          }
+          if (activeAttentionCategory) setActiveAttentionCategory(null);
+        }}
+        needsAttentionCount={12}
+      />
 
-                    <div className="space-y-3 mb-6 flex-1">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-500">Status</span>
-                        <Badge variant={
-                          cg.status === "Active" ? "success" :
-                            cg.status === "On Leave" ? "warning" :
-                              cg.status === "Inactive" ? "error" : "default"
-                        }>{cg.status}</Badge>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-500">Rating</span>
-                        <div className="flex items-center gap-1 font-medium text-slate-700">
-                          <Star className={cn("w-3.5 h-3.5", cg.rating > 0 ? "fill-amber-400 text-amber-400" : "fill-slate-200 text-slate-200")} />
-                          {cg.rating > 0 ? cg.rating.toFixed(1) : "New"}
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-slate-500">Compliance</span>
-                        <div className="flex items-center gap-1">
-                          {cg.complianceScore === 100 ? (
-                            <ShieldAlert className="w-3.5 h-3.5 text-emerald-500" />
-                          ) : (
-                            <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
-                          )}
-                          <span className={cn("font-medium", cg.complianceScore === 100 ? "text-emerald-600" : "text-amber-600")}>
-                            {cg.complianceScore}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="pt-2 flex flex-wrap gap-1.5">
-                        {cg.skills.slice(0, 3).map((skill, i) => (
-                          <span key={i} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                            {skill}
-                          </span>
-                        ))}
-                        {cg.skills.length > 3 && (
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-100">
-                            +{cg.skills.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+      {/* 2. Needs Attention Section with interactive filtering */}
+      <CaregiverAttentionSection
+        caregivers={branchFilteredCaregivers}
+        onSelectCategoryFilter={handleAttentionCategorySelect}
+        onSelectCaregiverId={handleSelectCaregiverId}
+        activeAttentionCategory={activeAttentionCategory}
+      />
 
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-brand-teal text-sm font-medium mt-auto">
-                      View Profile
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="table"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden"
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm whitespace-nowrap">
-                <thead className="bg-slate-50/50 border-b border-slate-200 text-slate-500 font-medium">
-                  <tr>
-                    <th className="px-6 py-4">Caregiver</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Rating</th>
-                    <th className="px-6 py-4">Compliance</th>
-                    <th className="px-6 py-4">Patients</th>
-                    <th className="px-6 py-4">Last Active</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {caregiversList.map((cg) => (
-                    <tr key={cg.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4">
-                        <Link href={`/caregivers/${cg.id}`} className="flex items-center gap-3">
-                          <Avatar src={cg.avatarUrl} alt={cg.name} fallback={cg.name.substring(0, 2)} size="sm" />
-                          <div>
-                            <div className="font-medium text-slate-900 group-hover:text-brand-teal transition-colors">{cg.name}</div>
-                            <div className="text-xs text-slate-500">{cg.role}</div>
-                          </div>
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant={
-                          cg.status === "Active" ? "success" :
-                            cg.status === "On Leave" ? "warning" :
-                              cg.status === "Inactive" ? "error" : "default"
-                        }>{cg.status}</Badge>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                          <Star className={cn("w-3.5 h-3.5", cg.rating > 0 ? "fill-amber-400 text-amber-400" : "fill-slate-200 text-slate-200")} />
-                          {cg.rating > 0 ? cg.rating.toFixed(1) : "New"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge variant={cg.complianceScore === 100 ? "success" : cg.complianceScore >= 80 ? "warning" : "error"}>
-                          {cg.complianceScore}% Compliant
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600">
-                        {cg.assignedPatientsCount} Active
-                      </td>
-                      <td className="px-6 py-4 text-slate-500">
-                        {cg.lastActiveDate}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <Link href={`/caregivers/${cg.id}`}>
-                          <button className="text-brand-teal font-medium hover:text-emerald-700 transition-colors text-sm">
-                            View
-                          </button>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* 3. Lightweight Recent Activity Section */}
+      <CaregiverRecentActivitySection
+        activities={CAREGIVER_RECENT_ACTIVITIES}
+        onSelectCaregiverId={handleSelectCaregiverId}
+      />
 
-      <AddCaregiverModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+      {/* 4. Caregiver Directory (Anchor for smooth scroll) */}
+      <div id="caregiver-directory-anchor">
+        <CaregiverManagementWorkspace
+          caregivers={branchFilteredCaregivers}
+          selectedStatusFilter={selectedStatusFilter}
+          onSelectStatusFilter={setSelectedStatusFilter}
+          selectedCaregiverId={selectedCaregiver?.id || null}
+          onSelectCaregiver={handleSelectCaregiver}
+          activeAttentionCategory={activeAttentionCategory}
+          onClearAttentionCategory={() => setActiveAttentionCategory(null)}
+        />
+      </div>
+
+      {/* Contextual Quick Inspector Drawer */}
+      <CaregiverContextualDrawer
+        caregiver={selectedCaregiver}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        onEditCaregiver={(cg) => router.push(`/caregivers/${cg.id}/edit`)}
       />
     </div>
   );

@@ -113,7 +113,7 @@ export function ClientAttentionSection({
   const urgentCount = items.filter((i) => i.isUrgent).length;
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
       <div>
         {/* Header matching FollowUpTasksSection */}
         <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
@@ -148,8 +148,8 @@ export function ClientAttentionSection({
                 key={item.id}
                 className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-3 transition-all ${
                   item.isUrgent
-                    ? "bg-rose-50/40 border-rose-200 hover:border-rose-300"
-                    : "bg-slate-50/70 border-slate-200 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
+                    ? "bg-rose-50/30 border-rose-300 hover:border-rose-400 hover:shadow-sm"
+                    : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm"
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">

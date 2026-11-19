@@ -28,7 +28,7 @@ export function ClientKpiStrip({
       value: totalCount.toLocaleString(),
       subtext: `${activeCount} receiving active care`,
       badge: "All Records",
-      badgeClass: "bg-slate-100 text-slate-700 border-slate-200/70",
+      badgeClass: "bg-emerald-50 text-[#1E5622] border-emerald-200/70",
       icon: Users,
       iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
     },
@@ -44,9 +44,9 @@ export function ClientKpiStrip({
     },
     {
       id: "Onboarding",
-      label: "Onboarding",
+      label: "In Onboarding",
       value: onboardingCount.toLocaleString(),
-      subtext: "Registration & setup progress",
+      subtext: "Care plan & setup in progress",
       badge: "In Setup",
       badgeClass: "bg-amber-50 text-amber-800 border-amber-200/70",
       icon: Clock,
@@ -65,7 +65,10 @@ export function ClientKpiStrip({
   ];
 
   return (
-    <section aria-label="Client Key Performance Indicators" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+    <section
+      aria-label="Client Key Performance Indicators"
+      className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4"
+    >
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
         const isSelected = activeStatusFilter === kpi.id;
@@ -104,7 +107,9 @@ export function ClientKpiStrip({
             {/* Bottom Meta Row */}
             <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
               <span className="text-slate-400 font-medium truncate pr-1">{kpi.subtext}</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${kpi.badgeClass}`}>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${kpi.badgeClass}`}
+              >
                 {kpi.badge}
               </span>
             </div>

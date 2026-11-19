@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   Users,
   Plus,
-  Home,
   Download,
   Calendar,
   MapPin,
@@ -15,7 +14,6 @@ import {
   FileText,
   Printer,
   Check,
-  Inbox,
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
 import { getClientsFromStorage } from "@/lib/clients/mockData";
@@ -355,25 +353,7 @@ export default function ClientsPage() {
             )}
           </div>
 
-          {/* Intake Pipeline Link */}
-          <Link
-            href="/intake/pipeline"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all"
-          >
-            <Inbox className="w-3.5 h-3.5 text-slate-500" />
-            <span>Intake Pipeline</span>
-          </Link>
-
-          {/* Households Link */}
-          <Link
-            href="/households"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all"
-          >
-            <Home className="w-3.5 h-3.5 text-slate-500" />
-            <span>Households</span>
-          </Link>
-
-          {/* Add Client CTA */}
+          {/* Add Client CTA (Dedicated Action) */}
           <Link
             href="/clients/new"
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/25 hover:shadow-md active:scale-95 cursor-pointer"

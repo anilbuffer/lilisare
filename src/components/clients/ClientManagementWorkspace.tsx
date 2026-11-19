@@ -54,7 +54,13 @@ export function ClientManagementWorkspace({
       { id: "ALL", label: "All Clients", count: clients.length },
       { id: "Active", label: "Active", count: clients.filter((c) => c.status === "Active").length },
       { id: "Onboarding", label: "Onboarding", count: clients.filter((c) => c.status === "Onboarding").length },
-      { id: "On Hold", label: "On Hold", count: clients.filter((c) => c.status === "On Hold").length },
+      {
+        id: "PENDING_AUTH",
+        label: "Pending Auth",
+        count: clients.filter(
+          (c) => c.readiness?.authorization !== "Verified" || c.status === "On Hold"
+        ).length,
+      },
       {
         id: "ATTENTION",
         label: "Needs Attention",
@@ -70,6 +76,10 @@ export function ClientManagementWorkspace({
       // Tab status filter
       if (currentTab === "ATTENTION") {
         if (!client.attentionItems || client.attentionItems.length === 0) return false;
+      } else if (currentTab === "PENDING_AUTH") {
+        const isPending =
+          client.readiness?.authorization !== "Verified" || client.status === "On Hold";
+        if (!isPending) return false;
       } else if (currentTab !== "ALL" && client.status !== currentTab) {
         return false;
       }
@@ -137,7 +147,7 @@ export function ClientManagementWorkspace({
   return (
     <section aria-label="Client Management Workspace" className="space-y-4">
       {/* Workspace Container matching InquiryManagementWorkspace */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
         {/* Workspace Toolbar Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
@@ -278,7 +288,7 @@ export function ClientManagementWorkspace({
               )}
             </div>
           ) : viewMode === "table" ? (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
@@ -477,10 +487,10 @@ export function ClientManagementWorkspace({
                   <div
                     key={client.id}
                     onClick={() => onSelectClient(client)}
-                    className={`h-full bg-white backdrop-blur-xl rounded-2xl p-5 border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
+                    className={`h-full bg-white rounded-2xl p-4 sm:p-5 border transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
                       isSelected
-                        ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
-                        : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
+                        ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-md -translate-y-0.5"
+                        : "border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300"
                     }`}
                   >
                     <div>

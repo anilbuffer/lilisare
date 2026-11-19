@@ -18,11 +18,7 @@ import {
   ChevronRight,
   Sparkles,
   ArrowUpRight,
-  Download,
   ChevronDown,
-  FileSpreadsheet,
-  FileText,
-  Printer,
   Check,
   LayoutGrid,
   List,
@@ -42,26 +38,15 @@ export default function HouseholdsPage() {
   const [selectedHousehold, setSelectedHousehold] = useState<Household | null>(null);
 
   // Dropdown states for header controls (matching /intake/pipeline & /clients)
-  const [isExportOpen, setIsExportOpen] = useState(false);
   const [isDateOpen, setIsDateOpen] = useState(false);
-  const [isBranchOpen, setIsBranchOpen] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState("30d");
-  const [selectedBranch, setSelectedBranch] = useState("All Branches");
 
-  const exportRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
-  const branchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
-        setIsExportOpen(false);
-      }
       if (dateRef.current && !dateRef.current.contains(event.target as Node)) {
         setIsDateOpen(false);
-      }
-      if (branchRef.current && !branchRef.current.contains(event.target as Node)) {
-        setIsBranchOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -73,12 +58,6 @@ export default function HouseholdsPage() {
     { id: "7d", label: "This Week" },
     { id: "month", label: "This Month" },
     { id: "all", label: "All Active Records" },
-  ];
-
-  const branchOptions = [
-    { id: "All Branches", label: "All Branches" },
-    { id: "North Metro Branch", label: "North Metro Branch" },
-    { id: "South County Branch", label: "South County Branch" },
   ];
 
   // Tab definitions
@@ -114,11 +93,6 @@ export default function HouseholdsPage() {
   // Filter logic
   const filteredHouseholds = useMemo(() => {
     return MOCK_HOUSEHOLDS.filter((hh) => {
-      // Branch filter
-      if (selectedBranch !== "All Branches") {
-        if (selectedBranch === "North Metro Branch" && hh.state !== "OR") return false;
-      }
-
       // Tab filter
       if (selectedTab === "CARE_ACTIVE" && hh.triJourneyStatus.clientStage !== "Care Active") {
         return false;
@@ -158,7 +132,7 @@ export default function HouseholdsPage() {
 
       return true;
     });
-  }, [searchQuery, selectedProgram, selectedTab, selectedBranch]);
+  }, [searchQuery, selectedProgram, selectedTab]);
 
   const isFiltered = searchQuery !== "" || selectedProgram !== "all" || selectedTab !== "ALL";
 
@@ -166,80 +140,6 @@ export default function HouseholdsPage() {
     setSearchQuery("");
     setSelectedProgram("all");
     setSelectedTab("ALL");
-  };
-
-  const handleExportCSV = () => {
-    setIsExportOpen(false);
-    const headers = [
-      "Household Code",
-      "Household Name",
-      "Care Recipient",
-      "Family Caregiver",
-      "Program",
-      "Auth Status",
-      "Weekly Hours",
-      "Case Manager",
-    ];
-    const rows = filteredHouseholds.map((h) => [
-      h.code,
-      `"${h.name}"`,
-      `"${h.client.name}"`,
-      `"${h.primaryCaregiver.name}"`,
-      `"${h.program}"`,
-      h.authStatus,
-      h.authorizedHoursPerWeek,
-      `"${h.caseManager.name}"`,
-    ]);
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `LiliSare_Households_Roster_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast.success(`Exported ${filteredHouseholds.length} households to CSV`);
-  };
-
-  const handleExportJSON = () => {
-    setIsExportOpen(false);
-    const rows = filteredHouseholds.map((h) => ({
-      Code: h.code,
-      Name: h.name,
-      Client: h.client.name,
-      Caregiver: h.primaryCaregiver.name,
-      Program: h.program,
-      AuthStatus: h.authStatus,
-      AuthorizedHours: h.authorizedHoursPerWeek,
-      CaseManager: h.caseManager.name,
-    }));
-
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-      JSON.stringify(rows, null, 2)
-    )}`;
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", jsonString);
-    downloadAnchor.setAttribute(
-      "download",
-      `lilisare-households-${new Date().toISOString().split("T")[0]}.json`
-    );
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-
-    toast.success(`Exported ${filteredHouseholds.length} household records to JSON`);
-  };
-
-  const handlePrintSummary = () => {
-    setIsExportOpen(false);
-    window.print();
   };
 
   const getClientChartLink = (hhId: string) => {
@@ -260,17 +160,9 @@ export default function HouseholdsPage() {
       {/* 01. Standardized Page Header matching /intake/pipeline & /clients */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Households & Family Units
-            </h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E3F1D9] text-[#1E5622] border border-[#3D6B22]/20">
-              {MOCK_HOUSEHOLDS.length} Family Units
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Unified management of linked care recipients, paid family caregivers, and authorizations
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Households & Family Units
+          </h1>
         </div>
 
         {/* Action Controls & Journey Cross-Links */}
@@ -279,11 +171,7 @@ export default function HouseholdsPage() {
           <div className="relative" ref={dateRef}>
             <button
               type="button"
-              onClick={() => {
-                setIsDateOpen(!isDateOpen);
-                setIsBranchOpen(false);
-                setIsExportOpen(false);
-              }}
+              onClick={() => setIsDateOpen(!isDateOpen)}
               className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
             >
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -309,89 +197,6 @@ export default function HouseholdsPage() {
                     {selectedDateRange === opt.id && <Check className="w-3 h-3" />}
                   </button>
                 ))}
-              </div>
-            )}
-          </div>
-
-          {/* Branch Filter */}
-          <div className="relative" ref={branchRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setIsBranchOpen(!isBranchOpen);
-                setIsDateOpen(false);
-                setIsExportOpen(false);
-              }}
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
-            >
-              <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              <span>{selectedBranch}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-            {isBranchOpen && (
-              <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                {branchOptions.map((b) => (
-                  <button
-                    key={b.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedBranch(b.id);
-                      setIsBranchOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedBranch === b.id
-                      ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
-                      : "text-slate-700 hover:bg-slate-50"
-                      }`}
-                  >
-                    <span>{b.label}</span>
-                    {selectedBranch === b.id && <Check className="w-3 h-3" />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Export Dropdown */}
-          <div className="relative" ref={exportRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setIsExportOpen(!isExportOpen);
-                setIsDateOpen(false);
-                setIsBranchOpen(false);
-              }}
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-400" />
-              <span>Export</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-            {isExportOpen && (
-              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                <button
-                  type="button"
-                  onClick={handleExportCSV}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Export to CSV</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExportJSON}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
-                >
-                  <FileText className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Export to JSON</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handlePrintSummary}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 border-t border-slate-100 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Print Summary</span>
-                </button>
               </div>
             )}
           </div>

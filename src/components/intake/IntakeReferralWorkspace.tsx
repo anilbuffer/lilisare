@@ -31,15 +31,8 @@ export function IntakeReferralWorkspace() {
 
   // Filter States
   const [selectedStage, setSelectedStage] = useState<InquiryStage | null>(null);
-  const [selectedBranch, setSelectedBranch] = useState<string>("All Branches");
   const [selectedDateRange, setSelectedDateRange] = useState<string>("30d");
   const [activeKpiKey, setActiveKpiKey] = useState<"ALL" | "NEW" | "ASSESSMENT" | "CONVERTED">("ALL");
-
-  // Filter by branch if selected
-  const branchFilteredInquiries = useMemo(() => {
-    if (selectedBranch === "All Branches") return inquiries;
-    return inquiries.filter((i) => i.branch === selectedBranch);
-  }, [inquiries, selectedBranch]);
 
   // Handlers for KPIs
   const handleSelectKpiFilter = (key: "ALL" | "NEW" | "ASSESSMENT" | "CONVERTED") => {
@@ -123,12 +116,8 @@ export function IntakeReferralWorkspace() {
       {/* 01. Page Header */}
       <IntakePageHeader
         newReferralHref="/intake/pipeline/new/"
-        selectedBranch={selectedBranch}
-        onBranchChange={setSelectedBranch}
         selectedDateRange={selectedDateRange}
         onDateRangeChange={setSelectedDateRange}
-        onExport={handleExport}
-        totalCount={79}
       />
 
       {/* 02. KPI Overview (Four clean, dashboard-style cards) */}
@@ -143,7 +132,7 @@ export function IntakeReferralWorkspace() {
 
       {/* 03. Inquiry Management Workspace (Full-Width with Grid & List View toggles and Stage filters) */}
       <InquiryManagementWorkspace
-        inquiries={branchFilteredInquiries}
+        inquiries={inquiries}
         selectedStageFilter={selectedStage}
         onSelectStageFilter={handleSelectStageFilter}
         baseDetailsPath="/intake/pipeline"

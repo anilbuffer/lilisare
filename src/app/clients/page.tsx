@@ -6,12 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   Users,
   Plus,
-  Download,
   Calendar,
   ChevronDown,
-  FileSpreadsheet,
-  FileText,
-  Printer,
   Check,
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
@@ -33,11 +29,8 @@ export default function ClientsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedDateRange, setSelectedDateRange] = useState("30d");
 
-  // Dropdown states for header controls (matching /intake/pipeline/)
-  const [isExportOpen, setIsExportOpen] = useState(false);
+  // Dropdown states for header controls
   const [isDateOpen, setIsDateOpen] = useState(false);
-
-  const exportRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
 
   // Contextual Profile Drawer
@@ -50,9 +43,6 @@ export default function ClientsPage() {
     setClients(data);
 
     function handleClickOutside(event: MouseEvent) {
-      if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
-        setIsExportOpen(false);
-      }
       if (dateRef.current && !dateRef.current.contains(event.target as Node)) {
         setIsDateOpen(false);
       }
@@ -91,81 +81,6 @@ export default function ClientsPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    setIsExportOpen(false);
-    const headers = [
-      "Client ID",
-      "Name",
-      "Household",
-      "Care Arrangement",
-      "Caregiver",
-      "Status",
-      "Auth Hours",
-      "Auth Expiry",
-    ];
-    const rows = clients.map((c) => [
-      c.id,
-      `"${c.name}"`,
-      `"${c.household.name}"`,
-      `"${c.careType}"`,
-      `"${c.assignedCareTeam.primaryCaregiver?.name || "Unassigned"}"`,
-      c.status,
-      c.carePlan.authorizedWeeklyHours,
-      c.authorization.expiryDate,
-    ]);
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `LiliSare_Clients_Roster_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast.success(`Exported ${clients.length} clients to CSV`);
-  };
-
-  const handleExportJSON = () => {
-    setIsExportOpen(false);
-    const rows = clients.map((c) => ({
-      ID: c.id,
-      Name: c.name,
-      Household: c.household.name,
-      CareType: c.careType,
-      PrimaryCaregiver: c.assignedCareTeam.primaryCaregiver?.name || "Unassigned",
-      Status: c.status,
-      AuthorizedHours: c.carePlan.authorizedWeeklyHours,
-      AuthNumber: c.authorization.authNumber,
-      AuthExpiry: c.authorization.expiryDate,
-    }));
-
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-      JSON.stringify(rows, null, 2)
-    )}`;
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", jsonString);
-    downloadAnchor.setAttribute(
-      "download",
-      `lilisare-clients-${new Date().toISOString().split("T")[0]}.json`
-    );
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-
-    toast.success(`Exported ${clients.length} client records to JSON`);
-  };
-
-  const handlePrintSummary = () => {
-    setIsExportOpen(false);
-    window.print();
-  };
-
   const dateOptions = [
     { id: "30d", label: "Last 30 Days" },
     { id: "7d", label: "This Week" },
@@ -188,20 +103,12 @@ export default function ClientsPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-5 pb-12 animate-in fade-in duration-200">
-      {/* 01. Page Header matching IntakePageHeader */}
+      {/* 01. Page Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Clients & Family Care
-            </h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E3F1D9] text-[#1E5622] border border-[#3D6B22]/20">
-              {clients.length} Active Records
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Manage registered clients, family households, authorizations, and ongoing care readiness
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Clients & Family Care
+          </h1>
         </div>
 
         {/* Actions & Filters */}
@@ -210,10 +117,7 @@ export default function ClientsPage() {
           <div className="relative" ref={dateRef}>
             <button
               type="button"
-              onClick={() => {
-                setIsDateOpen(!isDateOpen);
-                setIsExportOpen(false);
-              }}
+              onClick={() => setIsDateOpen(!isDateOpen)}
               className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
             >
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -240,50 +144,6 @@ export default function ClientsPage() {
                     {selectedDateRange === opt.id && <Check className="w-3 h-3" />}
                   </button>
                 ))}
-              </div>
-            )}
-          </div>
-
-          {/* Export Dropdown */}
-          <div className="relative" ref={exportRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setIsExportOpen(!isExportOpen);
-                setIsDateOpen(false);
-              }}
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-400" />
-              <span>Export</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-            {isExportOpen && (
-              <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                <button
-                  type="button"
-                  onClick={handleExportCSV}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Export to CSV</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExportJSON}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
-                >
-                  <FileText className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Export to JSON</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handlePrintSummary}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 border-t border-slate-100 cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Print Summary</span>
-                </button>
               </div>
             )}
           </div>

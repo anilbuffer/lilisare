@@ -9,11 +9,20 @@ import {
   Check,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   User,
   Users,
   Building2,
   Heart,
   FileCheck,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Clock,
+  ShieldCheck,
+  UserCheck,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,6 +73,7 @@ export function NewReferralFullPage({
   // Form State - Step 4: Assignment & Submission
   const [assignedCoordinator, setAssignedCoordinator] = useState("Sarah Jenkins");
   const [urgency, setUrgency] = useState<"Normal" | "Urgent">("Normal");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleToggleCareType = (type: string) => {
     if (careTypes.includes(type)) {
@@ -76,7 +86,7 @@ export function NewReferralFullPage({
   const handleNextStep = () => {
     if (step === 1) {
       if (!primaryContact.trim()) {
-        toast.error("Please enter the primary contact name");
+        toast.error("Please enter the primary family contact name");
         return;
       }
       if (!phone.trim() && !email.trim()) {
@@ -85,7 +95,7 @@ export function NewReferralFullPage({
       }
     } else if (step === 2) {
       if (!clientName.trim()) {
-        toast.error("Please enter the person needing care (Client name)");
+        toast.error("Please enter the loved one needing care (Client Name)");
         return;
       }
     }
@@ -98,10 +108,14 @@ export function NewReferralFullPage({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const randomId = `INQ-${Math.floor(1043 + Math.random() * 50)}`;
 
-    toast.success(`Referral ${randomId} successfully created!`);
-    router.push(onSuccessRedirectHref);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      toast.success(`Referral ${randomId} successfully recorded! Redirecting to pipeline...`);
+      router.push(onSuccessRedirectHref);
+    }, 600);
   };
 
   const steps = [
@@ -112,34 +126,43 @@ export function NewReferralFullPage({
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-5 pb-14 animate-in fade-in duration-200">
-      {/* Back Button */}
+    <div className="w-full max-w-4xl mx-auto space-y-5 pb-16 animate-in fade-in duration-200">
+      {/* Back Button with subtle shadow */}
       <div>
         <Link
           href={backHref}
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Pipeline & Inquiries</span>
+          <span>Back to Intake Pipeline</span>
         </Link>
       </div>
 
-      {/* Header Banner */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-5 sm:p-6 shadow-xs">
-        <div className="flex items-center gap-2.5 mb-1">
-          <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200">
-            New Intake
-          </span>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            New Family Referral
-          </h1>
+      {/* Header Banner - Matching Patients Card Style */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/80">
+                New Intake Entry
+              </span>
+              <span className="text-xs text-slate-400">Step {step} of 4</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              New Family Referral
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Capture family contact, loved one demographics, care requirements, and assign an intake coordinator.
+            </p>
+          </div>
+
+          <div className="w-12 h-12 rounded-2xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center shrink-0 self-start sm:self-center shadow-[0_4px_16px_rgba(61,107,34,0.12)]">
+            <Sparkles className="w-6 h-6 text-[#3D6B22]" />
+          </div>
         </div>
-        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-          4-step guided intake: capture family inquiry, care requirements, and assign coordinator
-        </p>
 
         {/* Step Progress Bar */}
-        <div className="mt-5 pt-4 border-t border-slate-100">
+        <div className="mt-6 pt-5 border-t border-slate-100">
           <div className="grid grid-cols-4 gap-2">
             {steps.map((s) => {
               const isDone = s.num < step;
@@ -148,18 +171,18 @@ export function NewReferralFullPage({
               return (
                 <div key={s.num} className="flex flex-col items-center text-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                       isDone
-                        ? "bg-[#3D6B22] text-white"
+                        ? "bg-[#3D6B22] text-white shadow-sm"
                         : isCurrent
-                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/15 shadow-xs"
-                        : "bg-slate-100 text-slate-500 border border-slate-200"
+                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                        : "bg-slate-100 text-slate-400 border border-slate-200"
                     }`}
                   >
                     {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
                   </div>
                   <span
-                    className={`text-[11px] mt-1.5 font-semibold truncate max-w-full ${
+                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${
                       isCurrent ? "text-[#3D6B22]" : "text-slate-500"
                     }`}
                   >
@@ -172,84 +195,108 @@ export function NewReferralFullPage({
         </div>
       </div>
 
-      {/* Form Content Card */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
+      {/* Main Guided Form Card */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-6">
         {/* STEP 1: Family & Contact Details */}
         {step === 1 && (
-          <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="border-b border-slate-100 pb-2.5">
-              <h2 className="text-sm font-bold text-slate-900">
-                1. Family & Contact Details
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Who is the primary person contacting LiliSare on behalf of the family?
+          <div className="space-y-5 animate-in fade-in duration-200">
+            <div>
+              <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                1. Family & Primary Contact Details
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </h4>
+              <p className="text-xs text-slate-500">
+                Who is reaching out on behalf of the family to inquire about care services?
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Primary Contact Full Name *
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5 pt-1">
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Primary Contact Full Name <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Sarah Miller-Jenkins"
-                  value={primaryContact}
-                  onChange={(e) => setPrimaryContact(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Sarah Miller-Jenkins"
+                    value={primaryContact}
+                    onChange={(e) => setPrimaryContact(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Relationship to Client
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Relationship to Loved One
                 </label>
-                <select
-                  value={contactRelationship}
-                  onChange={(e) => setContactRelationship(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                >
-                  <option value="Daughter">Daughter</option>
-                  <option value="Son">Son</option>
-                  <option value="Spouse">Spouse</option>
-                  <option value="Mother">Mother</option>
-                  <option value="Father">Father</option>
-                  <option value="Legal Guardian / POA">Legal Guardian / POA</option>
-                  <option value="Self">Self (Client)</option>
-                  <option value="Case Manager">Case Manager</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Users className="h-4 w-4" />
+                  </div>
+                  <select
+                    value={contactRelationship}
+                    onChange={(e) => setContactRelationship(e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
+                  >
+                    <option value="Daughter">Daughter</option>
+                    <option value="Son">Son</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Father">Father</option>
+                    <option value="Legal Guardian / POA">Legal Guardian / POA</option>
+                    <option value="Self">Self (Client)</option>
+                    <option value="Case Manager">Case Manager</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Phone Number *
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Phone Number <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="tel"
-                  required
-                  placeholder="(404) 555-0182"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="(404) 555-0182"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Email Address
                 </label>
-                <input
-                  type="email"
-                  placeholder="sarah.jenkins@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="sarah.jenkins@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Preferred Contact Method
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -258,9 +305,9 @@ export function NewReferralFullPage({
                       key={method}
                       type="button"
                       onClick={() => setPreferredContactMethod(method)}
-                      className={`py-2 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
+                      className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
                         preferredContactMethod === method
-                          ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs"
+                          ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                           : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                       }`}
                     >
@@ -270,20 +317,28 @@ export function NewReferralFullPage({
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Best Time to Reach
                 </label>
-                <select
-                  value={bestTimeToCall}
-                  onChange={(e) => setBestTimeToCall(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                >
-                  <option value="Mornings (9am - 12pm)">Mornings (9am - 12pm)</option>
-                  <option value="Afternoons (1pm - 4pm)">Afternoons (1pm - 4pm)</option>
-                  <option value="Evenings (5pm - 8pm)">Evenings (5pm - 8pm)</option>
-                  <option value="Anytime">Anytime during business hours</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Clock className="h-4 w-4" />
+                  </div>
+                  <select
+                    value={bestTimeToCall}
+                    onChange={(e) => setBestTimeToCall(e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
+                  >
+                    <option value="Mornings (9am - 12pm)">Mornings (9am - 12pm)</option>
+                    <option value="Afternoons (1pm - 4pm)">Afternoons (1pm - 4pm)</option>
+                    <option value="Evenings (5pm - 8pm)">Evenings (5pm - 8pm)</option>
+                    <option value="Anytime">Anytime during business hours</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -291,60 +346,76 @@ export function NewReferralFullPage({
 
         {/* STEP 2: Client & Household Details */}
         {step === 2 && (
-          <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="border-b border-slate-100 pb-2.5">
-              <h2 className="text-sm font-bold text-slate-900">
-                2. Client & Household Details
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Who is the individual receiving care, and where will services be delivered?
+          <div className="space-y-5 animate-in fade-in duration-200">
+            <div>
+              <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                2. Loved One & Household Details
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </h4>
+              <p className="text-xs text-slate-500">
+                Identify the individual receiving care and their primary residential address.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Client Full Name (Care Recipient) *
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 pt-1">
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Loved One Full Name (Care Recipient) <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Eleanor Miller"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Eleanor Miller"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Age
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="115"
-                  value={clientAge}
-                  onChange={(e) => setClientAge(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    max="115"
+                    value={clientAge}
+                    onChange={(e) => setClientAge(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div className="sm:col-span-3">
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="sm:col-span-3 space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Household Street Address
                 </label>
-                <input
-                  type="text"
-                  placeholder="1428 Peachtree Hills Cir NE"
-                  value={householdAddress}
-                  onChange={(e) => setHouseholdAddress(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <MapPin className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="1428 Peachtree Hills Cir NE"
+                    value={householdAddress}
+                    onChange={(e) => setHouseholdAddress(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   City
                 </label>
                 <input
@@ -352,12 +423,12 @@ export function NewReferralFullPage({
                   placeholder="Atlanta"
                   value={householdCity}
                   onChange={(e) => setHouseholdCity(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+                  className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   ZIP Code
                 </label>
                 <input
@@ -365,46 +436,68 @@ export function NewReferralFullPage({
                   placeholder="30305"
                   value={householdZip}
                   onChange={(e) => setHouseholdZip(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+                  className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Branch Assignment
                 </label>
-                <select
-                  value={branch}
-                  onChange={(e) => setBranch(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-                >
-                  <option value="North Metro Branch">North Metro Branch</option>
-                  <option value="South County Branch">South County Branch</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Building2 className="h-4 w-4" />
+                  </div>
+                  <select
+                    value={branch}
+                    onChange={(e) => setBranch(e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
+                  >
+                    <option value="North Metro Branch">North Metro Branch</option>
+                    <option value="South County Branch">South County Branch</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
 
+              {/* SFC Potential Family Caregiver */}
               <div className="sm:col-span-3 pt-3 border-t border-slate-100">
-                <span className="text-xs font-bold text-slate-900 block">
-                  Potential In-Home Caregiver (Optional)
-                </span>
-                <p className="text-[11px] text-slate-500 mb-2.5">
-                  Does a family member intend to provide care under the Structured Family Caregiving (SFC) model?
+                <div className="flex items-center gap-2 mb-1">
+                  <Heart className="w-4 h-4 text-[#3D6B22]" />
+                  <span className="text-xs font-bold text-slate-900">
+                    Potential Family Caregiver (SFC Model - Optional)
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mb-3">
+                  Does a family member or friend plan to provide care under the Structured Family Caregiving model?
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Caregiver Name (e.g. Clara Jenkins)"
-                    value={caregiverName}
-                    onChange={(e) => setCaregiverName(e.target.value)}
-                    className="px-3.5 py-2 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Relationship (e.g. Granddaughter)"
-                    value={caregiverRelationship}
-                    onChange={(e) => setCaregiverRelationship(e.target.value)}
-                    className="px-3.5 py-2 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <UserCheck className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Caregiver Name (e.g. Clara Jenkins)"
+                      value={caregiverName}
+                      onChange={(e) => setCaregiverName(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800 placeholder:text-slate-400"
+                    />
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Users className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Relationship (e.g. Granddaughter)"
+                      value={caregiverRelationship}
+                      onChange={(e) => setCaregiverRelationship(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800 placeholder:text-slate-400"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -413,82 +506,109 @@ export function NewReferralFullPage({
 
         {/* STEP 3: Referral & Care Requirements */}
         {step === 3 && (
-          <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="border-b border-slate-100 pb-2.5">
-              <h2 className="text-sm font-bold text-slate-900">
-                3. Referral & Care Requirements
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                How did they find LiliSare, and what support services are required?
+          <div className="space-y-5 animate-in fade-in duration-200">
+            <div>
+              <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                3. Referral Source & Care Requirements
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </h4>
+              <p className="text-xs text-slate-500">
+                How did this family find LiliSare, and what support programs or hours are requested?
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5 pt-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Referral Source
                 </label>
-                <select
-                  value={referralSource}
-                  onChange={(e) => setReferralSource(e.target.value as ReferralSourceType)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                >
-                  <option value="Website">Website / Online Form</option>
-                  <option value="Phone">Phone Inquiry</option>
-                  <option value="Referral">Community / Senior Center</option>
-                  <option value="Case Manager">Case Manager / Area Agency</option>
-                  <option value="Hospital Discharge">Hospital Discharge</option>
-                  <option value="Physician">Physician / Clinic</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <select
+                    value={referralSource}
+                    onChange={(e) => setReferralSource(e.target.value as ReferralSourceType)}
+                    className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
+                  >
+                    <option value="Website">Website / Online Form</option>
+                    <option value="Phone">Phone Inquiry</option>
+                    <option value="Referral">Community / Senior Center</option>
+                    <option value="Case Manager">Case Manager / Area Agency</option>
+                    <option value="Hospital Discharge">Hospital Discharge</option>
+                    <option value="Physician">Physician / Clinic</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Referring Organization
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Emory Hospital, Fulton County Office of Aging"
-                  value={organization}
-                  onChange={(e) => setOrganization(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Building2 className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g. Emory Hospital, Fulton Aging Dept"
+                    value={organization}
+                    onChange={(e) => setOrganization(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Case Manager (if known)
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Case Manager (if applicable)
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Janice Campbell, LCSW"
-                  value={caseManagerName}
-                  onChange={(e) => setCaseManagerName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <UserCheck className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g. Janice Campbell, LCSW"
+                    value={caseManagerName}
+                    onChange={(e) => setCaseManagerName(e.target.value)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Payer / Program Interest
                 </label>
-                <select
-                  value={programInterest}
-                  onChange={(e) => setProgramInterest(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                >
-                  <option value="Medicaid Waiver (CCSP / SOURCE)">Medicaid Waiver (CCSP / SOURCE)</option>
-                  <option value="Structured Family Caregiving (SFC)">Structured Family Caregiving (SFC)</option>
-                  <option value="Private Pay">Private Pay</option>
-                  <option value="VA Community Care Network (CCN)">VA Community Care Network (CCN)</option>
-                  <option value="Long-Term Care Insurance">Long-Term Care Insurance</option>
-                  <option value="Georgia GAPP (Pediatric)">Georgia GAPP (Pediatric)</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <select
+                    value={programInterest}
+                    onChange={(e) => setProgramInterest(e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
+                  >
+                    <option value="Medicaid Waiver (CCSP / SOURCE)">Medicaid Waiver (CCSP / SOURCE)</option>
+                    <option value="Structured Family Caregiving (SFC)">Structured Family Caregiving (SFC)</option>
+                    <option value="Private Pay">Private Pay</option>
+                    <option value="VA Community Care Network (CCN)">VA Community Care Network (CCN)</option>
+                    <option value="Long-Term Care Insurance">Long-Term Care Insurance</option>
+                    <option value="Georgia GAPP (Pediatric)">Georgia GAPP (Pediatric)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-800 block mb-1.5">
-                  Requested Care Types
+              <div className="sm:col-span-2 space-y-2">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Requested Care Services
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -505,9 +625,9 @@ export function NewReferralFullPage({
                         key={ct}
                         type="button"
                         onClick={() => handleToggleCareType(ct)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer ${
+                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs"
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                             : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                         }`}
                       >
@@ -518,30 +638,35 @@ export function NewReferralFullPage({
                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
                   Requested Hours / Week
                 </label>
-                <input
-                  type="number"
-                  min="5"
-                  max="80"
-                  value={hoursPerWeek}
-                  onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10) || 20)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Clock className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="number"
+                    min="5"
+                    max="80"
+                    value={hoursPerWeek}
+                    onChange={(e) => setHoursPerWeek(parseInt(e.target.value, 10) || 20)}
+                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+                  />
+                </div>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Care Requirements & Notes
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Care Requirements & Intake Notes
                 </label>
                 <textarea
-                  rows={2}
-                  placeholder="Describe specific mobility issues, medical conditions, or family scheduling preferences..."
+                  rows={3}
+                  placeholder="Describe specific mobility issues, medical diagnosis, preferred caregiver traits, or family schedule notes..."
                   value={supportNotes}
                   onChange={(e) => setSupportNotes(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
+                  className="w-full p-3.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
                 />
               </div>
             </div>
@@ -550,100 +675,134 @@ export function NewReferralFullPage({
 
         {/* STEP 4: Review & Submit */}
         {step === 4 && (
-          <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="border-b border-slate-100 pb-2.5">
-              <h2 className="text-sm font-bold text-slate-900">
+          <div className="space-y-5 animate-in fade-in duration-200">
+            <div>
+              <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                 4. Review & Assign Intake Coordinator
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Verify the inquiry details before creating the active pipeline record.
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </h4>
+              <p className="text-xs text-slate-500">
+                Confirm the inquiry information and assign a coordinator for immediate family outreach.
               </p>
             </div>
 
-            {/* Summary Preview */}
-            <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50 space-y-3">
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-slate-500 block text-[11px]">Primary Contact:</span>
-                  <strong className="text-slate-900">{primaryContact || "N/A"}</strong> ({contactRelationship})
-                  <span className="block text-[11px] text-slate-400">{phone} · {email}</span>
+            {/* Summary Review Card */}
+            <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                    Primary Family Contact
+                  </span>
+                  <strong className="text-slate-900 text-sm">{primaryContact || "N/A"}</strong>
+                  <span className="text-slate-600 block">Relationship: {contactRelationship}</span>
+                  <span className="text-slate-500 block">{phone} · {email || "No email"}</span>
                 </div>
 
-                <div>
-                  <span className="text-slate-500 block text-[11px]">Client Needing Care:</span>
-                  <strong className="text-slate-900">{clientName || "N/A"}</strong> (Age {clientAge})
-                  <span className="block text-[11px] text-slate-400">{householdCity}, GA</span>
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                    Loved One (Care Recipient)
+                  </span>
+                  <strong className="text-slate-900 text-sm">{clientName || "N/A"}</strong>
+                  <span className="text-slate-600 block">Age {clientAge} · {clientGender}</span>
+                  <span className="text-slate-500 block">{householdCity}, GA · {branch}</span>
                 </div>
 
-                <div>
-                  <span className="text-slate-500 block text-[11px]">Referral Source:</span>
-                  <strong className="text-slate-900">{referralSource}</strong>
-                  {organization && <span className="block text-[11px] text-slate-400">{organization}</span>}
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                    Referral & Organization
+                  </span>
+                  <strong className="text-slate-900 text-sm">{referralSource}</strong>
+                  <span className="text-slate-600 block">{organization || "Direct Self-Inquiry"}</span>
+                  {caseManagerName && (
+                    <span className="text-slate-500 block">CM: {caseManagerName}</span>
+                  )}
                 </div>
 
-                <div>
-                  <span className="text-slate-500 block text-[11px]">Program & Hours:</span>
-                  <strong className="text-slate-900">{programInterest}</strong>
-                  <span className="block text-[11px] text-slate-400">{hoursPerWeek} hrs / week</span>
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                    Program & Schedule
+                  </span>
+                  <strong className="text-slate-900 text-sm">{programInterest}</strong>
+                  <span className="text-slate-600 block">{hoursPerWeek} hrs/week requested</span>
+                  <span className="text-slate-500 block">{careTypes.join(", ")}</span>
                 </div>
               </div>
 
               {caregiverName && (
-                <div className="pt-2 border-t border-slate-200/60 text-xs">
-                  <span className="text-slate-500 block text-[11px]">Potential Family Caregiver:</span>
-                  <span className="font-semibold text-slate-900">{caregiverName} ({caregiverRelationship})</span>
+                <div className="pt-3 border-t border-slate-200 text-xs">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">
+                    Structured Family Caregiving Candidate
+                  </span>
+                  <span className="font-semibold text-slate-900 text-sm">{caregiverName}</span>
+                  <span className="text-slate-500 ml-2">({caregiverRelationship})</span>
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Assign Coordinator *
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Assign Intake Coordinator <span className="text-red-500">*</span>
                 </label>
-                <select
-                  value={assignedCoordinator}
-                  onChange={(e) => setAssignedCoordinator(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                >
-                  <option value="Sarah Jenkins">Sarah Jenkins (Senior Intake Lead)</option>
-                  <option value="Elena Rostova">Elena Rostova (Intake Coordinator)</option>
-                  <option value="Marcus Vance">Marcus Vance (Intake Specialist)</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <UserCheck className="h-4 w-4" />
+                  </div>
+                  <select
+                    value={assignedCoordinator}
+                    onChange={(e) => setAssignedCoordinator(e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
+                  >
+                    <option value="Sarah Jenkins">Sarah Jenkins (Senior Intake Lead)</option>
+                    <option value="Elena Rostova">Elena Rostova (Intake Coordinator)</option>
+                    <option value="Marcus Vance">Marcus Vance (Intake Specialist)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-slate-800 block mb-1">
-                  Priority Level
+              <div className="space-y-1.5">
+                <label className="text-[13px] font-medium text-slate-700">
+                  Priority Status
                 </label>
-                <select
-                  value={urgency}
-                  onChange={(e) => setUrgency(e.target.value as "Normal" | "Urgent")}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900"
-                >
-                  <option value="Normal">Normal Priority</option>
-                  <option value="Urgent">Urgent Priority (Hospital discharge / immediate)</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <select
+                    value={urgency}
+                    onChange={(e) => setUrgency(e.target.value as "Normal" | "Urgent")}
+                    className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
+                  >
+                    <option value="Normal">Normal Priority</option>
+                    <option value="Urgent">Urgent Priority (Hospital discharge / emergency)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+        <div className="pt-5 border-t border-slate-100 flex items-center justify-between">
           {step > 1 ? (
             <button
               type="button"
               onClick={handlePrevStep}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Back</span>
+              <span>Previous Step</span>
             </button>
           ) : (
             <Link
               href={backHref}
-              className="px-3.5 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+              className="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
             >
               Cancel
             </Link>
@@ -653,7 +812,7 @@ export function NewReferralFullPage({
             <button
               type="button"
               onClick={handleNextStep}
-              className="inline-flex items-center gap-1.5 px-4.5 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl transition-all shadow-[0_6px_24px_rgba(61,107,34,0.25)] cursor-pointer"
             >
               <span>Continue</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -661,11 +820,24 @@ export function NewReferralFullPage({
           ) : (
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={handleSubmit}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl shadow-sm shadow-[#3D6B22]/20 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-[0_6px_24px_rgba(61,107,34,0.25)] transition-all cursor-pointer disabled:opacity-75"
             >
-              <Check className="w-4 h-4 stroke-[2.5]" />
-              <span>Create Inquiry Record</span>
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Saving Referral...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  <span>Create Referral Record</span>
+                </>
+              )}
             </button>
           )}
         </div>

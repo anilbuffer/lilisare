@@ -105,7 +105,7 @@ export function InquiryManagementWorkspace({
   return (
     <section aria-label="Inquiry Management Workspace" className="space-y-4">
       {/* Workspace Header & Toolbar */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2">
@@ -130,7 +130,7 @@ export function InquiryManagementWorkspace({
                 placeholder="Search inquiry, family ID, client..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
               />
             </div>
 
@@ -238,7 +238,7 @@ export function InquiryManagementWorkspace({
         </div>
       ) : viewMode === "grid" ? (
         /* GRID VIEW */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredInquiries.map((inquiry) => {
             const badge = STAGE_BADGES[inquiry.stage];
             const detailsHref = getDetailsHref(inquiry.id);
@@ -247,14 +247,14 @@ export function InquiryManagementWorkspace({
               <Link
                 key={inquiry.id}
                 href={detailsHref}
-                className="bg-white border border-slate-200/80 hover:border-[#3D6B22]/50 hover:shadow-md rounded-2xl p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
+                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60 transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
               >
                 <div>
                   {/* Top: Family Title + Stage Badge */}
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
+                        <h3 className="text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
                           {inquiry.familyName}
                         </h3>
                         {inquiry.urgency === "Urgent" && (
@@ -267,25 +267,25 @@ export function InquiryManagementWorkspace({
                     </div>
 
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${badge.bg} ${badge.text} ${badge.border}`}
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${badge.bg} ${badge.text} ${badge.border}`}
                     >
                       {inquiry.stage}
                     </span>
                   </div>
 
                   {/* Compact Tags */}
-                  <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-100 flex-wrap">
-                    <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg">
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 flex-wrap">
+                    <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200/60">
                       {inquiry.careRequirements.hoursPerWeek} hrs/wk
                     </span>
-                    <span className="text-[11px] font-medium bg-emerald-50 text-[#1E5622] px-2.5 py-0.5 rounded-lg border border-emerald-100">
+                    <span className="text-[11px] font-medium bg-emerald-50 text-[#1E5622] px-2.5 py-0.5 rounded-lg border border-emerald-200/60">
                       {formatShortProgram(inquiry.careRequirements.programInterest)}
                     </span>
                   </div>
                 </div>
 
                 {/* Card Footer: Minimal metadata + Details link */}
-                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="font-mono text-slate-600 font-medium">{inquiry.id}</span>
                     <span>·</span>
@@ -294,7 +294,7 @@ export function InquiryManagementWorkspace({
                     <span>{inquiry.dateReceived}</span>
                   </div>
 
-                  <span className="inline-flex items-center gap-1 font-semibold text-[#3D6B22] group-hover:translate-x-0.5 transition-transform shrink-0">
+                  <span className="inline-flex items-center gap-1 font-semibold text-[#3D6B22] group-hover:translate-x-1 transition-transform shrink-0">
                     <span>Details</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </span>
@@ -305,7 +305,7 @@ export function InquiryManagementWorkspace({
         </div>
       ) : (
         /* LIST VIEW */
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider">

@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Inbox, Sparkles, Clock, CheckCircle2, ArrowUpRight } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import { Inbox, Sparkles, Clock, CheckCircle2 } from "lucide-react";
 
 interface IntakeKpiStripProps {
   totalInquiries?: number;
@@ -24,59 +23,43 @@ export function IntakeKpiStrip({
   const kpis = [
     {
       key: "ALL" as const,
+      badge: "ALL",
+      badgeClass: "bg-emerald-50 text-emerald-800 border border-emerald-200/70",
       label: "Total Inquiries",
       value: totalInquiries.toLocaleString(),
-      subtext: "Active inquiries across pipeline",
+      subtext: "Active inquiries",
       icon: Inbox,
-      tone: "forest" as const,
-      toneStyles: {
-        cardBorder: "border-slate-200 hover:border-[#3D6B22]/50",
-        activeBorder: "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-emerald-50/15",
-        iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
-        valText: "text-slate-900",
-      },
+      iconBg: "bg-[#E7F3E5] text-[#3D6B22]",
     },
     {
       key: "NEW" as const,
+      badge: "NEW",
+      badgeClass: "bg-[#FEF3C7] text-[#92400E] border border-amber-200/70",
       label: "New Inquiries",
       value: newInquiries.toLocaleString(),
       subtext: "Awaiting first contact",
       icon: Sparkles,
-      tone: "coral" as const,
-      toneStyles: {
-        cardBorder: "border-rose-200 hover:border-rose-400",
-        activeBorder: "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/20",
-        iconBg: "bg-rose-100 text-rose-700",
-        valText: "text-slate-900",
-      },
+      iconBg: "bg-[#FEF3C7] text-[#D97706]",
     },
     {
       key: "ASSESSMENT" as const,
+      badge: "IN PROGRESS",
+      badgeClass: "bg-[#E0F2FE] text-[#0369A1] border border-sky-200/70",
       label: "In Assessment",
       value: inAssessment.toLocaleString(),
-      subtext: "Assessment & CM coordination",
+      subtext: "Assessment and coordination",
       icon: Clock,
-      tone: "amber" as const,
-      toneStyles: {
-        cardBorder: "border-amber-200 hover:border-amber-400",
-        activeBorder: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/20",
-        iconBg: "bg-amber-100 text-amber-800",
-        valText: "text-slate-900",
-      },
+      iconBg: "bg-[#E0F2FE] text-[#0284C7]",
     },
     {
       key: "CONVERTED" as const,
+      badge: "CONVERTED",
+      badgeClass: "bg-[#DCFCE7] text-[#15803D] border border-emerald-200/70",
       label: "Converted",
       value: converted.toLocaleString(),
-      subtext: "Moved to active onboarding",
+      subtext: "Moved to onboarding",
       icon: CheckCircle2,
-      tone: "forest" as const,
-      toneStyles: {
-        cardBorder: "border-slate-200 hover:border-[#3D6B22]/50",
-        activeBorder: "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-emerald-50/15",
-        iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
-        valText: "text-slate-900",
-      },
+      iconBg: "bg-[#DCFCE7] text-[#16A34A]",
     },
   ];
 
@@ -85,49 +68,44 @@ export function IntakeKpiStrip({
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
         const isSelected = activeFilter === kpi.key;
-        const styles = kpi.toneStyles;
 
         return (
           <button
             key={kpi.key}
             type="button"
             onClick={() => onSelectKpiFilter(kpi.key)}
-            className="group block text-left focus:outline-none cursor-pointer w-full"
+            className="group block text-left focus:outline-none cursor-pointer w-full transition-transform duration-200 hover:-translate-y-0.5"
           >
-            <Card
-              className={`p-4 h-full bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border rounded-2xl ${
-                isSelected ? styles.activeBorder : styles.cardBorder
+            <div
+              className={`p-4 sm:p-5 h-full bg-white rounded-2xl shadow-[0_6px_32px_rgba(0,0,0,0.05)] transition-all duration-200 ${
+                isSelected
+                  ? "border-2 border-[#3D6B22] ring-1 ring-[#3D6B22]/30 shadow-[0_8px_32px_rgba(61,107,34,0.12)]"
+                  : "border border-slate-200/80 hover:border-slate-300"
               }`}
             >
-              {/* Top row: Label + Icon (identical to dashboardPage / AdminKpiRow) */}
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-                  {kpi.label}
+              {/* Top row: Badge on left + Circle Icon on right */}
+              <div className="flex items-center justify-between mb-3">
+                <span className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${kpi.badgeClass}`}>
+                  {kpi.badge}
                 </span>
-                <div className={`p-1.5 rounded-lg shrink-0 ${styles.iconBg}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${kpi.iconBg}`}>
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
 
-              {/* Middle row: Big Metric Value + Active indicator / Hover arrow */}
-              <div className="flex items-baseline justify-between mt-1">
-                <span className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${styles.valText}`}>
-                  {kpi.value}
-                </span>
-                {isSelected ? (
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#3D6B22] bg-[#3D6B22]/10 px-2 py-0.5 rounded-full shrink-0">
-                    Active Filter
-                  </span>
-                ) : (
-                  <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-                )}
+              {/* Big Metric Value */}
+              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 leading-none mb-2">
+                {kpi.value}
               </div>
 
-              {/* Bottom row: Subtext description */}
-              <p className="text-[11px] text-slate-400 mt-1 truncate">
+              {/* Bottom row: Title & Subtext */}
+              <div className="text-sm font-bold text-slate-900 leading-tight">
+                {kpi.label}
+              </div>
+              <p className="text-xs text-slate-400 font-normal mt-0.5 leading-snug">
                 {kpi.subtext}
               </p>
-            </Card>
+            </div>
           </button>
         );
       })}

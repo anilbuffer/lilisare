@@ -88,7 +88,7 @@ export function IntakePageHeader({
           <button
             type="button"
             onClick={() => setIsDateOpen(!isDateOpen)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
           >
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
             <span>{dateOptions.find((d) => d.id === selectedDateRange)?.label || "Date Range"}</span>
@@ -118,7 +118,7 @@ export function IntakePageHeader({
           <button
             type="button"
             onClick={() => setIsBranchOpen(!isBranchOpen)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
           >
             <MapPin className="w-3.5 h-3.5 text-slate-400" />
             <span>{selectedBranch}</span>
@@ -148,7 +148,7 @@ export function IntakePageHeader({
           <button
             type="button"
             onClick={() => setIsExportOpen(!isExportOpen)}
-            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-400" />
             <span>Export</span>
@@ -186,7 +186,7 @@ export function IntakePageHeader({
         {newReferralHref ? (
           <Link
             href={newReferralHref}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-sm shadow-[#3D6B22]/20 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>New Referral</span>
@@ -195,7 +195,7 @@ export function IntakePageHeader({
           <button
             type="button"
             onClick={onNewReferral}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-sm shadow-[#3D6B22]/20 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>New Referral</span>

@@ -36,10 +36,10 @@ export function FollowUpTasksSection({
   const displayedTasks = showAll ? tasks : tasks.slice(0, 4);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-slate-900 text-sm leading-tight">
               Follow-up & Tasks
@@ -61,7 +61,7 @@ export function FollowUpTasksSection({
         </div>
 
         {/* Clean Task List */}
-        <div className="mt-3 space-y-2">
+        <div className="mt-3.5 space-y-2">
           {displayedTasks.map((task) => {
             const Icon = CATEGORY_ICONS[task.category] || Clock;
 
@@ -70,8 +70,8 @@ export function FollowUpTasksSection({
                 key={task.id}
                 className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 transition-all ${
                   task.isOverdue
-                    ? "bg-rose-50/30 border-rose-200/80 hover:border-rose-300"
-                    : "bg-slate-50/70 border-slate-200/80 hover:bg-white hover:border-slate-300 hover:shadow-xs"
+                    ? "bg-rose-50/40 border-rose-200 hover:border-rose-300"
+                    : "bg-slate-50/70 border-slate-200 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -105,10 +105,10 @@ export function FollowUpTasksSection({
                 <button
                   type="button"
                   onClick={() => onTaskAction(task)}
-                  className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold shrink-0 cursor-pointer transition-all ${
+                  className={`inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 cursor-pointer transition-all ${
                     task.isOverdue
-                      ? "bg-rose-600 hover:bg-rose-700 text-white shadow-2xs"
-                      : "bg-white hover:bg-emerald-50 text-slate-800 hover:text-[#3D6B22] border border-slate-200 shadow-2xs"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
+                      : "bg-white hover:bg-emerald-50 text-slate-800 hover:text-[#3D6B22] border border-slate-200 shadow-xs"
                   }`}
                 >
                   <span>{task.actionLabel}</span>

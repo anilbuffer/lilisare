@@ -36,10 +36,10 @@ export function RecentActivitySection({
   const displayedActivities = showAll ? activities : activities.slice(0, 4);
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-slate-900 text-sm leading-tight">
               Recent Activity
@@ -57,7 +57,7 @@ export function RecentActivitySection({
         </div>
 
         {/* Clean Activity Feed */}
-        <div className="mt-3 space-y-2">
+        <div className="mt-3.5 space-y-2">
           {displayedActivities.map((item) => {
             const config = ACTIVITY_ICONS[item.type] || ACTIVITY_ICONS.referral_received;
             const Icon = config.icon;
@@ -66,7 +66,7 @@ export function RecentActivitySection({
               <div
                 key={item.id}
                 onClick={() => onSelectInquiryById(item.inquiryId)}
-                className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-white hover:border-slate-300 hover:shadow-xs transition-all text-xs flex items-center justify-between gap-3 cursor-pointer group"
+                className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div

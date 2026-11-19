@@ -37,7 +37,7 @@ export default function DashboardPage() {
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            {today} • <span className="font-medium text-[#3D6B22]">Central Agency Operations</span>
+            {today}
           </p>
         </div>
 

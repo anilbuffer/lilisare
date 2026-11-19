@@ -39,6 +39,15 @@ const STAGE_BADGES: Record<InquiryStage, { bg: string; text: string; border: str
   "Converted": { bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200" },
 };
 
+const formatShortProgram = (program: string): string => {
+  if (program.includes("CCSP")) return "CCSP Waiver";
+  if (program.includes("SOURCE")) return "SOURCE Waiver";
+  if (program.includes("Private Pay")) return "Private Pay";
+  if (program.includes("VA")) return "VA Aid & Attend";
+  if (program.includes("GAPP")) return "GAPP Pediatric";
+  return program.split("(")[0].trim() || program;
+};
+
 export function InquiryManagementWorkspace({
   inquiries,
   selectedStageFilter,
@@ -230,7 +239,7 @@ export function InquiryManagementWorkspace({
       ) : viewMode === "grid" ? (
         /* GRID VIEW */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
-          {filteredInquiries.map((inquiry, index) => {
+          {filteredInquiries.map((inquiry) => {
             const badge = STAGE_BADGES[inquiry.stage];
             const detailsHref = getDetailsHref(inquiry.id);
 
@@ -238,70 +247,54 @@ export function InquiryManagementWorkspace({
               <Link
                 key={inquiry.id}
                 href={detailsHref}
-                className="bg-white border border-slate-200/80 hover:border-[#3D6B22]/50 hover:shadow-md rounded-2xl p-4 sm:p-4.5 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
+                className="bg-white border border-slate-200/80 hover:border-[#3D6B22]/50 hover:shadow-md rounded-2xl p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
               >
                 <div>
-                  {/* Top: Record Label + Stage Badge */}
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-slate-400">
-                        Family Record {String(index + 1).padStart(2, "0")}
-                      </span>
-                      {inquiry.urgency === "Urgent" && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
-                          <AlertTriangle className="w-2.5 h-2.5" />
-                          Urgent
-                        </span>
-                      )}
+                  {/* Top: Family Title + Stage Badge */}
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
+                          {inquiry.familyName}
+                        </h3>
+                        {inquiry.urgency === "Urgent" && (
+                          <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" title="Urgent Priority" />
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5 truncate">
+                        {inquiry.familyInfo.clientInfo.name} ({inquiry.familyInfo.clientInfo.age}y)
+                      </p>
                     </div>
+
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badge.bg} ${badge.text} ${badge.border}`}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${badge.bg} ${badge.text} ${badge.border}`}
                     >
                       {inquiry.stage}
                     </span>
                   </div>
 
-                  {/* Family Title */}
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
-                    {inquiry.familyName}
-                  </h3>
-
-                  {/* Client Info */}
-                  <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
-                    <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>
-                      Client: <strong className="text-slate-800 font-semibold">{inquiry.familyInfo.clientInfo.name}</strong> ({inquiry.familyInfo.clientInfo.age}y)
+                  {/* Compact Tags */}
+                  <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-100 flex-wrap">
+                    <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg">
+                      {inquiry.careRequirements.hoursPerWeek} hrs/wk
                     </span>
-                  </p>
-
-                  {/* Program / Hours Details */}
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between text-slate-500">
-                      <span className="text-[11px]">Program:</span>
-                      <span className="font-medium text-slate-800 truncate max-w-[170px]" title={inquiry.careRequirements.programInterest}>
-                        {inquiry.careRequirements.programInterest}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-slate-500">
-                      <span className="text-[11px]">Requested:</span>
-                      <span className="font-semibold text-slate-900">
-                        {inquiry.careRequirements.hoursPerWeek} hrs / wk
-                      </span>
-                    </div>
+                    <span className="text-[11px] font-medium bg-emerald-50 text-[#1E5622] px-2.5 py-0.5 rounded-lg border border-emerald-100">
+                      {formatShortProgram(inquiry.careRequirements.programInterest)}
+                    </span>
                   </div>
                 </div>
 
-                {/* Card Footer: Source · Date · Action Link */}
-                <div className="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
-                    <span className="font-mono font-semibold text-slate-700">{inquiry.id}</span>
+                {/* Card Footer: Minimal metadata + Details link */}
+                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <span className="font-mono text-slate-600 font-medium">{inquiry.id}</span>
                     <span>·</span>
-                    <span className="truncate">{inquiry.source}</span>
+                    <span>{inquiry.source}</span>
                     <span>·</span>
                     <span>{inquiry.dateReceived}</span>
                   </div>
 
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D6B22] group-hover:translate-x-0.5 transition-transform shrink-0">
+                  <span className="inline-flex items-center gap-1 font-semibold text-[#3D6B22] group-hover:translate-x-0.5 transition-transform shrink-0">
                     <span>Details</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </span>
@@ -317,12 +310,12 @@ export function InquiryManagementWorkspace({
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Family & Client</th>
+                  <th className="py-3 px-4">Family & Loved One</th>
                   <th className="py-3 px-3">Inquiry ID</th>
                   <th className="py-3 px-3">Stage</th>
+                  <th className="py-3 px-3">Care & Hours</th>
                   <th className="py-3 px-3">Source</th>
-                  <th className="py-3 px-3">Program & Hours</th>
-                  <th className="py-3 px-3">Assigned Coordinator</th>
+                  <th className="py-3 px-3">Coordinator</th>
                   <th className="py-3 px-3">Received</th>
                   <th className="py-3 px-4 text-right">Action</th>
                 </tr>
@@ -345,12 +338,12 @@ export function InquiryManagementWorkspace({
                         >
                           {inquiry.familyName}
                         </Link>
-                        <div className="text-[11px] text-slate-500">
-                          Client: {inquiry.familyInfo.clientInfo.name} ({inquiry.familyInfo.clientInfo.age}y)
+                        <div className="text-[11px] text-slate-400">
+                          {inquiry.familyInfo.clientInfo.name} ({inquiry.familyInfo.clientInfo.age}y)
                         </div>
                       </td>
 
-                      <td className="py-3 px-3 font-mono font-medium text-slate-800">
+                      <td className="py-3 px-3 font-mono text-slate-600">
                         {inquiry.id}
                       </td>
 
@@ -362,42 +355,24 @@ export function InquiryManagementWorkspace({
                         </span>
                       </td>
 
-                      <td className="py-3 px-3 text-slate-600">
-                        <span className="font-medium text-slate-800">{inquiry.source}</span>
-                        {inquiry.referralInfo.organization && (
-                          <span className="block text-[10px] text-slate-400 truncate max-w-[140px]">
-                            {inquiry.referralInfo.organization}
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="py-3 px-3 text-slate-600">
-                        <span className="font-medium text-slate-800 block truncate max-w-[150px]">
-                          {inquiry.careRequirements.programInterest}
+                      <td className="py-3 px-3">
+                        <span className="font-semibold text-slate-800">
+                          {inquiry.careRequirements.hoursPerWeek} hrs/wk
                         </span>
-                        <span className="text-[10px] text-slate-400">
-                          {inquiry.careRequirements.hoursPerWeek} hrs / wk
+                        <span className="text-[11px] text-slate-400 block">
+                          {formatShortProgram(inquiry.careRequirements.programInterest)}
                         </span>
                       </td>
 
-                      <td className="py-3 px-3 text-slate-800">
-                        <div className="flex items-center gap-2">
-                          {inquiry.referralInfo.assignedCoordinator.avatarUrl ? (
-                            <img
-                              src={inquiry.referralInfo.assignedCoordinator.avatarUrl}
-                              alt={inquiry.referralInfo.assignedCoordinator.name}
-                              className="w-5 h-5 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-5 h-5 rounded-full bg-emerald-100 text-[#1E5622] text-[10px] font-bold flex items-center justify-center">
-                              {inquiry.referralInfo.assignedCoordinator.name.charAt(0)}
-                            </div>
-                          )}
-                          <span className="font-medium">{inquiry.referralInfo.assignedCoordinator.name}</span>
-                        </div>
+                      <td className="py-3 px-3 text-slate-600">
+                        {inquiry.source}
                       </td>
 
-                      <td className="py-3 px-3 text-slate-500 text-[11px] whitespace-nowrap">
+                      <td className="py-3 px-3 text-slate-700">
+                        {inquiry.referralInfo.assignedCoordinator.name}
+                      </td>
+
+                      <td className="py-3 px-3 text-slate-400 whitespace-nowrap">
                         {inquiry.dateReceived}
                       </td>
 

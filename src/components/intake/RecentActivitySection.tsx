@@ -40,18 +40,11 @@ export function RecentActivitySection({
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 bg-emerald-50 text-[#3D6B22] rounded-xl shrink-0">
-              <Activity className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-sm leading-tight">
-                Recent Activity
-              </h3>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Real-time referral updates and communication
-              </p>
-            </div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-slate-900 text-sm leading-tight">
+              Recent Activity
+            </h3>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3D6B22] animate-pulse" title="Live Sync" />
           </div>
 
           <button
@@ -63,7 +56,7 @@ export function RecentActivitySection({
           </button>
         </div>
 
-        {/* Activity List */}
+        {/* Clean Activity Feed */}
         <div className="mt-3 space-y-2">
           {displayedActivities.map((item) => {
             const config = ACTIVITY_ICONS[item.type] || ACTIVITY_ICONS.referral_received;
@@ -72,53 +65,35 @@ export function RecentActivitySection({
             return (
               <div
                 key={item.id}
-                className="p-3 rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-white hover:border-slate-300 hover:shadow-2xs transition-all text-xs flex items-start gap-2.5"
+                onClick={() => onSelectInquiryById(item.inquiryId)}
+                className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-white hover:border-slate-300 hover:shadow-xs transition-all text-xs flex items-center justify-between gap-3 cursor-pointer group"
               >
-                <div
-                  className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5 ${config.bg} ${config.color}`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                </div>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div
+                    className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${config.bg} ${config.color}`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                  </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-slate-900 truncate">
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
                       {item.title}
-                    </span>
-                    <span className="text-[10px] text-slate-400 shrink-0">
-                      {item.timestamp}
-                    </span>
-                  </div>
-
-                  <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">
-                    {item.description}
-                  </p>
-
-                  <div className="flex items-center justify-between mt-1 text-[10px]">
-                    <span className="text-slate-400">
-                      By <strong className="text-slate-700 font-medium">{item.actor}</strong>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => onSelectInquiryById(item.inquiryId)}
-                      className="text-[#3D6B22] hover:underline font-semibold cursor-pointer"
-                    >
-                      {item.inquiryId}
-                    </button>
+                    </p>
+                    <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                      <span className="font-mono text-slate-600 font-medium">{item.inquiryId}</span>
+                      <span> · </span>
+                      <span>{item.actor}</span>
+                    </p>
                   </div>
                 </div>
+
+                <span className="text-[11px] text-slate-400 shrink-0 whitespace-nowrap">
+                  {item.timestamp}
+                </span>
               </div>
             );
           })}
         </div>
-      </div>
-
-      <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
-        <span>Audited under HIPAA & compliance logs</span>
-        <span className="font-medium text-[#3D6B22] flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#3D6B22] animate-pulse" />
-          Live Sync
-        </span>
       </div>
     </div>
   );

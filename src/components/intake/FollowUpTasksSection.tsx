@@ -40,23 +40,15 @@ export function FollowUpTasksSection({
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 bg-amber-50 text-amber-800 rounded-xl shrink-0">
-              <ListTodo className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-slate-900 text-sm leading-tight">
-                  Follow-up & Tasks
-                </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                  {tasks.filter((t) => t.isOverdue).length} Overdue
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Target first contact response &lt; 2 hrs
-              </p>
-            </div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-slate-900 text-sm leading-tight">
+              Follow-up & Tasks
+            </h3>
+            {tasks.filter((t) => t.isOverdue).length > 0 && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                {tasks.filter((t) => t.isOverdue).length} Overdue
+              </span>
+            )}
           </div>
 
           <button
@@ -68,7 +60,7 @@ export function FollowUpTasksSection({
           </button>
         </div>
 
-        {/* Task List */}
+        {/* Clean Task List */}
         <div className="mt-3 space-y-2">
           {displayedTasks.map((task) => {
             const Icon = CATEGORY_ICONS[task.category] || Clock;
@@ -76,15 +68,15 @@ export function FollowUpTasksSection({
             return (
               <div
                 key={task.id}
-                className={`p-3 rounded-xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-all ${
+                className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 transition-all ${
                   task.isOverdue
-                    ? "bg-rose-50/40 border-rose-200/80 hover:border-rose-300"
-                    : "bg-slate-50 border-slate-200/80 hover:bg-white hover:border-slate-300 hover:shadow-2xs"
+                    ? "bg-rose-50/30 border-rose-200/80 hover:border-rose-300"
+                    : "bg-slate-50/70 border-slate-200/80 hover:bg-white hover:border-slate-300 hover:shadow-xs"
                 }`}
               >
-                <div className="flex items-start gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div
-                    className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5 ${
+                    className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${
                       task.isOverdue
                         ? "bg-rose-100 text-rose-700"
                         : "bg-emerald-100 text-[#1E5622]"
@@ -96,16 +88,16 @@ export function FollowUpTasksSection({
                     <button
                       type="button"
                       onClick={() => onSelectInquiryById(task.inquiryId)}
-                      className="font-bold text-slate-900 hover:text-[#3D6B22] text-left truncate block cursor-pointer transition-colors"
+                      className="font-bold text-slate-900 hover:text-[#3D6B22] text-left truncate block cursor-pointer transition-colors leading-tight"
                     >
-                      {task.title}
+                      {task.title.replace(/Â·/g, "·")}
                     </button>
-                    <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
-                      <span>Assigned: <strong className="text-slate-800 font-semibold">{task.assignedCoordinator}</strong></span>
-                      <span>•</span>
-                      <span className={task.isOverdue ? "text-rose-700 font-semibold" : "text-slate-500"}>
+                    <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1.5 truncate">
+                      <span className={task.isOverdue ? "text-rose-600 font-semibold" : ""}>
                         {task.dueDate}
                       </span>
+                      <span>·</span>
+                      <span className="truncate">{task.assignedCoordinator}</span>
                     </div>
                   </div>
                 </div>
@@ -113,7 +105,7 @@ export function FollowUpTasksSection({
                 <button
                   type="button"
                   onClick={() => onTaskAction(task)}
-                  className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 cursor-pointer transition-all ${
+                  className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold shrink-0 cursor-pointer transition-all ${
                     task.isOverdue
                       ? "bg-rose-600 hover:bg-rose-700 text-white shadow-2xs"
                       : "bg-white hover:bg-emerald-50 text-slate-800 hover:text-[#3D6B22] border border-slate-200 shadow-2xs"
@@ -126,11 +118,6 @@ export function FollowUpTasksSection({
             );
           })}
         </div>
-      </div>
-
-      <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
-        <span>Prioritized by intake response SLAs</span>
-        <span className="font-medium text-slate-500">Live Queue</span>
       </div>
     </div>
   );

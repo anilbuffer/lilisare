@@ -184,7 +184,7 @@ export function InquiryManagementWorkspace({
                 }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
                   isActive
-                    ? "bg-[#3D6B22] text-white shadow-xs"
+                    ? "bg-[#1B3414] text-white shadow-xs"
                     : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200"
                 }`}
               >
@@ -278,7 +278,7 @@ export function InquiryManagementWorkspace({
                     <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200/60">
                       {inquiry.careRequirements.hoursPerWeek} hrs/wk
                     </span>
-                    <span className="text-[11px] font-medium bg-emerald-50 text-[#1E5622] px-2.5 py-0.5 rounded-lg border border-emerald-200/60">
+                    <span className="text-[11px] font-medium bg-[#E3F1D9] text-[#1E5622] px-2.5 py-0.5 rounded-lg border border-[#3D6B22]/20">
                       {formatShortProgram(inquiry.careRequirements.programInterest)}
                     </span>
                   </div>

@@ -204,18 +204,18 @@ export function IntakePageHeader({
         {newReferralHref ? (
           <Link
             href={newReferralHref}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm shadow-[#1B3414]/25 hover:shadow-md active:scale-95 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-4 h-4 text-[#93C573]" />
             <span>New Referral</span>
           </Link>
         ) : (
           <button
             type="button"
             onClick={onNewReferral}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm shadow-[#1B3414]/25 hover:shadow-md active:scale-95 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <Plus className="w-4 h-4 text-[#93C573]" />
             <span>New Referral</span>
           </button>
         )}

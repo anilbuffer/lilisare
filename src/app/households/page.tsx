@@ -252,7 +252,7 @@ export default function HouseholdsPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Households & Family Units
             </h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#1E5622] border border-emerald-200">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E3F1D9] text-[#1E5622] border border-[#3D6B22]/20">
               {MOCK_HOUSEHOLDS.length} Family Units
             </span>
           </div>
@@ -405,147 +405,133 @@ export default function HouseholdsPage() {
           </Link>
 
           {/* Register Household CTA */}
-          <button className="flex items-center gap-2 bg-[#1B3414] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#274C1D] transition-colors shadow-sm shadow-[#1B3414]/20 cursor-pointer">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/25 hover:shadow-md active:scale-95 cursor-pointer">
             <Plus className="w-4 h-4 text-[#93C573]" />
             Register Household
           </button>
         </div>
       </header>
 
-      {/* 02. KPI Stats Strip - Uniform styling with Dashboard AdminKpiRow & Clients Workspace */}
+      {/* 02. KPI Stats Strip - Uniform styling with Dashboard AdminKpiRow & Caregivers */}
       <section aria-label="Household Key Performance Indicators" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Total Households */}
         <button
           type="button"
           onClick={() => setSelectedTab(selectedTab === "ALL" ? "ALL" : "ALL")}
-          className="group block text-left focus:outline-none w-full transition-transform duration-200 hover:-translate-y-0.5 cursor-pointer"
+          className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
+            selectedTab === "ALL"
+              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
+              : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
+          }`}
         >
-          <Card
-            className={`p-4 h-full bg-white transition-all duration-200 rounded-2xl hover:shadow-md border ${
-              selectedTab === "ALL"
-                ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#F2F8EE]/30 shadow-xs"
-                : "border-slate-200 hover:border-[#3D6B22]/50"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-                Total Households
-              </span>
-              <div className="p-1.5 rounded-lg shrink-0 bg-[#3D6B22]/10 text-[#3D6B22]">
-                <Home className="w-4 h-4" />
-              </div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+              Total Households
+            </span>
+            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-[#3D6B22]/10 text-[#3D6B22]">
+              <Home className="w-4 h-4" />
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-                11
-              </span>
-              <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="truncate">Registered family units</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
-                11 Active
-              </span>
-            </div>
-          </Card>
+          </div>
+          <div className="flex items-baseline justify-between mt-1">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+              {MOCK_HOUSEHOLDS.length}
+            </span>
+            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
+            <span className="text-slate-400 font-medium truncate pr-1">Registered family units</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-[#E3F1D9] text-[#1E5622] border-[#3D6B22]/20">
+              {MOCK_HOUSEHOLDS.length} Active
+            </span>
+          </div>
         </button>
 
         {/* Family Caregivers */}
         <button
           type="button"
           onClick={() => setSelectedTab(selectedTab === "CARE_ACTIVE" ? "ALL" : "CARE_ACTIVE")}
-          className="group block text-left focus:outline-none w-full transition-transform duration-200 hover:-translate-y-0.5 cursor-pointer"
+          className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
+            selectedTab === "CARE_ACTIVE"
+              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
+              : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
+          }`}
         >
-          <Card
-            className={`p-4 h-full bg-white transition-all duration-200 rounded-2xl hover:shadow-md border ${
-              selectedTab === "CARE_ACTIVE"
-                ? "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/20 shadow-xs"
-                : "border-blue-200 hover:border-blue-400"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-                Family Caregivers
-              </span>
-              <div className="p-1.5 rounded-lg shrink-0 bg-blue-100 text-blue-700">
-                <Heart className="w-4 h-4" />
-              </div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+              Family Caregivers
+            </span>
+            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-rose-100 text-rose-700">
+              <Heart className="w-4 h-4" />
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-                8
-              </span>
-              <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="truncate">Linked family & guardians</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 bg-blue-50 text-blue-800 border border-blue-200/70">
-                8 W-2 Paid
-              </span>
-            </div>
-          </Card>
+          </div>
+          <div className="flex items-baseline justify-between mt-1">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+              {MOCK_HOUSEHOLDS.filter((h) => h.primaryCaregiver).length}
+            </span>
+            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
+            <span className="text-slate-400 font-medium truncate pr-1">Linked family & guardians</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-rose-50 text-rose-700 border-rose-200/70">
+              {MOCK_HOUSEHOLDS.filter((h) => h.primaryCaregiver).length} W-2 Paid
+            </span>
+          </div>
         </button>
 
         {/* Authorized Weekly Hours */}
-        <div className="group block text-left focus:outline-none w-full transition-transform duration-200 hover:-translate-y-0.5">
-          <Card className="p-4 h-full bg-white transition-all duration-200 rounded-2xl hover:shadow-md border border-teal-200 hover:border-teal-400">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-                Authorized Weekly Hours
-              </span>
-              <div className="p-1.5 rounded-lg shrink-0 bg-teal-100 text-teal-700">
-                <Clock className="w-4 h-4" />
-              </div>
+        <div className="group text-left focus:outline-none w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60 transition-all duration-300 relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+              Authorized Weekly Hours
+            </span>
+            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-sky-100 text-sky-700">
+              <Clock className="w-4 h-4" />
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-                122
-              </span>
-              <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="truncate">Approved weekly care hours</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 bg-teal-50 text-teal-800 border border-teal-200/70">
-                100% Tracked
-              </span>
-            </div>
-          </Card>
+          </div>
+          <div className="flex items-baseline justify-between mt-1">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+              {MOCK_HOUSEHOLDS.reduce((sum, h) => sum + h.authorizedHoursPerWeek, 0)}
+            </span>
+            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
+            <span className="text-slate-400 font-medium truncate pr-1">Approved weekly care hours</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-sky-50 text-sky-800 border-sky-200/70">
+              100% Tracked
+            </span>
+          </div>
         </div>
 
         {/* Pending Case Mgr Auths */}
         <button
           type="button"
           onClick={() => setSelectedTab(selectedTab === "PENDING_AUTH" ? "ALL" : "PENDING_AUTH")}
-          className="group block text-left focus:outline-none w-full transition-transform duration-200 hover:-translate-y-0.5 cursor-pointer"
+          className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-4.5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
+            selectedTab === "PENDING_AUTH"
+              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
+              : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
+          }`}
         >
-          <Card
-            className={`p-4 h-full bg-white transition-all duration-200 rounded-2xl hover:shadow-md border ${
-              selectedTab === "PENDING_AUTH"
-                ? "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/30 shadow-xs"
-                : "border-amber-200 hover:border-amber-400"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
-                Pending Case Mgr Auths
-              </span>
-              <div className="p-1.5 rounded-lg shrink-0 bg-amber-100 text-amber-800">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+              Pending Case Mgr Auths
+            </span>
+            <div className="w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 bg-amber-100 text-amber-800">
+              <ShieldCheck className="w-4 h-4" />
             </div>
-            <div className="flex items-baseline justify-between mt-1">
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-amber-900">
-                2
-              </span>
-              <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="truncate">Awaiting CM sign-off</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 bg-amber-50 text-amber-800 border border-amber-200/70">
-                2 Approvals Due
-              </span>
-            </div>
-          </Card>
+          </div>
+          <div className="flex items-baseline justify-between mt-1">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+              {MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length}
+            </span>
+            <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </div>
+          <div className="mt-3 pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-[11px] text-slate-500">
+            <span className="text-slate-400 font-medium truncate pr-1">Awaiting CM sign-off</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 bg-amber-50 text-amber-800 border-amber-200/70">
+              {MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length} Approvals Due
+            </span>
+          </div>
         </button>
       </section>
 
@@ -691,16 +677,16 @@ export default function HouseholdsPage() {
             ) : viewMode === "grid" ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredHouseholds.map((hh) => (
-                  <Card
+                  <div
                     key={hh.id}
-                    className="p-4 border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md transition-all space-y-3.5"
+                    className="h-full bg-white backdrop-blur-xl rounded-2xl p-5 border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden space-y-3.5"
                   >
                     {/* Header: Name, Code & Program */}
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-slate-900 text-base">{hh.name}</h3>
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[11px] font-semibold rounded-md font-mono">
+                          <h3 className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-base">{hh.name}</h3>
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[11px] font-semibold rounded-md font-mono border border-slate-200/60">
                             {hh.code}
                           </span>
                         </div>
@@ -710,7 +696,7 @@ export default function HouseholdsPage() {
                             {hh.city}, {hh.state}
                           </span>
                           <span>•</span>
-                          <span className="font-medium text-[#3D6B22] bg-[#3D6B22]/10 px-2 py-0.5 rounded-full text-[11px]">
+                          <span className="font-medium text-[#1E5622] bg-[#E3F1D9] border border-[#3D6B22]/20 px-2 py-0.5 rounded-full text-[11px]">
                             {hh.program}
                           </span>
                         </div>
@@ -738,7 +724,7 @@ export default function HouseholdsPage() {
                     </div>
 
                     {/* Linked Dual Entity Display (Client & Caregiver) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-100">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50/70 rounded-xl border border-slate-100">
                       {/* Client Box with direct link into Client Chart */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
@@ -825,96 +811,98 @@ export default function HouseholdsPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedHousehold(hh)}
-                          className="px-2.5 py-1 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                          className="px-3 py-1.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm shadow-[#1B3414]/20 active:scale-95 cursor-pointer"
                         >
                           Manage <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 ))}
               </div>
             ) : (
-              <div className="overflow-x-auto -mx-4 sm:mx-0">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/80 border-y border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                      <th className="py-3 px-3.5">Household</th>
-                      <th className="py-3 px-3.5">Program</th>
-                      <th className="py-3 px-3.5">Care Recipient (Client)</th>
-                      <th className="py-3 px-3.5">Paid Family Caregiver</th>
-                      <th className="py-3 px-3.5">Case Manager</th>
-                      <th className="py-3 px-3.5">Auth Status</th>
-                      <th className="py-3 px-3.5">Weekly Hours</th>
-                      <th className="py-3 px-3.5 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {filteredHouseholds.map((hh) => (
-                      <tr
-                        key={hh.id}
-                        onClick={() => setSelectedHousehold(hh)}
-                        className="hover:bg-slate-50/80 cursor-pointer transition-colors"
-                      >
-                        <td className="py-3 px-3.5">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-slate-900">{hh.name}</span>
-                            <span className="text-[11px] font-mono text-slate-400">{hh.code}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-3.5">
-                          <span className="text-[11px] font-medium text-[#3D6B22] bg-[#3D6B22]/10 px-2 py-0.5 rounded-full">
-                            {hh.program}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3.5">
-                          <Link
-                            href={getClientChartLink(hh.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-semibold text-blue-600 hover:underline"
-                          >
-                            {hh.client.name}
-                          </Link>
-                        </td>
-                        <td className="py-3 px-3.5">
-                          <Link
-                            href="/caregivers"
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-semibold text-slate-800 hover:text-[#3D6B22]"
-                          >
-                            {hh.primaryCaregiver.name}
-                          </Link>
-                        </td>
-                        <td className="py-3 px-3.5 text-slate-600">
-                          {hh.caseManager.name}
-                        </td>
-                        <td className="py-3 px-3.5">
-                          <span
-                            className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                              hh.authStatus === "Approved"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : "bg-amber-50 text-amber-700 border-amber-200"
-                            }`}
-                          >
-                            {hh.authStatus}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3.5 font-bold text-slate-900">
-                          {hh.scheduledHoursPerWeek} / {hh.authorizedHoursPerWeek} hrs
-                        </td>
-                        <td className="py-3 px-3.5 text-right" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedHousehold(hh)}
-                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                          >
-                            Manage
-                          </button>
-                        </td>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        <th className="py-3.5 px-4">Household</th>
+                        <th className="py-3.5 px-4">Program</th>
+                        <th className="py-3.5 px-4">Care Recipient (Client)</th>
+                        <th className="py-3.5 px-4">Paid Family Caregiver</th>
+                        <th className="py-3.5 px-4">Case Manager</th>
+                        <th className="py-3.5 px-4">Auth Status</th>
+                        <th className="py-3.5 px-4">Weekly Hours</th>
+                        <th className="py-3.5 px-4 text-right">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {filteredHouseholds.map((hh) => (
+                        <tr
+                          key={hh.id}
+                          onClick={() => setSelectedHousehold(hh)}
+                          className="hover:bg-slate-50/70 cursor-pointer transition-colors"
+                        >
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-col">
+                              <span className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">{hh.name}</span>
+                              <span className="text-[11px] font-mono text-slate-400">{hh.code}</span>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="text-[11px] font-medium text-[#1E5622] bg-[#E3F1D9] border border-[#3D6B22]/20 px-2.5 py-0.5 rounded-full">
+                              {hh.program}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <Link
+                              href={getClientChartLink(hh.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-semibold text-blue-600 hover:underline"
+                            >
+                              {hh.client.name}
+                            </Link>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <Link
+                              href="/caregivers"
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-semibold text-slate-800 hover:text-[#3D6B22]"
+                            >
+                              {hh.primaryCaregiver.name}
+                            </Link>
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-600">
+                            {hh.caseManager.name}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                                hh.authStatus === "Approved"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : "bg-amber-50 text-amber-700 border-amber-200"
+                              }`}
+                            >
+                              {hh.authStatus}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-slate-900">
+                            {hh.scheduledHoursPerWeek} / {hh.authorizedHoursPerWeek} hrs
+                          </td>
+                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedHousehold(hh)}
+                              className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                            >
+                              Manage
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
@@ -922,13 +910,13 @@ export default function HouseholdsPage() {
       </section>
 
       {/* 04. Secondary Sections: Household Bottlenecks & Coordination Activity matching /intake/pipeline & /clients */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Actionable Bottlenecks Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-slate-900 text-sm leading-tight">
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
                   Household Journey Bottlenecks
                 </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
@@ -939,10 +927,10 @@ export default function HouseholdsPage() {
             </div>
 
             <div className="mt-3.5 space-y-2">
-              <div className="p-3 rounded-xl border border-rose-200 bg-rose-50/40 text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/40 text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-rose-100 text-rose-700">
-                    <ShieldCheck className="w-3.5 h-3.5" />
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-rose-100 text-rose-700 transition-transform group-hover:scale-105">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-slate-900 truncate">
@@ -955,17 +943,17 @@ export default function HouseholdsPage() {
                 </div>
                 <Link
                   href="/billing/authorizations"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs shrink-0"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs shrink-0 transition-colors"
                 >
                   <span>Push CM</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
 
-              <div className="p-3 rounded-xl border border-amber-200 bg-amber-50/40 text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/40 text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-amber-100 text-amber-800">
-                    <Clock className="w-3.5 h-3.5" />
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-amber-100 text-amber-800 transition-transform group-hover:scale-105">
+                    <Clock className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-slate-900 truncate">
@@ -978,17 +966,17 @@ export default function HouseholdsPage() {
                 </div>
                 <Link
                   href="/caregivers"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-emerald-50 text-slate-800 hover:text-[#3D6B22] border border-slate-200 shadow-xs shrink-0"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-emerald-50 text-slate-800 hover:text-[#3D6B22] border border-slate-200 shadow-xs shrink-0 transition-colors"
                 >
                   <span>Follow up</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
 
-              <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 text-xs flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-sky-100 text-sky-800">
-                    <FileWarning className="w-3.5 h-3.5" />
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-sky-100 text-sky-800 transition-transform group-hover:scale-105">
+                    <FileWarning className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-slate-900 truncate">
@@ -1001,7 +989,7 @@ export default function HouseholdsPage() {
                 </div>
                 <Link
                   href="/clients"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 shadow-xs shrink-0"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 shadow-xs shrink-0 transition-colors"
                 >
                   <span>View Doc</span>
                   <ArrowRight className="w-3 h-3" />
@@ -1012,11 +1000,11 @@ export default function HouseholdsPage() {
         </div>
 
         {/* Right: Recent Household Activity Feed */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-slate-900 text-sm leading-tight">
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
                   Recent Household Activity
                 </h3>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3D6B22] animate-pulse" title="Live Sync" />
@@ -1025,13 +1013,13 @@ export default function HouseholdsPage() {
             </div>
 
             <div className="mt-3.5 space-y-2">
-              <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 group">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-emerald-100 text-[#1E5622]">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-emerald-100 text-[#1E5622] transition-transform group-hover:scale-105">
+                    <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-slate-900 truncate">
+                    <p className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
                       EVV shift verified (40/40 hrs compliant)
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5 truncate">
@@ -1042,13 +1030,13 @@ export default function HouseholdsPage() {
                 <span className="text-[11px] text-slate-400 shrink-0">08:30 AM</span>
               </div>
 
-              <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 group">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-sky-100 text-sky-800">
-                    <UserCheck className="w-3.5 h-3.5" />
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-sky-100 text-sky-800 transition-transform group-hover:scale-105">
+                    <UserCheck className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-slate-900 truncate">
+                    <p className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
                       Primary family caregiver assigned
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5 truncate">
@@ -1059,13 +1047,13 @@ export default function HouseholdsPage() {
                 <span className="text-[11px] text-slate-400 shrink-0">Yesterday</span>
               </div>
 
-              <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all text-xs flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 group">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center bg-purple-100 text-purple-800">
-                    <Sparkles className="w-3.5 h-3.5" />
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-purple-100 text-purple-800 transition-transform group-hover:scale-105">
+                    <Sparkles className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-slate-900 truncate">
+                    <p className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
                       New household registered from converted intake
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5 truncate">

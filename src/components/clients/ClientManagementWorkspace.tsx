@@ -278,19 +278,20 @@ export function ClientManagementWorkspace({
               )}
             </div>
           ) : viewMode === "table" ? (
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-50/80 border-y border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    <th className="py-3 px-3.5">Client</th>
-                    <th className="py-3 px-3.5">Household</th>
-                    <th className="py-3 px-3.5">Care Arrangement</th>
-                    <th className="py-3 px-3.5">Assigned Caregiver</th>
-                    <th className="py-3 px-3.5">Readiness</th>
-                    <th className="py-3 px-3.5">Status</th>
-                    <th className="py-3 px-3.5">Updated</th>
-                    <th className="py-3 px-3.5 text-right">Action</th>
-                  </tr>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      <th className="py-3.5 px-4">Client</th>
+                      <th className="py-3.5 px-4">Household</th>
+                      <th className="py-3.5 px-4">Care Arrangement</th>
+                      <th className="py-3.5 px-4">Assigned Caregiver</th>
+                      <th className="py-3.5 px-4">Readiness</th>
+                      <th className="py-3.5 px-4">Status</th>
+                      <th className="py-3.5 px-4">Updated</th>
+                      <th className="py-3.5 px-4 text-right">Action</th>
+                    </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {filteredClients.map((client) => {
@@ -446,13 +447,13 @@ export function ClientManagementWorkspace({
                             <button
                               type="button"
                               onClick={() => onSelectClient(client)}
-                              className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                              className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
                             >
                               Quick View
                             </button>
                             <Link
                               href={`/clients/${client.id}`}
-                              className="p-1 text-slate-400 hover:text-[#3D6B22] transition-colors rounded-lg hover:bg-[#F2F8EE]"
+                              className="p-1.5 text-slate-400 hover:text-[#3D6B22] transition-colors rounded-xl hover:bg-[#F2F8EE]"
                               title="Full Profile"
                             >
                               <ChevronRight className="w-4 h-4" />
@@ -465,8 +466,9 @@ export function ClientManagementWorkspace({
                 </tbody>
               </table>
             </div>
+          </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredClients.map((client) => {
                 const isSelected = selectedClientId === client.id;
                 const hasAttention = client.attentionItems && client.attentionItems.length > 0;
@@ -475,17 +477,17 @@ export function ClientManagementWorkspace({
                   <div
                     key={client.id}
                     onClick={() => onSelectClient(client)}
-                    className={`p-4 rounded-xl transition-all duration-200 cursor-pointer flex flex-col justify-between border ${
+                    className={`h-full bg-white backdrop-blur-xl rounded-2xl p-5 border transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
                       isSelected
-                        ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#F2F8EE]/30 shadow-xs"
-                        : "border-slate-200 bg-white hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5"
+                        ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
+                        : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
                     }`}
                   >
                     <div>
                       {/* Card Header: Client Info & Status */}
                       <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/80 shrink-0">
                             {client.avatarUrl ? (
                               <img
                                 src={client.avatarUrl}
@@ -499,7 +501,7 @@ export function ClientManagementWorkspace({
                             )}
                           </div>
                           <div>
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                            <div className="flex items-center gap-1.5 font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                               <span>{client.name}</span>
                               {hasAttention && (
                                 <span title="Needs Attention" className="text-amber-600">
@@ -514,7 +516,7 @@ export function ClientManagementWorkspace({
                         </div>
 
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusBadge(
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${getStatusBadge(
                             client.status
                           )}`}
                         >
@@ -523,23 +525,23 @@ export function ClientManagementWorkspace({
                       </div>
 
                       {/* Badges strip: Care Type & Household */}
-                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                      <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
                         <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getCareTypeBadge(
+                          className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${getCareTypeBadge(
                             client.careType
                           )}`}
                         >
                           {client.careType}
                         </span>
 
-                        <div className="flex items-center gap-1 text-[11px] text-slate-600 font-medium bg-slate-50 px-2 py-0.5 rounded-full border border-slate-200">
+                        <div className="flex items-center gap-1 text-[11px] text-slate-600 font-medium bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200/80">
                           <Home className="w-3 h-3 text-slate-400" />
                           <span className="truncate max-w-[130px]">{client.household.name}</span>
                         </div>
                       </div>
 
                       {/* Caregiver & Hours summary */}
-                      <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs">
+                      <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-2 text-xs">
                         <div className="flex items-center justify-between text-slate-600">
                           <span className="text-slate-400 text-[11px]">Caregiver:</span>
                           {client.assignedCareTeam.primaryCaregiver ? (
@@ -564,12 +566,12 @@ export function ClientManagementWorkspace({
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                       <span className="text-[11px] text-slate-400">{client.updatedAtRelative}</span>
                       <Link
                         href={`/clients/${client.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] group-hover:translate-x-1 transition-transform"
                       >
                         Full Profile
                         <ArrowRight className="w-3 h-3" />

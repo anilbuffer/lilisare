@@ -221,7 +221,7 @@ export default function ClientsPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Clients & Family Care
             </h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#1E5622] border border-emerald-200">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E3F1D9] text-[#1E5622] border border-[#3D6B22]/20">
               {clients.length} Active Records
             </span>
           </div>
@@ -376,7 +376,7 @@ export default function ClientsPage() {
           {/* Add Client CTA */}
           <Link
             href="/clients/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/20"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/25 hover:shadow-md active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4 text-[#93C573]" />
             <span>Add Client</span>
@@ -402,7 +402,7 @@ export default function ClientsPage() {
       />
 
       {/* 04. Secondary Sections: Actionable Items & Recent Activity matching /intake/pipeline */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ClientAttentionSection
           clients={branchFilteredClients}
           onSelectClient={handleSelectClientId}

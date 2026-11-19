@@ -36,12 +36,12 @@ export function RecentActivitySection({
   const displayedActivities = showAll ? activities : activities.slice(0, 4);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
+    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <h3 className="font-bold text-slate-900 text-sm leading-tight">
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
               Recent Activity
             </h3>
             <span className="w-1.5 h-1.5 rounded-full bg-[#3D6B22] animate-pulse" title="Live Sync" />
@@ -66,13 +66,13 @@ export function RecentActivitySection({
               <div
                 key={item.id}
                 onClick={() => onSelectInquiryById(item.inquiryId)}
-                className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 cursor-pointer group"
+                className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
-                    className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${config.bg} ${config.color}`}
+                    className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center transition-transform group-hover:scale-105 ${config.bg} ${config.color}`}
                   >
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon className="w-4 h-4" />
                   </div>
 
                   <div className="min-w-0">

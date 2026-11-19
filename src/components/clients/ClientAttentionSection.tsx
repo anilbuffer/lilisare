@@ -113,12 +113,12 @@ export function ClientAttentionSection({
   const urgentCount = items.filter((i) => i.isUrgent).length;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
+    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
       <div>
         {/* Header matching FollowUpTasksSection */}
         <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <h3 className="font-bold text-slate-900 text-sm leading-tight">
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
               Actionable Care Items
             </h3>
             {urgentCount > 0 && (
@@ -146,16 +146,17 @@ export function ClientAttentionSection({
             return (
               <div
                 key={item.id}
-                className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 transition-all ${item.isUrgent
+                className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-3 transition-all ${
+                  item.isUrgent
                     ? "bg-rose-50/40 border-rose-200 hover:border-rose-300"
                     : "bg-slate-50/70 border-slate-200 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)]"
-                  }`}
+                }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
-                    className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${config.bg} ${config.color}`}
+                    className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center transition-transform group-hover:scale-105 ${config.bg} ${config.color}`}
                   >
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <button
@@ -178,10 +179,11 @@ export function ClientAttentionSection({
                 <button
                   type="button"
                   onClick={() => onSelectClient(item.clientId)}
-                  className={`inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 cursor-pointer transition-all ${item.isUrgent
+                  className={`inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer transition-all ${
+                    item.isUrgent
                       ? "bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
                       : "bg-white hover:bg-emerald-50 text-slate-800 hover:text-[#3D6B22] border border-slate-200 shadow-xs"
-                    }`}
+                  }`}
                 >
                   <span>{item.actionLabel}</span>
                   <ArrowRight className="w-3 h-3" />

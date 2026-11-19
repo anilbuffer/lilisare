@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { InquiryRecord } from "@/types/intake";
-import { X, Calendar, Clock, Stethoscope, CheckCircle2, User } from "lucide-react";
+import { X, Calendar, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 
 interface ScheduleAssessmentModalProps {
@@ -50,18 +50,18 @@ export function ScheduleAssessmentModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-[#FFFFFF] rounded-2xl border border-[#D5DFDA] shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[#D5DFDA] bg-[#F7F9F8] flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#E0F2FE] text-[#0369A1] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 flex items-center justify-center">
               <Stethoscope className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[#111C16]">
+              <h2 className="text-base font-bold text-slate-900 leading-tight">
                 Schedule Clinical Assessment
               </h2>
-              <p className="text-xs text-[#4A5D52]">
+              <p className="text-xs text-slate-500 mt-0.5">
                 {inquiry.familyName} · Client: {inquiry.familyInfo.clientInfo.name}
               </p>
             </div>
@@ -69,7 +69,7 @@ export function ScheduleAssessmentModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#FFFFFF] border border-[#D5DFDA] flex items-center justify-center text-[#74877C] hover:text-[#111C16] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -79,7 +79,7 @@ export function ScheduleAssessmentModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-3.5 text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="font-semibold text-[#111C16] block mb-1">
+              <label className="font-semibold text-slate-800 block mb-1">
                 Assessment Date *
               </label>
               <input
@@ -87,18 +87,18 @@ export function ScheduleAssessmentModal({
                 required
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#D5DFDA] rounded-xl text-[#111C16]"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
               />
             </div>
 
             <div>
-              <label className="font-semibold text-[#111C16] block mb-1">
+              <label className="font-semibold text-slate-800 block mb-1">
                 Target Time
               </label>
               <select
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#D5DFDA] rounded-xl text-[#111C16]"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
               >
                 <option value="09:00 AM">09:00 AM</option>
                 <option value="10:30 AM">10:30 AM</option>
@@ -110,13 +110,13 @@ export function ScheduleAssessmentModal({
           </div>
 
           <div>
-            <label className="font-semibold text-[#111C16] block mb-1">
+            <label className="font-semibold text-slate-800 block mb-1">
               Assigned Clinical Assessor
             </label>
             <select
               value={assessor}
               onChange={(e) => setAssessor(e.target.value)}
-              className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#D5DFDA] rounded-xl text-[#111C16]"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
             >
               <option value="Marcus Chen, RN (Clinical Supervisor)">Marcus Chen, RN (Clinical Supervisor)</option>
               <option value="Dr. Rachel Adams, MD">Dr. Rachel Adams, MD (Medical Director)</option>
@@ -125,13 +125,13 @@ export function ScheduleAssessmentModal({
           </div>
 
           <div>
-            <label className="font-semibold text-[#111C16] block mb-1">
+            <label className="font-semibold text-slate-800 block mb-1">
               Assessment Type
             </label>
             <select
               value={assessmentType}
               onChange={(e) => setAssessmentType(e.target.value)}
-              className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#D5DFDA] rounded-xl text-[#111C16]"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
             >
               <option value="Comprehensive In-Home RN Assessment">Comprehensive In-Home RN Assessment</option>
               <option value="SFC Home Safety & Health Verification">SFC Home Safety & Health Verification</option>
@@ -141,29 +141,29 @@ export function ScheduleAssessmentModal({
           </div>
 
           <div>
-            <label className="font-semibold text-[#111C16] block mb-1">
+            <label className="font-semibold text-slate-800 block mb-1">
               Clinical Special Instructions
             </label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 bg-[#FFFFFF] border border-[#D5DFDA] rounded-xl text-[#111C16]"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
             />
           </div>
 
           {/* Footer */}
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#D5DFDA]">
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 text-xs font-medium text-[#4A5D52] hover:text-[#111C16]"
+              className="px-3.5 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl shadow-xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl shadow-sm shadow-[#3D6B22]/20 cursor-pointer"
             >
               <Calendar className="w-3.5 h-3.5" />
               <span>Confirm Assessment</span>

@@ -1022,3 +1022,11 @@ export const INITIAL_RECENT_ACTIVITIES: RecentActivityItem[] = [
     actor: "Sarah Jenkins",
   },
 ];
+
+export function getInquiryById(id: string): InquiryRecord | undefined {
+  return INITIAL_INQUIRIES.find((i) => i.id.toLowerCase() === id.toLowerCase());
+}
+
+export function getAllInquiryIds(): string[] {
+  return INITIAL_INQUIRIES.map((i) => i.id);
+}

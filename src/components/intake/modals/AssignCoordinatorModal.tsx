@@ -56,18 +56,18 @@ export function AssignCoordinatorModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-[#FFFFFF] rounded-2xl border border-[#D5DFDA] shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[#D5DFDA] bg-[#F7F9F8] flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#E3F1D9] text-[#1E5622] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#1E5622] border border-emerald-200 flex items-center justify-center">
               <UserCheck className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-[#111C16]">
+              <h2 className="text-base font-bold text-slate-900 leading-tight">
                 Assign Intake Coordinator
               </h2>
-              <p className="text-xs text-[#4A5D52]">
+              <p className="text-xs text-slate-500 mt-0.5">
                 {inquiry.familyName} · {inquiry.id}
               </p>
             </div>
@@ -75,14 +75,14 @@ export function AssignCoordinatorModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#FFFFFF] border border-[#D5DFDA] flex items-center justify-center text-[#74877C] hover:text-[#111C16] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 space-y-2.5 text-xs">
+        <div className="p-5 space-y-2 text-xs">
           {COORDINATORS.map((c) => {
             const isSelected = selectedName === c.name;
             return (
@@ -90,22 +90,21 @@ export function AssignCoordinatorModal({
                 key={c.name}
                 type="button"
                 onClick={() => setSelectedName(c.name)}
-                className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-colors cursor-pointer ${
-                  isSelected
-                    ? "bg-[#F2F8EE] border-[#3D6B22] shadow-xs ring-2 ring-[#3D6B22]/15"
-                    : "bg-[#FFFFFF] hover:bg-[#F7F9F8] border-[#D5DFDA]"
-                }`}
+                className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${isSelected
+                  ? "bg-emerald-50/50 border-[#3D6B22] shadow-2xs ring-2 ring-[#3D6B22]/15"
+                  : "bg-slate-50/70 hover:bg-white border-slate-200 hover:border-slate-300"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <img
                     src={c.avatar}
                     alt={c.name}
-                    className="w-9 h-9 rounded-full object-cover border border-[#D5DFDA]"
+                    className="w-9 h-9 rounded-full object-cover border border-slate-200"
                   />
                   <div>
-                    <h3 className="font-bold text-[#111C16]">{c.name}</h3>
-                    <p className="text-[11px] text-[#4A5D52]">{c.role}</p>
-                    <span className="text-[10px] text-[#74877C]">{c.workload}</span>
+                    <h3 className="font-bold text-slate-900">{c.name}</h3>
+                    <p className="text-[11px] text-slate-500">{c.role}</p>
+                    <span className="text-[10px] text-slate-400">{c.workload}</span>
                   </div>
                 </div>
 
@@ -116,18 +115,18 @@ export function AssignCoordinatorModal({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#D5DFDA] bg-[#F7F9F8] flex items-center justify-end gap-2">
+        <div className="p-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-3.5 py-2 text-xs font-medium text-[#4A5D52] hover:text-[#111C16]"
+            className="px-3.5 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl shadow-xs"
+            className="px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl shadow-sm shadow-[#3D6B22]/20 cursor-pointer"
           >
             Update Assignment
           </button>

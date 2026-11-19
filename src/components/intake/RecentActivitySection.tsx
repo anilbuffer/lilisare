@@ -8,8 +8,8 @@ import {
   PhoneCall,
   Calendar,
   CheckCircle2,
-  Clock,
-  ExternalLink,
+  Activity,
+  ArrowRight,
 } from "lucide-react";
 
 interface RecentActivitySectionProps {
@@ -17,12 +17,15 @@ interface RecentActivitySectionProps {
   onSelectInquiryById: (inquiryId: string) => void;
 }
 
-const ACTIVITY_ICONS: Record<RecentActivityItem["type"], { icon: React.ElementType; color: string; bg: string }> = {
-  referral_received: { icon: Sparkles, color: "text-[#B91C1C]", bg: "bg-[#FEE2E2]" },
-  inquiry_assigned: { icon: UserCheck, color: "text-[#0F5E6E]", bg: "bg-[#E0F2F5]" },
-  family_contacted: { icon: PhoneCall, color: "text-[#9A5B00]", bg: "bg-[#FEF3C7]" },
-  assessment_scheduled: { icon: Calendar, color: "text-[#0369A1]", bg: "bg-[#E0F2FE]" },
-  referral_converted: { icon: CheckCircle2, color: "text-[#1E5622]", bg: "bg-[#E3F1D9]" },
+const ACTIVITY_ICONS: Record<
+  RecentActivityItem["type"],
+  { icon: React.ElementType; color: string; bg: string }
+> = {
+  referral_received: { icon: Sparkles, color: "text-rose-700", bg: "bg-rose-100" },
+  inquiry_assigned: { icon: UserCheck, color: "text-sky-800", bg: "bg-sky-100" },
+  family_contacted: { icon: PhoneCall, color: "text-amber-800", bg: "bg-amber-100" },
+  assessment_scheduled: { icon: Calendar, color: "text-indigo-800", bg: "bg-indigo-100" },
+  referral_converted: { icon: CheckCircle2, color: "text-[#1E5622]", bg: "bg-emerald-100" },
 };
 
 export function RecentActivitySection({
@@ -33,30 +36,35 @@ export function RecentActivitySection({
   const displayedActivities = showAll ? activities : activities.slice(0, 4);
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#D5DFDA] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-      {/* Header */}
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between pb-3 border-b border-[#D5DFDA]/60">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-bold text-[#111C16] tracking-tight">
-              Recent Activity
-            </h3>
-            <span className="text-[11px] font-medium text-[#74877C]">
-              Live updates
-            </span>
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-emerald-50 text-[#3D6B22] rounded-xl shrink-0">
+              <Activity className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm leading-tight">
+                Recent Activity
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Real-time referral updates and communication
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={() => setShowAll(!showAll)}
-            className="text-xs font-semibold text-[#3D6B22] hover:text-[#2C5217] transition-colors cursor-pointer"
+            className="text-xs font-semibold text-[#3D6B22] hover:text-[#1B3414] transition-colors cursor-pointer"
           >
             {showAll ? "Show Less" : `View All (${activities.length})`}
           </button>
         </div>
 
         {/* Activity List */}
-        <div className="mt-3 space-y-2.5">
+        <div className="mt-3 space-y-2">
           {displayedActivities.map((item) => {
             const config = ACTIVITY_ICONS[item.type] || ACTIVITY_ICONS.referral_received;
             const Icon = config.icon;
@@ -64,7 +72,7 @@ export function RecentActivitySection({
             return (
               <div
                 key={item.id}
-                className="p-3 rounded-xl border border-[#D5DFDA] bg-[#F7F9F8] hover:bg-[#FFFFFF] hover:border-[#93C573] transition-colors text-xs flex items-start gap-2.5"
+                className="p-3 rounded-xl border border-slate-200/80 bg-slate-50 hover:bg-white hover:border-slate-300 hover:shadow-2xs transition-all text-xs flex items-start gap-2.5"
               >
                 <div
                   className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center mt-0.5 ${config.bg} ${config.color}`}
@@ -74,26 +82,26 @@ export function RecentActivitySection({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-[#111C16] truncate">
+                    <span className="font-bold text-slate-900 truncate">
                       {item.title}
                     </span>
-                    <span className="text-[10px] text-[#74877C] shrink-0">
+                    <span className="text-[10px] text-slate-400 shrink-0">
                       {item.timestamp}
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-[#4A5D52] mt-0.5 line-clamp-1">
+                  <p className="text-[11px] text-slate-600 mt-0.5 line-clamp-1">
                     {item.description}
                   </p>
 
                   <div className="flex items-center justify-between mt-1 text-[10px]">
-                    <span className="text-[#74877C]">
-                      By <strong className="text-[#111C16] font-medium">{item.actor}</strong>
+                    <span className="text-slate-400">
+                      By <strong className="text-slate-700 font-medium">{item.actor}</strong>
                     </span>
                     <button
                       type="button"
                       onClick={() => onSelectInquiryById(item.inquiryId)}
-                      className="text-[#3D6B22] hover:underline font-medium cursor-pointer"
+                      className="text-[#3D6B22] hover:underline font-semibold cursor-pointer"
                     >
                       {item.inquiryId}
                     </button>
@@ -105,11 +113,11 @@ export function RecentActivitySection({
         </div>
       </div>
 
-      <div className="mt-3 pt-2 text-[11px] text-[#74877C] flex items-center justify-between">
-        <span>Audited in compliance with HIPAA & LiliSphere logs</span>
+      <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+        <span>Audited under HIPAA & compliance logs</span>
         <span className="font-medium text-[#3D6B22] flex items-center gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-[#3D6B22] animate-pulse" />
-          Active Sync
+          Live Sync
         </span>
       </div>
     </div>

@@ -117,7 +117,7 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
             </div>
             {!isCollapsed && (
               <div className="flex flex-col truncate pr-4">
-                <span className="font-bold text-base tracking-wide text-white block leading-tight truncate">
+                <span className="font-bold text-base lg:text-xl tracking-wide text-white block leading-tight truncate">
                   LiliSare
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal mt-0.5">

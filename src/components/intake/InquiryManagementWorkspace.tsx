@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { InquiryRecord, InquiryStage } from "@/types/intake";
-import { InquiryDetailView } from "./InquiryDetailView";
 import {
   Search,
-  SlidersHorizontal,
+  LayoutGrid,
+  List,
   ChevronRight,
+  ArrowRight,
   Sparkles,
   PhoneCall,
   Stethoscope,
@@ -15,69 +17,55 @@ import {
   AlertTriangle,
   User,
   Inbox,
-  Filter,
+  FilterX,
+  Clock,
+  MapPin,
+  Calendar,
 } from "lucide-react";
 
 interface InquiryManagementWorkspaceProps {
   inquiries: InquiryRecord[];
-  selectedInquiry: InquiryRecord | null;
-  onSelectInquiry: (inquiry: InquiryRecord) => void;
   selectedStageFilter: InquiryStage | null;
   onSelectStageFilter: (stage: InquiryStage | null) => void;
-  onContactFamily: (inquiry: InquiryRecord) => void;
-  onAssignCoordinator: (inquiry: InquiryRecord) => void;
-  onScheduleAssessment: (inquiry: InquiryRecord) => void;
-  onUpdateStatus: (inquiry: InquiryRecord, newStage: InquiryRecord["stage"]) => void;
-  onConvertToOnboarding: (inquiry: InquiryRecord) => void;
-  onAddTimelineNote: (inquiryId: string, noteText: string) => void;
-  onToggleDocumentStatus: (inquiryId: string, docId: string) => void;
+  baseDetailsPath?: string;
 }
 
 const STAGE_BADGES: Record<InquiryStage, { bg: string; text: string; border: string }> = {
-  "New Lead": { bg: "bg-[#FEF2F2]", text: "text-[#B91C1C]", border: "border-[#FECACA]" },
-  "Contacted": { bg: "bg-[#FEF3C7]", text: "text-[#9A5B00]", border: "border-[#FDE68A]" },
-  "In Assessment": { bg: "bg-[#E0F2FE]", text: "text-[#0369A1]", border: "border-[#BAE6FD]" },
-  "CM Coordination": { bg: "bg-[#EEF2FF]", text: "text-[#4338CA]", border: "border-[#C7D2FE]" },
-  "Converted": { bg: "bg-[#E3F1D9]", text: "text-[#1E5622]", border: "border-[#C7E4B3]" },
+  "New Lead": { bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200" },
+  "Contacted": { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200" },
+  "In Assessment": { bg: "bg-sky-50", text: "text-sky-800", border: "border-sky-200" },
+  "CM Coordination": { bg: "bg-indigo-50", text: "text-indigo-800", border: "border-indigo-200" },
+  "Converted": { bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200" },
 };
 
 export function InquiryManagementWorkspace({
   inquiries,
-  selectedInquiry,
-  onSelectInquiry,
   selectedStageFilter,
   onSelectStageFilter,
-  onContactFamily,
-  onAssignCoordinator,
-  onScheduleAssessment,
-  onUpdateStatus,
-  onConvertToOnboarding,
-  onAddTimelineNote,
-  onToggleDocumentStatus,
+  baseDetailsPath = "/intake/pipeline",
 }: InquiryManagementWorkspaceProps) {
+  const router = useRouter();
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [tabFilter, setTabFilter] = useState<string>("ALL");
 
-  // Keep tab filter and selectedStageFilter in sync
   const currentStage = selectedStageFilter || (tabFilter !== "ALL" ? (tabFilter as InquiryStage) : null);
 
-  const tabs: { id: string; label: string; count?: number }[] = [
+  const tabs: { id: string; label: string; count: number }[] = [
     { id: "ALL", label: "All inquiries", count: inquiries.length },
-    { id: "New Lead", label: "New", count: inquiries.filter((i) => i.stage === "New Lead").length },
+    { id: "New Lead", label: "New Lead", count: inquiries.filter((i) => i.stage === "New Lead").length },
     { id: "Contacted", label: "Contacted", count: inquiries.filter((i) => i.stage === "Contacted").length },
-    { id: "In Assessment", label: "Assessment", count: inquiries.filter((i) => i.stage === "In Assessment").length },
-    { id: "CM Coordination", label: "Coordination", count: inquiries.filter((i) => i.stage === "CM Coordination").length },
+    { id: "In Assessment", label: "In Assessment", count: inquiries.filter((i) => i.stage === "In Assessment").length },
+    { id: "CM Coordination", label: "CM Coordination", count: inquiries.filter((i) => i.stage === "CM Coordination").length },
     { id: "Converted", label: "Converted", count: inquiries.filter((i) => i.stage === "Converted").length },
   ];
 
   const filteredInquiries = useMemo(() => {
     return inquiries.filter((item) => {
-      // Stage / Tab Filter
       if (currentStage && item.stage !== currentStage) {
         return false;
       }
 
-      // Search Query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesId = item.id.toLowerCase().includes(query);
@@ -95,40 +83,76 @@ export function InquiryManagementWorkspace({
     });
   }, [inquiries, currentStage, searchQuery]);
 
+  const handleRowClick = (id: string) => {
+    router.push(`${baseDetailsPath}/${id}`);
+  };
+
   return (
-    <section aria-label="Inquiry Management Workspace" className="space-y-3">
-      {/* Workspace Header & Search / Filter Controls */}
-      <div className="bg-[#FFFFFF] border border-[#D5DFDA] rounded-2xl p-4 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+    <section aria-label="Inquiry Management Workspace" className="space-y-4">
+      {/* Workspace Header & Toolbar */}
+      <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
-            <h2 className="text-base font-bold text-[#111C16] tracking-tight">
-              Inquiry Management
-            </h2>
-            <p className="text-xs text-[#4A5D52] mt-0.5">
-              Review, qualify and manage family inquiries in real-time
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 leading-tight">
+                Inquiry Management
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                {filteredInquiries.length} shown
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Review, qualify and manage family inquiries across all stages
             </p>
           </div>
 
-          {/* Search bar */}
-          <div className="relative w-full md:w-80">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#74877C]" />
-            <input
-              type="text"
-              placeholder="Search inquiry, family ID, client..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs bg-[#F7F9F8] border border-[#D5DFDA] rounded-xl text-[#111C16] placeholder-[#74877C] focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
-            />
+          <div className="flex items-center gap-2.5">
+            {/* Search Input */}
+            <div className="relative w-full md:w-72">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search inquiry, family ID, client..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              />
+            </div>
+
+            {/* View Mode Toggle (Grid vs List) */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                title="List View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-[#D5DFDA]/60 overflow-x-auto no-scrollbar">
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 pt-3 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => {
-            const isActive =
-              tab.id === "ALL"
-                ? !currentStage
-                : currentStage === tab.id;
+            const isActive = tab.id === "ALL" ? !currentStage : currentStage === tab.id;
 
             return (
               <button
@@ -143,153 +167,243 @@ export function InquiryManagementWorkspace({
                     onSelectStageFilter(tab.id as InquiryStage);
                   }
                 }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl whitespace-nowrap transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
                   isActive
                     ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "bg-[#F7F9F8] text-[#4A5D52] hover:bg-[#EEF2F0] hover:text-[#111C16] border border-[#D5DFDA]"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200"
                 }`}
               >
                 <span>{tab.label}</span>
-                {tab.count !== undefined && (
-                  <span
-                    className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                      isActive ? "bg-white/20 text-white" : "bg-[#D5DFDA]/60 text-[#4A5D52]"
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                    isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-600"
+                  }`}
+                >
+                  {tab.count}
+                </span>
               </button>
             );
           })}
+
+          {currentStage && (
+            <button
+              type="button"
+              onClick={() => {
+                setTabFilter("ALL");
+                onSelectStageFilter(null);
+              }}
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-rose-600 px-2 py-1 ml-auto cursor-pointer transition-colors"
+            >
+              <FilterX className="w-3.5 h-3.5" />
+              <span>Clear Filter</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Split-Pane Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        {/* Left Pane: Inquiry List (5 cols on lg) */}
-        <div className="lg:col-span-5 flex flex-col gap-2.5">
-          <div className="flex items-center justify-between text-xs text-[#4A5D52] px-1 font-medium">
-            <span>
-              Showing {filteredInquiries.length} of {inquiries.length} inquiries
-            </span>
-            {currentStage && (
-              <span className="text-[#3D6B22] font-semibold">
-                Filtered: {currentStage}
-              </span>
-            )}
-          </div>
+      {/* Empty State */}
+      {filteredInquiries.length === 0 ? (
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-10 text-center">
+          <Inbox className="w-10 h-10 text-slate-400 mx-auto mb-2 opacity-50" />
+          <h3 className="text-sm font-semibold text-slate-900">No inquiries match criteria</h3>
+          <p className="text-xs text-slate-500 mt-1">
+            Try adjusting your search terms or clearing the stage filter.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setSearchQuery("");
+              onSelectStageFilter(null);
+              setTabFilter("ALL");
+            }}
+            className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-[#3D6B22] bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer"
+          >
+            Reset Filters
+          </button>
+        </div>
+      ) : viewMode === "grid" ? (
+        /* GRID VIEW */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+          {filteredInquiries.map((inquiry, index) => {
+            const badge = STAGE_BADGES[inquiry.stage];
 
-          {filteredInquiries.length === 0 ? (
-            <div className="bg-[#FFFFFF] border border-[#D5DFDA] rounded-2xl p-8 text-center">
-              <Inbox className="w-10 h-10 text-[#74877C] mx-auto mb-2 opacity-50" />
-              <h3 className="text-sm font-semibold text-[#111C16]">No inquiries match criteria</h3>
-              <p className="text-xs text-[#4A5D52] mt-1">
-                Try adjusting your search terms or clearing the stage filter.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  onSelectStageFilter(null);
-                  setTabFilter("ALL");
-                }}
-                className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-[#3D6B22] bg-[#E3F1D9] rounded-lg hover:bg-[#C7E4B3] transition-colors"
+            return (
+              <div
+                key={inquiry.id}
+                onClick={() => handleRowClick(inquiry.id)}
+                className="bg-white border border-slate-200/80 hover:border-[#3D6B22]/50 hover:shadow-md rounded-2xl p-4 sm:p-4.5 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden"
               >
-                Clear all filters
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-[calc(100vh-280px)] overflow-y-auto pr-1 custom-scrollbar">
-              {filteredInquiries.map((inquiry, index) => {
-                const isSelected = selectedInquiry?.id === inquiry.id;
-                const badge = STAGE_BADGES[inquiry.stage];
-
-                return (
-                  <button
-                    key={inquiry.id}
-                    type="button"
-                    onClick={() => onSelectInquiry(inquiry)}
-                    className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-150 cursor-pointer relative group ${
-                      isSelected
-                        ? "bg-[#FFFFFF] border-[#3D6B22] shadow-sm ring-2 ring-[#3D6B22]/15"
-                        : "bg-[#FFFFFF] hover:bg-[#F7F9F8] border-[#D5DFDA] hover:border-[#93C573]"
-                    }`}
-                  >
-                    {/* Top Row: Family Label + Stage Badge */}
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-[11px] font-bold text-[#74877C]">
-                          Family Record {String(index + 1).padStart(2, "0")}
+                <div>
+                  {/* Top: Record Label + Stage Badge */}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-slate-400">
+                        Family Record {String(index + 1).padStart(2, "0")}
+                      </span>
+                      {inquiry.urgency === "Urgent" && (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
+                          <AlertTriangle className="w-2.5 h-2.5" />
+                          Urgent
                         </span>
-                        {inquiry.urgency === "Urgent" && (
-                          <span className="w-2 h-2 rounded-full bg-[#FF6E61]" title="Urgent inquiry" />
+                      )}
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badge.bg} ${badge.text} ${badge.border}`}
+                    >
+                      {inquiry.stage}
+                    </span>
+                  </div>
+
+                  {/* Family Title */}
+                  <h3 className="text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
+                    {inquiry.familyName}
+                  </h3>
+
+                  {/* Client Info */}
+                  <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>
+                      Client: <strong className="text-slate-800 font-semibold">{inquiry.familyInfo.clientInfo.name}</strong> ({inquiry.familyInfo.clientInfo.age}y)
+                    </span>
+                  </p>
+
+                  {/* Program / Hours Details */}
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between text-slate-500">
+                      <span className="text-[11px]">Program:</span>
+                      <span className="font-medium text-slate-800 truncate max-w-[170px]" title={inquiry.careRequirements.programInterest}>
+                        {inquiry.careRequirements.programInterest}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-500">
+                      <span className="text-[11px]">Requested:</span>
+                      <span className="font-semibold text-slate-900">
+                        {inquiry.careRequirements.hoursPerWeek} hrs / wk
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Footer: Source · Date · Action Link */}
+                <div className="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5 truncate">
+                    <span className="font-mono font-semibold text-slate-700">{inquiry.id}</span>
+                    <span>·</span>
+                    <span className="truncate">{inquiry.source}</span>
+                    <span>·</span>
+                    <span>{inquiry.dateReceived}</span>
+                  </div>
+
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D6B22] group-hover:translate-x-0.5 transition-transform shrink-0">
+                    <span>Details</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* LIST VIEW */
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[10px] tracking-wider">
+                <tr>
+                  <th className="py-3 px-4">Family & Client</th>
+                  <th className="py-3 px-3">Inquiry ID</th>
+                  <th className="py-3 px-3">Stage</th>
+                  <th className="py-3 px-3">Source</th>
+                  <th className="py-3 px-3">Program & Hours</th>
+                  <th className="py-3 px-3">Assigned Coordinator</th>
+                  <th className="py-3 px-3">Received</th>
+                  <th className="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredInquiries.map((inquiry) => {
+                  const badge = STAGE_BADGES[inquiry.stage];
+
+                  return (
+                    <tr
+                      key={inquiry.id}
+                      onClick={() => handleRowClick(inquiry.id)}
+                      className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                    >
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                          {inquiry.familyName}
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          Client: {inquiry.familyInfo.clientInfo.name} ({inquiry.familyInfo.clientInfo.age}y)
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-3 font-mono font-medium text-slate-800">
+                        {inquiry.id}
+                      </td>
+
+                      <td className="py-3 px-3">
+                        <span
+                          className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${badge.bg} ${badge.text} ${badge.border}`}
+                        >
+                          {inquiry.stage}
+                        </span>
+                      </td>
+
+                      <td className="py-3 px-3 text-slate-600">
+                        <span className="font-medium text-slate-800">{inquiry.source}</span>
+                        {inquiry.referralInfo.organization && (
+                          <span className="block text-[10px] text-slate-400 truncate max-w-[140px]">
+                            {inquiry.referralInfo.organization}
+                          </span>
                         )}
-                      </div>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badge.bg} ${badge.text} ${badge.border}`}
-                      >
-                        {inquiry.stage}
-                      </span>
-                    </div>
+                      </td>
 
-                    {/* Middle Row: Family Name & Client */}
-                    <h3 className="text-sm font-bold text-[#111C16] group-hover:text-[#3D6B22] transition-colors truncate">
-                      {inquiry.familyName}
-                    </h3>
-                    <p className="text-xs text-[#4A5D52] truncate mt-0.5">
-                      Client: <span className="text-[#111C16] font-medium">{inquiry.familyInfo.clientInfo.name}</span> ({inquiry.familyInfo.clientInfo.age}y)
-                    </p>
+                      <td className="py-3 px-3 text-slate-600">
+                        <span className="font-medium text-slate-800 block truncate max-w-[150px]">
+                          {inquiry.careRequirements.programInterest}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {inquiry.careRequirements.hoursPerWeek} hrs / wk
+                        </span>
+                      </td>
 
-                    {/* Bottom Row: ID · Source · Timestamp */}
-                    <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-[#D5DFDA]/60 text-[11px] text-[#74877C]">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className="font-mono font-medium text-[#111C16]">{inquiry.id}</span>
-                        <span>·</span>
-                        <span className="truncate">{inquiry.source}</span>
-                      </div>
-                      <span className="font-medium text-[#4A5D52] shrink-0">
+                      <td className="py-3 px-3 text-slate-800">
+                        <div className="flex items-center gap-2">
+                          {inquiry.referralInfo.assignedCoordinator.avatarUrl ? (
+                            <img
+                              src={inquiry.referralInfo.assignedCoordinator.avatarUrl}
+                              alt={inquiry.referralInfo.assignedCoordinator.name}
+                              className="w-5 h-5 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-5 h-5 rounded-full bg-emerald-100 text-[#1E5622] text-[10px] font-bold flex items-center justify-center">
+                              {inquiry.referralInfo.assignedCoordinator.name.charAt(0)}
+                            </div>
+                          )}
+                          <span className="font-medium">{inquiry.referralInfo.assignedCoordinator.name}</span>
+                        </div>
+                      </td>
+
+                      <td className="py-3 px-3 text-slate-500 text-[11px] whitespace-nowrap">
                         {inquiry.dateReceived}
-                      </span>
-                    </div>
+                      </td>
 
-                    {/* Active Indicator Chevron */}
-                    {isSelected && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:flex text-[#3D6B22]">
-                        <ChevronRight className="w-5 h-5 stroke-[2.5]" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                      <td className="py-3 px-4 text-right">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D6B22] group-hover:translate-x-1 transition-transform">
+                          <span>View</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        {/* Right Pane: Selected Inquiry Details (7 cols on lg) */}
-        <div className="lg:col-span-7">
-          {selectedInquiry ? (
-            <InquiryDetailView
-              inquiry={selectedInquiry}
-              onContactFamily={onContactFamily}
-              onAssignCoordinator={onAssignCoordinator}
-              onScheduleAssessment={onScheduleAssessment}
-              onUpdateStatus={onUpdateStatus}
-              onConvertToOnboarding={onConvertToOnboarding}
-              onAddTimelineNote={onAddTimelineNote}
-              onToggleDocumentStatus={onToggleDocumentStatus}
-            />
-          ) : (
-            <div className="bg-[#FFFFFF] border border-[#D5DFDA] rounded-2xl p-12 text-center">
-              <User className="w-12 h-12 text-[#74877C] mx-auto mb-3 opacity-40" />
-              <h3 className="text-base font-bold text-[#111C16]">Select an Inquiry Record</h3>
-              <p className="text-xs text-[#4A5D52] mt-1 max-w-sm mx-auto">
-                Choose a family inquiry from the list on the left to view complete family details, referral notes, care requirements, documents, and take action.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </section>
   );
 }

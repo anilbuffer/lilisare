@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Inbox, Sparkles, Clock, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { Card } from "@/components/ui/Card";
 
 interface IntakeKpiStripProps {
   totalInquiries?: number;
@@ -17,102 +18,112 @@ export function IntakeKpiStrip({
   newInquiries = 24,
   inAssessment = 21,
   converted = 16,
-  activeFilter,
+  activeFilter = "ALL",
   onSelectKpiFilter = () => {},
 }: IntakeKpiStripProps) {
   const kpiItems = [
     {
       key: "ALL" as const,
-      tag: "All",
-      value: totalInquiries,
       label: "Total Inquiries",
-      subtext: "Active inquiries",
+      value: totalInquiries,
+      subtext: "Active inquiries across pipeline",
       icon: Inbox,
-      badgeColor: "bg-[#F7F9F8] text-[#4A5D52] border-[#D5DFDA]",
-      iconColor: "text-[#3D6B22] bg-[#E3F1D9]",
-      highlightBorder: "border-[#3D6B22] ring-2 ring-[#3D6B22]/15",
+      tone: "forest" as const,
+      toneStyles: {
+        cardBorder: "border-slate-200/90 hover:border-[#3D6B22]/60",
+        activeBorder: "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-emerald-50/20",
+        iconBg: "bg-emerald-50 text-[#3D6B22] border border-emerald-200/60",
+        valText: "text-slate-900",
+      },
     },
     {
       key: "NEW" as const,
-      tag: "New",
-      value: newInquiries,
       label: "New Inquiries",
+      value: newInquiries,
       subtext: "Awaiting first contact",
       icon: Sparkles,
-      badgeColor: "bg-[#FEF3C7] text-[#9A5B00] border-[#FDE68A]",
-      iconColor: "text-[#9A5B00] bg-[#FEF3C7]",
-      highlightBorder: "border-[#9A5B00] ring-2 ring-[#9A5B00]/15",
+      tone: "coral" as const,
+      toneStyles: {
+        cardBorder: "border-rose-200/80 hover:border-rose-400",
+        activeBorder: "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/20",
+        iconBg: "bg-rose-50 text-rose-700 border border-rose-200",
+        valText: "text-slate-900",
+      },
     },
     {
       key: "ASSESSMENT" as const,
-      tag: "In progress",
-      value: inAssessment,
       label: "In Assessment",
-      subtext: "Assessment and coordination",
+      value: inAssessment,
+      subtext: "Assessment & CM coordination",
       icon: Clock,
-      badgeColor: "bg-[#E0F2F5] text-[#0F5E6E] border-[#BAE6FD]",
-      iconColor: "text-[#0F5E6E] bg-[#E0F2F5]",
-      highlightBorder: "border-[#0F5E6E] ring-2 ring-[#0F5E6E]/15",
+      tone: "amber" as const,
+      toneStyles: {
+        cardBorder: "border-amber-200/80 hover:border-amber-400",
+        activeBorder: "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/20",
+        iconBg: "bg-amber-50 text-amber-800 border border-amber-200",
+        valText: "text-slate-900",
+      },
     },
     {
       key: "CONVERTED" as const,
-      tag: "Converted",
-      value: converted,
       label: "Converted",
-      subtext: "Moved to onboarding",
+      value: converted,
+      subtext: "Moved to active onboarding",
       icon: CheckCircle2,
-      badgeColor: "bg-[#E3F1D9] text-[#1E5622] border-[#C7E4B3]",
-      iconColor: "text-[#1E5622] bg-[#E3F1D9]",
-      highlightBorder: "border-[#1E5622] ring-2 ring-[#1E5622]/15",
+      tone: "forest" as const,
+      toneStyles: {
+        cardBorder: "border-slate-200/90 hover:border-[#3D6B22]/60",
+        activeBorder: "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-emerald-50/20",
+        iconBg: "bg-emerald-50 text-[#1E5622] border border-emerald-200/60",
+        valText: "text-slate-900",
+      },
     },
   ];
 
   return (
-    <section aria-label="Intake KPI Overview" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+    <section aria-label="Intake KPI Overview" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
       {kpiItems.map((item) => {
         const Icon = item.icon;
         const isSelected = activeFilter === item.key;
+        const styles = item.toneStyles;
 
         return (
           <button
             key={item.key}
             type="button"
             onClick={() => onSelectKpiFilter(item.key)}
-            className={`text-left p-4 bg-[#FFFFFF] rounded-2xl border transition-all duration-150 shadow-xs hover:shadow-md cursor-pointer group relative ${
-              isSelected ? item.highlightBorder : "border-[#D5DFDA] hover:border-[#93C573]"
+            className={`group text-left p-4 sm:p-4.5 rounded-2xl bg-white border transition-all duration-200 shadow-xs hover:shadow-md hover:-translate-y-0.5 cursor-pointer relative overflow-hidden ${
+              isSelected ? styles.activeBorder : styles.cardBorder
             }`}
           >
-            {/* Top row: Pill & Icon */}
-            <div className="flex items-center justify-between mb-3">
-              <span
-                className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${item.badgeColor}`}
-              >
-                {item.tag}
+            {/* Top row: Label + Icon (identical to dashboardPage / AdminKpiRow) */}
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <span className="text-xs sm:text-sm font-semibold text-slate-600 group-hover:text-slate-900 tracking-tight truncate">
+                {item.label}
               </span>
-              <div
-                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${item.iconColor}`}
-              >
-                <Icon className="w-4 h-4 stroke-[2.2]" />
+              <div className={`p-1.5 sm:p-2 rounded-xl shrink-0 ${styles.iconBg}`}>
+                <Icon className="w-4 h-4" />
               </div>
             </div>
 
-            {/* Metric Value */}
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl font-extrabold text-[#111C16] tracking-tight">
+            {/* Middle row: Big Metric Number + Active Filter Indicator */}
+            <div className="flex items-baseline justify-between mt-1 gap-2">
+              <span className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${styles.valText}`}>
                 {item.value}
               </span>
-              <ArrowUpRight className="w-3.5 h-3.5 text-[#74877C] opacity-0 group-hover:opacity-100 transition-opacity" />
+              {isSelected ? (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#3D6B22] bg-[#3D6B22]/10 px-2 py-0.5 rounded-full shrink-0">
+                  Active
+                </span>
+              ) : (
+                <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+              )}
             </div>
 
-            {/* Title & Subtext */}
-            <div className="mt-1">
-              <h3 className="text-sm font-semibold text-[#111C16]">
-                {item.label}
-              </h3>
-              <p className="text-xs text-[#4A5D52] mt-0.5">
-                {item.subtext}
-              </p>
-            </div>
+            {/* Bottom row: Subtext description */}
+            <p className="text-[11px] text-slate-400 mt-1 truncate">
+              {item.subtext}
+            </p>
           </button>
         );
       })}

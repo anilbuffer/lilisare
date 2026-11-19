@@ -690,7 +690,7 @@ export function CaregiverManagementWorkspace({
                           onClick={() => onSelectCaregiver(cg)}
                           className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
                         >
-                          Quick View
+                          View Details
                         </button>
                         <Link
                           href={`/caregivers/${cg.id}`}
@@ -830,7 +830,7 @@ export function CaregiverManagementWorkspace({
                       onClick={() => onSelectCaregiver(cg)}
                       className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
                     >
-                      Quick View
+                      View Details
                     </button>
 
                     <Link

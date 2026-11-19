@@ -465,7 +465,7 @@ export function ClientManagementWorkspace({
                               onClick={() => onSelectClient(client)}
                               className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
                             >
-                              Quick View
+                              View Details
                             </button>
                             <Link
                               href={`/clients/${client.id}`}

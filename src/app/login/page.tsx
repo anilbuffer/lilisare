@@ -725,11 +725,6 @@ export default function LoginPage() {
                     <Heart className="w-3.5 h-3.5 text-[#FF6E61] group-hover:scale-110 transition-transform" />
                     <span>Who We Are & Mission</span>
                   </button>
-
-                  <div className="flex items-center space-x-2 bg-[#14280E]/80 text-[#93C573] px-3.5 py-1.5 rounded-full border border-[#93C573]/40 text-xs font-semibold">
-                    <span className="w-2 h-2 rounded-full bg-[#93C573] animate-pulse" />
-                    <span>Systems Operational (99.99%)</span>
-                  </div>
                 </div>
               </div>
 

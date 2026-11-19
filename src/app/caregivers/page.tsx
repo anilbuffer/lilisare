@@ -75,18 +75,11 @@ export default function CaregiversPage() {
   }, []);
 
   const handleSelectCaregiver = (cg: CaregiverRecord) => {
-    setSelectedCaregiver(cg);
-    setIsDrawerOpen(true);
+    router.push(`/caregivers/${cg.id}`);
   };
 
   const handleSelectCaregiverId = (id: string) => {
-    const found = caregivers.find((c) => c.id.toLowerCase() === id.toLowerCase());
-    if (found) {
-      setSelectedCaregiver(found);
-      setIsDrawerOpen(true);
-    } else {
-      router.push(`/caregivers/${id}`);
-    }
+    router.push(`/caregivers/${id}`);
   };
 
   const handleCloseDrawer = () => {

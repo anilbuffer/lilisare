@@ -23,6 +23,12 @@ import {
   MapPin,
   Calendar,
   AlertTriangle,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  User,
+  Building2,
+  Globe,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import {
@@ -149,6 +155,28 @@ export default function AddClientPage() {
     }
   };
 
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      if (!clientName.trim()) {
+        toast.error("Please enter the client full legal name.");
+        return;
+      }
+      if (!contactName.trim()) {
+        toast.error("Please enter the primary contact name.");
+        return;
+      }
+      if (!contactPhone.trim() && !contactEmail.trim()) {
+        toast.error("Please enter a phone number or email for the primary contact.");
+        return;
+      }
+    }
+    setCurrentStep((prev) => Math.min(prev + 1, 4));
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
   const handleCreateClient = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -204,7 +232,7 @@ export default function AddClientPage() {
       }
     }
 
-    // Notice: Client status starts as "Onboarding", not Active!
+    // Client status starts as "Onboarding"
     const newRecord: ClientRecord = {
       id: newId,
       name: clientName,
@@ -214,7 +242,7 @@ export default function AddClientPage() {
       age: 8,
       gender: gender,
       primaryLanguage: primaryLanguage,
-      status: "Onboarding", // As instructed: Client activation depends on readiness, do not mark every client Active
+      status: "Onboarding",
       careType: careType,
       household: householdInfo,
       primaryContact: {
@@ -278,40 +306,47 @@ export default function AddClientPage() {
         effectiveDate: new Date().toISOString().split("T")[0],
         reviewDate: "2027-11-19",
         needsReview: false,
-        frequency: schedulePreference,
-        careNeeds: selectedCareNeeds,
-        specialInstructions: specialInstructions,
-        mobilityNotes: "Independent ambulation; standby support for routine transitions.",
-        dietaryRestrictions: "Standard diet.",
-        allergies: ["None reported"],
+        frequency: schedulePreference || "Monday – Friday, daytime",
         adlSupportNeeds: selectedCareNeeds,
+        careNeeds: selectedCareNeeds,
+        specialInstructions: specialInstructions || "Client requires standby supervision with transitions and calm routine.",
+        mobilityNotes: "Standby assist with ambulatory transfers.",
+        dietaryRestrictions: "None reported.",
+        allergies: ["No known drug allergies (NKDA)"],
       },
       authorization: {
-        authNumber: authNumber,
+        authNumber: authNumber || `AUTH-2026-${nextNum}`,
         payer: payerName,
         status: "Pending Renewal",
+        totalUnitsApproved: (Number(authorizedHours) || 30) * 4 * 12,
+        unitsUsed: 0,
+        unitsRemaining: (Number(authorizedHours) || 30) * 4 * 12,
+        weeklyHourCap: Number(authorizedHours) || 30,
+        daysUntilExpiry: 365,
         startDate: new Date().toISOString().split("T")[0],
         expiryDate: "2027-11-19",
-        daysUntilExpiry: 365,
-        totalUnitsApproved: Number(authorizedHours) * 52,
-        unitsUsed: 0,
-        unitsRemaining: Number(authorizedHours) * 52,
-        weeklyHourCap: Number(authorizedHours) || 30,
         caseManagerName: caseManagerName,
         caseManagerAgency: payerName,
       },
       documents: [
         {
           id: `DOC-${Date.now()}-1`,
-          name: "Verifiable Parental Consent (COPPA/HIPAA)",
+          name: "Signed Patient Bill of Rights & Consent",
           category: "Consent",
-          status: consentSigned ? "Review needed" : "Missing",
+          status: consentSigned ? "Verified" : "Missing",
           uploadedDate: new Date().toISOString().split("T")[0],
-          signedBy: contactName,
           fileSize: "1.2 MB",
         },
         {
           id: `DOC-${Date.now()}-2`,
+          name: "State Medicaid Service Authorization Packet",
+          category: "Authorization",
+          status: "Review needed",
+          uploadedDate: new Date().toISOString().split("T")[0],
+          fileSize: "3.8 MB",
+        },
+        {
+          id: `DOC-${Date.now()}-3`,
           name: "Initial Care Plan & Services Request",
           category: "Assessment",
           status: "Verified",
@@ -375,39 +410,87 @@ export default function AddClientPage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300">
-      {/* Top Breadcrumb & Title */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <Link
-            href="/clients"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#3D6B22] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Clients Workspace
-          </Link>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Add New Client
-          </h1>
-          <p className="text-xs text-slate-500">
-            Guided 4-step onboarding wizard for registering clients and connecting family households.
-          </p>
+      {/* 01. Top Header Card: Aligned completely with /intake/pipeline/new/ */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Link
+                href="/clients"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#3D6B22] transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back to Clients Workspace
+              </Link>
+              <span className="text-slate-300">•</span>
+              <span className="text-xs font-semibold text-[#3D6B22] bg-[#3D6B22]/10 px-2.5 py-0.5 rounded-full">
+                Step {currentStep} of 4: {steps.find((s) => s.num === currentStep)?.title}
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Add New Client
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Guided 4-step onboarding wizard for registering clients and connecting family households.
+            </p>
+          </div>
+
+          <div className="w-12 h-12 rounded-2xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center shrink-0 self-start sm:self-center shadow-[0_4px_16px_rgba(61,107,34,0.12)]">
+            <Sparkles className="w-6 h-6 text-[#3D6B22]" />
+          </div>
         </div>
 
-        <span className="text-xs font-mono font-bold bg-[#E3F1D9] text-[#1E5622] px-3 py-1 rounded-full border border-[#1E5622]/20">
-          Client Onboarding Wizard
-        </span>
+        {/* Step Progress Bar with Circular Indicators */}
+        <div className="mt-6 pt-5 border-t border-slate-100">
+          <div className="grid grid-cols-4 gap-2">
+            {steps.map((s) => {
+              const isDone = s.num < currentStep;
+              const isCurrent = s.num === currentStep;
+
+              return (
+                <div
+                  key={s.num}
+                  className="flex flex-col items-center text-center cursor-pointer"
+                  onClick={() => {
+                    if (isDone) setCurrentStep(s.num);
+                  }}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                      isDone
+                        ? "bg-[#3D6B22] text-white shadow-sm"
+                        : isCurrent
+                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                        : "bg-slate-100 text-slate-400 border border-slate-200"
+                    }`}
+                  >
+                    {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
+                  </div>
+                  <span
+                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${
+                      isCurrent ? "text-[#3D6B22]" : "text-slate-500"
+                    }`}
+                  >
+                    {s.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Path Selector: Convert Inquiry vs Direct Registration */}
+      {/* 02. Pathway Selector: Convert Inquiry vs Direct Registration */}
       {currentStep < 5 && (
-        <Card className="p-4 border-[#D5DFDA] bg-white">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                Choose Registration Pathway
-              </span>
-              <p className="text-xs text-slate-600">
-                Prevent duplicate records by converting existing inquiries whenever possible.
+              <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                Registration Pathway
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Prevent duplicate client records by converting existing pipeline inquiries or create directly.
               </p>
             </div>
           </div>
@@ -421,16 +504,16 @@ export default function AddClientPage() {
                   handleSelectInquiry(CONVERTABLE_INQUIRIES[0]);
                 }
               }}
-              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 ${
+              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
                 creationPath === "convert"
-                  ? "border-[#3D6B22] bg-[#F2F8EE] ring-2 ring-[#3D6B22]/20"
+                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
                   : "border-slate-200 bg-slate-50/50 hover:bg-white"
               }`}
             >
               <div
-                className={`p-2 rounded-lg ${
+                className={`p-2 rounded-xl shrink-0 ${
                   creationPath === "convert"
-                    ? "bg-[#3D6B22] text-white"
+                    ? "bg-[#3D6B22] text-white shadow-xs"
                     : "bg-slate-200 text-slate-600"
                 }`}
               >
@@ -451,21 +534,22 @@ export default function AddClientPage() {
               onClick={() => {
                 setCreationPath("direct");
                 setClientName("");
+                setPreferredName("");
                 setContactName("");
                 setContactPhone("");
                 setContactEmail("");
                 setAddress("");
               }}
-              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 ${
+              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
                 creationPath === "direct"
-                  ? "border-[#3D6B22] bg-[#F2F8EE] ring-2 ring-[#3D6B22]/20"
+                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
                   : "border-slate-200 bg-slate-50/50 hover:bg-white"
               }`}
             >
               <div
-                className={`p-2 rounded-lg ${
+                className={`p-2 rounded-xl shrink-0 ${
                   creationPath === "direct"
-                    ? "bg-[#3D6B22] text-white"
+                    ? "bg-[#3D6B22] text-white shadow-xs"
                     : "bg-slate-200 text-slate-600"
                 }`}
               >
@@ -482,10 +566,10 @@ export default function AddClientPage() {
             </button>
           </div>
 
-          {/* If Convert mode: show eligible inquiries selector */}
+          {/* Qualified Inquiry Selector */}
           {creationPath === "convert" && (
-            <div className="mt-3.5 pt-3 border-t border-slate-200/80 space-y-2">
-              <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+            <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-2">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
                 Select Qualified Inquiry to Convert:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -494,869 +578,990 @@ export default function AddClientPage() {
                     key={inq.id}
                     type="button"
                     onClick={() => handleSelectInquiry(inq)}
-                    className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
+                    className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
                       selectedInquiryId === inq.id
-                        ? "border-[#3D6B22] bg-white shadow-xs font-bold"
-                        : "border-slate-200 bg-white/70 hover:bg-white text-slate-700"
+                        ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs font-semibold ring-1 ring-[#3D6B22]"
+                        : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-slate-500">{inq.id}</span>
-                      <span className="text-[10px] font-bold text-[#1E5622] bg-[#E3F1D9] px-1.5 py-0.2 rounded">
+                      <span className="font-mono text-[10px] text-slate-500 font-bold">{inq.id}</span>
+                      <span className="text-[10px] font-bold text-[#1E5622] bg-[#E3F1D9] px-2 py-0.5 rounded-full">
                         Ready
                       </span>
                     </div>
-                    <div className="text-slate-900 font-bold mt-1 truncate">{inq.clientName}</div>
-                    <div className="text-slate-500 text-[10px] truncate">{inq.familyName}</div>
+                    <div className="text-slate-900 font-bold mt-1.5 truncate">{inq.clientName}</div>
+                    <div className="text-slate-500 text-[11px] truncate">{inq.familyName}</div>
                   </button>
                 ))}
               </div>
             </div>
           )}
-        </Card>
+        </div>
       )}
 
-      {/* Step Progress Bar Indicator */}
+      {/* 03. Main Guided Form Card */}
       {currentStep < 5 && (
-        <div className="bg-white rounded-2xl border border-[#D5DFDA] p-4 shadow-xs">
-          <div className="grid grid-cols-4 gap-2">
-            {steps.map((step) => {
-              const isPast = currentStep > step.num;
-              const isCurrent = currentStep === step.num;
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-6">
+          {/* STEP 1: Personal & Contact Information */}
+          {currentStep === 1 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  1. Personal & Contact Information
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Enter client legal demographics and primary responsible family contact info.
+                </p>
+              </div>
 
-              return (
-                <div
-                  key={step.num}
-                  className={`text-left cursor-pointer transition-all ${
-                    isCurrent
-                      ? "text-[#3D6B22]"
-                      : isPast
-                      ? "text-slate-700"
-                      : "text-slate-400 opacity-60"
-                  }`}
-                  onClick={() => {
-                    if (isPast) setCurrentStep(step.num);
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                        isCurrent
-                          ? "bg-[#3D6B22] text-white"
-                          : isPast
-                          ? "bg-[#E3F1D9] text-[#1E5622]"
-                          : "bg-slate-100 text-slate-500"
+              {/* Client Demographics */}
+              <div className="space-y-4 pt-1">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Client Details (Person Receiving Care)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5">
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Full Legal Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Leo Miller"
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Preferred / Nickname
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="e.g. Leo"
+                        value={preferredName}
+                        onChange={(e) => setPreferredName(e.target.value)}
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Date of Birth <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Calendar className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="date"
+                        required
+                        value={dob}
+                        onChange={(e) => setDob(e.target.value)}
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Gender
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <select
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none cursor-pointer"
+                      >
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Non-binary">Non-binary</option>
+                        <option value="Other">Other / Prefer not to say</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Primary Language
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Globe className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={primaryLanguage}
+                        onChange={(e) => setPrimaryLanguage(e.target.value)}
+                        placeholder="English"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Primary Contact Details */}
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Primary Contact & Guardian Details
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Responsible Contact Full Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        placeholder="e.g. Sarah Miller"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Relationship to Client <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={contactRelationship}
+                        onChange={(e) => setContactRelationship(e.target.value)}
+                        placeholder="e.g. Mother & Legal Guardian"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Primary Phone <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Phone className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="tel"
+                        required
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        placeholder="(541) 555-0199"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Mail className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="email"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="contact@example.com"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Preferred Contact Method
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(["Phone", "Email", "SMS"] as ("Phone" | "Email" | "SMS")[]).map((method) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setPreferredMethod(method)}
+                          className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
+                            preferredMethod === method
+                              ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                              : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                          }`}
+                        >
+                          {method}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Household Physical Address */}
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Household Physical Address
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4.5">
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Street Address</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <MapPin className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        placeholder="742 Evergreen Terrace"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">City</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Building2 className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="Springfield"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">State / Zip</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                        className="w-16 px-2.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-center font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                      />
+                      <input
+                        type="text"
+                        value={zip}
+                        onChange={(e) => setZip(e.target.value)}
+                        placeholder="97477"
+                        className="flex-1 px-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Emergency Contact */}
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Emergency Contact (24/7 Response)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Emergency Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <ShieldCheck className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={emergencyName}
+                        onChange={(e) => setEmergencyName(e.target.value)}
+                        placeholder="e.g. David Miller"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Relationship</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={emergencyRel}
+                        onChange={(e) => setEmergencyRel(e.target.value)}
+                        placeholder="e.g. Father"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Phone</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Phone className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="tel"
+                        value={emergencyPhone}
+                        onChange={(e) => setEmergencyPhone(e.target.value)}
+                        placeholder="(555) 000-0000"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: Household & Family Relationships */}
+          {currentStep === 2 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  2. Household & Relationships
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Connect this client to an existing household or establish a new family care unit.
+                </p>
+              </div>
+
+              {/* Household Assignment */}
+              <div className="space-y-3 pt-1">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Household Unit Assignment
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div
+                    onClick={() => setHouseholdChoice("existing")}
+                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
+                      householdChoice === "existing"
+                        ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                        : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${
+                        householdChoice === "existing"
+                          ? "border-[#3D6B22] bg-[#3D6B22] text-white"
+                          : "border-slate-300 bg-white"
                       }`}
                     >
-                      {isPast ? <Check className="w-3.5 h-3.5" /> : step.num}
-                    </span>
-                    <span className="text-xs font-bold truncate hidden sm:inline">
-                      {step.title}
+                      {householdChoice === "existing" && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">Link to Existing Household</div>
+                      <div className="text-[11px] text-slate-500">Connect to existing family address and records</div>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setHouseholdChoice("new")}
+                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
+                      householdChoice === "new"
+                        ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                        : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${
+                        householdChoice === "new"
+                          ? "border-[#3D6B22] bg-[#3D6B22] text-white"
+                          : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {householdChoice === "new" && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">Create New Household Unit</div>
+                      <div className="text-[11px] text-slate-500">Establish a new independent residential record</div>
+                    </div>
+                  </div>
+                </div>
+
+                {householdChoice === "existing" ? (
+                  <div className="space-y-1.5 pt-2">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Select Existing Family Household
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Home className="h-4 w-4" />
+                      </div>
+                      <select
+                        value={selectedHouseholdId}
+                        onChange={(e) => setSelectedHouseholdId(e.target.value)}
+                        className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none cursor-pointer"
+                      >
+                        {MOCK_HOUSEHOLDS.map((hh) => (
+                          <option key={hh.id} value={hh.id}>
+                            {hh.name} ({hh.code}) – {hh.address}, {hh.city}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 pt-2">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      New Household Name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Home className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={newHouseholdName}
+                        onChange={(e) => setNewHouseholdName(e.target.value)}
+                        placeholder="e.g. Sullivan Household"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Family Caregiver Information */}
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Family or Friend Caregiver Details
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Caregiver Candidate Name
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <HeartHandshake className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={caregiverName}
+                        onChange={(e) => setCaregiverName(e.target.value)}
+                        placeholder="e.g. Sarah Miller"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Caregiver Relationship
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={familyCaregiverRel}
+                        onChange={(e) => setFamilyCaregiverRel(e.target.value)}
+                        placeholder="e.g. Mother (Family Caregiver)"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Caregiver Phone
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Phone className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="tel"
+                        value={caregiverPhone}
+                        onChange={(e) => setCaregiverPhone(e.target.value)}
+                        placeholder="(555) 000-0000"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decision-Making Permissions Checklist */}
+              <div className="space-y-3 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Guardian Permissions & Decision-Making Authority
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  {[
+                    "Medical Decisions",
+                    "Sign Consents",
+                    "View Care Notes",
+                    "Manage Scheduling",
+                    "Authorized Pickup",
+                    "Financial Decisions",
+                  ].map((perm) => {
+                    const isChecked = permissions.includes(perm);
+                    return (
+                      <div
+                        key={perm}
+                        onClick={() => togglePermission(perm)}
+                        className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                          isChecked
+                            ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#1E5622] font-semibold ring-1 ring-[#3D6B22]/30 shadow-xs"
+                            : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        <span
+                          className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
+                            isChecked
+                              ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
+                              : "border-slate-300 bg-white"
+                          }`}
+                        >
+                          {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </span>
+                        <span className="text-xs">{perm}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: Care Requirements & Services */}
+          {currentStep === 3 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  3. Care Requirements & Services
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Configure requested care arrangements, program waiver, and support schedules.
+                </p>
+              </div>
+
+              {/* Requested Care Arrangement */}
+              <div className="space-y-3 pt-1">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Requested Care Arrangement Type
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {(
+                    [
+                      "Family Care",
+                      "Live-In Care",
+                      "Family Friend Care",
+                      "Attendant Care",
+                    ] as CareArrangementType[]
+                  ).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setCareType(type)}
+                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                        careType === type
+                          ? "border-[#3D6B22] bg-[#3D6B22]/10 text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.12)]"
+                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
+                      }`}
+                    >
+                      <span className="text-xs block font-semibold">{type}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Program & Hours */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5 pt-3 border-t border-slate-100">
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Approved Service Line / Program
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                    <select
+                      value={program}
+                      onChange={(e) => setProgram(e.target.value)}
+                      className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none cursor-pointer"
+                    >
+                      <option value="Pediatric In-Home Care (Medicaid EPSDT Waiver)">
+                        Pediatric In-Home Care (Medicaid EPSDT Waiver)
+                      </option>
+                      <option value="Medicaid K-Plan / DD In-Home Attendant Support">
+                        Medicaid K-Plan / DD In-Home Attendant Support
+                      </option>
+                      <option value="Senior Community Care / OHP Waiver">
+                        Senior Community Care / OHP Waiver
+                      </option>
+                      <option value="Medicaid Elderly Waiver (Live-In Personal Care)">
+                        Medicaid Elderly Waiver (Live-In Personal Care)
+                      </option>
+                      <option value="Private Duty / Family Respite">
+                        Private Duty / Family Respite
+                      </option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Authorized Weekly Hours
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="number"
+                      min={1}
+                      max={80}
+                      value={authorizedHours}
+                      onChange={(e) => setAuthorizedHours(Number(e.target.value))}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Care Needs Tags */}
+              <div className="space-y-3 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Daily Living & ADL Care Needs
+                </span>
+
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "ADL Bathing Supervision",
+                    "Nutritional Meal Preparation",
+                    "Sensory Regulation Support",
+                    "Standby Transfer Assist",
+                    "Community Inclusion & Walking",
+                    "Medication Prompting",
+                    "Communication Board Support",
+                    "Toileting Assistance",
+                  ].map((need) => {
+                    const isSelected = selectedCareNeeds.includes(need);
+                    return (
+                      <button
+                        key={need}
+                        type="button"
+                        onClick={() => toggleCareNeed(need)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                        }`}
+                      >
+                        {isSelected ? "✓ " : "+ "}
+                        {need}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Schedule Preference & Instructions */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4.5 pt-3 border-t border-slate-100">
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Preferred Schedule Window
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={schedulePreference}
+                      onChange={(e) => setSchedulePreference(e.target.value)}
+                      placeholder="e.g. Monday – Friday, 8:00 AM – 4:00 PM"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Special Care Instructions
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={specialInstructions}
+                      onChange={(e) => setSpecialInstructions(e.target.value)}
+                      placeholder="e.g. Calm routine, standby supervision"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: Documents & Final Review */}
+          {currentStep === 4 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  4. Documents & Final Review
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Verify required consents, authorization info, and review complete record before submission.
+                </p>
+              </div>
+
+              {/* Compliance & Consent Checklist */}
+              <div className="space-y-3 pt-1">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Required Consent Documents & Compliance Checks
+                </span>
+
+                <div className="space-y-2 text-xs">
+                  <div
+                    onClick={() => setConsentSigned(!consentSigned)}
+                    className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white flex items-center justify-between cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
+                          consentSigned
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22]"
+                            : "border-slate-300 bg-white"
+                        }`}
+                      >
+                        {consentSigned && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-900 block text-xs">
+                          Verifiable Parental Consent (COPPA / HIPAA Compliant)
+                        </span>
+                        <span className="text-slate-500 text-[11px]">
+                          Required for care recipients under legal guardianship.
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                        consentSigned
+                          ? "bg-emerald-50 text-[#1E5622] border border-emerald-200"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
+                      }`}
+                    >
+                      {consentSigned ? "Signed & Attached" : "Pending Sign-off"}
                     </span>
                   </div>
+
                   <div
-                    className={`h-1.5 rounded-full ${
-                      isCurrent
-                        ? "bg-[#3D6B22]"
-                        : isPast
-                        ? "bg-[#93C573]"
-                        : "bg-slate-200"
-                    }`}
-                  />
+                    onClick={() => setPhysicianOrderUploaded(!physicianOrderUploaded)}
+                    className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white flex items-center justify-between cursor-pointer transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
+                          physicianOrderUploaded
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22]"
+                            : "border-slate-300 bg-white"
+                        }`}
+                      >
+                        {physicianOrderUploaded && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-900 block text-xs">
+                          Supporting Care Plan / Physician Assessment
+                        </span>
+                        <span className="text-slate-500 text-[11px]">
+                          Required before service authorization can be verified.
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200">
+                      {physicianOrderUploaded ? "Attached" : "Missing"}
+                    </span>
+                  </div>
                 </div>
-              );
-            })}
+              </div>
+
+              {/* Payer Authorization Info */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 pt-3 border-t border-slate-100">
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Authorization #
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={authNumber}
+                      onChange={(e) => setAuthNumber(e.target.value)}
+                      placeholder="AUTH-2026-9812"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">Payer Organization</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Building2 className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={payerName}
+                      onChange={(e) => setPayerName(e.target.value)}
+                      placeholder="State Medicaid Waiver"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">Payer Case Manager</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <User className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={caseManagerName}
+                      onChange={(e) => setCaseManagerName(e.target.value)}
+                      placeholder="Dana Jenkins, MSW"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Final Summary Card */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-3 text-xs">
+                <h5 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
+                  Registration Summary Review
+                </h5>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-600">
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Client</span>
+                    <strong className="text-slate-900 text-xs font-bold">{clientName || "—"}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Care Type</span>
+                    <strong className="text-slate-900 text-xs font-bold">{careType}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Caregiver</span>
+                    <strong className="text-slate-900 text-xs font-bold">{caregiverName || "Unassigned"}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Authorized Hours</span>
+                    <strong className="text-slate-900 text-xs font-bold">{authorizedHours} hrs/wk</strong>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-[11px] flex items-center gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>
+                    <strong>Readiness Policy: </strong>
+                    Client will be created with status <strong>Onboarding</strong>. Service activation
+                    will occur once all documents and caregiver screenings are verified.
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Actions: Aligned completely with /intake/pipeline/new/ */}
+          <div className="pt-5 border-t border-slate-100 flex items-center justify-between">
+            {currentStep > 1 ? (
+              <button
+                type="button"
+                onClick={handlePrevStep}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Previous Step</span>
+              </button>
+            ) : (
+              <Link
+                href="/clients"
+                className="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Cancel
+              </Link>
+            )}
+
+            {currentStep < 4 ? (
+              <button
+                type="button"
+                onClick={handleNextStep}
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl transition-all shadow-[0_6px_24px_rgba(61,107,34,0.25)] cursor-pointer"
+              >
+                <span>Continue</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCreateClient}
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-[0_6px_24px_rgba(61,107,34,0.25)] transition-all cursor-pointer"
+              >
+                <Check className="w-4 h-4 stroke-[2.5]" />
+                <span>Complete Client Registration</span>
+              </button>
+            )}
           </div>
         </div>
       )}
 
-      {/* Wizard Step 1: Personal & Contact Information */}
-      {currentStep === 1 && (
-        <Card className="p-6 border-slate-200 space-y-5 animate-in fade-in duration-200">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">
-              1. Personal & Contact Information
-            </h2>
-            <p className="text-xs text-slate-500">
-              Enter the client demographics and primary family contact info.
-            </p>
-          </div>
-
-          {/* Client Details */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Client Details (Person Receiving Care)
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Full Legal Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  placeholder="e.g. Leo Miller"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Preferred / Nickname
-                </label>
-                <input
-                  type="text"
-                  value={preferredName}
-                  onChange={(e) => setPreferredName(e.target.value)}
-                  placeholder="e.g. Leo"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Date of Birth *
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] focus:bg-white"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Gender</label>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Non-binary">Non-binary</option>
-                  <option value="Other">Other / Prefer not to say</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Primary Language
-                </label>
-                <input
-                  type="text"
-                  value={primaryLanguage}
-                  onChange={(e) => setPrimaryLanguage(e.target.value)}
-                  placeholder="English"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Primary Contact Details */}
-          <div className="space-y-4 pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Primary Contact & Guardian Details
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Responsible Contact Name *
-                </label>
-                <input
-                  type="text"
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  placeholder="e.g. Sarah Miller"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Relationship to Client *
-                </label>
-                <input
-                  type="text"
-                  value={contactRelationship}
-                  onChange={(e) => setContactRelationship(e.target.value)}
-                  placeholder="e.g. Mother & Legal Guardian"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Preferred Contact Method
-                </label>
-                <select
-                  value={preferredMethod}
-                  onChange={(e) => setPreferredMethod(e.target.value as any)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                >
-                  <option value="Phone">Phone Call</option>
-                  <option value="Email">Email</option>
-                  <option value="SMS">SMS / Text Message</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Primary Phone *
-                </label>
-                <input
-                  type="tel"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="(555) 000-0000"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                  placeholder="contact@example.com"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Address */}
-          <div className="space-y-4 pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Household Physical Address
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="sm:col-span-2">
-                <label className="text-xs font-bold text-slate-700 block mb-1">Street Address</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="742 Evergreen Terrace"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">City</label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Springfield"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">State / Zip</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    className="w-16 px-2 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 text-center"
-                  />
-                  <input
-                    type="text"
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value)}
-                    placeholder="97477"
-                    className="flex-1 px-2 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Emergency Contact */}
-          <div className="space-y-4 pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Emergency Contact (24/7 Response)
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Emergency Name</label>
-                <input
-                  type="text"
-                  value={emergencyName}
-                  onChange={(e) => setEmergencyName(e.target.value)}
-                  placeholder="e.g. David Miller"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Relationship</label>
-                <input
-                  type="text"
-                  value={emergencyRel}
-                  onChange={(e) => setEmergencyRel(e.target.value)}
-                  placeholder="e.g. Father"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Phone</label>
-                <input
-                  type="tel"
-                  value={emergencyPhone}
-                  onChange={(e) => setEmergencyPhone(e.target.value)}
-                  placeholder="(555) 000-0000"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => {
-                if (!clientName.trim()) {
-                  toast.error("Please enter the client full legal name.");
-                  return;
-                }
-                setCurrentStep(2);
-              }}
-              className="flex items-center gap-1.5 px-5 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
-            >
-              <span>Continue to Household & Relationships</span>
-              <ArrowRight className="w-4 h-4 text-[#93C573]" />
-            </button>
-          </div>
-        </Card>
-      )}
-
-      {/* Wizard Step 2: Household & Relationships */}
-      {currentStep === 2 && (
-        <Card className="p-6 border-slate-200 space-y-5 animate-in fade-in duration-200">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">
-              2. Household & Relationships
-            </h2>
-            <p className="text-xs text-slate-500">
-              Connect this client to an existing household or establish a new family unit.
-            </p>
-          </div>
-
-          {/* Household Assignment */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Household Unit Assignment
-            </h3>
-
-            <div className="flex gap-4 text-xs font-bold">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="householdChoice"
-                  checked={householdChoice === "existing"}
-                  onChange={() => setHouseholdChoice("existing")}
-                  className="text-[#3D6B22] focus:ring-[#3D6B22]"
-                />
-                <span>Link to Existing Household</span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="householdChoice"
-                  checked={householdChoice === "new"}
-                  onChange={() => setHouseholdChoice("new")}
-                  className="text-[#3D6B22] focus:ring-[#3D6B22]"
-                />
-                <span>Create New Household Unit</span>
-              </label>
-            </div>
-
-            {householdChoice === "existing" ? (
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Select Existing Family Household
-                </label>
-                <select
-                  value={selectedHouseholdId}
-                  onChange={(e) => setSelectedHouseholdId(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                >
-                  {MOCK_HOUSEHOLDS.map((hh) => (
-                    <option key={hh.id} value={hh.id}>
-                      {hh.name} ({hh.code}) – {hh.address}, {hh.city}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  New Household Name
-                </label>
-                <input
-                  type="text"
-                  value={newHouseholdName}
-                  onChange={(e) => setNewHouseholdName(e.target.value)}
-                  placeholder="e.g. Sullivan Household"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Family Caregiver Information */}
-          <div className="space-y-4 pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Family or Friend Caregiver Details
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Caregiver Candidate Name
-                </label>
-                <input
-                  type="text"
-                  value={caregiverName}
-                  onChange={(e) => setCaregiverName(e.target.value)}
-                  placeholder="e.g. Sarah Miller"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Caregiver Relationship
-                </label>
-                <input
-                  type="text"
-                  value={familyCaregiverRel}
-                  onChange={(e) => setFamilyCaregiverRel(e.target.value)}
-                  placeholder="e.g. Mother (Family Caregiver)"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Caregiver Phone
-                </label>
-                <input
-                  type="tel"
-                  value={caregiverPhone}
-                  onChange={(e) => setCaregiverPhone(e.target.value)}
-                  placeholder="(555) 000-0000"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Decision-Making Permissions Checklist */}
-          <div className="space-y-3 pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Guardian Permissions & Decision-Making Authority
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              {[
-                "Medical Decisions",
-                "Sign Consents",
-                "View Care Notes",
-                "Manage Scheduling",
-                "Authorized Pickup",
-                "Financial Decisions",
-              ].map((perm) => (
-                <label
-                  key={perm}
-                  onClick={() => togglePermission(perm)}
-                  className={`p-2.5 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-all ${
-                    permissions.includes(perm)
-                      ? "border-[#3D6B22] bg-[#F2F8EE] text-[#1E5622] font-bold"
-                      : "border-slate-200 bg-slate-50 text-slate-700"
-                  }`}
-                >
-                  <span
-                    className={`w-4 h-4 rounded flex items-center justify-center text-[10px] border ${
-                      permissions.includes(perm)
-                        ? "bg-[#3D6B22] text-white border-[#3D6B22]"
-                        : "border-slate-300 bg-white"
-                    }`}
-                  >
-                    {permissions.includes(perm) && <Check className="w-3 h-3" />}
-                  </span>
-                  <span>{perm}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(1)}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrentStep(3)}
-              className="flex items-center gap-1.5 px-5 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
-            >
-              <span>Continue to Care & Services</span>
-              <ArrowRight className="w-4 h-4 text-[#93C573]" />
-            </button>
-          </div>
-        </Card>
-      )}
-
-      {/* Wizard Step 3: Care Requirements & Services */}
-      {currentStep === 3 && (
-        <Card className="p-6 border-slate-200 space-y-5 animate-in fade-in duration-200">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">
-              3. Care Requirements & Services
-            </h2>
-            <p className="text-xs text-slate-500">
-              Configure requested care arrangements, program waiver, and support schedules.
-            </p>
-          </div>
-
-          {/* Requested Care Arrangement */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Requested Care Arrangement Type
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {(
-                [
-                  "Family Care",
-                  "Live-In Care",
-                  "Family Friend Care",
-                  "Attendant Care",
-                ] as CareArrangementType[]
-              ).map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setCareType(type)}
-                  className={`p-3 rounded-xl border text-center transition-all ${
-                    careType === type
-                      ? "border-[#3D6B22] bg-[#F2F8EE] text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20"
-                      : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
-                  }`}
-                >
-                  <span className="text-xs block">{type}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Program & Hours */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Approved Service Line / Program
-              </label>
-              <select
-                value={program}
-                onChange={(e) => setProgram(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-              >
-                <option value="Pediatric In-Home Care (Medicaid EPSDT Waiver)">
-                  Pediatric In-Home Care (Medicaid EPSDT Waiver)
-                </option>
-                <option value="Medicaid K-Plan / DD In-Home Attendant Support">
-                  Medicaid K-Plan / DD In-Home Attendant Support
-                </option>
-                <option value="Senior Community Care / OHP Waiver">
-                  Senior Community Care / OHP Waiver
-                </option>
-                <option value="Medicaid Elderly Waiver (Live-In Personal Care)">
-                  Medicaid Elderly Waiver (Live-In Personal Care)
-                </option>
-                <option value="Private Duty / Family Respite">
-                  Private Duty / Family Respite
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Authorized Weekly Hours
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min={1}
-                  max={80}
-                  value={authorizedHours}
-                  onChange={(e) => setAuthorizedHours(Number(e.target.value))}
-                  className="w-24 px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-bold"
-                />
-                <span className="text-xs text-slate-500 font-medium">hours / week requested</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Care Needs Tags */}
-          <div className="space-y-3 pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Daily Living & ADL Care Needs
-            </h3>
-
-            <div className="flex flex-wrap gap-2">
-              {[
-                "ADL Bathing Supervision",
-                "Nutritional Meal Preparation",
-                "Sensory Regulation Support",
-                "Standby Transfer Assist",
-                "Community Inclusion & Walking",
-                "Medication Prompting",
-                "Communication Board Support",
-                "Toileting Assistance",
-              ].map((need) => (
-                <button
-                  key={need}
-                  type="button"
-                  onClick={() => toggleCareNeed(need)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    selectedCareNeeds.includes(need)
-                      ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/30 font-bold"
-                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                  }`}
-                >
-                  {selectedCareNeeds.includes(need) ? "✓ " : "+ "}
-                  {need}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Schedule Preference & Instructions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Preferred Schedule Window
-              </label>
-              <input
-                type="text"
-                value={schedulePreference}
-                onChange={(e) => setSchedulePreference(e.target.value)}
-                placeholder="e.g. Monday – Friday, 8:00 AM – 4:00 PM"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Special Care Instructions
-              </label>
-              <input
-                type="text"
-                value={specialInstructions}
-                onChange={(e) => setSpecialInstructions(e.target.value)}
-                placeholder="e.g. Calm routine, asthma inhaler in kitchen"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(2)}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={() => setCurrentStep(4)}
-              className="flex items-center gap-1.5 px-5 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
-            >
-              <span>Continue to Documents & Review</span>
-              <ArrowRight className="w-4 h-4 text-[#93C573]" />
-            </button>
-          </div>
-        </Card>
-      )}
-
-      {/* Wizard Step 4: Documents & Review */}
-      {currentStep === 4 && (
-        <Card className="p-6 border-slate-200 space-y-5 animate-in fade-in duration-200">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">4. Documents & Final Review</h2>
-            <p className="text-xs text-slate-500">
-              Verify required consents, authorization info, and review complete record before submission.
-            </p>
-          </div>
-
-          {/* Compliance & Consent Checklist */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Required Consent Documents & Compliance Checks
-            </h3>
-
-            <div className="space-y-2 text-xs">
-              <label className="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={consentSigned}
-                    onChange={(e) => setConsentSigned(e.target.checked)}
-                    className="text-[#3D6B22] rounded"
-                  />
-                  <div>
-                    <span className="font-bold text-slate-900">
-                      Verifiable Parental Consent (COPPA/HIPAA Compliant)
-                    </span>
-                    <span className="text-slate-500 block text-[11px]">
-                      Required for care recipients under legal guardianship.
-                    </span>
-                  </div>
-                </div>
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                    consentSigned
-                      ? "bg-[#E3F1D9] text-[#1E5622]"
-                      : "bg-[#FEE2E2] text-[#B91C1C]"
-                  }`}
-                >
-                  {consentSigned ? "Signed & Attached" : "Pending Sign-off"}
-                </span>
-              </label>
-
-              <label className="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between cursor-pointer">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={physicianOrderUploaded}
-                    onChange={(e) => setPhysicianOrderUploaded(e.target.checked)}
-                    className="text-[#3D6B22] rounded"
-                  />
-                  <div>
-                    <span className="font-bold text-slate-900">
-                      Supporting Care Plan / Physician Assessment
-                    </span>
-                    <span className="text-slate-500 block text-[11px]">
-                      Required before service authorization can be verified.
-                    </span>
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#E3F1D9] text-[#1E5622]">
-                  {physicianOrderUploaded ? "Attached" : "Missing"}
-                </span>
-              </label>
-            </div>
-          </div>
-
-          {/* Payer Authorization Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-slate-100">
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Authorization # (If Available)
-              </label>
-              <input
-                type="text"
-                value={authNumber}
-                onChange={(e) => setAuthNumber(e.target.value)}
-                placeholder="AUTH-2026-9812"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Payer Organization</label>
-              <input
-                type="text"
-                value={payerName}
-                onChange={(e) => setPayerName(e.target.value)}
-                placeholder="State Medicaid Waiver"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Payer Case Manager</label>
-              <input
-                type="text"
-                value={caseManagerName}
-                onChange={(e) => setCaseManagerName(e.target.value)}
-                placeholder="Dana Jenkins, MSW"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-              />
-            </div>
-          </div>
-
-          {/* Final Summary Card */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-3 text-xs">
-            <h3 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Registration Summary Review
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-600">
-              <div>
-                <span className="text-slate-400 block">Client</span>
-                <strong className="text-slate-900">{clientName || "—"}</strong>
-              </div>
-              <div>
-                <span className="text-slate-400 block">Care Type</span>
-                <strong className="text-slate-900">{careType}</strong>
-              </div>
-              <div>
-                <span className="text-slate-400 block">Caregiver</span>
-                <strong className="text-slate-900">{caregiverName || "Unassigned"}</strong>
-              </div>
-              <div>
-                <span className="text-slate-400 block">Authorized Hours</span>
-                <strong className="text-slate-900">{authorizedHours} hrs/wk</strong>
-              </div>
-            </div>
-
-            <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-amber-900 text-[11px] flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
-              <span>
-                <strong>Readiness Policy: </strong>
-                Client will be created with status <strong>Onboarding</strong>. Service activation
-                will occur once all documents and caregiver screenings are verified.
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(3)}
-              className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={handleCreateClient}
-              className="flex items-center gap-1.5 px-6 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all shadow-md"
-            >
-              <CheckCircle2 className="w-4 h-4 text-[#93C573]" />
-              <span>Submit & Create Client Record</span>
-            </button>
-          </div>
-        </Card>
-      )}
-
-      {/* Step 5: Success & Confirmation Screen */}
+      {/* 04. Step 5: Success & Confirmation Screen */}
       {currentStep === 5 && createdClient && (
-        <Card className="p-8 border-slate-200 text-center space-y-6 animate-in zoom-in-95 duration-200">
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] text-center space-y-6 animate-in zoom-in-95 duration-200">
           <div className="w-16 h-16 rounded-2xl bg-[#E3F1D9] text-[#1E5622] flex items-center justify-center mx-auto shadow-sm">
             <CheckCircle2 className="w-8 h-8" />
           </div>
@@ -1407,20 +1612,20 @@ export default function AddClientPage() {
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               href={`/clients/${createdClient.id}`}
-              className="px-5 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_16px_rgba(61,107,34,0.25)] flex items-center gap-1.5 cursor-pointer"
             >
               <span>View Full Client Profile</span>
-              <ArrowRight className="w-4 h-4 text-[#93C573]" />
+              <ArrowRight className="w-4 h-4 text-white" />
             </Link>
 
             <Link
               href="/clients"
-              className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all"
+              className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
             >
               Return to Clients Workspace
             </Link>
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );

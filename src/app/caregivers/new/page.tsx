@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Users,
+  Home,
   HeartHandshake,
   FileText,
   ShieldCheck,
@@ -26,6 +27,12 @@ import {
   GraduationCap,
   Award,
   Lock,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  User,
+  Building2,
+  Globe,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import {
@@ -117,6 +124,14 @@ export default function AddCaregiverPage() {
     toast.info(`Pre-filled from application ${app.id} (${app.applicantName})`);
   };
 
+  const toggleCourse = (course: string) => {
+    if (trainingCoursesSelected.includes(course)) {
+      setTrainingCoursesSelected(trainingCoursesSelected.filter((c) => c !== course));
+    } else {
+      setTrainingCoursesSelected([...trainingCoursesSelected, course]);
+    }
+  };
+
   const handleNext = () => {
     if (currentStep === 1) {
       if (!fullName.trim() || !phone.trim() || !email.trim()) {
@@ -135,7 +150,6 @@ export default function AddCaregiverPage() {
     e.preventDefault();
 
     const existingCaregivers = getCaregiversFromStorage();
-    // Generate unique sequential Caregiver ID e.g. CG-140
     const nextNum = 140 + Math.floor(Math.random() * 850);
     const newId = `CG-${nextNum}`;
 
@@ -303,42 +317,101 @@ export default function AddCaregiverPage() {
   };
 
   const stepLabels = [
-    { num: 1, title: "Personal Information" },
-    { num: 2, title: "Caregiver Type & Relationship" },
-    { num: 3, title: "Documents & Credentials" },
+    { num: 1, title: "Personal Details" },
+    { num: 2, title: "Workforce & Family" },
+    { num: 3, title: "Credentials" },
     { num: 4, title: "Screening & Training" },
     { num: 5, title: "Review & Submit" },
   ];
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 pb-16">
-      {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link
-            href="/caregivers"
-            className="flex items-center gap-1.5 font-semibold text-slate-700 hover:text-[#3D6B22] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Caregiver Directory</span>
-          </Link>
-          <span className="text-slate-300">/</span>
-          <span className="text-slate-600 font-medium">Add New Caregiver</span>
-        </div>
-      </div>
-
-      {currentStep !== 6 && (
-        <>
-          {/* Header Title */}
+    <div className="w-full max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300">
+      {/* 01. Top Header Card: Aligned completely with /intake/pipeline/new/ */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Add New Caregiver</h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Guided 5-step registration for Family Caregivers, Live-In Attendants, and Family Friends
+            <div className="flex items-center gap-2 mb-2">
+              <Link
+                href="/caregivers"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#3D6B22] transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back to Caregivers Directory
+              </Link>
+              <span className="text-slate-300">•</span>
+              <span className="text-xs font-semibold text-[#3D6B22] bg-[#3D6B22]/10 px-2.5 py-0.5 rounded-full">
+                Step {currentStep} of 5: {stepLabels.find((s) => s.num === currentStep)?.title}
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Add New Caregiver
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Guided 5-step registration for Family Caregivers, Live-In Attendants, and Family Friends.
             </p>
           </div>
 
-          {/* Path Selection: Direct vs Convert Pipeline */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-2 rounded-2xl border border-slate-200/90 shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center shrink-0 self-start sm:self-center shadow-[0_4px_16px_rgba(61,107,34,0.12)]">
+            <Sparkles className="w-6 h-6 text-[#3D6B22]" />
+          </div>
+        </div>
+
+        {/* Step Progress Bar with Circular Indicators */}
+        <div className="mt-6 pt-5 border-t border-slate-100">
+          <div className="grid grid-cols-5 gap-2">
+            {stepLabels.map((s) => {
+              const isDone = s.num < currentStep;
+              const isCurrent = s.num === currentStep;
+
+              return (
+                <div
+                  key={s.num}
+                  className="flex flex-col items-center text-center cursor-pointer"
+                  onClick={() => {
+                    if (isDone) setCurrentStep(s.num);
+                  }}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                      isDone
+                        ? "bg-[#3D6B22] text-white shadow-sm"
+                        : isCurrent
+                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                        : "bg-slate-100 text-slate-400 border border-slate-200"
+                    }`}
+                  >
+                    {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
+                  </div>
+                  <span
+                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${
+                      isCurrent ? "text-[#3D6B22]" : "text-slate-500"
+                    }`}
+                  >
+                    {s.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* 02. Pathway Selector: Convert Applicant vs Direct Registration */}
+      {currentStep < 6 && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                Registration Pathway
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Prevent duplicate caregiver profiles by importing existing recruitment applications or create directly.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => {
@@ -348,26 +421,26 @@ export default function AddCaregiverPage() {
               }}
               className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
                 creationPath === "convert"
-                  ? "border-[#3D6B22] bg-[#F2F8EE]/70 ring-1 ring-[#3D6B22]/30 shadow-sm"
-                  : "border-slate-100 hover:bg-slate-50"
+                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                  : "border-slate-200 bg-slate-50/50 hover:bg-white"
               }`}
             >
               <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                className={`p-2 rounded-xl shrink-0 ${
                   creationPath === "convert"
-                    ? "bg-[#3D6B22] text-white"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[#3D6B22] text-white shadow-xs"
+                    : "bg-slate-200 text-slate-600"
                 }`}
               >
                 <FolderInput className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block">
+                <div className="text-xs font-bold text-slate-900">
                   Convert Applicant from Onboarding Pipeline
-                </span>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">
-                  Recommended: Select an existing application to prevent duplicate profiles
-                </span>
+                </div>
+                <div className="text-[11px] text-slate-500 mt-0.5">
+                  Import application screening data and prevent duplicate profiles.
+                </div>
               </div>
             </button>
 
@@ -383,733 +456,675 @@ export default function AddCaregiverPage() {
               }}
               className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
                 creationPath === "direct"
-                  ? "border-[#3D6B22] bg-[#F2F8EE]/70 ring-1 ring-[#3D6B22]/30 shadow-sm"
-                  : "border-slate-100 hover:bg-slate-50"
+                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                  : "border-slate-200 bg-slate-50/50 hover:bg-white"
               }`}
             >
               <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                className={`p-2 rounded-xl shrink-0 ${
                   creationPath === "direct"
-                    ? "bg-[#3D6B22] text-white"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[#3D6B22] text-white shadow-xs"
+                    : "bg-slate-200 text-slate-600"
                 }`}
               >
                 <UserPlus className="w-4 h-4" />
               </div>
               <div>
-                <span className="text-xs font-bold text-slate-900 block">
+                <div className="text-xs font-bold text-slate-900">
                   Register New Caregiver Directly
-                </span>
-                <span className="text-[11px] text-slate-500 mt-0.5 block">
-                  Start fresh registration form for a new workforce applicant
-                </span>
+                </div>
+                <div className="text-[11px] text-slate-500 mt-0.5">
+                  Start fresh registration form for an administrative direct hire.
+                </div>
               </div>
             </button>
           </div>
 
-          {/* Stepper Strip */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4">
-            <div className="grid grid-cols-5 gap-2">
-              {stepLabels.map((st) => {
-                const isPast = currentStep > st.num;
-                const isCurr = currentStep === st.num;
-                return (
-                  <button
-                    key={st.num}
-                    type="button"
-                    disabled={currentStep < st.num}
-                    onClick={() => setCurrentStep(st.num)}
-                    className={`text-left group transition-all ${
-                      currentStep < st.num ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span
-                        className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
-                          isPast
-                            ? "bg-[#3D6B22] text-white"
-                            : isCurr
-                            ? "bg-[#3D6B22]/10 text-[#3D6B22] ring-2 ring-[#3D6B22]"
-                            : "bg-slate-100 text-slate-400"
-                        }`}
-                      >
-                        {isPast ? "✓" : st.num}
-                      </span>
-                      <span
-                        className={`text-[11px] font-bold truncate ${
-                          isCurr ? "text-[#3D6B22]" : "text-slate-600"
-                        }`}
-                      >
-                        Step {st.num}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 truncate hidden sm:block">
-                      {st.title}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* STEP 1: Personal Information */}
-      {currentStep === 1 && (
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-6 space-y-6 animate-fadeIn">
+          {/* Qualified Applications List */}
           {creationPath === "convert" && (
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                Select Applicant from Onboarding Pipeline
+            <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-2">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                Select Qualified Application to Convert:
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {CONVERTABLE_APPLICATIONS.map((app) => (
                   <button
                     key={app.id}
                     type="button"
                     onClick={() => handleSelectApplication(app)}
-                    className={`p-3 rounded-lg border text-left transition-all text-xs cursor-pointer ${
+                    className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
                       selectedAppId === app.id
-                        ? "bg-[#E3F1D9]/40 border-[#3D6B22] ring-1 ring-[#3D6B22]"
-                        : "bg-white border-slate-200 hover:bg-slate-100"
+                        ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs font-semibold ring-1 ring-[#3D6B22]"
+                        : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-slate-900">{app.applicantName}</span>
-                      <span className="text-[10px] font-mono text-[#3D6B22] font-semibold">{app.id}</span>
+                      <span className="font-mono text-[10px] text-slate-500 font-bold">{app.id}</span>
+                      <span className="text-[10px] font-bold text-[#1E5622] bg-[#E3F1D9] px-2 py-0.5 rounded-full">
+                        {app.caregiverType}
+                      </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{app.caregiverType}</p>
-                    <p className="text-[10px] text-slate-400 mt-1">Stage: {app.currentPipelineStage}</p>
+                    <div className="text-slate-900 font-bold mt-1.5 truncate">{app.applicantName}</div>
+                    <div className="text-slate-500 text-[11px] truncate">
+                      {app.relationshipToClient} · {app.city}, {app.state}
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
           )}
-
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">1. Personal Information</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Legal name, direct contact details, residential address, and emergency contact
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Full Legal Name *</label>
-              <input
-                type="text"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Brianna Jenkins"
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Preferred Name</label>
-              <input
-                type="text"
-                value={preferredName}
-                onChange={(e) => setPreferredName(e.target.value)}
-                placeholder="e.g. Bri"
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Date of Birth</label>
-              <input
-                type="date"
-                value={dob}
-                onChange={(e) => setDob(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Gender</label>
-              <select
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-                <option value="Non-binary">Non-binary</option>
-                <option value="Prefer not to say">Prefer not to say</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Phone Number *</label>
-              <input
-                type="text"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="(541) 555-0812"
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Email Address *</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="caregiver@example.com"
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
-            <div className="sm:col-span-2">
-              <label className="block text-slate-600 font-medium mb-1">Street Address</label>
-              <input
-                type="text"
-                value={street}
-                onChange={(e) => setStreet(e.target.value)}
-                placeholder="742 Evergreen Terrace"
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">City</label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">ZIP</label>
-              <input
-                type="text"
-                value={zip}
-                onChange={(e) => setZip(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-slate-100">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">
-              Emergency Contact
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div>
-                <label className="block text-slate-600 font-medium mb-1">Contact Name</label>
-                <input
-                  type="text"
-                  value={emergencyName}
-                  onChange={(e) => setEmergencyName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-600 font-medium mb-1">Relationship</label>
-                <input
-                  type="text"
-                  value={emergencyRel}
-                  onChange={(e) => setEmergencyRel(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-                />
-              </div>
-              <div>
-                <label className="block text-slate-600 font-medium mb-1">Emergency Phone</label>
-                <input
-                  type="text"
-                  value={emergencyPhone}
-                  onChange={(e) => setEmergencyPhone(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-3">
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-5 py-2 rounded-xl bg-[#3D6B22] hover:bg-[#2d5019] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-            >
-              <span>Next: Type & Relationship</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
       )}
 
-      {/* STEP 2: Caregiver Type & Relationship */}
-      {currentStep === 2 && (
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-6 space-y-6 animate-fadeIn">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">2. Caregiver Type & Relationship</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Select relationship category, link to client and household, and set care boundaries
-            </p>
-          </div>
-
-          {/* 3 Categories Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              {
-                id: "Family Caregiver",
-                title: "Family Caregiver",
-                desc: "Parent, adult child, or relative providing state-approved family care.",
-              },
-              {
-                id: "Live-In Caregiver",
-                title: "Live-In Caregiver",
-                desc: "Resides on premises with defined sleep & rest boundaries.",
-              },
-              {
-                id: "Family Friend",
-                title: "Family Friend",
-                desc: "Trusted community friend or neighbor providing respite or transport.",
-              },
-            ].map((cat) => (
-              <div
-                key={cat.id}
-                onClick={() => setCaregiverType(cat.id as CaregiverType)}
-                className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                  caregiverType === cat.id
-                    ? "border-[#3D6B22] bg-[#F2F8EE] ring-1 ring-[#3D6B22]"
-                    : "border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <h4 className="font-bold text-slate-900 text-xs">{cat.title}</h4>
-                  {caregiverType === cat.id && <Check className="w-4 h-4 text-[#3D6B22]" />}
-                </div>
-                <p className="text-[11px] text-slate-500 leading-snug">{cat.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Relationship to Client *</label>
-              <input
-                type="text"
-                required
-                value={relationshipToClient}
-                onChange={(e) => setRelationshipToClient(e.target.value)}
-                placeholder="e.g. Sister, Mother, Dedicated Live-In Aide"
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Link to Client / Household</label>
-              <select
-                value={selectedClientId}
-                onChange={(e) => setSelectedClientId(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              >
-                {INITIAL_CLIENTS.map((cl) => (
-                  <option key={cl.id} value={cl.id}>
-                    {cl.id} — {cl.name} ({cl.household.name})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Branch</label>
-              <select
-                value={branch}
-                onChange={(e) => setBranch(e.target.value)}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="Mountain Lane">Mountain Lane</option>
-                <option value="North Metro">North Metro</option>
-                <option value="Valley View">Valley View</option>
-                <option value="Westside">Westside</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Classification</label>
-              <select
-                value={classification}
-                onChange={(e) => setClassification(e.target.value as any)}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="W-2">W-2 Employed</option>
-                <option value="1099">1099 Contractor</option>
-                <option value="Family Paid Exempt">Family Paid Exempt</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-slate-600 font-medium mb-1">Target Hours / Week</label>
-              <input
-                type="number"
-                value={capacityHours}
-                onChange={(e) => setCapacityHours(Number(e.target.value))}
-                className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-              />
-            </div>
-          </div>
-
-          <div className="text-xs">
-            <label className="block text-slate-600 font-medium mb-1">Caregiving Boundaries</label>
-            <textarea
-              rows={3}
-              value={caregivingBoundaries}
-              onChange={(e) => setCaregivingBoundaries(e.target.value)}
-              className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
-            />
-          </div>
-
-          <div className="flex justify-between pt-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-5 py-2 rounded-xl bg-[#3D6B22] hover:bg-[#2d5019] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-            >
-              <span>Next: Documents & Credentials</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3: Documents & Credentials */}
-      {currentStep === 3 && (
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-6 space-y-6 animate-fadeIn">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">3. Documents & Credentials</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Verify identity documents, CPR / First Aid, TB risk test, and expiration dates
-            </p>
-          </div>
-
-          <div className="space-y-3 text-xs">
-            {/* Identity Doc */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+      {/* 03. Main Guided Form Card */}
+      {currentStep < 6 && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-6">
+          {/* STEP 1: Personal Details */}
+          {currentStep === 1 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
               <div>
-                <h4 className="font-bold text-slate-900">Government Identity Verification (State ID / Passport)</h4>
-                <p className="text-slate-500 text-[11px] mt-0.5">Form I-9 compliant document</p>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  1. Personal & Contact Details
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Caregiver legal demographics, contact channels, and primary physical address.
+                </p>
               </div>
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-[#1E5622]">
-                <input
-                  type="checkbox"
-                  checked={idVerified}
-                  onChange={(e) => setIdVerified(e.target.checked)}
-                  className="rounded text-[#3D6B22] focus:ring-[#3D6B22] w-4 h-4"
-                />
-                <span>Verified</span>
-              </label>
-            </div>
 
-            {/* CPR / First Aid */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h4 className="font-bold text-slate-900">CPR & First Aid BLS Certification</h4>
-                <p className="text-slate-500 text-[11px] mt-0.5">AHA or Red Cross pediatric/adult certificate</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="date"
-                  value={cprExpiry}
-                  onChange={(e) => setCprExpiry(e.target.value)}
-                  className="p-1.5 border border-slate-200 rounded text-xs"
-                />
-                <label className="flex items-center gap-2 cursor-pointer font-semibold text-[#1E5622]">
-                  <input
-                    type="checkbox"
-                    checked={cprVerified}
-                    onChange={(e) => setCprVerified(e.target.checked)}
-                    className="rounded text-[#3D6B22] focus:ring-[#3D6B22] w-4 h-4"
-                  />
-                  <span>Verified</span>
-                </label>
-              </div>
-            </div>
-
-            {/* TB Test */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h4 className="font-bold text-slate-900">TB Screening / Risk Assessment</h4>
-                <p className="text-slate-500 text-[11px] mt-0.5">Annual negative symptom screen on file</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="date"
-                  value={tbExpiry}
-                  onChange={(e) => setTbExpiry(e.target.value)}
-                  className="p-1.5 border border-slate-200 rounded text-xs"
-                />
-                <label className="flex items-center gap-2 cursor-pointer font-semibold text-[#1E5622]">
-                  <input
-                    type="checkbox"
-                    checked={tbTested}
-                    onChange={(e) => setTbTested(e.target.checked)}
-                    className="rounded text-[#3D6B22] focus:ring-[#3D6B22] w-4 h-4"
-                  />
-                  <span>Verified</span>
-                </label>
-              </div>
-            </div>
-
-            {/* I-9 & Tax Withholding */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between">
-              <div>
-                <h4 className="font-bold text-slate-900">Form I-9 & W-4 / W-9 Tax Forms</h4>
-                <p className="text-slate-500 text-[11px] mt-0.5">Payroll compliance setup</p>
-              </div>
-              <label className="flex items-center gap-2 cursor-pointer font-semibold text-[#1E5622]">
-                <input
-                  type="checkbox"
-                  checked={i9Signed}
-                  onChange={(e) => setI9Signed(e.target.checked)}
-                  className="rounded text-[#3D6B22] focus:ring-[#3D6B22] w-4 h-4"
-                />
-                <span>Signed</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex justify-between pt-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-5 py-2 rounded-xl bg-[#3D6B22] hover:bg-[#2d5019] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-            >
-              <span>Next: Screening & Training</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 4: Screening & Training */}
-      {currentStep === 4 && (
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-6 space-y-6 animate-fadeIn">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">4. Screening & Training</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Initiate background screening, check exclusion registries, and assign mandatory training courses
-            </p>
-          </div>
-
-          <div className="space-y-4 text-xs">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-              <h4 className="font-bold text-slate-900 text-xs">State & Federal Background Screening</h4>
-              <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={initiateBcu}
-                  onChange={(e) => setInitiateBcu(e.target.checked)}
-                  className="rounded text-[#3D6B22] focus:ring-[#3D6B22] w-4 h-4"
-                />
-                <span>Initiate Oregon BCU Live-Scan Fingerprint Screening</span>
-              </label>
-              <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={oigSamCleared}
-                  onChange={(e) => setOigSamCleared(e.target.checked)}
-                  className="rounded text-[#3D6B22] focus:ring-[#3D6B22] w-4 h-4"
-                />
-                <span>OIG / SAM Federal Exclusion Check Cleared</span>
-              </label>
-              <label className="flex items-center gap-2.5 cursor-pointer font-semibold text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={abuseRegistryInitiated}
-                  onChange={(e) => setAbuseRegistryInitiated(e.target.checked)}
-                  className="rounded text-[#3D6B22] focus:ring-[#3D6B22] w-4 h-4"
-                />
-                <span>State Child Abuse Registry (CAN) & Sex Offender Registry Search</span>
-              </label>
-            </div>
-
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-slate-900 text-xs">Mandatory Training Modules (8 Hours)</h4>
-                <span className="text-slate-400 text-[11px]">Required prior to active care</span>
-              </div>
-              <div className="space-y-1.5">
-                {[
-                  "Mandatory Child Abuse Reporting & Safeguarding",
-                  "HIPAA & Patient Privacy Fundamentals",
-                  "Person-Centered Pediatric In-Home Care",
-                  "EVV Mobile Clock-In & Location Protocol",
-                ].map((course) => (
-                  <div key={course} className="flex items-center gap-2 text-slate-700">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#3D6B22]" />
-                    <span>{course}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 pt-1">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Full Legal Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <User className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Brianna Jenkins"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
                   </div>
-                ))}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Preferred Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <User className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="e.g. Brianna"
+                      value={preferredName}
+                      onChange={(e) => setPreferredName(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Date of Birth <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Calendar className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="date"
+                      required
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Gender
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Users className="h-4 w-4" />
+                    </div>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none cursor-pointer"
+                    >
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Non-binary">Non-binary</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Primary Language
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Globe className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={languages}
+                      onChange={(e) => setLanguages(e.target.value)}
+                      placeholder="English"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Phone className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="(541) 555-0812"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Mail className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="brianna.jenkins@example.com"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">Street Address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <MapPin className="h-4 w-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={street}
+                      onChange={(e) => setStreet(e.target.value)}
+                      placeholder="742 Evergreen Terrace"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">City / State / Zip</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Springfield"
+                      className="flex-1 px-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                    />
+                    <input
+                      type="text"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="w-14 px-2 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-center font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                    />
+                    <input
+                      type="text"
+                      value={zip}
+                      onChange={(e) => setZip(e.target.value)}
+                      placeholder="97477"
+                      className="w-20 px-2.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="flex justify-between pt-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-5 py-2 rounded-xl bg-[#3D6B22] hover:bg-[#2d5019] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-            >
-              <span>Next: Review & Submit</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+          {/* STEP 2: Workforce & Family Relationships */}
+          {currentStep === 2 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  2. Workforce & Family Relationships
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Classify caregiver employment model and link them to family care recipient households.
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-1">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Caregiver Workforce Classification
+                </span>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {(
+                    [
+                      "Family Caregiver",
+                      "Live-In Caregiver",
+                      "Family Friend Caregiver",
+                      "Agency Direct Care",
+                    ] as CaregiverType[]
+                  ).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setCaregiverType(type)}
+                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                        caregiverType === type
+                          ? "border-[#3D6B22] bg-[#3D6B22]/10 text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.12)]"
+                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
+                      }`}
+                    >
+                      <span className="text-xs block font-semibold">{type}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 pt-2">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Link to Client / Care Recipient
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <User className="h-4 w-4" />
+                      </div>
+                      <select
+                        value={selectedClientId}
+                        onChange={(e) => setSelectedClientId(e.target.value)}
+                        className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none cursor-pointer"
+                      >
+                        {INITIAL_CLIENTS.map((cl) => (
+                          <option key={cl.id} value={cl.id}>
+                            {cl.name} ({cl.id}) – {cl.household.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
+                        <ChevronDown className="w-4 h-4" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Relationship to Client
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={relationshipToClient}
+                        onChange={(e) => setRelationshipToClient(e.target.value)}
+                        placeholder="e.g. Sister & Secondary Guardian"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Weekly Capacity (Hours)
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Clock className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="number"
+                        min={1}
+                        max={60}
+                        value={capacityHours}
+                        onChange={(e) => setCapacityHours(Number(e.target.value))}
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: Credentials & Certifications */}
+          {currentStep === 3 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  3. Documents & Credentials
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Verify government identification, BLS CPR certificate, and health clearances.
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-1">
+                <div
+                  onClick={() => setIdVerified(!idVerified)}
+                  className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white flex items-center justify-between cursor-pointer transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
+                        idVerified ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {idVerified && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-900 block text-xs">
+                        Government Photo ID Verified (DMV / Passport)
+                      </span>
+                      <span className="text-slate-500 text-[11px]">Identity matched to applicant SSN and record.</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                      idVerified ? "bg-emerald-50 text-[#1E5622] border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"
+                    }`}
+                  >
+                    {idVerified ? "Verified" : "Pending"}
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => setCprVerified(!cprVerified)}
+                  className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white flex items-center justify-between cursor-pointer transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
+                        cprVerified ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {cprVerified && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-900 block text-xs">
+                        BLS CPR & First Aid Certification
+                      </span>
+                      <span className="text-slate-500 text-[11px]">Valid American Heart Association or Red Cross certificate.</span>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                      cprVerified ? "bg-emerald-50 text-[#1E5622] border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"
+                    }`}
+                  >
+                    {cprVerified ? `Valid until ${cprExpiry}` : "Pending Upload"}
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => setTbTested(!tbTested)}
+                  className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-white flex items-center justify-between cursor-pointer transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
+                        tbTested ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
+                      }`}
+                    >
+                      {tbTested && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-900 block text-xs">
+                        TB (Tuberculosis) Negative Health Clearance
+                      </span>
+                      <span className="text-slate-500 text-[11px]">Chest X-ray or skin screening within 12 months.</span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200">
+                    {tbTested ? `Clear until ${tbExpiry}` : "Missing"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: Screening & Training */}
+          {currentStep === 4 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  4. Screening & Training
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Background checks (BCU), OIG/SAM sanctions, and mandatory onboarding training courses.
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-1">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Mandatory Compliance Training Modules
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  {[
+                    "Mandatory Child Abuse Reporting",
+                    "HIPAA & Patient Privacy",
+                    "EVV Mobile Protocol",
+                    "Bloodborne Pathogens Safety",
+                    "Crisis De-escalation & Safety",
+                    "Client Rights & Ethics",
+                  ].map((course) => {
+                    const isChecked = trainingCoursesSelected.includes(course);
+                    return (
+                      <div
+                        key={course}
+                        onClick={() => toggleCourse(course)}
+                        className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                          isChecked
+                            ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#1E5622] font-semibold ring-1 ring-[#3D6B22]/30 shadow-xs"
+                            : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        <span
+                          className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
+                            isChecked
+                              ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
+                              : "border-slate-300 bg-white"
+                          }`}
+                        >
+                          {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                        </span>
+                        <span className="text-xs">{course}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5: Review & Submit */}
+          {currentStep === 5 && (
+            <div className="space-y-5 animate-in fade-in duration-200">
+              <div>
+                <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                  5. Review & Final Confirmation
+                  <div className="h-px bg-slate-100 flex-1"></div>
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Verify registration details and confirm initial onboarding status assignment.
+                </p>
+              </div>
+
+              {/* Summary Card */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/90 space-y-3 text-xs">
+                <h5 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
+                  Caregiver Registration Summary
+                </h5>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-600">
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Caregiver Name</span>
+                    <strong className="text-slate-900 text-xs font-bold">{fullName || "—"}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Caregiver Type</span>
+                    <strong className="text-slate-900 text-xs font-bold">{caregiverType}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Classification</span>
+                    <strong className="text-slate-900 text-xs font-bold">{classification}</strong>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Capacity</span>
+                    <strong className="text-slate-900 text-xs font-bold">{capacityHours} hrs/wk</strong>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-[11px] flex items-center gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                  <span>
+                    <strong>Workforce Activation Rule: </strong>
+                    Caregiver will be registered with status <strong>Onboarding</strong>. EVV shift dispatch
+                    will unlock once background checks and mandatory courses are fully cleared.
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Footer Actions: Aligned completely with /intake/pipeline/new/ */}
+          <div className="pt-5 border-t border-slate-100 flex items-center justify-between">
+            {currentStep > 1 ? (
+              <button
+                type="button"
+                onClick={handleBack}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Previous Step</span>
+              </button>
+            ) : (
+              <Link
+                href="/caregivers"
+                className="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Cancel
+              </Link>
+            )}
+
+            {currentStep < 5 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl transition-all shadow-[0_6px_24px_rgba(61,107,34,0.25)] cursor-pointer"
+              >
+                <span>Continue</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-[0_6px_24px_rgba(61,107,34,0.25)] transition-all cursor-pointer"
+              >
+                <Check className="w-4 h-4 stroke-[2.5]" />
+                <span>Complete Caregiver Registration</span>
+              </button>
+            )}
           </div>
         </div>
       )}
 
-      {/* STEP 5: Review & Submit */}
-      {currentStep === 5 && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-6 space-y-6 animate-fadeIn">
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-bold text-slate-900">5. Review & Submit Registration</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Review information, assign onboarding status, and complete intake registration
-            </p>
-          </div>
-
-          {/* Summary Box */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-              <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-                Caregiver Profile Summary
-              </h4>
-              <p><span className="text-slate-400">Name:</span> <strong className="text-slate-800">{fullName}</strong></p>
-              <p><span className="text-slate-400">Type:</span> <strong className="text-slate-800">{caregiverType}</strong></p>
-              <p><span className="text-slate-400">Relationship:</span> <strong className="text-slate-800">{relationshipToClient}</strong></p>
-              <p><span className="text-slate-400">Phone:</span> <strong className="text-slate-800">{phone}</strong></p>
-              <p><span className="text-slate-400">Email:</span> <strong className="text-slate-800">{email}</strong></p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-              <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-                Onboarding & Assignments
-              </h4>
-              <p><span className="text-slate-400">Assigned Client:</span> <strong className="text-slate-800">{selectedClientId}</strong></p>
-              <p><span className="text-slate-400">Branch:</span> <strong className="text-slate-800">{branch}</strong></p>
-              <p><span className="text-slate-400">Classification:</span> <strong className="text-slate-800">{classification}</strong></p>
-              <p><span className="text-slate-400">Assigned Coordinator:</span> <strong className="text-slate-800">{onboardingCoordinator}</strong></p>
-              <p><span className="text-slate-400">Initial Status:</span> <strong className="text-amber-800 bg-amber-100 px-2 py-0.5 rounded">({initialStatus})</strong></p>
-            </div>
-          </div>
-
-          {/* Regulatory Warning Callout */}
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-            <div className="text-xs">
-              <h4 className="font-bold text-amber-900">
-                Important: Registration does not equal approval
-              </h4>
-              <p className="text-amber-800 mt-0.5 leading-relaxed">
-                A caregiver should only become eligible for work after the applicable agency and regulatory requirements are satisfied (cleared state background check, verified CPR credentials, completed training modules, and authorized payer service setup).
-              </p>
-            </div>
-          </div>
-
-          <div className="flex justify-between pt-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold"
-            >
-              Back
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-xl bg-[#3D6B22] hover:bg-[#2d5019] text-white text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Submit Caregiver Registration</span>
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* STEP 6: Caregiver Registration Complete (Outcomes Screen) */}
+      {/* 04. Step 6: Success Confirmation Screen */}
       {currentStep === 6 && createdCaregiver && (
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-8 space-y-6 text-center animate-fadeIn">
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] text-center space-y-6 animate-in zoom-in-95 duration-200">
           <div className="w-16 h-16 rounded-2xl bg-[#E3F1D9] text-[#1E5622] flex items-center justify-center mx-auto shadow-sm">
             <CheckCircle2 className="w-8 h-8" />
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">
-              Caregiver Registration Complete
+            <span className="text-xs font-bold text-[#1E5622] uppercase tracking-wider bg-[#E3F1D9] px-3 py-1 rounded-full border border-[#1E5622]/20">
+              Caregiver Profile Created
+            </span>
+            <h2 className="text-2xl font-extrabold text-slate-900 mt-2">
+              {createdCaregiver.name} Successfully Registered
             </h2>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-              The caregiver has been successfully registered in the LiliSare workforce database.
+              Generated unique Caregiver ID{" "}
+              <strong className="font-mono text-slate-900">{createdCaregiver.id}</strong> under{" "}
+              <strong className="text-slate-900">{createdCaregiver.type}</strong> classification.
             </p>
           </div>
 
-          <div className="inline-block px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 font-mono text-base font-bold text-[#3D6B22]">
-            Caregiver ID: {createdCaregiver.id}
+          {/* Workflow Status Checklist */}
+          <div className="max-w-md mx-auto bg-slate-50 rounded-xl p-4 border border-slate-200/90 text-left space-y-2.5 text-xs">
+            <div className="flex items-center gap-2 text-slate-800 font-semibold">
+              <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">
+                ✓
+              </span>
+              <span>Unique Caregiver ID Generated: {createdCaregiver.id}</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-800 font-semibold">
+              <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold">
+                ✓
+              </span>
+              <span>Classification: {createdCaregiver.employmentClassification}</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-800 font-semibold">
+              <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center text-[10px] font-bold">
+                !
+              </span>
+              <span>Status: Onboarding (Awaiting background check clearance)</span>
+            </div>
           </div>
 
-          {/* 7 Outcomes Checklist matching prompt */}
-          <div className="max-w-md mx-auto text-left p-5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5 text-xs">
-            <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px] mb-3">
-              Registration Lifecycle Actions Completed:
-            </h4>
-            {[
-              "1. Generated unique Caregiver ID (" + createdCaregiver.id + ")",
-              "2. Created caregiver profile record",
-              "3. Connected relevant household and client",
-              "4. Assigned onboarding coordinator (" + onboardingCoordinator + ")",
-              "5. Tracking outstanding documents and screening",
-              "6. Queueing approval and eligibility checks",
-              "7. Ready to unlock assignments upon final regulatory approval",
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-slate-700">
-                <Check className="w-3.5 h-3.5 text-[#3D6B22] shrink-0" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Important Callout */}
-          <div className="max-w-md mx-auto p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-left text-xs text-amber-900">
-            <strong>Important:</strong> Registration does not equal approval. A caregiver should only become eligible for work after the applicable agency and regulatory requirements are satisfied.
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+          {/* Action Navigation */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               href={`/caregivers/${createdCaregiver.id}`}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#3D6B22] text-white text-xs font-bold hover:bg-[#2d5019] transition-all shadow-sm"
+              className="px-5 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_16px_rgba(61,107,34,0.25)] flex items-center gap-1.5 cursor-pointer"
             >
-              View Caregiver Profile
+              <span>View Full Caregiver Profile</span>
+              <ArrowRight className="w-4 h-4 text-white" />
             </Link>
+
             <Link
               href="/caregivers"
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 transition-all shadow-sm"
+              className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
             >
-              Return to Caregiver Directory
+              Return to Caregivers Directory
             </Link>
           </div>
         </div>

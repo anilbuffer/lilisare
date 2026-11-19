@@ -52,18 +52,11 @@ export default function ClientsPage() {
   }, []);
 
   const handleSelectClient = (client: ClientRecord) => {
-    setSelectedClient(client);
-    setIsDrawerOpen(true);
+    router.push(`/clients/${client.id}`);
   };
 
   const handleSelectClientId = (clientId: string) => {
-    const found = clients.find((c) => c.id === clientId);
-    if (found) {
-      setSelectedClient(found);
-      setIsDrawerOpen(true);
-    } else {
-      router.push(`/clients/${clientId}`);
-    }
+    router.push(`/clients/${clientId}`);
   };
 
   const handleCloseDrawer = () => {

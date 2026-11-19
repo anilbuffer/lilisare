@@ -524,9 +524,9 @@ export function ClientEditView({ clientId }: ClientEditViewProps) {
 
           <button
             type="submit"
-            className="flex items-center gap-2 px-6 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all shadow-md"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_16px_rgba(61,107,34,0.25)] cursor-pointer"
           >
-            <Save className="w-4 h-4 text-[#93C573]" />
+            <Save className="w-4 h-4 text-white" />
             <span>Save & Update Client Record</span>
           </button>
         </div>

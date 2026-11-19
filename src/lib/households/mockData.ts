@@ -510,9 +510,33 @@ export const MOCK_HOUSEHOLDS: Household[] = [
   },
 ];
 
+export const HOUSEHOLDS_STORAGE_KEY = "lilisare_households_data";
+
+export function getHouseholdsFromStorage(): Household[] {
+  if (typeof window === "undefined") return MOCK_HOUSEHOLDS;
+  const stored = localStorage.getItem(HOUSEHOLDS_STORAGE_KEY);
+  if (!stored) {
+    localStorage.setItem(HOUSEHOLDS_STORAGE_KEY, JSON.stringify(MOCK_HOUSEHOLDS));
+    return MOCK_HOUSEHOLDS;
+  }
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return MOCK_HOUSEHOLDS;
+  }
+}
+
+export function saveHouseholdsToStorage(households: Household[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(HOUSEHOLDS_STORAGE_KEY, JSON.stringify(households));
+}
+
 export function getHouseholdById(id: string): Household | undefined {
   const cleanId = id.toLowerCase();
-  return MOCK_HOUSEHOLDS.find(
+  const all = getHouseholdsFromStorage();
+  return all.find(
+    (h) => h.id.toLowerCase() === cleanId || h.code.toLowerCase() === cleanId
+  ) || MOCK_HOUSEHOLDS.find(
     (h) => h.id.toLowerCase() === cleanId || h.code.toLowerCase() === cleanId
   );
 }

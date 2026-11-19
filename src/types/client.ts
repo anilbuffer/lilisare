@@ -140,7 +140,7 @@ export interface ClientHouseholdMember {
 export interface ClientActivityLog {
   id: string;
   timestamp: string;
-  type: "status_change" | "caregiver_assigned" | "document_updated" | "authorization" | "note" | "audit";
+  type: "status_change" | "caregiver_assigned" | "document_updated" | "authorization" | "note" | "audit" | "call" | "email" | "assessment";
   author: string;
   authorRole: string;
   title: string;

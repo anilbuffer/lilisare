@@ -28,14 +28,19 @@ import {
   UserCheck,
   ClipboardCheck,
 } from "lucide-react";
-import { MOCK_HOUSEHOLDS, Household } from "@/lib/households/mockData";
+import { MOCK_HOUSEHOLDS, Household, getHouseholdsFromStorage } from "@/lib/households/mockData";
 import { toast } from "sonner";
 
 export default function HouseholdsPage() {
+  const [householdsList, setHouseholdsList] = useState<Household[]>(MOCK_HOUSEHOLDS);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState("all");
   const [selectedTab, setSelectedTab] = useState<string>("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+
+  useEffect(() => {
+    setHouseholdsList(getHouseholdsFromStorage());
+  }, []);
 
   // Dropdown states for header controls (matching /intake/pipeline & /clients)
   const [isDateOpen, setIsDateOpen] = useState(false);
@@ -62,26 +67,26 @@ export default function HouseholdsPage() {
 
   // Tab definitions
   const tabs = [
-    { id: "ALL", label: "All Households", count: MOCK_HOUSEHOLDS.length },
+    { id: "ALL", label: "All Households", count: householdsList.length },
     {
       id: "CARE_ACTIVE",
       label: "Care Active",
-      count: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage === "Care Active").length,
+      count: householdsList.filter((h) => h.triJourneyStatus.clientStage === "Care Active").length,
     },
     {
       id: "ONBOARDING",
       label: "In Onboarding",
-      count: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage !== "Care Active").length,
+      count: householdsList.filter((h) => h.triJourneyStatus.clientStage !== "Care Active").length,
     },
     {
       id: "PENDING_AUTH",
       label: "Pending Auth",
-      count: MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length,
+      count: householdsList.filter((h) => h.authStatus !== "Approved").length,
     },
     {
       id: "STUCK",
       label: "Delayed & Stuck",
-      count: MOCK_HOUSEHOLDS.filter(
+      count: householdsList.filter(
         (h) =>
           Boolean(h.triJourneyStatus.bottleneckMessage) ||
           h.authStatus === "Expired" ||
@@ -92,7 +97,7 @@ export default function HouseholdsPage() {
 
   // Filter logic
   const filteredHouseholds = useMemo(() => {
-    return MOCK_HOUSEHOLDS.filter((hh) => {
+    return householdsList.filter((hh) => {
       // Tab filter
       if (selectedTab === "CARE_ACTIVE" && hh.triJourneyStatus.clientStage !== "Care Active") {
         return false;
@@ -132,7 +137,7 @@ export default function HouseholdsPage() {
 
       return true;
     });
-  }, [searchQuery, selectedProgram, selectedTab]);
+  }, [householdsList, searchQuery, selectedProgram, selectedTab]);
 
   const isFiltered = searchQuery !== "" || selectedProgram !== "all" || selectedTab !== "ALL";
 
@@ -189,10 +194,13 @@ export default function HouseholdsPage() {
           </div>
 
           {/* Register Household CTA (Dedicated Action) */}
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/25 hover:shadow-md active:scale-95 cursor-pointer">
-            <Plus className="w-4 h-4 text-[#93C573]" />
-            Register Household
-          </button>
+          <Link
+            href="/households/new"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white text-xs font-bold rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4 text-white" />
+            <span>Register Household</span>
+          </Link>
         </div>
       </header>
 
@@ -202,28 +210,28 @@ export default function HouseholdsPage() {
           {
             id: "ALL",
             label: "Total Households",
-            value: MOCK_HOUSEHOLDS.length.toLocaleString(),
+            value: householdsList.length.toLocaleString(),
             icon: Home,
             iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
           },
           {
             id: "CARE_ACTIVE",
             label: "Active Care Units",
-            value: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage === "Care Active").length.toLocaleString(),
+            value: householdsList.filter((h) => h.triJourneyStatus.clientStage === "Care Active").length.toLocaleString(),
             icon: Heart,
             iconBg: "bg-[#E3F1D9] text-[#1E5622]",
           },
           {
             id: "ONBOARDING",
             label: "In Onboarding",
-            value: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage !== "Care Active").length.toLocaleString(),
+            value: householdsList.filter((h) => h.triJourneyStatus.clientStage !== "Care Active").length.toLocaleString(),
             icon: Clock,
             iconBg: "bg-amber-100 text-amber-800",
           },
           {
             id: "STUCK",
             label: "Needs Attention",
-            value: MOCK_HOUSEHOLDS.filter(
+            value: householdsList.filter(
               (h) =>
                 Boolean(h.triJourneyStatus.bottleneckMessage) ||
                 h.authStatus === "Expired" ||

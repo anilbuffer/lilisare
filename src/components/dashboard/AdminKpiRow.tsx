@@ -25,7 +25,7 @@ export function AdminKpiRow() {
       value: metrics.activeClients.count.toLocaleString(),
       icon: Users,
       tone: metrics.activeClients.tone,
-      href: "/patients?status=active",
+      href: "/clients?status=Active",
     },
     {
       id: "caregivers",

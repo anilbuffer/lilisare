@@ -115,4 +115,11 @@ The Agency Admin Portal must NEVER be designed as isolated, fragmented departmen
   3. Are scheduling, compliance, EVV, and billing operational for this arrangement? (Agency Operations Journey)
 - **Eliminate Silos:** An action or status update in one journey (e.g., Case Manager Authorisation received) automatically updates and unlocks the downstream steps in the connected journeys (e.g., Caregiver Activation and Scheduling eligibility).
 
+## 9. General Development & UI Guidelines
+- **Navigation:** Navigate newly built pages from dedicated sidebar menu items for all new pages, matching existing sidebar styling and role-based navigation.
+- **Modals vs. Full Pages:** Avoid long, content-heavy modals; implement extensive views (wizards, profiles, detailed record editors) as dedicated full pages instead.
+- **Design Consistency:** Maintain uniform styling and layouts across all UI elements (cards, typography, actions/links, tables, and modals) in line with existing pages.
+- **Brand & Domain Terminology:** Align all copy, service names, sample data, and tone with the LiliSare brand, incorporating clear terminology for Patients/Clients, Caregivers, and Households.
+
+
 

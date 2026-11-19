@@ -18,7 +18,8 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
     if (pathname.startsWith("/hr/dashboard") || pathname === "/hr") return "HR Dashboard";
     if (pathname.startsWith("/users")) return "User Management";
     if (pathname.startsWith("/training")) return "Training (LMS)";
-    if (pathname.startsWith("/patients")) return "Patients";
+    if (pathname.startsWith("/clients") || pathname.startsWith("/patients")) return "Clients";
+    if (pathname.startsWith("/households")) return "Households";
     if (pathname.startsWith("/scheduling")) return "Scheduling";
     if (pathname.startsWith("/evv")) return "EVV Monitoring";
     if (pathname.startsWith("/caregivers")) return "Caregivers & HR";

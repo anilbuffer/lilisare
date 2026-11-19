@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Sparkles, MapPin, Calendar } from "lucide-react";
 
 import { AdminKpiRow } from "@/components/dashboard/AdminKpiRow";
+import { LiliSareJourneyRibbon } from "@/components/dashboard/LiliSareJourneyRibbon";
 import { NeedsYourAttentionCard } from "@/components/dashboard/NeedsYourAttentionCard";
 import { VisitsChart } from "@/components/dashboard/VisitsChart";
 import { EvvCompliance } from "@/components/dashboard/EvvCompliance";
@@ -64,6 +65,11 @@ export default function DashboardPage() {
       {/* 03. KPI Cards Strip */}
       <section aria-label="Key Performance Indicators">
         <AdminKpiRow />
+      </section>
+
+      {/* 03b. LiliSare Connected Journeys Navigation Ribbon */}
+      <section aria-label="LiliSare Three Connected Journeys">
+        <LiliSareJourneyRibbon />
       </section>
 
       {/* 04. Needs Your Attention (High-Priority Action Queue) */}

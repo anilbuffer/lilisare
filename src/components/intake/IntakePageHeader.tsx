@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Download, Calendar, MapPin, ChevronDown, Check, FileSpreadsheet, FileText } from "lucide-react";
+import { Plus, Download, Calendar, MapPin, ChevronDown, Check, FileSpreadsheet, FileText, Home, Users } from "lucide-react";
 import { toast } from "sonner";
 
 interface IntakePageHeaderProps {
@@ -181,6 +181,24 @@ export function IntakePageHeader({
             </div>
           )}
         </div>
+
+        {/* Households Link */}
+        <Link
+          href="/households"
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all"
+        >
+          <Home className="w-3.5 h-3.5 text-slate-500" />
+          <span>Households</span>
+        </Link>
+
+        {/* Clients Link */}
+        <Link
+          href="/clients"
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all"
+        >
+          <Users className="w-3.5 h-3.5 text-slate-500" />
+          <span>Clients</span>
+        </Link>
 
         {/* New Referral - Primary CTA (Opens dedicated page) */}
         {newReferralHref ? (

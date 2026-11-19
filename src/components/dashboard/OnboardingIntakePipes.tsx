@@ -93,7 +93,7 @@ export function OnboardingIntakePipes() {
       count: metrics.familyPipeline.converted,
       pctOfTop: Math.round((metrics.familyPipeline.converted / metrics.familyPipeline.newLead) * 100),
       color: "bg-[#1B3414]",
-      href: "/patients?status=admitted",
+      href: "/clients?status=Onboarding",
     },
   ];
 

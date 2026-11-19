@@ -108,6 +108,8 @@ const getNavGroups = (role?: string) => {
           { name: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Recruiting", icon: UserPlus, id: "recruiting" },
           { name: "Caregivers", icon: HeartHandshake, id: "caregivers" },
+          { name: "Clients", icon: Users, id: "clients" },
+          { name: "Households", icon: Home, id: "households", badge: 11 },
           { name: "Training", icon: GraduationCap, id: "training" },
           { name: "Payroll", icon: Receipt, id: "payroll" },
           { name: "Messages", icon: MessageSquare, id: "messages" },
@@ -146,9 +148,10 @@ const getNavGroups = (role?: string) => {
         ],
       },
       {
-        label: "Patients & Census",
+        label: "Clients & Households",
         items: [
-          { name: "Patient List & Care Plans", icon: Users, id: "patients" },
+          { name: "Clients", icon: Users, id: "clients" },
+          { name: "Households", icon: Home, id: "households", badge: 11 },
         ],
       },
       {
@@ -167,7 +170,8 @@ const getNavGroups = (role?: string) => {
         items: [
           { name: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Referral & Intake", icon: Inbox, id: "referrals" },
-          { name: "Patients", icon: Users, id: "patients" },
+          { name: "Clients", icon: Users, id: "clients" },
+          { name: "Households", icon: Home, id: "households", badge: 11 },
           { name: "Reports", icon: BarChart3, id: "reports" },
         ],
       },
@@ -182,6 +186,8 @@ const getNavGroups = (role?: string) => {
           { name: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Billing & Claims", icon: Receipt, id: "billing-workspace" },
           { name: "Authorizations", icon: ShieldCheck, id: "authorizations" },
+          { name: "Clients", icon: Users, id: "clients" },
+          { name: "Households", icon: Home, id: "households", badge: 11 },
           { name: "Payroll", icon: Receipt, id: "payroll" },
           { name: "Reports (Financial)", icon: BarChart3, id: "reports" },
           { name: "Messages", icon: MessageSquare, id: "messages" },
@@ -196,7 +202,8 @@ const getNavGroups = (role?: string) => {
         label: "",
         items: [
           { name: "Clinical Dashboard", icon: LayoutDashboard, id: "dashboard" },
-          { name: "Patients", icon: Users, id: "patients" },
+          { name: "Clients", icon: Users, id: "clients" },
+          { name: "Households", icon: Home, id: "households", badge: 11 },
           { name: "Assessments & Care Plan", icon: CheckSquare, id: "assessments" },
           { name: "QA (Audits)", icon: Award, id: "qa" },
           { name: "Incident Reports", icon: ShieldAlert, id: "incidents" },
@@ -212,6 +219,8 @@ const getNavGroups = (role?: string) => {
         label: "",
         items: [
           { name: "Compliance Dashboard", icon: LayoutDashboard, id: "dashboard" },
+          { name: "Clients", icon: Users, id: "clients" },
+          { name: "Households", icon: Home, id: "households", badge: 11 },
           { name: "Compliance Tracking", icon: CheckSquare, id: "compliance" },
           { name: "Quality Assurance", icon: Award, id: "qa" },
           { name: "Incident Reports", icon: ShieldAlert, id: "incidents" },
@@ -229,8 +238,10 @@ const getNavGroups = (role?: string) => {
         items: [
           { name: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Supervisory Visits", icon: CheckSquare, id: "visits" },
-          { name: "Incident Reports", icon: ShieldAlert, id: "incidents" },
+          { name: "Clients", icon: Users, id: "clients" },
+          { name: "Households", icon: Home, id: "households", badge: 11 },
           { name: "Caregivers", icon: Users, id: "caregivers" },
+          { name: "Incident Reports", icon: ShieldAlert, id: "incidents" },
           { name: "Messages", icon: MessageSquare, id: "messages" },
         ],
       },
@@ -376,7 +387,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (pathname?.startsWith("/audit-logs")) return "audit-logs";
     if (pathname?.startsWith("/automation")) return "automation-rules";
     if (pathname?.startsWith("/intake") || pathname?.startsWith("/referrals")) return "intake-referrals";
-    if (pathname?.startsWith("/patients")) return "clients";
+    if (pathname?.startsWith("/clients") || pathname?.startsWith("/patients")) return "clients";
     if (pathname?.startsWith("/caregivers")) return "caregivers";
     if (pathname?.startsWith("/billing/authorizations") || pathname?.startsWith("/authorizations")) return "authorizations";
     if (pathname?.startsWith("/scheduling") || pathname?.startsWith("/scheduler")) return "scheduling";
@@ -506,7 +517,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   let href = "#";
                   if (item.id === "dashboard") href = safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : "/dashboard";
                   if (item.id === "intake-referrals") href = "/intake/pipeline";
-                  if (item.id === "clients") href = "/patients";
+                  if (item.id === "clients") href = "/clients";
                   if (item.id === "caregivers") href = safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : "/caregivers";
                   if (item.id === "households") href = "/households";
                   if (item.id === "authorizations") href = "/billing/authorizations";
@@ -533,7 +544,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   if (item.id === "billing-workspace") href = "/billing/workspace";
                   if (item.id === "reports") href = safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/reports" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/reports" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/reports" : "/reports";
                   if (item.id === "messages") href = safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/messages" : safeUser?.role === "CAREGIVER" ? "/caregiver/messages" : safeUser?.role === "HR" ? "/hr/messages" : safeUser?.role === "SCHEDULER" ? "/scheduler/messages" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/messages" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/messages" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/messages" : safeUser?.role === "TRAINER" ? "/training-admin/messages" : "/billing/messages";
-                  if (item.id === "patients") href = safeUser?.role === "SCHEDULER" ? "/scheduler/patients/list" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/patients" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/patients" : "/patients";
+                  if (item.id === "patients") href = "/clients";
                   if (item.id === "evv-monitoring") href = "/evv-monitoring";
                   if (item.id === "qa") href = safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/qa" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/qa" : "/quality-assurance";
                   if (item.id === "visits") href = safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/visits" : "/field-supervisor/visits";

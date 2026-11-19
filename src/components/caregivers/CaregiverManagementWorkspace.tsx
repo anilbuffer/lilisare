@@ -272,20 +272,124 @@ export function CaregiverManagementWorkspace({
   };
 
   return (
-    <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* Directory Title & Tabs */}
-      <div className="border-b border-slate-100 px-6 pt-5 pb-3">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3.5">
+    <section aria-label="Caregiver Management Workspace" className="space-y-4">
+      {/* Workspace Header & Toolbar */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
-            <h2 className="text-base font-bold text-slate-900 leading-tight">Caregiver Directory</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 leading-tight">
+                Caregiver Management
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                {filteredCaregivers.length} shown
+              </span>
+            </div>
             <p className="text-xs text-slate-500 mt-0.5">
               Workforce roster across Family Caregivers, Live-In aides, and Family Friends
             </p>
           </div>
 
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 md:w-72">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search caregiver, ID, household..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+              />
+            </div>
+
+            {/* Filter Panel Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowFiltersPanel(!showFiltersPanel)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                showFiltersPanel || activeFiltersCount > 0
+                  ? "bg-[#F2F8EE] border-[#3D6B22] text-[#3D6B22]"
+                  : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <Filter className="w-3.5 h-3.5" />
+              <span>Filters</span>
+              {activeFiltersCount > 0 && (
+                <span className="w-4 h-4 rounded-full bg-[#3D6B22] text-white text-[10px] flex items-center justify-center font-bold">
+                  {activeFiltersCount}
+                </span>
+              )}
+              {showFiltersPanel ? (
+                <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              )}
+            </button>
+
+            {/* View Mode Toggle (Grid vs Table) */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === "table"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                title="Table View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Tabs Row matching /intake/pipeline & /clients */}
+        <div className="flex items-center gap-1.5 pt-3 overflow-x-auto scrollbar-none">
+          {tabs.map((tab) => {
+            const isActive = currentTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  onSelectStatusFilter(tab.id === "ALL" ? null : tab.id);
+                  if (activeAttentionCategory) onClearAttentionCategory();
+                }}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-[#1B3414] text-white shadow-xs"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200"
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+                    isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-600"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+
           {/* Active Attention Banner if filtering by attention category */}
           {activeAttentionCategory && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-800 animate-fadeIn">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-800 animate-fadeIn ml-1 shrink-0">
               <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
               <span>
                 Filtering:{" "}
@@ -309,128 +413,17 @@ export function CaregiverManagementWorkspace({
               </button>
             </div>
           )}
-        </div>
 
-        {/* Status Tabs matching /intake/pipeline & /clients */}
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-          {tabs.map((tab) => {
-            const isActive = currentTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  onSelectStatusFilter(tab.id === "ALL" ? null : tab.id);
-                  if (activeAttentionCategory) onClearAttentionCategory();
-                }}
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-[#1B3414] text-white shadow-xs"
-                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 border border-slate-200/60"
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                    isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-600"
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Search & Filter Toolbar */}
-      <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        {/* Search Input */}
-        <div className="relative flex-1 max-w-xl">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search caregiver, ID, household..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-sm"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-
-        {/* Right side: Filters button & Grid/Table toggles */}
-        <div className="flex items-center gap-2.5 self-end md:self-auto">
-          <button
-            type="button"
-            onClick={() => setShowFiltersPanel(!showFiltersPanel)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-              showFiltersPanel || activeFiltersCount > 0
-                ? "bg-[#F2F8EE] border-[#3D6B22] text-[#3D6B22]"
-                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            <Filter className="w-3.5 h-3.5" />
-            <span>Filters</span>
-            {activeFiltersCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-[#3D6B22] text-white text-[10px] flex items-center justify-center font-bold">
-                {activeFiltersCount}
-              </span>
-            )}
-            {showFiltersPanel ? (
-              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            )}
-          </button>
-
-          {(searchQuery || activeFiltersCount > 0 || currentTab !== "ALL" || activeAttentionCategory) && (
+          {(currentTab !== "ALL" || activeFiltersCount > 0 || searchQuery.trim() || activeAttentionCategory) && (
             <button
               type="button"
               onClick={handleClearFilters}
-              className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-200 transition-colors cursor-pointer"
-              title="Reset all filters"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-rose-600 px-2 py-1 ml-auto cursor-pointer transition-colors shrink-0"
             >
-              <FilterX className="w-4 h-4" />
+              <FilterX className="w-3.5 h-3.5" />
+              <span>Clear Filter</span>
             </button>
           )}
-
-          <div className="h-5 w-px bg-slate-200 mx-1" />
-
-          {/* View Mode Toggle */}
-          <div className="flex items-center bg-white p-0.5 rounded-xl border border-slate-200 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={`p-1.5 rounded-lg transition-all ${
-                viewMode === "table"
-                  ? "bg-[#3D6B22]/10 text-[#3D6B22] font-semibold"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-              title="Table view"
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg transition-all ${
-                viewMode === "grid"
-                  ? "bg-[#3D6B22]/10 text-[#3D6B22] font-semibold"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-              title="Grid view"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       </div>
 
@@ -546,7 +539,7 @@ export function CaregiverManagementWorkspace({
 
       {/* Directory Content: Table or Grid */}
       {filteredCaregivers.length === 0 ? (
-        <div className="p-12 text-center">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-10 text-center">
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-3">
             <Users className="w-6 h-6" />
           </div>
@@ -564,8 +557,9 @@ export function CaregiverManagementWorkspace({
         </div>
       ) : viewMode === "table" ? (
         /* TABLE VIEW */
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="py-3 px-4 pl-6">Caregiver</th>
@@ -713,9 +707,10 @@ export function CaregiverManagementWorkspace({
             </tbody>
           </table>
         </div>
-      ) : (
-        /* GRID VIEW */
-        <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      </div>
+    ) : (
+      /* GRID VIEW */
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCaregivers.map((cg) => {
             const isSelected = selectedCaregiverId === cg.id;
             const assignedClient = cg.availabilityAssignments.assignedClient;

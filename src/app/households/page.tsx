@@ -13,6 +13,7 @@ import {
   Plus,
   ArrowRight,
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   MapPin,
   ChevronRight,
@@ -195,105 +196,78 @@ export default function HouseholdsPage() {
         </div>
       </header>
 
-      {/* 02. KPI Stats Strip - Uniform styling matching LiliSare KPI cards */}
-      <section aria-label="Household Key Performance Indicators" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      {/* 02. KPI Stats Strip - Uniform styling matching /intake/pipeline & /clients */}
+      <section aria-label="Household Key Performance Indicators" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {[
           {
             id: "ALL",
             label: "Total Households",
             value: MOCK_HOUSEHOLDS.length.toLocaleString(),
             icon: Home,
-            tone: "forest" as const,
+            iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
           },
           {
             id: "CARE_ACTIVE",
             label: "Active Care Units",
             value: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage === "Care Active").length.toLocaleString(),
             icon: Heart,
-            tone: "forest" as const,
-          },
-          {
-            id: "PENDING_AUTH",
-            label: "Pending Authorisations",
-            value: MOCK_HOUSEHOLDS.filter((h) => h.authStatus !== "Approved").length.toLocaleString(),
-            icon: ClipboardCheck,
-            tone: "amber" as const,
+            iconBg: "bg-[#E3F1D9] text-[#1E5622]",
           },
           {
             id: "ONBOARDING",
             label: "In Onboarding",
             value: MOCK_HOUSEHOLDS.filter((h) => h.triJourneyStatus.clientStage !== "Care Active").length.toLocaleString(),
             icon: Clock,
-            tone: "amber" as const,
+            iconBg: "bg-amber-100 text-amber-800",
           },
           {
             id: "STUCK",
-            label: "Households Stuck",
+            label: "Needs Attention",
             value: MOCK_HOUSEHOLDS.filter(
               (h) =>
                 Boolean(h.triJourneyStatus.bottleneckMessage) ||
                 h.authStatus === "Expired" ||
-                h.authStatus === "Expiring Soon"
+                h.authStatus === "Expiring Soon" ||
+                h.authStatus === "Pending Review"
             ).length.toLocaleString(),
-            icon: Home,
-            tone: "coral" as const,
+            icon: AlertTriangle,
+            iconBg: "bg-rose-100 text-rose-700",
           },
         ].map((kpi) => {
           const Icon = kpi.icon;
           const isSelected = selectedTab === kpi.id;
-
-          const toneStyles = {
-            forest: {
-              cardBorder: "border-slate-200 hover:border-[#3D6B22]/50",
-              iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
-              valText: "text-slate-900",
-              selected:
-                "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 shadow-md bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white -translate-y-0.5",
-            },
-            amber: {
-              cardBorder: "border-amber-300 hover:border-amber-400 bg-white",
-              iconBg: "bg-amber-100 text-amber-800",
-              valText: "text-amber-900",
-              selected:
-                "border-amber-400 ring-2 ring-amber-400/20 shadow-md bg-gradient-to-b from-amber-50/70 via-white to-white -translate-y-0.5",
-            },
-            coral: {
-              cardBorder: "border-rose-300 hover:border-rose-400 bg-white",
-              iconBg: "bg-rose-100 text-rose-700",
-              valText: "text-rose-900",
-              selected:
-                "border-rose-400 ring-2 ring-rose-400/20 shadow-md bg-gradient-to-b from-rose-50/70 via-white to-white -translate-y-0.5",
-            },
-          }[kpi.tone];
 
           return (
             <button
               key={kpi.id}
               type="button"
               onClick={() => setSelectedTab(selectedTab === kpi.id ? "ALL" : kpi.id)}
-              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-2xl p-4 sm:p-4.5 border transition-all duration-200 relative overflow-hidden flex flex-col justify-between ${isSelected
-                ? toneStyles.selected
-                : `${toneStyles.cardBorder} shadow-sm hover:shadow-md hover:-translate-y-0.5`
-                }`}
+              className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
+                isSelected
+                  ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
+                  : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
+              }`}
             >
+              {/* Top row: Label & Animated Icon Container */}
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
                   {kpi.label}
                 </span>
                 <div
-                  className={`p-1.5 rounded-lg shrink-0 transition-transform group-hover:scale-105 ${toneStyles.iconBg}`}
+                  className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 ${kpi.iconBg}`}
                 >
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
 
+              {/* Metric Value & Hover Glow Arrow */}
               <div className="flex items-baseline justify-between mt-1">
                 <span
-                  className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${toneStyles.valText}`}
+                  className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors"
                 >
                   {kpi.value}
                 </span>
-                <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-slate-500 transition-opacity" />
+                <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
               </div>
             </button>
           );
@@ -644,9 +618,9 @@ export default function HouseholdsPage() {
       </section>
 
       {/* 04. Secondary Sections: Household Bottlenecks & Coordination Activity matching /intake/pipeline & /clients */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left: Actionable Bottlenecks Card */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -734,7 +708,7 @@ export default function HouseholdsPage() {
         </div>
 
         {/* Right: Recent Household Activity Feed */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2">

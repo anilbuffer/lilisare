@@ -104,8 +104,18 @@ export default function CaregiversPage() {
     toast.info(`Filtered directory for: ${category.replace(/_/g, " ")}`);
   };
 
+  const needsAttentionCount = caregivers.filter(
+    (cg) =>
+      cg.status === "On Hold" ||
+      cg.status === "Pending" ||
+      cg.documentsCredentials?.overallStatus === "Expired" ||
+      cg.documentsCredentials?.overallStatus === "Missing" ||
+      cg.verificationChecklist?.screening !== "Cleared" ||
+      cg.verificationChecklist?.training !== "Complete"
+  ).length;
+
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-16">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -199,7 +209,7 @@ export default function CaregiversPage() {
         </div>
       </div>
 
-      {/* 1. KPI Strip answering the 5 administrative questions immediately */}
+      {/* 02. KPI Strip - 4 clean dashboard cards matching /intake/pipeline & /clients */}
       <CaregiverKpiStrip
         caregivers={caregivers}
         activeStatusFilter={selectedStatusFilter || "ALL"}
@@ -211,24 +221,10 @@ export default function CaregiversPage() {
           }
           if (activeAttentionCategory) setActiveAttentionCategory(null);
         }}
-        needsAttentionCount={12}
+        needsAttentionCount={needsAttentionCount}
       />
 
-      {/* 2. Secondary Sections: Needs Attention & Recent Activity (Side-by-side matching /clients) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CaregiverAttentionSection
-          caregivers={caregivers}
-          onSelectCategoryFilter={handleAttentionCategorySelect}
-          onSelectCaregiverId={handleSelectCaregiverId}
-          activeAttentionCategory={activeAttentionCategory}
-        />
-        <CaregiverRecentActivitySection
-          activities={CAREGIVER_RECENT_ACTIVITIES}
-          onSelectCaregiverId={handleSelectCaregiverId}
-        />
-      </div>
-
-      {/* 4. Caregiver Directory (Anchor for smooth scroll) */}
+      {/* 03. Caregiver Directory Management Workspace (Consistent Section 03 positioning) */}
       <div id="caregiver-directory-anchor">
         <CaregiverManagementWorkspace
           caregivers={caregivers}
@@ -238,6 +234,20 @@ export default function CaregiversPage() {
           onSelectCaregiver={handleSelectCaregiver}
           activeAttentionCategory={activeAttentionCategory}
           onClearAttentionCategory={() => setActiveAttentionCategory(null)}
+        />
+      </div>
+
+      {/* 04. Secondary Sections: Needs Attention & Recent Activity (Side-by-side matching /intake/pipeline) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <CaregiverAttentionSection
+          caregivers={caregivers}
+          onSelectCategoryFilter={handleAttentionCategorySelect}
+          onSelectCaregiverId={handleSelectCaregiverId}
+          activeAttentionCategory={activeAttentionCategory}
+        />
+        <CaregiverRecentActivitySection
+          activities={CAREGIVER_RECENT_ACTIVITIES}
+          onSelectCaregiverId={handleSelectCaregiverId}
         />
       </div>
 

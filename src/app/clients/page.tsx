@@ -176,7 +176,7 @@ export default function ClientsPage() {
       />
 
       {/* 04. Secondary Sections: Actionable Items & Recent Activity matching /intake/pipeline */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ClientAttentionSection
           clients={clients}
           onSelectClient={handleSelectClientId}

@@ -56,3 +56,63 @@ Access to systems and data is granted on a strict Principle of Least Privilege (
 ## 6. Enforcement & Incident Response
 - **Enforcement:** Failure to adhere to these rules may result in immediate revocation of access and potential disciplinary or legal action.
 - **Incident Reporting:** Any suspected data breach, unauthorized access, or compliance violation must be reported immediately to the Security Officer.
+
+## 7. LiliSare – Agency Admin Workflow (Core Journey & Scope Boundaries)
+All administrative features, user flows, and intake processes must strictly align with the 10-stage Agency Admin Journey. Development must never go out of scope beyond these defined stages:
+
+1. **Intake & Referral (New inquiry)**
+   - **Trigger:** A family, client, or caregiver contacts LiliSare or a referral arrives from an external partner/organisation.
+   - **Data Captured:** Family contact details, Person needing care, Type of care needed, Location, Referral source, Preferred contact method.
+   - **System Entity:** `Inquiry` (e.g. `INQ-1001`, Status: `New Lead`).
+2. **Client Registration (Client created)**
+   - **Entity:** `Client Profile` (The person receiving care, e.g. Child A).
+   - **Data Captured:** Demographics, DOB, Address, Responsible family member, Emergency contacts, Service requirements, Programme information, Case manager details.
+3. **Caregiver Registration (Caregiver created)**
+   - **Entity:** `Caregiver Profile` (The person providing care, e.g. Mother A).
+   - **Data Captured:** Personal details, Relationship to client, Contact info, Employment/contractor classification (W-2/1099), Credentials, Training status, Payroll setup info.
+   - **Core Relationship:** Client and Caregiver are distinct profiles connected under a **Linked Household Relationship** (Family-centred care model).
+4. **Documents & Onboarding (Verification pending)**
+   - **Dynamic Checklist:** Identity documents, Agreements, Background screening, CPR/First Aid, Training completion.
+   - **Statuses:** `Verified` / `Completed`, `Signed`, `Pending`, `Missing`.
+5. **Case Manager & Authorisation (Approval pending)**
+   - **Coordination:** Coordinate with case manager, track requested hours/units, approval dates, expiry dates.
+   - **Core Rule:** Caregiver onboarding completion does NOT automatically authorize service delivery; applicable approval and payer service rules must be satisfied.
+6. **Caregiver Approval & Activation (Ready for activation)**
+   - **Prerequisites:** All documents, screening, training, agreements, authorizations, and payroll setup verified.
+   - **Status:** Unlocks `Active` caregiver status for scheduled delivery.
+7. **Scheduling & EVV (Care in progress)**
+   - **Admin:** Caregiver assignments, visit dates/times, shift changes, missed visit alerts, availability.
+   - **Caregiver (Mobile App):** Visit checklist, Clock-in, Deliver care, Clock-out, EVV time & location verification.
+8. **Care Notes & Clinical Monitoring (Ongoing monitoring)**
+   - **Monitoring:** Missing care notes, documentation reviews, RN assessments, supervisory visits.
+   - **AI Rule:** AI may assist in drafting care note wording, but a responsible person must review and approve final documentation.
+9. **Compliance Management (Continuous monitoring)**
+   - **Lifecycle:** Ongoing proactive tracking of expiring credentials (e.g. CPR, First Aid), renewals, supervisory deadlines, and recurring background checks.
+10. **Billing & Payroll (Financial processing)**
+    - **Billing Team:** Completed visits review, authorization validation, care documentation audit, claim preparation/submission, denials/corrections.
+    - **Payroll Team:** Eligible work hours review, worker classification, payroll coordination via ADP, corrections and reconciliation.
+
+## 8. The Three Connected Journeys (Core Product Architecture)
+The Agency Admin Portal must NEVER be designed as isolated, fragmented department screens. Instead, it is architected around **three synchronized, interdependent journeys** unified within LiliSphere (often tied together by a Household):
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ 1. CLIENT JOURNEY                                                                     │
+│    Inquiry ──▶ Client Registration ──▶ Assessment ──▶ Service Authorisation ──▶ Care Received │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ 2. CAREGIVER JOURNEY                                                                  │
+│    Registration ──▶ Documents ──▶ Screening ──▶ Training ──▶ Approval ──▶ Activation ──▶ Care Delivery │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ 3. AGENCY OPERATIONS JOURNEY                                                          │
+│    Intake ──▶ Coordination ──▶ Compliance ──▶ Scheduling ──▶ Monitoring ──▶ Billing & Payroll │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Architectural Guidelines:
+- **Unified Household/Case Context:** When an Admin views a case (e.g. Family inquiry), they must immediately see where the case stands across all 3 tracks:
+  1. Has the Client been assessed and authorised? (Client Journey)
+  2. Is the associated Caregiver (e.g., Mother) fully screened, trained, and activated? (Caregiver Journey)
+  3. Are scheduling, compliance, EVV, and billing operational for this arrangement? (Agency Operations Journey)
+- **Eliminate Silos:** An action or status update in one journey (e.g., Case Manager Authorisation received) automatically updates and unlocks the downstream steps in the connected journeys (e.g., Caregiver Activation and Scheduling eligibility).
+
+

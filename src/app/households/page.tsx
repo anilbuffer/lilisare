@@ -35,7 +35,6 @@ export default function HouseholdsPage() {
   const [selectedProgram, setSelectedProgram] = useState("all");
   const [selectedTab, setSelectedTab] = useState<string>("ALL");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
-  const [selectedHousehold, setSelectedHousehold] = useState<Household | null>(null);
 
   // Dropdown states for header controls (matching /intake/pipeline & /clients)
   const [isDateOpen, setIsDateOpen] = useState(false);
@@ -142,25 +141,12 @@ export default function HouseholdsPage() {
     setSelectedTab("ALL");
   };
 
-  const getClientChartLink = (hhId: string) => {
-    switch (hhId) {
-      case "hh-1001":
-        return "/clients/CL-1001";
-      case "hh-1002":
-        return "/clients/CL-1002";
-      case "hh-1003":
-        return "/clients/CL-1003";
-      default:
-        return "/clients";
-    }
-  };
-
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-5 pb-12 animate-in fade-in duration-200">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Standardized Page Header matching /intake/pipeline & /clients */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Households & Family Units
           </h1>
         </div>
@@ -450,151 +436,109 @@ export default function HouseholdsPage() {
                 )}
               </div>
             ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {filteredHouseholds.map((hh) => (
-                  <div
-                    key={hh.id}
-                    className="h-full bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group relative overflow-hidden space-y-3.5"
-                  >
-                    {/* Header: Name, Code & Program */}
-                    <div className="flex items-start justify-between">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredHouseholds.map((hh) => {
+                  const getAuthBadge = (status: string) => {
+                    switch (status) {
+                      case "Approved":
+                        return "bg-[#E3F1D9] text-[#1E5622] border-[#3D6B22]/20";
+                      case "Expiring Soon":
+                        return "bg-amber-50 text-amber-800 border-amber-200";
+                      case "Pending Review":
+                        return "bg-blue-50 text-blue-700 border-blue-200";
+                      case "Expired":
+                        return "bg-rose-50 text-rose-700 border-rose-200";
+                      default:
+                        return "bg-slate-100 text-slate-700 border-slate-200";
+                    }
+                  };
+
+                  return (
+                    <Link
+                      key={hh.id}
+                      href={`/households/${hh.id}`}
+                      className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-[#3D6B22]/60 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
+                    >
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-base">{hh.name}</h3>
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[11px] font-semibold rounded-md font-mono border border-slate-200/60">
-                            {hh.code}
+                        {/* Top: Household Name, Code, City & Auth Status Badge */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-base truncate">
+                              {hh.name}
+                            </h3>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                              <span className="font-mono text-slate-500 font-medium">{hh.code}</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1 truncate">
+                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                {hh.city}, {hh.state}
+                              </span>
+                            </div>
+                          </div>
+
+                          <span
+                            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${getAuthBadge(
+                              hh.authStatus
+                            )}`}
+                          >
+                            {hh.authStatus}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-slate-400" />
-                            {hh.city}, {hh.state}
-                          </span>
-                          <span>•</span>
-                          <span className="font-medium text-[#1E5622] bg-[#E3F1D9] border border-[#3D6B22]/20 px-2 py-0.5 rounded-full text-[11px]">
+
+                        {/* Connected Members: Care Recipient & Family Caregiver */}
+                        <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-slate-400 text-[11px] flex items-center gap-1.5 shrink-0">
+                              <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              Client:
+                            </span>
+                            <span className="font-semibold text-slate-800 truncate max-w-[160px]">
+                              {hh.client.name}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-slate-600">
+                            <span className="text-slate-400 text-[11px] flex items-center gap-1.5 shrink-0">
+                              <Heart className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                              Caregiver:
+                            </span>
+                            <span className="font-semibold text-slate-800 truncate max-w-[160px]">
+                              {hh.primaryCaregiver.name}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Compact Tags */}
+                        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                          <span className="text-[11px] font-medium bg-[#E3F1D9] text-[#1E5622] px-2 py-0.5 rounded-lg border border-[#3D6B22]/20 truncate">
                             {hh.program}
                           </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${hh.authStatus === "Approved"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
-                            }`}
-                        >
-                          {hh.authStatus === "Approved" ? (
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          ) : (
-                            <AlertCircle className="w-3 h-3 text-amber-600" />
-                          )}
-                          {hh.authStatus}
-                        </span>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
-                          Expires: {hh.authExpiry}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Linked Dual Entity Display (Client & Caregiver) */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50/70 rounded-xl border border-slate-100">
-                      {/* Client Box with direct link into Client Chart */}
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                          <Users className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Care Recipient (Client)</span>
-                        </div>
-                        <div className="text-xs font-semibold text-slate-900 truncate">
-                          {hh.client.name}
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          {hh.client.relationship}
-                        </div>
-                        <Link
-                          href={getClientChartLink(hh.id)}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:underline pt-0.5"
-                        >
-                          View Client Chart <ArrowRight className="w-3 h-3" />
-                        </Link>
-                      </div>
-
-                      {/* Caregiver Box with direct link into Caregiver File */}
-                      <div className="space-y-1 sm:border-l sm:border-slate-200 sm:pl-3">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                          <Heart className="w-3.5 h-3.5 text-rose-600" />
-                          <span>Paid Family Caregiver</span>
-                        </div>
-                        <div className="text-xs font-semibold text-slate-900 truncate">
-                          {hh.primaryCaregiver.name}
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          {hh.primaryCaregiver.relationship}
-                        </div>
-                        <Link
-                          href="/caregivers"
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:underline pt-0.5"
-                        >
-                          View Caregiver File <ArrowRight className="w-3 h-3" />
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Tri-Journey Status Ribbon */}
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Tri-Journey Synchronization Status
-                      </span>
-                      <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
-                        <div className="p-1.5 bg-blue-50/70 text-blue-800 rounded-lg border border-blue-100">
-                          <div className="text-[9px] uppercase font-bold text-blue-500">1. Client</div>
-                          <div className="font-bold truncate mt-0.5 text-[11px]">{hh.triJourneyStatus.clientStage}</div>
-                        </div>
-                        <div className="p-1.5 bg-emerald-50/70 text-emerald-800 rounded-lg border border-emerald-100">
-                          <div className="text-[9px] uppercase font-bold text-emerald-500">2. Caregiver</div>
-                          <div className="font-bold truncate mt-0.5 text-[11px]">{hh.triJourneyStatus.caregiverStage}</div>
-                        </div>
-                        <div className="p-1.5 bg-indigo-50/70 text-indigo-800 rounded-lg border border-indigo-100">
-                          <div className="text-[9px] uppercase font-bold text-indigo-500">3. Agency Ops</div>
-                          <div className="font-bold truncate mt-0.5 text-[11px]">{hh.triJourneyStatus.opsStage}</div>
-                        </div>
-                      </div>
-
-                      {hh.triJourneyStatus.bottleneckMessage && (
-                        <div className="flex items-center gap-1.5 p-2 bg-amber-50 text-amber-800 text-[11px] rounded-lg border border-amber-200/80">
-                          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-600" />
-                          <span className="truncate">{hh.triJourneyStatus.bottleneckMessage}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Operational Footer */}
-                    <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
-                      <div className="text-slate-600 text-[11px] truncate max-w-[200px]">
-                        <span className="text-slate-400">Case Mgr:</span>{" "}
-                        <span className="font-semibold text-slate-800">{hh.caseManager.name}</span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <span className="font-bold text-slate-900 text-xs">
-                            {hh.scheduledHoursPerWeek} / {hh.authorizedHoursPerWeek}
+                          <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200/60 shrink-0">
+                            {hh.authorizedHoursPerWeek} hrs/wk
                           </span>
-                          <span className="text-slate-400 text-[10px] block">Weekly Hours</span>
                         </div>
-                        <Link
-                          href={`/households/${hh.id}`}
-                          className="px-3 py-1.5 bg-[#1B3414] hover:bg-[#274C1D] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm shadow-[#1B3414]/20 active:scale-95 cursor-pointer"
-                        >
-                          Manage <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
                       </div>
-                    </div>
-                  </div>
-                ))}
+
+                      {/* Card Footer */}
+                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                        <div className="flex items-center gap-1 truncate text-slate-500">
+                          <span className="text-slate-400">CM:</span>
+                          <span className="font-medium text-slate-700 truncate max-w-[140px]">
+                            {hh.caseManager.name.replace(/,.*$/, "")}
+                          </span>
+                        </div>
+
+                        <span className="inline-flex items-center gap-1 font-semibold text-xs text-[#3D6B22] group-hover:translate-x-1 transition-transform shrink-0">
+                          <span>Details</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
@@ -602,7 +546,7 @@ export default function HouseholdsPage() {
                         <th className="py-3.5 px-4">Household</th>
                         <th className="py-3.5 px-4">Program</th>
                         <th className="py-3.5 px-4">Care Recipient (Client)</th>
-                        <th className="py-3.5 px-4">Paid Family Caregiver</th>
+                        <th className="py-3.5 px-4">Family Caregiver</th>
                         <th className="py-3.5 px-4">Case Manager</th>
                         <th className="py-3.5 px-4">Auth Status</th>
                         <th className="py-3.5 px-4">Weekly Hours</th>
@@ -610,67 +554,86 @@ export default function HouseholdsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-slate-700">
-                      {filteredHouseholds.map((hh) => (
-                        <tr
-                          key={hh.id}
-                          onClick={() => setSelectedHousehold(hh)}
-                          className="hover:bg-slate-50/70 cursor-pointer transition-colors"
-                        >
-                          <td className="py-3.5 px-4">
-                            <div className="flex flex-col">
-                              <span className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">{hh.name}</span>
-                              <span className="text-[11px] font-mono text-slate-400">{hh.code}</span>
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className="text-[11px] font-medium text-[#1E5622] bg-[#E3F1D9] border border-[#3D6B22]/20 px-2.5 py-0.5 rounded-full">
-                              {hh.program}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <Link
-                              href={getClientChartLink(hh.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              className="font-semibold text-blue-600 hover:underline"
-                            >
-                              {hh.client.name}
-                            </Link>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <Link
-                              href="/caregivers"
-                              onClick={(e) => e.stopPropagation()}
-                              className="font-semibold text-slate-800 hover:text-[#3D6B22]"
-                            >
-                              {hh.primaryCaregiver.name}
-                            </Link>
-                          </td>
-                          <td className="py-3.5 px-4 text-slate-600">
-                            {hh.caseManager.name}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span
-                              className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${hh.authStatus === "Approved"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : "bg-amber-50 text-amber-700 border-amber-200"
-                                }`}
-                            >
-                              {hh.authStatus}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 font-bold text-slate-900">
-                            {hh.scheduledHoursPerWeek} / {hh.authorizedHoursPerWeek} hrs
-                          </td>
-                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <Link
-                              href={`/households/${hh.id}`}
-                              className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1"
-                            >
-                              Manage
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredHouseholds.map((hh) => {
+                        const getAuthBadge = (status: string) => {
+                          switch (status) {
+                            case "Approved":
+                              return "bg-[#E3F1D9] text-[#1E5622] border-[#3D6B22]/20";
+                            case "Expiring Soon":
+                              return "bg-amber-50 text-amber-800 border-amber-200";
+                            case "Pending Review":
+                              return "bg-blue-50 text-blue-700 border-blue-200";
+                            case "Expired":
+                              return "bg-rose-50 text-rose-700 border-rose-200";
+                            default:
+                              return "bg-slate-100 text-slate-700 border-slate-200";
+                          }
+                        };
+
+                        return (
+                          <tr
+                            key={hh.id}
+                            className="hover:bg-slate-50/80 transition-colors group"
+                          >
+                            <td className="py-3.5 px-4">
+                              <Link href={`/households/${hh.id}`} className="block">
+                                <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-xs">
+                                  {hh.name}
+                                </div>
+                                <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+                                  {hh.code} • {hh.city}, {hh.state}
+                                </div>
+                              </Link>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className="text-[11px] font-medium text-[#1E5622] bg-[#E3F1D9] border border-[#3D6B22]/20 px-2.5 py-0.5 rounded-full inline-block">
+                                {hh.program}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-semibold text-slate-800 text-xs">
+                                {hh.client.name}
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                {hh.client.relationship}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="font-semibold text-slate-800 text-xs">
+                                {hh.primaryCaregiver.name}
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                {hh.primaryCaregiver.relationship}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 text-slate-600 text-xs">
+                              <div className="font-medium text-slate-800">{hh.caseManager.name.replace(/,.*$/, "")}</div>
+                              <div className="text-[11px] text-slate-400 truncate max-w-[140px]">{hh.caseManager.agency}</div>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span
+                                className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${getAuthBadge(
+                                  hh.authStatus
+                                )}`}
+                              >
+                                {hh.authStatus}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 font-semibold text-slate-800 text-xs">
+                              {hh.scheduledHoursPerWeek} / {hh.authorizedHoursPerWeek} hrs
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              <Link
+                                href={`/households/${hh.id}`}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                              >
+                                <span>Details</span>
+                                <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -838,104 +801,6 @@ export default function HouseholdsPage() {
           </div>
         </div>
       </div>
-
-      {/* Slide-over Detail Modal */}
-      {selectedHousehold && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="bg-[#1B3414] p-5 text-white flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold">{selectedHousehold.name}</h2>
-                  <span className="px-2 py-0.5 bg-white/20 text-white text-xs font-semibold rounded font-mono">
-                    {selectedHousehold.code}
-                  </span>
-                </div>
-                <p className="text-xs text-[#93C573] mt-1">{selectedHousehold.program} • {selectedHousehold.city}, {selectedHousehold.state}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedHousehold(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors text-lg cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto space-y-5 text-sm">
-              {/* Linked Household Details */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Care Recipient (Client)</h4>
-                  <p className="font-semibold text-slate-900">{selectedHousehold.client.name}</p>
-                  <p className="text-xs text-slate-500">{selectedHousehold.client.relationship}</p>
-                  <p className="text-xs text-slate-500 mt-1">{selectedHousehold.client.phone}</p>
-                  <Link
-                    href={getClientChartLink(selectedHousehold.id)}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline mt-2"
-                  >
-                    Open Client Chart <ArrowRight className="w-3 h-3" />
-                  </Link>
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Designated Caregiver</h4>
-                  <p className="font-semibold text-slate-900">{selectedHousehold.primaryCaregiver.name}</p>
-                  <p className="text-xs text-slate-500">{selectedHousehold.primaryCaregiver.relationship}</p>
-                  <p className="text-xs text-slate-500 mt-1">{selectedHousehold.primaryCaregiver.phone}</p>
-                  <Link
-                    href="/caregivers"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:underline mt-2"
-                  >
-                    Open Caregiver File <ArrowRight className="w-3 h-3" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Case Manager Coordination */}
-              <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Case Manager & Service Authorization</h4>
-                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-md">
-                    {selectedHousehold.authorizedHoursPerWeek} Hours / Week Authorized
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 pt-2">
-                  <div><strong>Case Manager:</strong> {selectedHousehold.caseManager.name}</div>
-                  <div><strong>Agency:</strong> {selectedHousehold.caseManager.agency}</div>
-                  <div><strong>Email:</strong> {selectedHousehold.caseManager.email}</div>
-                  <div><strong>Phone:</strong> {selectedHousehold.caseManager.phone}</div>
-                </div>
-              </div>
-
-              {/* Quick Action Navigation */}
-              <div className="grid grid-cols-2 gap-3">
-                <Link
-                  href="/billing/authorizations"
-                  className="flex items-center justify-center gap-2 p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-700 text-xs transition-colors"
-                >
-                  <ShieldCheck className="w-4 h-4 text-[#3D6B22]" /> Manage Authorizations
-                </Link>
-                <Link
-                  href="/scheduling"
-                  className="flex items-center justify-center gap-2 p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-semibold text-slate-700 text-xs transition-colors"
-                >
-                  <Calendar className="w-4 h-4 text-blue-600" /> Open Shift Scheduler
-                </Link>
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedHousehold(null)}
-                className="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

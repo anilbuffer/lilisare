@@ -112,7 +112,7 @@ export function IntakeReferralWorkspace() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-5 pb-12 animate-in fade-in duration-200">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Page Header */}
       <IntakePageHeader
         newReferralHref="/intake/pipeline/new/"

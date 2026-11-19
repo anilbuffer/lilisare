@@ -227,6 +227,15 @@ export const CAREGIVER_RECENT_ACTIVITIES: CaregiverAuditItem[] = [
     actor: "Sandata EVV Engine",
     type: "evv",
   },
+  {
+    id: "act-6",
+    timestamp: "2026-11-18T10:00:00Z",
+    relativeTime: "Yesterday",
+    title: "Annual performance review approved",
+    description: "CG-106 · Care coordinator evaluation completed",
+    actor: "Elena Vance, RN (Clinical Supervisor)",
+    type: "approval",
+  },
 ];
 
 export const INITIAL_CAREGIVERS: CaregiverRecord[] = [

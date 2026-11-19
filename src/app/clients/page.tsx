@@ -102,11 +102,11 @@ export default function ClientsPage() {
   ).length;
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-5 pb-12 animate-in fade-in duration-200">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Page Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Clients & Family Care
           </h1>
         </div>
@@ -134,11 +134,10 @@ export default function ClientsPage() {
                       setSelectedDateRange(opt.id);
                       setIsDateOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      selectedDateRange === opt.id
-                        ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedDateRange === opt.id
+                      ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
+                      : "text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     <span>{opt.label}</span>
                     {selectedDateRange === opt.id && <Check className="w-3 h-3" />}

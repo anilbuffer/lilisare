@@ -148,7 +148,7 @@ export function NewReferralFullPage({
               </span>
               <span className="text-xs text-slate-400">Step {step} of 4</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               New Family Referral
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -171,20 +171,18 @@ export function NewReferralFullPage({
               return (
                 <div key={s.num} className="flex flex-col items-center text-center">
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                      isDone
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone
                         ? "bg-[#3D6B22] text-white shadow-sm"
                         : isCurrent
-                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
-                        : "bg-slate-100 text-slate-400 border border-slate-200"
-                    }`}
+                          ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                          : "bg-slate-100 text-slate-400 border border-slate-200"
+                      }`}
                   >
                     {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
                   </div>
                   <span
-                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${
-                      isCurrent ? "text-[#3D6B22]" : "text-slate-500"
-                    }`}
+                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${isCurrent ? "text-[#3D6B22]" : "text-slate-500"
+                      }`}
                   >
                     {s.title}
                   </span>
@@ -305,11 +303,10 @@ export function NewReferralFullPage({
                       key={method}
                       type="button"
                       onClick={() => setPreferredContactMethod(method)}
-                      className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                        preferredContactMethod === method
+                      className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${preferredContactMethod === method
                           ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                           : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                      }`}
+                        }`}
                     >
                       {method}
                     </button>
@@ -625,11 +622,10 @@ export function NewReferralFullPage({
                         key={ct}
                         type="button"
                         onClick={() => handleToggleCareType(ct)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                          isSelected
+                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${isSelected
                             ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                             : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                        }`}
+                          }`}
                       >
                         {ct}
                       </button>

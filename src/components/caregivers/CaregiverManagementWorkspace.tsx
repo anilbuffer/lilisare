@@ -22,6 +22,7 @@ import {
   Users,
   Eye,
   User,
+  Home,
 } from "lucide-react";
 import { CaregiverRecord, CaregiverType, CaregiverStatus, CredentialStatus } from "@/types/caregiver";
 
@@ -44,7 +45,7 @@ export function CaregiverManagementWorkspace({
   activeAttentionCategory,
   onClearAttentionCategory,
 }: CaregiverManagementWorkspaceProps) {
-  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
 
@@ -273,10 +274,10 @@ export function CaregiverManagementWorkspace({
   return (
     <section className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       {/* Directory Title & Tabs */}
-      <div className="border-b border-slate-200/80 px-6 pt-5 pb-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+      <div className="border-b border-slate-100 px-6 pt-5 pb-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3.5">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Caregiver Directory</h2>
+            <h2 className="text-base font-bold text-slate-900 leading-tight">Caregiver Directory</h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Workforce roster across Family Caregivers, Live-In aides, and Family Friends
             </p>
@@ -301,7 +302,7 @@ export function CaregiverManagementWorkspace({
               <button
                 type="button"
                 onClick={onClearAttentionCategory}
-                className="hover:text-rose-950 font-bold ml-1"
+                className="hover:text-rose-950 font-bold ml-1 cursor-pointer"
                 title="Clear attention filter"
               >
                 ×
@@ -310,8 +311,8 @@ export function CaregiverManagementWorkspace({
           )}
         </div>
 
-        {/* Status Tabs matching requested design: (All) (Active) (Onboarding) (Pending) (On Hold) (Inactive) */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar border-b border-slate-200/80 -mb-px">
+        {/* Status Tabs matching /intake/pipeline & /clients */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
           {tabs.map((tab) => {
             const isActive = currentTab === tab.id;
             return (
@@ -322,16 +323,16 @@ export function CaregiverManagementWorkspace({
                   onSelectStatusFilter(tab.id === "ALL" ? null : tab.id);
                   if (activeAttentionCategory) onClearAttentionCategory();
                 }}
-                className={`flex items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                   isActive
-                    ? "border-[#3D6B22] text-[#3D6B22] bg-[#F2F8EE]/30"
-                    : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                    ? "bg-[#1B3414] text-white shadow-xs"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 border border-slate-200/60"
                 }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                    isActive ? "bg-[#3D6B22] text-white" : "bg-slate-100 text-slate-600"
+                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
+                    isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-600"
                   }`}
                 >
                   {tab.count}
@@ -562,7 +563,7 @@ export function CaregiverManagementWorkspace({
           </button>
         </div>
       ) : viewMode === "table" ? (
-        /* TABLE VIEW matching recommended directory fields */
+        /* TABLE VIEW */
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
@@ -570,8 +571,9 @@ export function CaregiverManagementWorkspace({
                 <th className="py-3 px-4 pl-6">Caregiver</th>
                 <th className="py-3 px-4">Caregiver ID</th>
                 <th className="py-3 px-4">Type</th>
+                <th className="py-3 px-4">Linked Household</th>
+                <th className="py-3 px-4">Assigned Client</th>
                 <th className="py-3 px-4">Credentials</th>
-                <th className="py-3 px-4">Assignment</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 pr-6 text-right">Actions</th>
               </tr>
@@ -594,7 +596,7 @@ export function CaregiverManagementWorkspace({
                     {/* Caregiver Name & Profile */}
                     <td className="py-3.5 px-4 pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                           {cg.avatarUrl ? (
                             <img
                               src={cg.avatarUrl}
@@ -606,23 +608,22 @@ export function CaregiverManagementWorkspace({
                           )}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors flex items-center gap-1.5">
-                            <span>{cg.name}</span>
-                            <span className="text-[10px] font-normal text-slate-400">
-                              ({cg.employmentClassification})
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
-                            <span>{cg.branch}</span>
-                            <span>•</span>
-                            <span>{cg.relationship.linkedHousehold.name}</span>
+                          <Link
+                            href={`/caregivers/${cg.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors"
+                          >
+                            {cg.name}
+                          </Link>
+                          <div className="text-[11px] text-slate-400 mt-0.5">
+                            {cg.branch}
                           </div>
                         </div>
                       </div>
                     </td>
 
                     {/* Caregiver ID */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-800">
+                    <td className="py-3.5 px-4 font-mono font-medium text-slate-700">
                       {cg.id}
                     </td>
 
@@ -637,45 +638,43 @@ export function CaregiverManagementWorkspace({
                       </span>
                     </td>
 
-                    {/* Credentials */}
+                    {/* Linked Household */}
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold border ${getCredentialBadge(
-                            cg.documentsCredentials.overallStatus
-                          )}`}
-                        >
-                          {cg.documentsCredentials.overallStatus}
+                      <div className="flex items-center gap-1.5 text-slate-700 text-xs">
+                        <Home className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate max-w-[140px] font-medium">
+                          {cg.relationship.linkedHousehold.name}
                         </span>
-                        {cg.documentsCredentials.overallStatus === "Expired" && (
-                          <span className="text-[10px] text-rose-600 font-semibold">
-                            (Renewal Due)
-                          </span>
-                        )}
                       </div>
                     </td>
 
-                    {/* Assignment */}
+                    {/* Assigned Client */}
                     <td className="py-3.5 px-4">
                       {assignedClient ? (
                         <div>
-                          <div className="font-semibold text-slate-900 flex items-center gap-1">
-                            <span className="text-[#3D6B22] font-mono text-[11px]">
-                              {assignedClient.id}
-                            </span>
-                            <span className="truncate max-w-[120px]">
-                              {assignedClient.name}
-                            </span>
+                          <div className="font-semibold text-slate-900 truncate max-w-[130px]">
+                            {assignedClient.name}
                           </div>
                           <span className="text-[10px] text-slate-400">
                             {assignedClient.weeklyAuthorizedHours} hrs/wk
                           </span>
                         </div>
                       ) : (
-                        <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                        <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-500">
                           Unassigned
                         </span>
                       )}
+                    </td>
+
+                    {/* Credentials */}
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold border ${getCredentialBadge(
+                          cg.documentsCredentials.overallStatus
+                        )}`}
+                      >
+                        {cg.documentsCredentials.overallStatus}
+                      </span>
                     </td>
 
                     {/* Status */}
@@ -685,21 +684,27 @@ export function CaregiverManagementWorkspace({
                           cg.status
                         )}`}
                       >
-                        ({cg.status})
+                        {cg.status}
                       </span>
                     </td>
 
                     {/* Actions */}
-                    <td className="py-3.5 px-4 pr-6 text-right">
-                      <div
-                        className="inline-flex items-center gap-1 text-slate-400 group-hover:text-[#3D6B22] transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectCaregiver(cg);
-                        }}
-                      >
-                        <span className="text-[11px] font-semibold">Inspect</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
+                    <td className="py-3.5 px-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onSelectCaregiver(cg)}
+                          className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                        >
+                          Quick View
+                        </button>
+                        <Link
+                          href={`/caregivers/${cg.id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                        >
+                          <span>Profile</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                        </Link>
                       </div>
                     </td>
                   </tr>
@@ -709,9 +714,7 @@ export function CaregiverManagementWorkspace({
           </table>
         </div>
       ) : (
-        /* GRID VIEW matching recommended sample cards:
-           Caregiver Record 01 (Active) - CG-102 - Family Caregiver
-        */
+        /* GRID VIEW */
         <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCaregivers.map((cg) => {
             const isSelected = selectedCaregiverId === cg.id;
@@ -721,17 +724,17 @@ export function CaregiverManagementWorkspace({
               <div
                 key={cg.id}
                 onClick={() => onSelectCaregiver(cg)}
-                className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
+                className={`bg-white rounded-2xl p-5 border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
                   isSelected
-                    ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-md -translate-y-0.5"
-                    : "border-slate-200 bg-white shadow-sm hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                    ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#F2F8EE]/30"
+                    : "border-slate-200 hover:border-[#3D6B22]/60"
                 }`}
               >
                 <div>
-                  {/* Top Bar: Caregiver Name & Status Badge */}
-                  <div className="flex items-start justify-between gap-2 mb-2.5">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                  {/* Top Bar: Caregiver Avatar, Name & Status Badge */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
                         {cg.avatarUrl ? (
                           <img
                             src={cg.avatarUrl}
@@ -742,74 +745,107 @@ export function CaregiverManagementWorkspace({
                           <User className="w-5 h-5 text-slate-400" />
                         )}
                       </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-snug">
+                      <div className="min-w-0">
+                        <h4 className="text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
                           {cg.name}
                         </h4>
-                        <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#3D6B22]">
-                          <span>{cg.id}</span>
-                          <span className="text-slate-300 font-sans">•</span>
-                          <span className="text-[11px] font-sans font-normal text-slate-500">
-                            {cg.branch}
-                          </span>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
+                          <span className="font-mono text-slate-500 font-medium">{cg.id}</span>
+                          <span>•</span>
+                          <span className="truncate">{cg.branch}</span>
                         </div>
                       </div>
                     </div>
 
                     <span
-                      className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border tracking-wide ${getStatusBadge(
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${getStatusBadge(
                         cg.status
                       )}`}
                     >
-                      ({cg.status})
+                      {cg.status}
                     </span>
                   </div>
 
-                  {/* Badges: Type and Credentials */}
-                  <div className="flex items-center flex-wrap gap-1.5 mt-3 mb-3">
+                  {/* Badges: Type and Linked Household */}
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
                     <span
-                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${getTypeBadge(
+                      className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-lg border ${getTypeBadge(
                         cg.type
                       )}`}
                     >
                       {cg.type}
                     </span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-50 border border-slate-200/80 px-2.5 py-0.5 rounded-lg truncate max-w-[160px]">
+                      <Home className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span className="truncate">{cg.relationship.linkedHousehold.name}</span>
+                    </span>
+                  </div>
+
+                  {/* Clean 2-line assignment & hours strip */}
+                  <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span className="text-slate-400 text-[11px] flex items-center gap-1.5 shrink-0">
+                        <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        Client:
+                      </span>
+                      {assignedClient ? (
+                        <span className="font-semibold text-slate-800 truncate max-w-[160px]">
+                          {assignedClient.name}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 italic text-[11px]">Unassigned</span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span className="text-slate-400 text-[11px] flex items-center gap-1.5 shrink-0">
+                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        Hours:
+                      </span>
+                      <span className="font-semibold text-slate-800">
+                        {assignedClient ? `${assignedClient.weeklyAuthorizedHours} hrs/wk` : "0 hrs/wk"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer with actions */}
+                <div
+                  className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center gap-1.5">
                     <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${getCredentialBadge(
-                        cg.documentsCredentials.overallStatus
-                      )}`}
-                    >
+                      className={`w-2 h-2 rounded-full ${
+                        cg.documentsCredentials.overallStatus === "Verified"
+                          ? "bg-emerald-500"
+                          : cg.documentsCredentials.overallStatus === "Expiring Soon"
+                          ? "bg-amber-500"
+                          : "bg-rose-500"
+                      }`}
+                    />
+                    <span className="text-slate-500 font-medium text-[11px]">
                       {cg.documentsCredentials.overallStatus} Credentials
                     </span>
                   </div>
 
-                  {/* Assignment info */}
-                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-xs">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                      Client Assignment
-                    </span>
-                    {assignedClient ? (
-                      <div className="flex items-center justify-between">
-                        <span className="font-semibold text-slate-800">
-                          {assignedClient.name}{" "}
-                          <span className="text-slate-400 font-normal">
-                            ({assignedClient.id})
-                          </span>
-                        </span>
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
-                          {assignedClient.weeklyAuthorizedHours}h / wk
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-slate-500 italic">Unassigned (Available)</span>
-                    )}
-                  </div>
-                </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onSelectCaregiver(cg)}
+                      className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                    >
+                      Quick View
+                    </button>
 
-                {/* Footer link */}
-                <div className="mt-3.5 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-[#3D6B22]">
-                  <span>Quick Overview</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    <Link
+                      href={`/caregivers/${cg.id}`}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:text-[#2C5217] transition-colors"
+                    >
+                      <span>Profile</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             );

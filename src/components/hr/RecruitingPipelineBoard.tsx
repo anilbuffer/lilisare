@@ -157,7 +157,7 @@ export function RecruitingPipelineBoard({ initialCandidates, initialStageFilter 
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 py-2">
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 flex-1">
           {/* Search */}
-          <div className="relative flex-1 min-w-[240px]">
+          <div className="relative flex-1 min-w-[260px]">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"

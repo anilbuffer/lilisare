@@ -1018,7 +1018,7 @@ export default function HrPayrollPage() {
                         {/* Caregiver Column */}
                         <td className="py-3 px-4 font-bold text-slate-900">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-teal-50 text-brand-teal font-semibold flex items-center justify-center border border-brand-teal/20 shrink-0">
+                            <div className="w-12 h-12 rounded-xl bg-teal-50 text-brand-teal font-semibold flex items-center justify-center border border-brand-teal/20 shrink-0">
                               {row.name.charAt(0)}
                             </div>
                             <div>

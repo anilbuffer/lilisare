@@ -403,7 +403,7 @@ export default function PatientsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <span
-                            className="font-medium text-slate-800 max-w-[240px] truncate block"
+                            className="font-medium text-slate-800 max-w-[260px] truncate block"
                             title={patient.primaryDiagnosis}
                           >
                             {patient.primaryDiagnosis}

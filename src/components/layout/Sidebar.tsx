@@ -416,7 +416,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         className={clsx(
           "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-all duration-300 ease-in-out min-[1120px]:translate-x-0 min-[1120px]:sticky min-[1120px]:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] min-[1120px]:shadow-none select-none",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          isCollapsed ? "min-[1120px]:w-[76px] w-[240px]" : "w-[240px]"
+          isCollapsed ? "min-[1120px]:w-[76px] w-[260px]" : "w-[260px]"
         )}
       >
         {/* Floating Edge Toggle Button matching requested screenshot */}
@@ -441,8 +441,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           )}
         >
           <Link href={safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal" : safeUser?.role === "CAREGIVER" ? "/caregiver" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : "/dashboard"} className="flex items-center gap-3 overflow-hidden group">
-            <div className="w-9 h-9 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow-md shadow-brand-teal/20 shrink-0 group-hover:scale-105 transition-transform">
-              <img src="/logo-mark.svg" alt="LiliSare Logo" className="w-7 h-7 object-contain" />
+            <div className="w-12 h-12 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow-md shadow-brand-teal/20 shrink-0 group-hover:scale-105 transition-transform">
+              <img src="/logo-mark.svg" alt="LiliSare Logo" className="w-10 h-10 object-contain" />
             </div>
             {!isCollapsed && (
               <div className="flex flex-col truncate pr-4">

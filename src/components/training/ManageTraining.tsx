@@ -274,7 +274,7 @@ export function ManageTraining() {
 
           <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 w-full md:w-auto mt-3 md:mt-0">
             {/* Search Input */}
-            <div className="relative w-full sm:w-auto sm:min-w-[240px]">
+            <div className="relative w-full sm:w-auto sm:min-w-[260px]">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -335,7 +335,7 @@ export function ManageTraining() {
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-extrabold shrink-0 shadow-sm">
+                      <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-extrabold shrink-0 shadow-sm">
                         {staff.avatar}
                       </div>
                       <div>
@@ -506,7 +506,7 @@ export function ManageTraining() {
           </div>
           <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 w-full md:w-auto mt-3 md:mt-0">
             {/* Search */}
-            <div className="relative w-full sm:w-auto sm:min-w-[240px]">
+            <div className="relative w-full sm:w-auto sm:min-w-[260px]">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"

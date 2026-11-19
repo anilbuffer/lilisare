@@ -30,8 +30,8 @@ export default function AboutPage() {
               currentUser?.role === "CLIENT" || currentUser?.role === "FAMILY"
                 ? "/portal"
                 : currentUser?.role === "CAREGIVER"
-                ? "/caregiver"
-                : "/dashboard"
+                  ? "/caregiver"
+                  : "/dashboard"
             }
             className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-brand-primary transition-colors font-medium"
           >
@@ -163,7 +163,7 @@ export default function AboutPage() {
         {/* Pillars / Values Strip */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-5 rounded-2xl bg-white border border-[#D5DFDA] shadow-xs space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-[#E3F1D9] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#E3F1D9] flex items-center justify-center">
               <HeartHandshake className="w-5 h-5 text-brand-primary" />
             </div>
             <h4 className="font-bold text-text-primary text-sm">Live-In & Family Caregivers</h4>
@@ -173,7 +173,7 @@ export default function AboutPage() {
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-[#D5DFDA] shadow-xs space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-[#E3F1D9] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#E3F1D9] flex items-center justify-center">
               <Users className="w-5 h-5 text-brand-primary" />
             </div>
             <h4 className="font-bold text-text-primary text-sm">Family Friends Community</h4>
@@ -183,7 +183,7 @@ export default function AboutPage() {
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-[#D5DFDA] shadow-xs space-y-2">
-            <div className="w-9 h-9 rounded-xl bg-[#FF6E61]/15 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#FF6E61]/15 flex items-center justify-center">
               <ShieldCheck className="w-5 h-5 text-[#FF6E61]" />
             </div>
             <h4 className="font-bold text-text-primary text-sm">Supported, Never Depleted</h4>

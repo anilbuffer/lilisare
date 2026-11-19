@@ -76,17 +76,14 @@ export function AuthorizationsComplianceCard() {
             <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
               <span className="text-[10px] uppercase font-bold text-emerald-700 block">Approved</span>
               <span className="text-lg font-extrabold text-emerald-950 mt-0.5 block">{metrics.authorizationsBreakdown.approved}</span>
-              <span className="text-[11px] text-emerald-700 font-medium block">{metrics.authorizationsBreakdown.approvedPct}%</span>
             </div>
             <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-100">
               <span className="text-[10px] uppercase font-bold text-amber-700 block">Awaiting State</span>
               <span className="text-lg font-extrabold text-amber-950 mt-0.5 block">{metrics.authorizationsBreakdown.awaitingState}</span>
-              <span className="text-[11px] text-amber-700 font-medium block">{metrics.authorizationsBreakdown.awaitingPct}%</span>
             </div>
             <div className="p-2.5 bg-rose-50 rounded-xl border border-rose-100">
               <span className="text-[10px] uppercase font-bold text-rose-700 block">Overdue</span>
               <span className="text-lg font-extrabold text-rose-950 mt-0.5 block">{metrics.authorizationsBreakdown.overdue}</span>
-              <span className="text-[11px] text-rose-700 font-medium block">{metrics.authorizationsBreakdown.overduePct}%</span>
             </div>
           </div>
 
@@ -102,7 +99,7 @@ export function AuthorizationsComplianceCard() {
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
               Urgent Follow-ups Required
             </span>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto thin-scrollbar pr-1.5">
               {OVERDUE_AUTHS.map((item) => (
                 <div key={item.clientCode} className="py-3 flex items-center justify-between text-xs gap-3">
                   <div className="min-w-0">
@@ -167,7 +164,7 @@ export function AuthorizationsComplianceCard() {
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
               Expiring & Overdue Roster
             </span>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto thin-scrollbar pr-1.5">
               {COMPLIANCE_ITEMS.map((item) => (
                 <div key={item.caregiverCode} className="py-3.5 flex items-center justify-between text-xs gap-3">
                   <div className="min-w-0">

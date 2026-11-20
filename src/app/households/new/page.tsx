@@ -247,20 +247,18 @@ export default function NewHouseholdPage() {
               return (
                 <div key={s.num} className="flex flex-col items-center text-center">
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                      isDone
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone
                         ? "bg-[#3D6B22] text-white shadow-sm"
                         : isCurrent
-                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
-                        : "bg-slate-100 text-slate-400 border border-slate-200"
-                    }`}
+                          ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                          : "bg-slate-100 text-slate-400 border border-slate-200"
+                      }`}
                   >
                     {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
                   </div>
                   <span
-                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${
-                      isCurrent ? "text-[#3D6B22]" : "text-slate-500"
-                    }`}
+                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${isCurrent ? "text-[#3D6B22]" : "text-slate-500"
+                      }`}
                   >
                     {s.title}
                   </span>
@@ -486,18 +484,16 @@ export default function NewHouseholdPage() {
                         type="button"
                         key={need}
                         onClick={() => toggleCareNeed(need)}
-                        className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs text-left transition-all cursor-pointer ${
-                          isChecked
+                        className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs text-left transition-all cursor-pointer ${isChecked
                             ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#3D6B22] font-semibold"
                             : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
-                        }`}
+                          }`}
                       >
                         <div
-                          className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
-                            isChecked
+                          className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${isChecked
                               ? "bg-[#3D6B22] border-[#3D6B22] text-white"
                               : "border-slate-300 bg-white"
-                          }`}
+                            }`}
                         >
                           {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                         </div>
@@ -547,16 +543,14 @@ export default function NewHouseholdPage() {
                   type="button"
                   key={p.id}
                   onClick={() => setCaregiverPathway(p.id)}
-                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                    caregiverPathway === p.id
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${caregiverPathway === p.id
                       ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-sm ring-1 ring-[#3D6B22]"
                       : "border-slate-200 bg-slate-50/60 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`block text-xs font-bold ${
-                      caregiverPathway === p.id ? "text-[#3D6B22]" : "text-slate-800"
-                    }`}
+                    className={`block text-xs font-bold ${caregiverPathway === p.id ? "text-[#3D6B22]" : "text-slate-800"
+                      }`}
                   >
                     {p.title}
                   </span>
@@ -893,7 +887,7 @@ export default function NewHouseholdPage() {
       </div>
 
       {/* Sticky Bottom Action Navigation Bar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3">
+      <div className="bg-white border border-slate-200 rounded-xl lg:rounded-2xl p-4 sm:p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={handlePrevStep}

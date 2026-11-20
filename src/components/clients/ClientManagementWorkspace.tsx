@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
-  LayoutGrid,
+  Kanban,
   List,
   Users,
   FilterX,
@@ -12,8 +13,129 @@ import {
   ShieldAlert,
   AlertCircle,
   ArrowRight,
+  ArrowUpRight,
+  Home,
+  Heart,
+  ChevronDown,
+  Check,
+  Filter,
+  Sparkles,
+  FileCheck2,
+  CheckCircle2,
+  Clock,
+  Archive,
+  Inbox,
+  UserCheck,
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
+import { toast } from "sonner";
+
+export type ClientKanbanStage =
+  | "Registration"
+  | "Onboarding"
+  | "Pending Auth"
+  | "Active"
+  | "On Hold / Discharged";
+
+export const CLIENT_KANBAN_STAGES: {
+  id: ClientKanbanStage;
+  title: string;
+  icon: React.ElementType;
+  badge: {
+    bg: string;
+    text: string;
+    border: string;
+    dot: string;
+    headerBadge: string;
+  };
+}[] = [
+    {
+      id: "Registration",
+      title: "Registration",
+      icon: Sparkles,
+      badge: {
+        bg: "bg-rose-50",
+        text: "text-rose-700",
+        border: "border-rose-200",
+        dot: "bg-rose-500",
+        headerBadge: "bg-rose-100 text-rose-800 border-rose-200",
+      },
+    },
+    {
+      id: "Onboarding",
+      title: "Onboarding",
+      icon: Clock,
+      badge: {
+        bg: "bg-amber-50",
+        text: "text-amber-800",
+        border: "border-amber-200",
+        dot: "bg-amber-500",
+        headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+      },
+    },
+    {
+      id: "Pending Auth",
+      title: "Pending Auth",
+      icon: FileCheck2,
+      badge: {
+        bg: "bg-purple-50",
+        text: "text-purple-700",
+        border: "border-purple-200",
+        dot: "bg-purple-500",
+        headerBadge: "bg-purple-100 text-purple-800 border-purple-200",
+      },
+    },
+    {
+      id: "Active",
+      title: "Active Care",
+      icon: CheckCircle2,
+      badge: {
+        bg: "bg-[#E3F1D9]",
+        text: "text-[#1E5622]",
+        border: "border-[#3D6B22]/20",
+        dot: "bg-[#3D6B22]",
+        headerBadge: "bg-[#E8F2E4] text-[#1E5622] border-[#93C573]/30",
+      },
+    },
+    {
+      id: "On Hold / Discharged",
+      title: "On Hold / Inactive",
+      icon: Archive,
+      badge: {
+        bg: "bg-slate-100",
+        text: "text-slate-600",
+        border: "border-slate-200",
+        dot: "bg-slate-400",
+        headerBadge: "bg-slate-200 text-slate-700 border-slate-300",
+      },
+    },
+  ];
+
+const STAGE_CONFIG_MAP = new Map(
+  CLIENT_KANBAN_STAGES.map((col) => [col.id, col])
+);
+
+export function resolveClientStage(
+  client: ClientRecord,
+  overrides: Record<string, ClientKanbanStage>
+): ClientKanbanStage {
+  if (overrides[client.id]) {
+    return overrides[client.id];
+  }
+  if (client.status === "Discharged" || client.status === "On Hold") {
+    return "On Hold / Discharged";
+  }
+  if (client.readiness?.authorization === "Pending" || client.readiness?.authorization === "Missing") {
+    return "Pending Auth";
+  }
+  if (client.status === "Onboarding") {
+    return "Onboarding";
+  }
+  if (client.status === "Active") {
+    return "Active";
+  }
+  return "Registration";
+}
 
 interface ClientManagementWorkspaceProps {
   clients: ClientRecord[];
@@ -47,50 +169,59 @@ export function ClientManagementWorkspace({
   selectedClientId,
   onSelectClient,
 }: ClientManagementWorkspaceProps) {
-  const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
+  const router = useRouter();
+
+  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCareType, setSelectedCareType] = useState("ALL");
+  const [stageOverrides, setStageOverrides] = useState<Record<string, ClientKanbanStage>>({});
 
-  // Determine active tab
-  const currentTab = selectedStatusFilter || "ALL";
+  // Dropdown & interactive drag states
+  const [isStageDropdownOpen, setIsStageDropdownOpen] = useState(false);
+  const stageDropdownRef = useRef<HTMLDivElement>(null);
+  const [draggedClientId, setDraggedClientId] = useState<string | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<ClientKanbanStage | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  // Tab definitions with dynamic counts
-  const tabs = useMemo(
-    () => [
-      { id: "ALL", label: "All Clients", count: clients.length },
-      { id: "Active", label: "Active", count: clients.filter((c) => c.status === "Active").length },
-      { id: "Onboarding", label: "Onboarding", count: clients.filter((c) => c.status === "Onboarding").length },
-      {
-        id: "PENDING_AUTH",
-        label: "Pending Auth",
-        count: clients.filter(
-          (c) => c.readiness?.authorization !== "Verified" || c.status === "On Hold"
-        ).length,
-      },
-      {
-        id: "ATTENTION",
-        label: "Needs Attention",
-        count: clients.filter((c) => c.attentionItems && c.attentionItems.length > 0).length,
-      },
-    ],
-    [clients]
-  );
+  // Close menus on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        stageDropdownRef.current &&
+        !stageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsStageDropdownOpen(false);
+      }
+      if (activeMenuId) {
+        setActiveMenuId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [activeMenuId]);
 
-  // Filter clients by search, tab status, and care type
+  // Determine active stage filter
+  const currentStageFilter: ClientKanbanStage | null =
+    selectedStatusFilter &&
+      CLIENT_KANBAN_STAGES.some((s) => s.id === selectedStatusFilter)
+      ? (selectedStatusFilter as ClientKanbanStage)
+      : null;
+
+  // Filter clients by search, tab status, care type, and stage filter
   const filteredClients = useMemo(() => {
     return clients.filter((client) => {
-      // Tab status filter
-      if (currentTab === "ATTENTION") {
+      const stage = resolveClientStage(client, stageOverrides);
+
+      // Selected stage dropdown / tab filter
+      if (selectedStatusFilter === "ATTENTION") {
         if (!client.attentionItems || client.attentionItems.length === 0) return false;
-      } else if (currentTab === "PENDING_AUTH") {
-        const isPending =
-          client.readiness?.authorization !== "Verified" || client.status === "On Hold";
-        if (!isPending) return false;
-      } else if (currentTab !== "ALL" && client.status !== currentTab) {
-        return false;
+      } else if (selectedStatusFilter && selectedStatusFilter !== "ALL") {
+        if (stage !== selectedStatusFilter) {
+          return false;
+        }
       }
 
-      // Care type dropdown filter
+      // Care type filter
       if (selectedCareType !== "ALL" && client.careType !== selectedCareType) {
         return false;
       }
@@ -105,21 +236,74 @@ export function ClientManagementWorkspace({
           client.assignedCareTeam.primaryCaregiver?.name.toLowerCase().includes(query) ?? false;
         const matchesProgram = client.carePlan.program.toLowerCase().includes(query);
 
-        if (!matchesName && !matchesId && !matchesHousehold && !matchesCaregiver && !matchesProgram) {
+        if (
+          !matchesName &&
+          !matchesId &&
+          !matchesHousehold &&
+          !matchesCaregiver &&
+          !matchesProgram
+        ) {
           return false;
         }
       }
 
       return true;
     });
-  }, [clients, currentTab, selectedCareType, searchQuery]);
+  }, [clients, selectedStatusFilter, selectedCareType, searchQuery, stageOverrides]);
 
-  const isFiltered = searchQuery !== "" || selectedCareType !== "ALL" || currentTab !== "ALL";
+  const isFiltered =
+    searchQuery !== "" || selectedCareType !== "ALL" || (selectedStatusFilter !== null && selectedStatusFilter !== "ALL");
 
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedCareType("ALL");
     onSelectStatusFilter(null);
+  };
+
+  // Move client between Kanban stages (via drag & drop or quick menu)
+  const handleMoveStage = (clientId: string, targetStage: ClientKanbanStage) => {
+    const targetClient = clients.find((c) => c.id === clientId);
+    if (!targetClient) return;
+
+    const currentStage = resolveClientStage(targetClient, stageOverrides);
+    if (currentStage === targetStage) return;
+
+    setStageOverrides((prev) => ({
+      ...prev,
+      [clientId]: targetStage,
+    }));
+    setActiveMenuId(null);
+    toast.success(`Moved ${targetClient.name} to "${targetStage}"`);
+  };
+
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedClientId(id);
+    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, stage: ClientKanbanStage) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverStage !== stage) {
+      setDragOverStage(stage);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverStage(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetStage: ClientKanbanStage) => {
+    e.preventDefault();
+    setDragOverStage(null);
+    const clientId = e.dataTransfer.getData("text/plain") || draggedClientId;
+    if (clientId) {
+      handleMoveStage(clientId, targetStage);
+    }
+    setDraggedClientId(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -151,23 +335,15 @@ export function ClientManagementWorkspace({
   };
 
   return (
-    <section aria-label="Client Management Workspace" className="space-y-4">
-      {/* Workspace Container matching InquiryManagementWorkspace */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
-        {/* Workspace Toolbar Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+    <section aria-label="Client Management Workspace">
+      {/* Outer Card container matching IntakeReferralWorkspace */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
+        {/* Workspace Header & Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-slate-900 leading-tight">
-                Client Management
-              </h2>
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                {filteredClients.length} shown
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Review and manage registered clients, caregivers, and authorizations
-            </p>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+              Client Management
+            </h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
@@ -179,11 +355,11 @@ export function ClientManagementWorkspace({
                 placeholder="Search client, ID, household, caregiver..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-xs"
               />
             </div>
 
-            {/* Care Type Filter Dropdown */}
+            {/* Care Type Filter */}
             <div className="relative">
               <select
                 value={selectedCareType}
@@ -198,131 +374,376 @@ export function ClientManagementWorkspace({
               </select>
             </div>
 
-            {/* View Mode Toggle (Grid vs Table) */}
+            {/* Stage Filter Dropdown matching Intake */}
+            <div className="relative" ref={stageDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsStageDropdownOpen(!isStageDropdownOpen)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                title="Filter clients by stage"
+              >
+                <Filter className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-slate-400 font-normal hidden sm:inline">Stage:</span>
+                <span className="flex items-center gap-1.5 font-bold text-slate-900 truncate max-w-[130px]">
+                  {currentStageFilter ? (
+                    <>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${STAGE_CONFIG_MAP.get(currentStageFilter)?.badge.dot || "bg-slate-400"
+                          }`}
+                      />
+                      <span className="truncate">
+                        {STAGE_CONFIG_MAP.get(currentStageFilter)?.title}
+                      </span>
+                    </>
+                  ) : (
+                    "All Stages"
+                  )}
+                </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isStageDropdownOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+
+              {isStageDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100">
+                    <span>Filter by Stage</span>
+                    {selectedStatusFilter && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectStatusFilter(null);
+                          setIsStageDropdownOpen(false);
+                        }}
+                        className="text-[10px] text-rose-600 hover:underline font-semibold cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onSelectStatusFilter(null);
+                        setIsStageDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${!selectedStatusFilter || selectedStatusFilter === "ALL"
+                        ? "bg-slate-50 font-bold text-slate-900"
+                        : "text-slate-700 hover:bg-slate-50"
+                        }`}
+                    >
+                      <span>All Stages</span>
+                      {(!selectedStatusFilter || selectedStatusFilter === "ALL") && (
+                        <Check className="w-3.5 h-3.5 text-[#3D6B22]" />
+                      )}
+                    </button>
+
+                    {CLIENT_KANBAN_STAGES.map((s) => {
+                      const isSelected = selectedStatusFilter === s.id;
+                      const count = clients.filter(
+                        (c) => resolveClientStage(c, stageOverrides) === s.id
+                      ).length;
+
+                      return (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => {
+                            onSelectStatusFilter(s.id);
+                            setIsStageDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
+                            ? "bg-slate-50 font-bold text-slate-900"
+                            : "text-slate-700 hover:bg-slate-50"
+                            }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full ${s.badge.dot}`} />
+                            <span>{s.title}</span>
+                          </span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-slate-100 text-slate-600">
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* View Mode Switcher: Kanban vs List (strictly matching Intake) */}
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
               <button
                 type="button"
-                onClick={() => setViewMode("grid")}
-                title="Grid View"
-                className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                onClick={() => setViewMode("kanban")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
+                  ? "bg-white text-[#3D6B22] shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
+                title="Kanban Board View"
               >
-                <LayoutGrid className="w-4 h-4" />
-                <span className="hidden sm:inline text-[11px]">Grid</span>
+                <Kanban className="w-3.5 h-3.5" />
+                <span>Kanban</span>
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode("table")}
-                title="Table View"
-                className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
-                  viewMode === "table"
-                    ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                onClick={() => setViewMode("list")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
+                  ? "bg-white text-[#3D6B22] shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
+                title="List View"
               >
-                <List className="w-4 h-4" />
-                <span className="hidden sm:inline text-[11px]">Table</span>
+                <List className="w-3.5 h-3.5" />
+                <span>List</span>
               </button>
             </div>
-          </div>
-        </div>
-
-        {/* Status Stage Tabs - matching InquiryManagementWorkspace */}
-        <div className="pt-3 overflow-x-auto scrollbar-none">
-          <div className="flex items-center gap-1.5 min-w-max border-b border-slate-100 pb-2.5">
-            {tabs.map((tab) => {
-              const isActive = currentTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => onSelectStatusFilter(tab.id === "ALL" ? null : tab.id)}
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-[#1B3414] text-white shadow-xs"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span
-                    className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                      isActive
-                        ? "bg-white/20 text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              );
-            })}
 
             {isFiltered && (
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:text-rose-700 px-2 py-1 ml-auto rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:text-rose-700 px-2.5 py-1.5 rounded-xl hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
+                title="Clear all active filters"
               >
                 <FilterX className="w-3.5 h-3.5" />
-                <span>Reset filters</span>
+                <span>Reset</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Content Display: Table or Grid */}
-        <div className="mt-3.5">
-          {filteredClients.length === 0 ? (
-            <div className="py-12 text-center text-slate-500">
-              <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="font-semibold text-slate-700 text-sm">No clients match your criteria</p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Try searching for another name or clearing active filters.
-              </p>
-              {isFiltered && (
-                <button
-                  type="button"
-                  onClick={handleClearFilters}
-                  className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#1E5622] bg-[#E3F1D9] hover:bg-[#d5eac8] rounded-xl transition-colors cursor-pointer"
-                >
-                  <FilterX className="w-3.5 h-3.5" />
-                  <span>Clear All Filters</span>
-                </button>
-              )}
+        {/* Content Area: Proper Kanban Board View vs List View */}
+        {viewMode === "kanban" ? (
+          /* KANBAN BOARD VIEW (5 Columns with clean, scannable client cards) */
+          <div className="w-full overflow-x-auto pb-3 pt-1 no-scrollbar sm:scrollbar-thin">
+            <div className="flex gap-3.5 min-w-[1250px] items-start">
+              {CLIENT_KANBAN_STAGES.map((col) => {
+                const columnClients = filteredClients.filter(
+                  (c) => resolveClientStage(c, stageOverrides) === col.id
+                );
+                const isDragOver = dragOverStage === col.id;
+                const isFilteredStage = selectedStatusFilter === col.id;
+
+                return (
+                  <div
+                    key={col.id}
+                    onDragOver={(e) => handleDragOver(e, col.id)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, col.id)}
+                    className={`w-[275px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${isDragOver
+                      ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
+                      : isFilteredStage
+                        ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
+                        : "bg-[#F8FAF9] border-slate-200/80"
+                      }`}
+                  >
+                    {/* Lane Header */}
+                    <div className="p-3 border-b border-slate-200/60 flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${col.badge.dot}`} />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-700 truncate">
+                          {col.title}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 bg-white ${col.badge.text} ${col.badge.border} shadow-2xs`}
+                      >
+                        {columnClients.length}
+                      </span>
+                    </div>
+
+                    {/* Cards Stack */}
+                    <div className="p-2.5 space-y-2.5 min-h-[440px] flex flex-col">
+                      {columnClients.length === 0 ? (
+                        <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-300/70 rounded-xl text-center bg-white/40">
+                          <Inbox className="w-5 h-5 text-slate-300 mb-1" />
+                          <span className="text-xs font-medium text-slate-400">
+                            No clients in stage
+                          </span>
+                        </div>
+                      ) : (
+                        columnClients.map((client) => {
+                          const isDragging = draggedClientId === client.id;
+                          const hasAttention =
+                            client.attentionItems && client.attentionItems.length > 0;
+
+                          return (
+                            <div
+                              key={client.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, client.id)}
+                              onClick={() => router.push(`/clients/${client.id}`)}
+                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
+                                }`}
+                            >
+                              <div>
+                                {/* Row 1: Client Name, ID & Attention Dot */}
+                                <div className="flex items-start justify-between gap-1.5 mb-1">
+                                  <div className="flex items-center gap-1.5 truncate flex-1">
+                                    <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate">
+                                      {client.name}
+                                    </h4>
+                                    {hasAttention && (
+                                      <span
+                                        className="w-2 h-2 rounded-full bg-amber-500 shrink-0"
+                                        title="Needs Attention"
+                                      />
+                                    )}
+                                  </div>
+                                  <span className="font-mono text-[10px] text-slate-400 shrink-0">
+                                    {client.id}
+                                  </span>
+                                </div>
+
+                                {/* Row 2: Connected Household & Age */}
+                                <p className="text-xs text-slate-500 truncate flex items-center gap-1">
+                                  <Home className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span className="truncate">{client.household.name}</span>
+                                  <span className="text-slate-400 font-normal">
+                                    · Age {client.age}
+                                  </span>
+                                </p>
+
+                                {/* Row 3: Care Arrangement / Primary Caregiver */}
+                                <div className="mt-2 text-[11px] text-slate-600 flex items-center justify-between">
+                                  <span
+                                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border truncate max-w-[130px] ${getCareTypeBadge(
+                                      client.careType
+                                    )}`}
+                                  >
+                                    {client.careType}
+                                  </span>
+
+                                  {client.assignedCareTeam.primaryCaregiver ? (
+                                    <span className="text-[10px] font-medium text-slate-600 truncate max-w-[110px] flex items-center gap-1">
+                                      <Users className="w-3 h-3 text-slate-400 shrink-0" />
+                                      {client.assignedCareTeam.primaryCaregiver.name.split(" ")[0]}
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-semibold text-rose-600">
+                                      Unassigned
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Row 4: Program Tag + Hours */}
+                                <div className="mt-2.5 flex items-center justify-between text-[11px]">
+                                  <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[155px]">
+                                    {formatShortProgram(client.carePlan.program)}
+                                  </span>
+                                  <span className="text-[10px] text-slate-500 font-semibold shrink-0">
+                                    {client.carePlan.authorizedWeeklyHours}h/wk
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Footer: Coordinator/Update + Quick Move Dropdown */}
+                              <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                                <span className="truncate max-w-[130px] text-slate-400 text-[11px]">
+                                  {client.assignedCareTeam.onboardingCoordinator?.name.split(" ")[0] || "Coordinator"} · {client.updatedAtRelative}
+                                </span>
+
+                                <div
+                                  className="flex items-center gap-1 shrink-0"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {/* Quick Move Stage dropdown */}
+                                  <div className="relative">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setActiveMenuId(
+                                          activeMenuId === client.id ? null : client.id
+                                        )
+                                      }
+                                      title="Move to another stage"
+                                      className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+                                    >
+                                      <ChevronDown className="w-3.5 h-3.5" />
+                                    </button>
+
+                                    {activeMenuId === client.id && (
+                                      <div className="absolute right-0 bottom-full mb-1 w-44 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
+                                        <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+                                          Move Stage
+                                        </div>
+                                        {CLIENT_KANBAN_STAGES.map((s) => {
+                                          const isCurrent =
+                                            resolveClientStage(client, stageOverrides) === s.id;
+                                          return (
+                                            <button
+                                              key={s.id}
+                                              type="button"
+                                              onClick={() =>
+                                                handleMoveStage(client.id, s.id)
+                                              }
+                                              className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center justify-between cursor-pointer"
+                                            >
+                                              <span className="flex items-center gap-1.5">
+                                                <span
+                                                  className={`w-1.5 h-1.5 rounded-full ${s.badge.dot}`}
+                                                />
+                                                <span>{s.title}</span>
+                                              </span>
+                                              {isCurrent && (
+                                                <Check className="w-3.5 h-3.5 text-[#3D6B22]" />
+                                              )}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* ArrowUpRight hover indicator */}
+                                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 opacity-60 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ) : viewMode === "table" ? (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Client</th>
-                      <th className="py-3.5 px-4">Household</th>
-                      <th className="py-3.5 px-4">Care Arrangement</th>
-                      <th className="py-3.5 px-4">Assigned Caregiver</th>
-                      <th className="py-3.5 px-4">Readiness</th>
-                      <th className="py-3.5 px-4">Status</th>
-                      <th className="py-3.5 px-4">Updated</th>
-                      <th className="py-3.5 px-4 text-right">Action</th>
-                    </tr>
+          </div>
+        ) : (
+          /* LIST VIEW (Clean, scannable table view matching Intake List view) */
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="py-3.5 px-4">Client</th>
+                    <th className="py-3.5 px-4">Household</th>
+                    <th className="py-3.5 px-4">Care Arrangement</th>
+                    <th className="py-3.5 px-4">Assigned Caregiver</th>
+                    <th className="py-3.5 px-4">Readiness</th>
+                    <th className="py-3.5 px-4">Stage</th>
+                    <th className="py-3.5 px-4">Updated</th>
+                    <th className="py-3.5 px-4 text-right">Action</th>
+                  </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {filteredClients.map((client) => {
-                    const isSelected = selectedClientId === client.id;
-                    const hasAttention = client.attentionItems && client.attentionItems.length > 0;
+                    const stage = resolveClientStage(client, stageOverrides);
+                    const stageConfig = STAGE_CONFIG_MAP.get(stage);
+                    const hasAttention =
+                      client.attentionItems && client.attentionItems.length > 0;
 
                     return (
                       <tr
                         key={client.id}
-                        onClick={() => onSelectClient(client)}
-                        className={`group cursor-pointer transition-colors ${
-                          isSelected
-                            ? "bg-[#F2F8EE] border-l-4 border-l-[#3D6B22]"
-                            : "hover:bg-slate-50/80"
-                        }`}
+                        onClick={() => router.push(`/clients/${client.id}`)}
+                        className="group cursor-pointer hover:bg-slate-50/80 transition-colors"
                       >
                         {/* Client Name & ID */}
                         <td className="py-3 px-3.5">
@@ -403,37 +824,33 @@ export function ClientManagementWorkspace({
                           <div className="flex items-center gap-1.5">
                             <span
                               title={`Profile: ${client.readiness.clientProfile}`}
-                              className={`w-2 h-2 rounded-full ${
-                                client.readiness.clientProfile === "Complete"
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-500"
-                              }`}
+                              className={`w-2 h-2 rounded-full ${client.readiness.clientProfile === "Complete"
+                                ? "bg-emerald-500"
+                                : "bg-amber-500"
+                                }`}
                             />
                             <span
                               title={`Care: ${client.readiness.careArrangement}`}
-                              className={`w-2 h-2 rounded-full ${
-                                client.readiness.careArrangement === "Complete"
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-500"
-                              }`}
+                              className={`w-2 h-2 rounded-full ${client.readiness.careArrangement === "Complete"
+                                ? "bg-emerald-500"
+                                : "bg-amber-500"
+                                }`}
                             />
                             <span
                               title={`Docs: ${client.readiness.documents}`}
-                              className={`w-2 h-2 rounded-full ${
-                                client.readiness.documents === "Verified"
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-500"
-                              }`}
+                              className={`w-2 h-2 rounded-full ${client.readiness.documents === "Verified"
+                                ? "bg-emerald-500"
+                                : "bg-amber-500"
+                                }`}
                             />
                             <span
                               title={`Auth: ${client.readiness.authorization}`}
-                              className={`w-2 h-2 rounded-full ${
-                                client.readiness.authorization === "Verified"
-                                  ? "bg-emerald-500"
-                                  : client.readiness.authorization === "Expiring"
+                              className={`w-2 h-2 rounded-full ${client.readiness.authorization === "Verified"
+                                ? "bg-emerald-500"
+                                : client.readiness.authorization === "Expiring"
                                   ? "bg-rose-500"
                                   : "bg-amber-500"
-                              }`}
+                                }`}
                             />
                             <span className="text-[11px] font-mono font-bold text-slate-600 ml-1">
                               {client.readiness.overallScore ?? 85}%
@@ -441,14 +858,18 @@ export function ClientManagementWorkspace({
                           </div>
                         </td>
 
-                        {/* Status */}
+                        {/* Stage Badge */}
                         <td className="py-3 px-3.5">
                           <span
-                            className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${getStatusBadge(
-                              client.status
-                            )}`}
+                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${stageConfig?.badge.bg ?? "bg-slate-100"
+                              } ${stageConfig?.badge.text ?? "text-slate-700"} ${stageConfig?.badge.border ?? "border-slate-200"
+                              }`}
                           >
-                            {client.status}
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${stageConfig?.badge.dot ?? "bg-slate-400"
+                                }`}
+                            />
+                            <span>{stageConfig?.title ?? stage}</span>
                           </span>
                         </td>
 
@@ -458,14 +879,17 @@ export function ClientManagementWorkspace({
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3 px-3.5 text-right" onClick={(e) => e.stopPropagation()}>
+                        <td
+                          className="py-3 px-3.5 text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
-                              onClick={() => onSelectClient(client)}
-                              className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
+                              onClick={() => router.push(`/clients/${client.id}`)}
+                              className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-[#F2F8EE] hover:text-[#3D6B22] border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
                             >
-                              View Details
+                              Details
                             </button>
                             <Link
                               href={`/clients/${client.id}`}
@@ -483,96 +907,7 @@ export function ClientManagementWorkspace({
               </table>
             </div>
           </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredClients.map((client) => {
-                const isSelected = selectedClientId === client.id;
-                const hasAttention = client.attentionItems && client.attentionItems.length > 0;
-
-                return (
-                  <div
-                    key={client.id}
-                    onClick={() => onSelectClient(client)}
-                    className={`bg-white rounded-2xl p-5 border shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 ${
-                      isSelected
-                        ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white -translate-y-0.5"
-                        : "border-slate-200 hover:border-[#3D6B22]/60"
-                    }`}
-                  >
-                    <div>
-                      {/* Top: Client Title + Status Badge */}
-                      <div className="flex items-start justify-between gap-2 mb-1.5">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <h3 className="text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
-                              {client.name}
-                            </h3>
-                            {hasAttention && (
-                              <span
-                                className="w-2 h-2 rounded-full bg-amber-500 shrink-0"
-                                title="Needs Attention"
-                              />
-                            )}
-                          </div>
-                          <p className="text-xs text-slate-500 mt-0.5 truncate">
-                            {client.household.name} · Age {client.age}
-                          </p>
-                        </div>
-
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${getStatusBadge(
-                            client.status
-                          )}`}
-                        >
-                          {client.status}
-                        </span>
-                      </div>
-
-                      {/* Compact Tags */}
-                      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 flex-wrap">
-                        <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200/60">
-                          {client.carePlan.authorizedWeeklyHours} hrs/wk
-                        </span>
-                        <span className="text-[11px] font-medium bg-[#E3F1D9] text-[#1E5622] px-2.5 py-0.5 rounded-lg border border-[#3D6B22]/20">
-                          {client.careType}
-                        </span>
-                        {client.assignedCareTeam.primaryCaregiver ? (
-                          <span className="text-[11px] font-medium text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-lg border border-slate-200/60 truncate max-w-[150px]">
-                            {client.assignedCareTeam.primaryCaregiver.name}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-200">
-                            Unassigned
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Card Footer: Minimal metadata + Profile link */}
-                    <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className="font-mono text-slate-600 font-medium">{client.id}</span>
-                        <span>·</span>
-                        <span>{formatShortProgram(client.carePlan.program)}</span>
-                        <span>·</span>
-                        <span>{client.updatedAtRelative}</span>
-                      </div>
-
-                      <Link
-                        href={`/clients/${client.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1 font-semibold text-[#3D6B22] group-hover:translate-x-1 transition-transform shrink-0"
-                      >
-                        <span>Profile</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </section>
   );

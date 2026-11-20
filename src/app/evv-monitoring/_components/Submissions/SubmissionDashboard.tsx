@@ -71,7 +71,7 @@ export function SubmissionDashboard() {
             <p className="text-2xl font-bold text-slate-900">423</p>
           </div>
         </div>
-        <div className="bg-gradient-to-br from-brand-teal to-teal-700 rounded-2xl p-4 sm:p-5 border border-teal-600 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-white">
+        <div className="bg-gradient-to-br from-brand-teal to-teal-700 rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-teal-600 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-white">
           <div>
             <p className="text-xs font-medium text-teal-100 uppercase tracking-wider">Pending Batch</p>
             <p className="text-2xl font-bold">{pendingVisits} Visits</p>

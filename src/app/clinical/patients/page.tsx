@@ -505,7 +505,7 @@ export default function PatientsPage() {
                   transition={{ duration: 0.25, delay: index * 0.04 }}
                 >
                   <Link href={`/clinical/patients/${patient.id}`} className="block h-full group">
-                    <Card className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:-translate-y-1 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)] hover:border-brand-teal/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between h-full">
+                    <Card className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:-translate-y-1 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)] hover:border-brand-teal/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between h-full">
                       <div>
                         {/* Top Row: Avatar & Name */}
                         <div className="flex items-start justify-between gap-3 mb-4">

@@ -375,8 +375,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       if (isPath("/hr/training")) return "training";
       if (isPath("/hr/payroll")) return "payroll";
       if (isPath("/hr/messages")) return "messages";
-      if (isPath("/clients") || isPath("/patients")) return "clients";
-      if (isPath("/households")) return "households";
+      if (isPath("/hr/clients") || isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/hr/households") || isPath("/households")) return "households";
       if (isPath("/hr/dashboard") || isPath("/hr")) return "dashboard";
     }
 
@@ -387,17 +387,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       if (isPath("/scheduler/dispatch/visits")) return "visit-list";
       if (isPath("/scheduler/caregivers/availability")) return "availability";
       if (isPath("/scheduler/caregivers")) return "caregivers";
-      if (isPath("/scheduler/patients") || isPath("/clients") || isPath("/patients")) return "clients";
-      if (isPath("/households")) return "households";
+      if (isPath("/scheduler/clients") || isPath("/scheduler/patients") || isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/scheduler/households") || isPath("/households")) return "households";
       if (isPath("/scheduler/messages")) return "messages";
       if (isPath("/scheduler")) return "dashboard";
     }
 
     if (role === "INTAKE_COORDINATOR") {
-      if (isPath("/intake/referrals") || isPath("/referrals")) return "referrals";
-      if (isPath("/clients") || isPath("/patients")) return "clients";
-      if (isPath("/intake/caregivers") || isPath("/caregivers")) return "caregivers";
-      if (isPath("/households")) return "households";
+      if (isPath("/intake/referrals") || isPath("/referrals") || isPath("/intake/pipeline") || isPath("/intake/inquiries")) return "referrals";
+      if (isPath("/intake/clients") || isPath("/intake/patients")) return "clients";
+      if (isPath("/intake/caregivers")) return "caregivers";
+      if (isPath("/intake/households")) return "households";
       if (isPath("/intake/reports") || isPath("/reports")) return "reports";
       if (isPath("/intake/dashboard") || isPath("/intake")) return "dashboard";
     }
@@ -477,36 +477,36 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (isPath("/hr/messages")) return "messages";
 
     // 3. Admin & General Agency Operational Mappings (Default ADMIN role & fallback)
-    if (isPath("/households")) return "households";
-    if (isPath("/audit-logs")) return "audit-logs";
-    if (isPath("/automation")) return "automation-rules";
-    if (isPath("/intake") || isPath("/referrals") || isPath("/refer")) return "intake-referrals";
-    if (isPath("/clients") || isPath("/patients")) return "clients";
+    if (isPath("/admin/command-center")) return "command-center";
+    if (isPath("/admin/households") || isPath("/households")) return "households";
+    if (isPath("/admin/audit-logs") || isPath("/audit-logs")) return "audit-logs";
+    if (isPath("/admin/automation") || isPath("/automation")) return "automation-rules";
+    if (isPath("/admin/intake-referrals") || isPath("/admin/referrals") || isPath("/intake/pipeline") || isPath("/intake/referrals") || isPath("/intake") || isPath("/referrals") || isPath("/refer")) return "intake-referrals";
+    if (isPath("/admin/clients") || isPath("/clients") || isPath("/patients")) return "clients";
 
     // Caregivers directory & management (Admin / Agency)
-    if (isPath("/caregivers")) return "caregivers";
+    if (isPath("/admin/caregivers") || isPath("/caregivers")) return "caregivers";
 
     // Care Operations
-    if (isPath("/billing/authorizations") || isPath("/authorizations")) return "authorizations";
-    if (isPath("/evv-monitoring") || isPath("/caregivers-tracker")) return "evv-visits";
-    if (isPath("/scheduling") || isPath("/scheduler")) return "scheduling";
-    if (isPath("/clinical/visit-notes") || isPath("/care-notes")) return "care-notes";
-    if (isPath("/clinical")) return "clinical-supervisory";
+    if (isPath("/admin/authorizations") || isPath("/billing/authorizations") || isPath("/authorizations")) return "authorizations";
+    if (isPath("/admin/evv-visits") || isPath("/evv-monitoring") || isPath("/caregivers-tracker")) return "evv-visits";
+    if (isPath("/admin/scheduling") || isPath("/scheduling") || isPath("/scheduler")) return "scheduling";
+    if (isPath("/admin/care-notes") || isPath("/clinical/visit-notes") || isPath("/care-notes")) return "care-notes";
+    if (isPath("/admin/clinical") || isPath("/clinical")) return "clinical-supervisory";
 
     // Administration
-    if (isPath("/compliance") || isPath("/quality-assurance")) return "compliance";
-    if (isPath("/training-admin") || isPath("/training")) return "training-credentials";
-    if (isPath("/billing/payroll") || isPath("/payroll")) return "payroll";
-    if (isPath("/billing")) return "billing-claims";
-    if (isPath("/reports")) return "reports-analytics";
+    if (isPath("/admin/compliance") || isPath("/compliance") || isPath("/quality-assurance")) return "compliance";
+    if (isPath("/admin/training") || isPath("/training-admin") || isPath("/training")) return "training-credentials";
+    if (isPath("/admin/payroll") || isPath("/billing/payroll") || isPath("/payroll")) return "payroll";
+    if (isPath("/admin/billing") || isPath("/billing")) return "billing-claims";
+    if (isPath("/admin/reports") || isPath("/reports")) return "reports-analytics";
 
     // System
-    if (isPath("/users")) return "user-role-mgmt";
-    if (isPath("/communications") || isPath("/notifications")) return "notifications";
-    if (isPath("/settings") || isPath("/admin-settings")) return "settings";
-    if (isPath("/admin/command-center")) return "command-center";
+    if (isPath("/admin/users") || isPath("/users")) return "user-role-mgmt";
+    if (isPath("/admin/notifications") || isPath("/communications") || isPath("/notifications")) return "notifications";
+    if (isPath("/admin/settings") || isPath("/settings") || isPath("/admin-settings")) return "settings";
 
-    if (isPath("/dashboard") || path === "/") return "dashboard";
+    if (isPath("/admin/dashboard") || isPath("/dashboard") || path === "/") return "dashboard";
 
     return "dashboard";
   }, [pathname, safeUser?.role]);
@@ -547,43 +547,104 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   };
 
   const getItemHref = (id: string) => {
-    if (id === "dashboard") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : "/dashboard";
-    if (id === "intake-referrals") return "/intake/pipeline";
-    if (id === "clients") return "/clients";
-    if (id === "caregivers") return safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/caregivers" : "/caregivers";
-    if (id === "households") return "/households";
-    if (id === "authorizations") return "/billing/authorizations";
-    if (id === "scheduling") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/schedule" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/scheduling" : "/scheduling";
-    if (id === "evv-visits") return "/evv-monitoring";
-    if (id === "care-notes") return "/clinical/visit-notes";
-    if (id === "clinical-supervisory") return "/clinical";
-    if (id === "compliance") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/tracking" : safeUser?.role === "TRAINER" ? "/training-admin/compliance" : "/compliance";
-    if (id === "training-credentials") return "/training-admin";
-    if (id === "billing-claims") return "/billing/workspace";
-    if (id === "payroll") return safeUser?.role === "HR" ? "/hr/payroll" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/payroll" : "/payroll";
-    if (id === "reports-analytics") return "/reports";
-    if (id === "user-role-mgmt") return "/users";
-    if (id === "automation-rules") return "/automation";
-    if (id === "notifications") return "/communications";
-    if (id === "audit-logs") return "/audit-logs";
-    if (id === "settings") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/settings" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/settings" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/settings" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/settings" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/settings" : safeUser?.role === "TRAINER" ? "/training-admin/settings" : "/settings";
+    const role = safeUser?.role;
+
+    // 1. Role-specific URL namespaces
+    if (role === "ADMIN" || !role) {
+      if (id === "dashboard") return "/admin/dashboard";
+      if (id === "intake-referrals") return "/admin/intake-referrals";
+      if (id === "clients") return "/admin/clients";
+      if (id === "caregivers") return "/admin/caregivers";
+      if (id === "households") return "/admin/households";
+      if (id === "authorizations") return "/admin/authorizations";
+      if (id === "scheduling") return "/admin/scheduling";
+      if (id === "evv-visits") return "/admin/evv-visits";
+      if (id === "care-notes") return "/admin/care-notes";
+      if (id === "clinical-supervisory") return "/admin/clinical";
+      if (id === "compliance") return "/admin/compliance";
+      if (id === "training-credentials") return "/admin/training";
+      if (id === "billing-claims") return "/admin/billing";
+      if (id === "payroll") return "/admin/payroll";
+      if (id === "reports-analytics") return "/admin/reports";
+      if (id === "user-role-mgmt") return "/admin/users";
+      if (id === "automation-rules") return "/admin/automation";
+      if (id === "notifications") return "/admin/notifications";
+      if (id === "audit-logs") return "/admin/audit-logs";
+      if (id === "settings") return "/admin/settings";
+      if (id === "command-center") return "/admin/command-center";
+    }
+
+    if (role === "INTAKE_COORDINATOR") {
+      if (id === "dashboard") return "/intake/dashboard";
+      if (id === "referrals") return "/intake/pipeline";
+      if (id === "clients") return "/intake/clients";
+      if (id === "caregivers") return "/intake/caregivers";
+      if (id === "households") return "/intake/households";
+      if (id === "reports") return "/intake/reports";
+      if (id === "settings") return "/intake/settings";
+    }
+
+    if (role === "HR") {
+      if (id === "dashboard") return "/hr/dashboard";
+      if (id === "recruiting") return "/hr/recruiting";
+      if (id === "caregivers") return "/hr/caregivers";
+      if (id === "clients") return "/hr/clients";
+      if (id === "households") return "/hr/households";
+      if (id === "training") return "/hr/training";
+      if (id === "payroll") return "/hr/payroll";
+      if (id === "messages") return "/hr/messages";
+    }
+
+    if (role === "SCHEDULER") {
+      if (id === "dashboard") return "/scheduler";
+      if (id === "scheduled-shifts") return "/scheduler/shifts/list";
+      if (id === "recurring-patterns") return "/scheduler/shifts/recurring";
+      if (id === "route-optimizer") return "/scheduler/dispatch/optimizer";
+      if (id === "visit-list") return "/scheduler/dispatch/visits";
+      if (id === "caregivers") return "/scheduler/caregivers";
+      if (id === "availability") return "/scheduler/caregivers/availability";
+      if (id === "clients") return "/scheduler/clients";
+      if (id === "households") return "/scheduler/households";
+      if (id === "messages") return "/scheduler/messages";
+    }
+
+    if (id === "dashboard") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : "/admin/dashboard";
+    if (id === "intake-referrals") return "/admin/intake-referrals";
+    if (id === "clients") return "/admin/clients";
+    if (id === "caregivers") return safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/caregivers" : "/admin/caregivers";
+    if (id === "households") return "/admin/households";
+    if (id === "authorizations") return "/admin/authorizations";
+    if (id === "scheduling") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/schedule" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/scheduling" : "/admin/scheduling";
+    if (id === "evv-visits") return "/admin/evv-visits";
+    if (id === "care-notes") return "/admin/care-notes";
+    if (id === "clinical-supervisory") return "/admin/clinical";
+    if (id === "compliance") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/tracking" : safeUser?.role === "TRAINER" ? "/training-admin/compliance" : "/admin/compliance";
+    if (id === "training-credentials") return "/admin/training";
+    if (id === "billing-claims") return "/admin/billing";
+    if (id === "payroll") return safeUser?.role === "HR" ? "/hr/payroll" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/payroll" : "/admin/payroll";
+    if (id === "reports-analytics") return "/admin/reports";
+    if (id === "user-role-mgmt") return "/admin/users";
+    if (id === "automation-rules") return "/admin/automation";
+    if (id === "notifications") return "/admin/notifications";
+    if (id === "audit-logs") return "/admin/audit-logs";
+    if (id === "settings") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/settings" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/settings" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/settings" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/settings" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/settings" : safeUser?.role === "TRAINER" ? "/training-admin/settings" : "/admin/settings";
 
     // Backward compatibility for other sub-portal roles
     if (id === "command-center") return "/admin/command-center";
-    if (id === "users") return "/users";
-    if (id === "training") return safeUser?.role === "CAREGIVER" ? "/caregiver/training" : safeUser?.role === "HR" ? "/hr/training" : "/training";
-    if (id === "billing-admin") return "/billing/workspace";
-    if (id === "billing-workspace") return "/billing/workspace";
-    if (id === "reports") return safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/reports" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/reports" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/reports" : "/reports";
+    if (id === "users") return "/admin/users";
+    if (id === "training") return safeUser?.role === "CAREGIVER" ? "/caregiver/training" : safeUser?.role === "HR" ? "/hr/training" : "/admin/training";
+    if (id === "billing-admin") return "/admin/billing";
+    if (id === "billing-workspace") return "/admin/billing";
+    if (id === "reports") return safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/reports" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/reports" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/reports" : "/admin/reports";
     if (id === "messages") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/messages" : safeUser?.role === "CAREGIVER" ? "/caregiver/messages" : safeUser?.role === "HR" ? "/hr/messages" : safeUser?.role === "SCHEDULER" ? "/scheduler/messages" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/messages" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/messages" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/messages" : safeUser?.role === "TRAINER" ? "/training-admin/messages" : "/billing/messages";
-    if (id === "patients") return "/clients";
-    if (id === "evv-monitoring") return "/evv-monitoring";
+    if (id === "patients") return "/admin/clients";
+    if (id === "evv-monitoring") return "/admin/evv-visits";
     if (id === "qa") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/qa" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/qa" : "/quality-assurance";
     if (id === "visits") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/visits" : "/field-supervisor/visits";
     if (id === "incidents") return safeUser?.role === "CAREGIVER" ? "/caregiver/incidents" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/incidents" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/incidents" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/incidents" : "/incidents";
     if (id === "assessments") return safeUser?.role === "CAREGIVER" ? "/caregiver/assessments" : "/clinical/assessments";
     if (id === "referrals") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/referrals" : "/referrals";
-    if (id === "communications") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/communications" : "/communications";
+    if (id === "communications") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/communications" : "/admin/notifications";
     if (id === "overview") return "/portal";
     if (id === "care-plan") return "/portal/care-plan";
     if (id === "billing") return "/portal/billing";
@@ -600,7 +661,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (id === "course-builder") return "/training-admin/courses/builder";
     if (id === "courses") return "/training-admin/courses";
     if (id === "quizzes") return "/training-admin/quizzes";
-    return "/dashboard";
+    return "/admin/dashboard";
   };
 
   return (
@@ -669,7 +730,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 ? "/field-supervisor"
                 : safeUser?.role === "TRAINER"
                 ? "/training-admin"
-                : "/dashboard"
+                : "/admin/dashboard"
             }
             className="flex items-center gap-3 overflow-hidden group"
           >

@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Users, UserPlus, FileText, CalendarClock } from "lucide-react";
 import { cn } from "@/components/ui/Card";
@@ -11,11 +12,14 @@ interface HRNavHeaderProps {
 }
 
 export function HRNavHeader({ activeTab }: HRNavHeaderProps) {
+  const pathname = usePathname();
+  const base = pathname?.startsWith("/admin/caregivers") ? "/admin/caregivers" : "/caregivers";
+
   const tabs = [
-    { id: "roster", label: "Caregiver Roster", icon: Users, href: "/caregivers" },
-    { id: "recruiting", label: "Recruiting Pipeline", icon: UserPlus, href: "/caregivers/recruiting" },
-    { id: "onboarding", label: "Onboarding & Docs", icon: FileText, href: "/caregivers/onboarding" },
-    { id: "time-off", label: "Time-Off Requests", icon: CalendarClock, href: "/caregivers/time-off" },
+    { id: "roster", label: "Caregiver Roster", icon: Users, href: base },
+    { id: "recruiting", label: "Recruiting Pipeline", icon: UserPlus, href: `${base}/recruiting` },
+    { id: "onboarding", label: "Onboarding & Docs", icon: FileText, href: `${base}/onboarding` },
+    { id: "time-off", label: "Time-Off Requests", icon: CalendarClock, href: `${base}/time-off` },
   ];
 
   return (

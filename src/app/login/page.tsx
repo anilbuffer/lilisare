@@ -544,7 +544,7 @@ export default function LoginPage() {
       setIsLoading(false);
 
       if (selectedRole === "ADMIN") {
-        router.push("/dashboard");
+        router.push("/admin/dashboard");
       } else if (selectedRole === "SCHEDULER") {
         router.push("/scheduler");
       } else if (selectedRole === "HR") {

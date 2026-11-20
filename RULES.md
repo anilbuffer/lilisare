@@ -120,6 +120,7 @@ The Agency Admin Portal must NEVER be designed as isolated, fragmented departmen
 - **Modals vs. Full Pages:** Avoid long, content-heavy modals; implement extensive views (wizards, profiles, detailed record editors) as dedicated full pages instead.
 - **Design Consistency:** Maintain uniform styling and layouts across all UI elements (cards, typography, actions/links, tables, and modals) in line with existing pages.
 - **Brand & Domain Terminology:** Align all copy, service names, sample data, and tone with the LiliSare brand, incorporating clear terminology for Patients/Clients, Caregivers, and Households.
+- **Role-Dedicated Routing Architecture:** All routing URLs MUST strictly include the role-dedicated prefix matching the user persona (e.g. `/intake/...`, `/admin/...`, `/hr/...`, `/scheduler/...`, `/billing/...`, `/clinical/...`, `/compliance/...`, `/portal/...`, `/caregiver/...`). Core entities must always be accessed via their role prefix (e.g. `/intake/caregivers/`, `/intake/clients/`, `/intake/households/` for Intake Coordinator, and `/admin/caregivers/`, `/admin/clients/`, `/admin/households/` for Agency Admin). Never introduce un-prefixed or ambiguous root entity URLs. All future pages, sub-routes, and navigation links must strictly follow this role-scoped convention.
 
 
 

@@ -91,6 +91,14 @@ export default function IntakeClientsPage() {
     setIsDrawerOpen(false);
   };
 
+  const needsAttentionCount = clients.filter(
+    (c) => Boolean(c.attentionItems && c.attentionItems.length > 0)
+  ).length;
+
+  const handleSelectKpiStatus = (status: string) => {
+    setSelectedStatus((prev) => (prev === status ? null : status));
+  };
+
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Top Header Bar */}
@@ -99,14 +107,6 @@ export default function IntakeClientsPage() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Intake Clients
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-2">
-            <span>Client admissions, waiver eligibility, and linked household coordination.</span>
-            <span className="inline-block w-1 h-1 rounded-full bg-slate-300" />
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-              Real-time Intake Sync · {lastSyncTime}
-            </span>
-          </p>
         </div>
 
         {/* Global Header Actions */}
@@ -187,16 +187,18 @@ export default function IntakeClientsPage() {
       {/* 02. Interactive KPI Metric Strip */}
       <ClientKpiStrip
         clients={clients}
-        selectedStatus={selectedStatus}
-        onSelectStatus={(status) => setSelectedStatus(status)}
+        activeStatusFilter={selectedStatus || "ALL"}
+        onSelectStatus={handleSelectKpiStatus}
+        needsAttentionCount={needsAttentionCount}
       />
 
       {/* 03. Main Interactive Workspace (Kanban / Table / Grid) */}
       <ClientManagementWorkspace
         clients={clients}
         selectedStatusFilter={selectedStatus}
+        onSelectStatusFilter={setSelectedStatus}
+        selectedClientId={selectedClient?.id ?? null}
         onSelectClient={handleSelectClient}
-        onOpenDrawer={handleOpenDrawer}
       />
 
       {/* 04. Contextual Quick-Profile Drawer */}

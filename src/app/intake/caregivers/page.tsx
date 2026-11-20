@@ -31,7 +31,6 @@ export default function IntakeCaregiversPage() {
 
   const [caregivers, setCaregivers] = useState<CaregiverRecord[]>([]);
   const [isMounted, setIsMounted] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string>("Just now");
 
   // Filter States
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string | null>(null);
@@ -62,9 +61,6 @@ export default function IntakeCaregiversPage() {
 
     const unsubscribe = subscribeToIntakeSync(() => {
       setCaregivers(getCaregiversFromStorage());
-      setLastSyncTime(
-        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      );
     });
 
     function handleClickOutside(event: MouseEvent) {
@@ -108,14 +104,6 @@ export default function IntakeCaregiversPage() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Intake Caregivers
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-2">
-            <span>Intake coordination, applicant screening, and family placement pipeline.</span>
-            <span className="inline-block w-1 h-1 rounded-full bg-slate-300" />
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Synced in Real-time · {lastSyncTime}
-            </span>
-          </p>
         </div>
 
         {/* Action Controls */}
@@ -141,11 +129,10 @@ export default function IntakeCaregiversPage() {
                       setSelectedDateRange(opt.id);
                       setIsDateOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      selectedDateRange === opt.id
+                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedDateRange === opt.id
                         ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
                         : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     <span>{opt.label}</span>
                     {selectedDateRange === opt.id && <Check className="w-3 h-3" />}

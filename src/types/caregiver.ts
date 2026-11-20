@@ -4,6 +4,16 @@ export type CaregiverType =
   | "Family Friend"
   | "Attendant Caregiver";
 
+export type CaregiverPipelineStage =
+  | "New Application"
+  | "Phone Screened"
+  | "Interview Scheduled"
+  | "Training"
+  | "Hiring Decision"
+  | "Offer Extended"
+  | "Hired & Onboarding"
+  | "Archived";
+
 export type CaregiverStatus =
   | "Active"
   | "Onboarding"
@@ -108,6 +118,7 @@ export interface CaregiverRecord {
   avatarUrl?: string;
   type: CaregiverType;
   status: CaregiverStatus;
+  pipelineStage?: CaregiverPipelineStage;
   branch: string; // e.g. "Mountain Lane", "North Metro", "Valley View"
   hireDate: string;
   employmentClassification: "W-2" | "1099" | "Family Paid Exempt";

@@ -1,30 +1,42 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
-  LayoutGrid,
+  Kanban,
   List,
   Filter,
   FilterX,
   ChevronDown,
-  ChevronUp,
-  UserCheck,
-  Clock,
-  AlertTriangle,
-  BadgeAlert,
-  ShieldAlert,
-  ArrowRight,
-  ExternalLink,
-  MapPin,
+  Check,
+  Inbox,
+  Sparkles,
+  PhoneCall,
+  Calendar,
+  GraduationCap,
+  ThumbsUp,
+  FileCheck2,
   CheckCircle2,
+  Archive,
+  ArrowUpRight,
+  ArrowRight,
+  Clock,
   Users,
-  Eye,
-  User,
   Home,
+  User,
+  AlertTriangle,
 } from "lucide-react";
-import { CaregiverRecord, CaregiverType, CaregiverStatus, CredentialStatus } from "@/types/caregiver";
+import {
+  CaregiverRecord,
+  CaregiverPipelineStage,
+  CaregiverType,
+  CaregiverStatus,
+  CredentialStatus,
+} from "@/types/caregiver";
+import { saveCaregiversToStorage } from "@/lib/caregivers/mockData";
+import { toast } from "sonner";
 
 interface CaregiverManagementWorkspaceProps {
   caregivers: CaregiverRecord[];
@@ -34,127 +46,231 @@ interface CaregiverManagementWorkspaceProps {
   onSelectCaregiver: (caregiver: CaregiverRecord) => void;
   activeAttentionCategory: string | null;
   onClearAttentionCategory: () => void;
+  baseDetailsPath?: string;
+}
+
+// 8 Required Columns for the Caregiver Kanban Board
+export const EIGHT_CAREGIVER_KANBAN_STAGES: {
+  id: CaregiverPipelineStage;
+  title: string;
+  icon: React.ElementType;
+  badge: {
+    bg: string;
+    text: string;
+    border: string;
+    dot: string;
+    headerBadge: string;
+  };
+}[] = [
+  {
+    id: "New Application",
+    title: "New Application",
+    icon: Sparkles,
+    badge: {
+      bg: "bg-rose-50",
+      text: "text-rose-700",
+      border: "border-rose-200",
+      dot: "bg-rose-500",
+      headerBadge: "bg-rose-100 text-rose-800 border-rose-200",
+    },
+  },
+  {
+    id: "Phone Screened",
+    title: "Phone Screened",
+    icon: PhoneCall,
+    badge: {
+      bg: "bg-amber-50",
+      text: "text-amber-800",
+      border: "border-amber-200",
+      dot: "bg-amber-500",
+      headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+    },
+  },
+  {
+    id: "Interview Scheduled",
+    title: "Interview Scheduled",
+    icon: Calendar,
+    badge: {
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      border: "border-purple-200",
+      dot: "bg-purple-500",
+      headerBadge: "bg-purple-100 text-purple-800 border-purple-200",
+    },
+  },
+  {
+    id: "Training",
+    title: "Training",
+    icon: GraduationCap,
+    badge: {
+      bg: "bg-blue-50",
+      text: "text-blue-800",
+      border: "border-blue-200",
+      dot: "bg-blue-600",
+      headerBadge: "bg-blue-100 text-blue-800 border-blue-200",
+    },
+  },
+  {
+    id: "Hiring Decision",
+    title: "Hiring Decision",
+    icon: ThumbsUp,
+    badge: {
+      bg: "bg-sky-50",
+      text: "text-sky-800",
+      border: "border-sky-200",
+      dot: "bg-sky-600",
+      headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
+    },
+  },
+  {
+    id: "Offer Extended",
+    title: "Offer Extended",
+    icon: FileCheck2,
+    badge: {
+      bg: "bg-teal-50",
+      text: "text-teal-800",
+      border: "border-teal-200",
+      dot: "bg-teal-600",
+      headerBadge: "bg-teal-100 text-teal-800 border-teal-200",
+    },
+  },
+  {
+    id: "Hired & Onboarding",
+    title: "Hired & Onboarding",
+    icon: CheckCircle2,
+    badge: {
+      bg: "bg-[#E3F1D9]",
+      text: "text-[#1E5622]",
+      border: "border-[#3D6B22]/20",
+      dot: "bg-[#3D6B22]",
+      headerBadge: "bg-[#E8F2E4] text-[#1E5622] border-[#93C573]/30",
+    },
+  },
+  {
+    id: "Archived",
+    title: "Archived",
+    icon: Archive,
+    badge: {
+      bg: "bg-slate-100",
+      text: "text-slate-600",
+      border: "border-slate-200",
+      dot: "bg-slate-400",
+      headerBadge: "bg-slate-200 text-slate-700 border-slate-300",
+    },
+  },
+];
+
+const STAGE_CONFIG_MAP = new Map(
+  EIGHT_CAREGIVER_KANBAN_STAGES.map((col) => [col.id, col])
+);
+
+// Safely normalize or fallback caregiver records into the 8 Kanban stages
+export function normalizeCaregiverStage(cg: CaregiverRecord): CaregiverPipelineStage {
+  if (cg.pipelineStage) return cg.pipelineStage;
+  if (cg.status === "Inactive" || cg.status === "On Hold") return "Archived";
+  if (cg.status === "Active") return "Hired & Onboarding";
+  if (cg.status === "Onboarding") return "Training";
+  if (cg.status === "Pending") return "Phone Screened";
+  return "New Application";
 }
 
 export function CaregiverManagementWorkspace({
-  caregivers,
+  caregivers: initialCaregivers,
   selectedStatusFilter,
   onSelectStatusFilter,
   selectedCaregiverId,
   onSelectCaregiver,
   activeAttentionCategory,
   onClearAttentionCategory,
+  baseDetailsPath = "/caregivers",
 }: CaregiverManagementWorkspaceProps) {
-  const [viewMode, setViewMode] = useState<"table" | "grid">("grid");
+  const router = useRouter();
+
+  // Internal mutable state for drag & drop or quick stage movements
+  const [items, setItems] = useState<CaregiverRecord[]>(initialCaregivers);
+  useEffect(() => {
+    setItems(initialCaregivers);
+  }, [initialCaregivers]);
+
+  // View Mode: Supports both a proper Kanban board view and a List view (default: kanban matching /intake/pipeline)
+  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFiltersPanel, setShowFiltersPanel] = useState(false);
+  const [tabFilter, setTabFilter] = useState<string>("ALL");
 
-  // Filter options state
-  const [filterType, setFilterType] = useState<string>("ALL");
-  const [filterCredential, setFilterCredential] = useState<string>("ALL");
-  const [filterScreening, setFilterScreening] = useState<string>("ALL");
-  const [filterTraining, setFilterTraining] = useState<string>("ALL");
-  const [filterAssignment, setFilterAssignment] = useState<string>("ALL");
-  const [filterBranch, setFilterBranch] = useState<string>("ALL");
+  // Drag and drop state
+  const [draggedCaregiverId, setDraggedCaregiverId] = useState<string | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<CaregiverPipelineStage | null>(null);
 
-  // Status Tabs
-  const currentTab = selectedStatusFilter || "ALL";
+  // Quick move active dropdown
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  const tabs = useMemo(
-    () => [
-      { id: "ALL", label: "All", count: caregivers.length },
-      { id: "Active", label: "Active", count: caregivers.filter((c) => c.status === "Active").length },
-      { id: "Onboarding", label: "Onboarding", count: caregivers.filter((c) => c.status === "Onboarding").length },
-      { id: "Pending", label: "Pending", count: caregivers.filter((c) => c.status === "Pending").length },
-      {
-        id: "EXPIRING",
-        label: "Expiring Credentials",
-        count: caregivers.filter(
-          (c) =>
-            c.documentsCredentials?.overallStatus === "Expired" ||
-            c.documentsCredentials?.overallStatus === "Missing" ||
-            c.documentsCredentials?.items?.some(
-              (i) => i.status === "Expired" || i.status === "Expiring Soon"
-            )
-        ).length,
-      },
-      {
-        id: "ATTENTION",
-        label: "Needs Attention",
-        count: caregivers.filter(
-          (c) =>
-            c.status === "On Hold" ||
-            c.status === "Pending" ||
-            c.documentsCredentials?.overallStatus === "Expired" ||
-            c.documentsCredentials?.overallStatus === "Missing" ||
-            c.verificationChecklist?.screening !== "Cleared" ||
-            c.verificationChecklist?.training !== "Complete"
-        ).length,
-      },
-    ],
-    [caregivers]
-  );
+  // Stage filter dropdown open state
+  const [isStageDropdownOpen, setIsStageDropdownOpen] = useState(false);
+  const stageDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filtered Caregivers List
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        stageDropdownRef.current &&
+        !stageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsStageDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const currentStage =
+    selectedStatusFilter || (tabFilter !== "ALL" ? (tabFilter as CaregiverPipelineStage) : null);
+
+  // Filtered Caregivers based on search, stage, and attention category
   const filteredCaregivers = useMemo(() => {
-    return caregivers.filter((cg) => {
-      // 1. Attention category filter (from clicking Needs Attention section)
+    return items.filter((cg) => {
+      const stage = normalizeCaregiverStage(cg);
+
+      // 1. Attention category filter (if triggered from top Attention section)
       if (activeAttentionCategory) {
         if (activeAttentionCategory === "expired_credentials") {
           const hasExpired =
-            cg.documentsCredentials.overallStatus === "Expired" ||
-            cg.documentsCredentials.items.some((i) => i.status === "Expired") ||
+            cg.documentsCredentials?.overallStatus === "Expired" ||
+            cg.documentsCredentials?.items?.some((i) => i.status === "Expired") ||
             cg.status === "On Hold";
           if (!hasExpired) return false;
         } else if (activeAttentionCategory === "screening_pending") {
           const hasPendingScreening =
-            cg.verificationChecklist.screening !== "Cleared" ||
-            cg.screeningTraining.backgroundCheck.status !== "Cleared" ||
+            cg.verificationChecklist?.screening !== "Cleared" ||
+            cg.screeningTraining?.backgroundCheck?.status !== "Cleared" ||
             cg.status === "Pending";
           if (!hasPendingScreening) return false;
         } else if (activeAttentionCategory === "training_incomplete") {
           const hasTrainingIncomplete =
-            cg.verificationChecklist.training !== "Complete" ||
-            cg.screeningTraining.overallTrainingStatus !== "Complete";
+            cg.verificationChecklist?.training !== "Complete" ||
+            cg.screeningTraining?.overallTrainingStatus !== "Complete";
           if (!hasTrainingIncomplete) return false;
         } else if (activeAttentionCategory === "missing_documents") {
           const hasMissing =
-            cg.verificationChecklist.cprFirstAid === "Missing" ||
-            cg.documentsCredentials.overallStatus === "Missing" ||
-            cg.documentsCredentials.items.some((i) => i.status === "Missing");
+            cg.verificationChecklist?.cprFirstAid === "Missing" ||
+            cg.documentsCredentials?.overallStatus === "Missing" ||
+            cg.documentsCredentials?.items?.some((i) => i.status === "Missing");
           if (!hasMissing) return false;
         } else if (activeAttentionCategory === "ALL_ATTENTION") {
           const needsAnyAttention =
             cg.status === "On Hold" ||
             cg.status === "Pending" ||
-            cg.documentsCredentials.overallStatus === "Expired" ||
-            cg.documentsCredentials.overallStatus === "Missing" ||
-            cg.verificationChecklist.screening !== "Cleared" ||
-            cg.verificationChecklist.training !== "Complete";
+            cg.documentsCredentials?.overallStatus === "Expired" ||
+            cg.documentsCredentials?.overallStatus === "Missing" ||
+            cg.verificationChecklist?.screening !== "Cleared" ||
+            cg.verificationChecklist?.training !== "Complete";
           if (!needsAnyAttention) return false;
         }
       }
 
-      // 2. Status tab filter
-      if (currentTab === "EXPIRING") {
-        const hasExpiring =
-          cg.documentsCredentials?.overallStatus === "Expired" ||
-          cg.documentsCredentials?.overallStatus === "Missing" ||
-          cg.documentsCredentials?.items?.some(
-            (i) => i.status === "Expired" || i.status === "Expiring Soon"
-          );
-        if (!hasExpiring) return false;
-      } else if (currentTab === "ATTENTION") {
-        const needsAnyAttention =
-          cg.status === "On Hold" ||
-          cg.status === "Pending" ||
-          cg.documentsCredentials?.overallStatus === "Expired" ||
-          cg.documentsCredentials?.overallStatus === "Missing" ||
-          cg.verificationChecklist?.screening !== "Cleared" ||
-          cg.verificationChecklist?.training !== "Complete";
-        if (!needsAnyAttention) return false;
-      } else if (currentTab !== "ALL" && cg.status !== currentTab) {
-        return false;
+      // 2. Stage filter
+      if (currentStage && currentStage !== "ALL") {
+        if (stage !== currentStage) {
+          return false;
+        }
       }
 
       // 3. Search query
@@ -162,100 +278,116 @@ export function CaregiverManagementWorkspace({
         const query = searchQuery.toLowerCase().trim();
         const matchesName = cg.name.toLowerCase().includes(query);
         const matchesId = cg.id.toLowerCase().includes(query);
-        const matchesHousehold = cg.relationship.linkedHousehold.name.toLowerCase().includes(query);
-        const matchesClient = cg.availabilityAssignments.assignedClient?.name.toLowerCase().includes(query) ?? false;
-        const matchesClientId = cg.availabilityAssignments.assignedClient?.id.toLowerCase().includes(query) ?? false;
-        const matchesBranch = cg.branch.toLowerCase().includes(query);
+        const matchesHousehold =
+          cg.relationship?.linkedHousehold?.name?.toLowerCase().includes(query) ?? false;
+        const matchesClient =
+          cg.availabilityAssignments?.assignedClient?.name?.toLowerCase().includes(query) ?? false;
+        const matchesBranch = cg.branch?.toLowerCase().includes(query) ?? false;
+        const matchesType = cg.type?.toLowerCase().includes(query) ?? false;
 
-        if (!matchesName && !matchesId && !matchesHousehold && !matchesClient && !matchesClientId && !matchesBranch) {
+        if (
+          !matchesName &&
+          !matchesId &&
+          !matchesHousehold &&
+          !matchesClient &&
+          !matchesBranch &&
+          !matchesType
+        ) {
           return false;
         }
       }
 
-      // 4. Panel filters
-      if (filterType !== "ALL" && cg.type !== filterType) {
-        return false;
-      }
-      if (filterCredential !== "ALL" && cg.documentsCredentials.overallStatus !== filterCredential) {
-        return false;
-      }
-      if (filterScreening !== "ALL" && cg.screeningTraining.backgroundCheck.status !== filterScreening) {
-        return false;
-      }
-      if (filterTraining !== "ALL" && cg.screeningTraining.overallTrainingStatus !== filterTraining) {
-        return false;
-      }
-      if (filterAssignment !== "ALL" && cg.assignmentStatus !== filterAssignment) {
-        return false;
-      }
-      if (filterBranch !== "ALL" && cg.branch !== filterBranch) {
-        return false;
-      }
-
       return true;
     });
-  }, [
-    caregivers,
-    currentTab,
-    activeAttentionCategory,
-    searchQuery,
-    filterType,
-    filterCredential,
-    filterScreening,
-    filterTraining,
-    filterAssignment,
-    filterBranch,
-  ]);
+  }, [items, currentStage, searchQuery, activeAttentionCategory]);
 
-  const activeFiltersCount = [
-    filterType !== "ALL",
-    filterCredential !== "ALL",
-    filterScreening !== "ALL",
-    filterTraining !== "ALL",
-    filterAssignment !== "ALL",
-    filterBranch !== "ALL",
-  ].filter(Boolean).length;
+  // Counts per stage for tabs, headers, and counters
+  const stageCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    EIGHT_CAREGIVER_KANBAN_STAGES.forEach((col) => {
+      counts[col.id] = 0;
+    });
+    items.forEach((item) => {
+      const norm = normalizeCaregiverStage(item);
+      if (counts[norm] !== undefined) {
+        counts[norm] += 1;
+      }
+    });
+    return counts;
+  }, [items]);
+
+  const getDetailsHref = (id: string) => {
+    const cleanPath = baseDetailsPath.replace(/\/$/, "");
+    return `${cleanPath}/${id}/`;
+  };
+
+  const handleRowClick = (id: string) => {
+    router.push(getDetailsHref(id));
+  };
+
+  // Move caregiver between stages (used by drag & drop and quick menu)
+  const handleMoveStage = (caregiverId: string, targetStage: CaregiverPipelineStage) => {
+    const targetItem = items.find((i) => i.id === caregiverId);
+    if (!targetItem) return;
+
+    const currentNormalized = normalizeCaregiverStage(targetItem);
+    if (currentNormalized === targetStage) return;
+
+    const updated = items.map((i) => {
+      if (i.id === caregiverId) {
+        // Also update status intuitively if moving into Hired or Archived
+        let newStatus: CaregiverStatus = i.status;
+        if (targetStage === "Hired & Onboarding") newStatus = "Active";
+        else if (targetStage === "Archived") newStatus = "Inactive";
+        else if (targetStage === "Training") newStatus = "Onboarding";
+        else if (targetStage === "New Application" || targetStage === "Phone Screened") newStatus = "Pending";
+
+        return { ...i, pipelineStage: targetStage, status: newStatus };
+      }
+      return i;
+    });
+
+    setItems(updated);
+    saveCaregiversToStorage(updated);
+    setActiveMenuId(null);
+    toast.success(`Moved ${targetItem.name} to "${targetStage}"`);
+  };
+
+  // HTML5 Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggedCaregiverId(id);
+    e.dataTransfer.setData("text/plain", id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, stage: CaregiverPipelineStage) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverStage !== stage) {
+      setDragOverStage(stage);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverStage(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetStage: CaregiverPipelineStage) => {
+    e.preventDefault();
+    setDragOverStage(null);
+    const caregiverId = e.dataTransfer.getData("text/plain") || draggedCaregiverId;
+    if (caregiverId) {
+      handleMoveStage(caregiverId, targetStage);
+    }
+    setDraggedCaregiverId(null);
+  };
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setFilterType("ALL");
-    setFilterCredential("ALL");
-    setFilterScreening("ALL");
-    setFilterTraining("ALL");
-    setFilterAssignment("ALL");
-    setFilterBranch("ALL");
+    setTabFilter("ALL");
     onSelectStatusFilter(null);
     onClearAttentionCategory();
-  };
-
-  const getStatusBadge = (status: CaregiverStatus) => {
-    switch (status) {
-      case "Active":
-        return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
-      case "Onboarding":
-        return "bg-[#FEF3C7] text-[#9A5B00] border-[#9A5B00]/20";
-      case "Pending":
-        return "bg-sky-50 text-sky-800 border-sky-200";
-      case "On Hold":
-        return "bg-rose-50 text-rose-700 border-rose-200";
-      case "Inactive":
-      default:
-        return "bg-slate-100 text-slate-700 border-slate-300";
-    }
-  };
-
-  const getCredentialBadge = (status: CredentialStatus) => {
-    switch (status) {
-      case "Verified":
-        return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
-      case "Expiring Soon":
-        return "bg-amber-50 text-amber-800 border-amber-200";
-      case "Expired":
-        return "bg-rose-50 text-rose-700 border-rose-200";
-      case "Missing":
-      default:
-        return "bg-slate-100 text-slate-700 border-slate-300";
-    }
   };
 
   const getTypeBadge = (type: CaregiverType) => {
@@ -272,22 +404,15 @@ export function CaregiverManagementWorkspace({
   };
 
   return (
-    <section aria-label="Caregiver Management Workspace" className="space-y-4">
-      {/* Workspace Header & Toolbar */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+    <section aria-label="Caregiver Management Workspace">
+      {/* Unified Outer Container Card strictly matching Intake & Referrals (/intake/pipeline/) */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
+        {/* Workspace Header & Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-slate-900 leading-tight">
-                Caregiver Management
-              </h2>
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                {filteredCaregivers.length} shown
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Workforce roster across Family Caregivers, Live-In aides, and Family Friends
-            </p>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+              Caregiver Management
+            </h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
@@ -299,98 +424,172 @@ export function CaregiverManagementWorkspace({
                 placeholder="Search caregiver, ID, household..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-xs"
               />
             </div>
 
-            {/* Filter Panel Toggle */}
-            <button
-              type="button"
-              onClick={() => setShowFiltersPanel(!showFiltersPanel)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                showFiltersPanel || activeFiltersCount > 0
-                  ? "bg-[#F2F8EE] border-[#3D6B22] text-[#3D6B22]"
-                  : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              <Filter className="w-3.5 h-3.5" />
-              <span>Filters</span>
-              {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-[#3D6B22] text-white text-[10px] flex items-center justify-center font-bold">
-                  {activeFiltersCount}
+            {/* Stage Filter Dropdown */}
+            <div className="relative" ref={stageDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsStageDropdownOpen(!isStageDropdownOpen)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                title="Filter caregivers by stage"
+              >
+                <Filter className="w-3.5 h-3.5 text-slate-500" />
+                <span className="text-slate-400 font-normal hidden sm:inline">Stage:</span>
+                <span className="flex items-center gap-1.5 font-bold text-slate-900 truncate max-w-[130px]">
+                  {currentStage && currentStage !== "ALL" ? (
+                    <>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          STAGE_CONFIG_MAP.get(currentStage as CaregiverPipelineStage)?.badge.dot ||
+                          "bg-slate-400"
+                        }`}
+                      />
+                      <span className="truncate">{currentStage}</span>
+                    </>
+                  ) : (
+                    "All Stages"
+                  )}
                 </span>
-              )}
-              {showFiltersPanel ? (
-                <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-              )}
-            </button>
+                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 shrink-0">
+                  {currentStage && currentStage !== "ALL"
+                    ? stageCounts[currentStage] || 0
+                    : items.length}
+                </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+                    isStageDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
 
-            {/* View Mode Toggle (Grid vs Table) */}
+              {isStageDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100">
+                    <span>Filter by Stage</span>
+                    {currentStage && currentStage !== "ALL" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setTabFilter("ALL");
+                          onSelectStatusFilter(null);
+                          setIsStageDropdownOpen(false);
+                        }}
+                        className="text-[10px] text-rose-600 hover:underline font-semibold cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="py-1 max-h-72 overflow-y-auto">
+                    {/* All Stages Option */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTabFilter("ALL");
+                        onSelectStatusFilter(null);
+                        setIsStageDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                        !currentStage || currentStage === "ALL"
+                          ? "bg-slate-50 font-bold text-slate-900"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+                        <span>All Stages</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                          {items.length}
+                        </span>
+                        {(!currentStage || currentStage === "ALL") && (
+                          <Check className="w-3.5 h-3.5 text-[#3D6B22]" />
+                        )}
+                      </div>
+                    </button>
+
+                    {/* 8 Configured Stage Options */}
+                    {EIGHT_CAREGIVER_KANBAN_STAGES.map((col) => {
+                      const isSelected = currentStage === col.id;
+                      const count = stageCounts[col.id] || 0;
+
+                      return (
+                        <button
+                          key={col.id}
+                          type="button"
+                          onClick={() => {
+                            setTabFilter(col.id);
+                            onSelectStatusFilter(col.id);
+                            setIsStageDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                            isSelected
+                              ? "bg-slate-50 font-bold text-slate-900"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${col.badge.dot}`} />
+                            <span className="truncate">{col.title}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${col.badge.headerBadge}`}
+                            >
+                              {count}
+                            </span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* View Mode Toggle: Kanban Board vs List View */}
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
               <button
                 type="button"
-                onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === "grid"
+                onClick={() => setViewMode("kanban")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "kanban"
                     ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
-                title="Grid View"
+                title="Kanban Board View (8 Columns)"
               >
-                <LayoutGrid className="w-4 h-4" />
+                <Kanban className="w-3.5 h-3.5" />
+                <span>Kanban</span>
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode("table")}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === "table"
+                onClick={() => setViewMode("list")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "list"
                     ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-800"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
-                title="Table View"
+                title="List View"
               >
-                <List className="w-4 h-4" />
+                <List className="w-3.5 h-3.5" />
+                <span>List</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Status Tabs Row matching /intake/pipeline & /clients */}
-        <div className="flex items-center gap-1.5 pt-3 overflow-x-auto scrollbar-none">
-          {tabs.map((tab) => {
-            const isActive = currentTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  onSelectStatusFilter(tab.id === "ALL" ? null : tab.id);
-                  if (activeAttentionCategory) onClearAttentionCategory();
-                }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-[#1B3414] text-white shadow-xs"
-                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200"
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                    isActive ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-600"
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-
-          {/* Active Attention Banner if filtering by attention category */}
-          {activeAttentionCategory && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-800 animate-fadeIn ml-1 shrink-0">
-              <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+        {/* Active Attention Banner if filtering by attention category */}
+        {activeAttentionCategory && (
+          <div className="flex items-center justify-between bg-rose-50 border border-rose-200 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-800 animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
               <span>
                 Filtering:{" "}
                 {activeAttentionCategory === "expired_credentials"
@@ -403,450 +602,356 @@ export function CaregiverManagementWorkspace({
                   ? "Missing Documents"
                   : "All Issues"}
               </span>
-              <button
-                type="button"
-                onClick={onClearAttentionCategory}
-                className="hover:text-rose-950 font-bold ml-1 cursor-pointer"
-                title="Clear attention filter"
-              >
-                ×
-              </button>
             </div>
-          )}
-
-          {(currentTab !== "ALL" || activeFiltersCount > 0 || searchQuery.trim() || activeAttentionCategory) && (
             <button
               type="button"
-              onClick={handleClearFilters}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-rose-600 px-2 py-1 ml-auto cursor-pointer transition-colors shrink-0"
+              onClick={onClearAttentionCategory}
+              className="text-rose-700 hover:text-rose-950 hover:underline font-bold text-xs cursor-pointer ml-2"
             >
-              <FilterX className="w-3.5 h-3.5" />
-              <span>Clear Filter</span>
+              Clear Filter
             </button>
-          )}
-        </div>
-      </div>
-
-      {/* Expandable Filter Panel */}
-      {showFiltersPanel && (
-        <div className="p-4 sm:p-5 bg-white border-b border-slate-200/80 animate-fadeIn">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {/* Caregiver Type */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Caregiver Type
-              </label>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="ALL">All Types</option>
-                <option value="Family Caregiver">Family Caregiver</option>
-                <option value="Live-In Caregiver">Live-In Caregiver</option>
-                <option value="Family Friend">Family Friend</option>
-              </select>
-            </div>
-
-            {/* Credential Status */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Credentials
-              </label>
-              <select
-                value={filterCredential}
-                onChange={(e) => setFilterCredential(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="Verified">Verified</option>
-                <option value="Expiring Soon">Expiring Soon</option>
-                <option value="Expired">Expired</option>
-                <option value="Missing">Missing</option>
-              </select>
-            </div>
-
-            {/* Screening Status */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Screening Status
-              </label>
-              <select
-                value={filterScreening}
-                onChange={(e) => setFilterScreening(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="ALL">All Screenings</option>
-                <option value="Cleared">Cleared</option>
-                <option value="Pending Review">Pending Review</option>
-                <option value="In Review">In Review</option>
-              </select>
-            </div>
-
-            {/* Training Status */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Training Status
-              </label>
-              <select
-                value={filterTraining}
-                onChange={(e) => setFilterTraining(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="ALL">All Training</option>
-                <option value="Complete">Complete</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Incomplete">Incomplete</option>
-              </select>
-            </div>
-
-            {/* Assignment */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Assignment
-              </label>
-              <select
-                value={filterAssignment}
-                onChange={(e) => setFilterAssignment(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="ALL">All Assignments</option>
-                <option value="Assigned">Assigned</option>
-                <option value="Unassigned">Unassigned</option>
-              </select>
-            </div>
-
-            {/* Branch */}
-            <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Branch
-              </label>
-              <select
-                value={filterBranch}
-                onChange={(e) => setFilterBranch(e.target.value)}
-                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 focus:outline-none focus:border-[#3D6B22]"
-              >
-                <option value="ALL">All Branches</option>
-                <option value="Mountain Lane">Mountain Lane</option>
-                <option value="North Metro">North Metro</option>
-                <option value="Valley View">Valley View</option>
-                <option value="Westside">Westside</option>
-              </select>
-            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Directory Content: Table or Grid */}
-      {filteredCaregivers.length === 0 ? (
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-10 text-center">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-3">
-            <Users className="w-6 h-6" />
-          </div>
-          <h3 className="text-sm font-bold text-slate-900">No Caregivers Found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            No caregiver records match your search criteria or active filters.
-          </p>
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition-colors"
-          >
-            Clear Filters
-          </button>
-        </div>
-      ) : viewMode === "table" ? (
-        /* TABLE VIEW */
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4 pl-6">Caregiver</th>
-                <th className="py-3 px-4">Caregiver ID</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">Linked Household</th>
-                <th className="py-3 px-4">Assigned Client</th>
-                <th className="py-3 px-4">Credentials</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredCaregivers.map((cg) => {
-                const isSelected = selectedCaregiverId === cg.id;
-                const assignedClient = cg.availabilityAssignments.assignedClient;
+        {/* Main Content Area: Kanban Board vs List View */}
+        {viewMode === "kanban" ? (
+          /* PROPER KANBAN BOARD VIEW (8 Columns with clean, scannable cards) */
+          <div className="w-full overflow-x-auto pb-3 pt-1 no-scrollbar sm:scrollbar-thin">
+            <div className="flex gap-3.5 min-w-[1680px] items-start">
+              {EIGHT_CAREGIVER_KANBAN_STAGES.map((col) => {
+                const columnCaregivers = filteredCaregivers.filter(
+                  (c) => normalizeCaregiverStage(c) === col.id
+                );
+                const isDragOver = dragOverStage === col.id;
+                const isFilteredStage = currentStage === col.id;
 
                 return (
-                  <tr
-                    key={cg.id}
-                    onClick={() => onSelectCaregiver(cg)}
-                    className={`transition-colors cursor-pointer group ${
-                      isSelected
-                        ? "bg-[#F2F8EE]/70 hover:bg-[#F2F8EE]"
-                        : "hover:bg-slate-50/80"
+                  <div
+                    key={col.id}
+                    onDragOver={(e) => handleDragOver(e, col.id)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, col.id)}
+                    className={`w-[280px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${
+                      isDragOver
+                        ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
+                        : isFilteredStage
+                        ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
+                        : "bg-[#F8FAF9] border-slate-200/80"
                     }`}
                   >
-                    {/* Caregiver Name & Profile */}
-                    <td className="py-3.5 px-4 pl-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                          {cg.avatarUrl ? (
-                            <img
-                              src={cg.avatarUrl}
-                              alt={cg.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <User className="w-4 h-4 text-slate-400" />
-                          )}
-                        </div>
-                        <div>
-                          <Link
-                            href={`/caregivers/${cg.id}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors"
-                          >
-                            {cg.name}
-                          </Link>
-                          <div className="text-[11px] text-slate-400 mt-0.5">
-                            {cg.branch}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Caregiver ID */}
-                    <td className="py-3.5 px-4 font-mono font-medium text-slate-700">
-                      {cg.id}
-                    </td>
-
-                    {/* Type */}
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getTypeBadge(
-                          cg.type
-                        )}`}
-                      >
-                        {cg.type}
-                      </span>
-                    </td>
-
-                    {/* Linked Household */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5 text-slate-700 text-xs">
-                        <Home className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate max-w-[140px] font-medium">
-                          {cg.relationship.linkedHousehold.name}
+                    {/* Column Lane Header */}
+                    <div className="p-3 border-b border-slate-200/60 flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${col.badge.dot}`} />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-700 truncate">
+                          {col.title}
                         </span>
                       </div>
-                    </td>
 
-                    {/* Assigned Client */}
-                    <td className="py-3.5 px-4">
-                      {assignedClient ? (
-                        <div>
-                          <div className="font-semibold text-slate-900 truncate max-w-[130px]">
-                            {assignedClient.name}
-                          </div>
-                          <span className="text-[10px] text-slate-400">
-                            {assignedClient.weeklyAuthorizedHours} hrs/wk
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 bg-white ${col.badge.text} ${col.badge.border} shadow-2xs`}
+                      >
+                        {columnCaregivers.length}
+                      </span>
+                    </div>
+
+                    {/* Card List Stack */}
+                    <div className="p-2.5 space-y-2.5 min-h-[440px] flex flex-col">
+                      {columnCaregivers.length === 0 ? (
+                        <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-300/70 rounded-xl text-center bg-white/40">
+                          <Inbox className="w-5 h-5 text-slate-300 mb-1" />
+                          <span className="text-xs font-medium text-slate-400">
+                            No caregivers
                           </span>
                         </div>
                       ) : (
-                        <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-500">
-                          Unassigned
-                        </span>
+                        columnCaregivers.map((cg) => {
+                          const isDragging = draggedCaregiverId === cg.id;
+                          const hasAttention =
+                            cg.status === "On Hold" ||
+                            cg.documentsCredentials?.overallStatus === "Expired" ||
+                            cg.documentsCredentials?.overallStatus === "Missing" ||
+                            cg.verificationChecklist?.screening !== "Cleared";
+                          const hours =
+                            cg.availabilityAssignments?.scheduledWeeklyHours ||
+                            cg.availabilityAssignments?.weeklyCapacityHours ||
+                            40;
+                          const detailsHref = getDetailsHref(cg.id);
+
+                          return (
+                            <div
+                              key={cg.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, cg.id)}
+                              onClick={() => router.push(detailsHref)}
+                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${
+                                isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
+                              }`}
+                            >
+                              <div>
+                                {/* Top Row: Name + ID & Attention Badge */}
+                                <div className="flex items-start justify-between gap-1.5 mb-1">
+                                  <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate flex-1">
+                                    {cg.name}
+                                  </h4>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    {hasAttention && (
+                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-100">
+                                        Action Req
+                                      </span>
+                                    )}
+                                    <span className="font-mono text-[10px] text-slate-400">
+                                      {cg.id}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Subtitle: Type & Linked Household */}
+                                <p className="text-xs text-slate-500 truncate">
+                                  {cg.type}
+                                  <span className="text-slate-400 font-normal">
+                                    {" "}
+                                    · {cg.relationship?.linkedHousehold?.name || cg.branch}
+                                  </span>
+                                </p>
+
+                                {/* Tags: Branch & Weekly Hours */}
+                                <div className="mt-2.5 flex items-center justify-between text-[11px]">
+                                  <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[160px]">
+                                    {cg.branch}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-medium shrink-0">
+                                    {hours}h/wk
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Footer: Date / Branch + Quick Move Stage dropdown + ArrowUpRight */}
+                              <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                                <span className="truncate max-w-[130px] text-slate-400 text-[11px]">
+                                  {cg.hireDate || "Recent"} · {cg.branch.split(" ")[0]}
+                                </span>
+
+                                <div
+                                  className="flex items-center gap-1 shrink-0"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {/* Quick Move Stage dropdown */}
+                                  <div className="relative">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setActiveMenuId(activeMenuId === cg.id ? null : cg.id)
+                                      }
+                                      title="Move to another stage"
+                                      className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+                                    >
+                                      <ChevronDown className="w-3.5 h-3.5" />
+                                    </button>
+
+                                    {activeMenuId === cg.id && (
+                                      <div className="absolute right-0 bottom-full mb-1 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
+                                        <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
+                                          Move Stage
+                                        </div>
+                                        {EIGHT_CAREGIVER_KANBAN_STAGES.map((s) => {
+                                          const isCurrent = normalizeCaregiverStage(cg) === s.id;
+                                          return (
+                                            <button
+                                              key={s.id}
+                                              type="button"
+                                              onClick={() => handleMoveStage(cg.id, s.id)}
+                                              className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center justify-between cursor-pointer"
+                                            >
+                                              <span className="flex items-center gap-1.5">
+                                                <span
+                                                  className={`w-1.5 h-1.5 rounded-full ${s.badge.dot}`}
+                                                />
+                                                <span>{s.title}</span>
+                                              </span>
+                                              {isCurrent && (
+                                                <Check className="w-3.5 h-3.5 text-[#3D6B22]" />
+                                              )}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* ArrowUpRight hover indicator */}
+                                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 opacity-60 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
                       )}
-                    </td>
-
-                    {/* Credentials */}
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold border ${getCredentialBadge(
-                          cg.documentsCredentials.overallStatus
-                        )}`}
-                      >
-                        {cg.documentsCredentials.overallStatus}
-                      </span>
-                    </td>
-
-                    {/* Status */}
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${getStatusBadge(
-                          cg.status
-                        )}`}
-                      >
-                        {cg.status}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-3.5 px-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => onSelectCaregiver(cg)}
-                          className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
-                        >
-                          View Details
-                        </button>
-                        <Link
-                          href={`/caregivers/${cg.id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                        >
-                          <span>Profile</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+        ) : (
+          /* LIST VIEW strictly matching /intake/pipeline */
+          <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-100/70 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
+                  <tr>
+                    <th className="py-3.5 px-4 pl-6">Caregiver / Applicant</th>
+                    <th className="py-3.5 px-3">ID</th>
+                    <th className="py-3.5 px-3">Type</th>
+                    <th className="py-3.5 px-3">Household / Client</th>
+                    <th className="py-3.5 px-3">Hours</th>
+                    <th className="py-3.5 px-3">Stage</th>
+                    <th className="py-3.5 px-3">Branch</th>
+                    <th className="py-3.5 px-3">Hire Date</th>
+                    <th className="py-3.5 px-4 pr-6 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {filteredCaregivers.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-10 text-center text-slate-400">
+                        <Inbox className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-xs font-medium text-slate-700">No caregivers found</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Try adjusting your search query or stage filter.
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredCaregivers.map((cg) => {
+                      const normStage = normalizeCaregiverStage(cg);
+                      const colConfig =
+                        STAGE_CONFIG_MAP.get(normStage) || EIGHT_CAREGIVER_KANBAN_STAGES[0];
+                      const detailsHref = getDetailsHref(cg.id);
+                      const assignedClient = cg.availabilityAssignments?.assignedClient;
+                      const hours =
+                        cg.availabilityAssignments?.scheduledWeeklyHours ||
+                        cg.availabilityAssignments?.weeklyCapacityHours ||
+                        40;
+
+                      return (
+                        <tr
+                          key={cg.id}
+                          onClick={() => handleRowClick(cg.id)}
+                          className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                        >
+                          {/* Caregiver Name & Avatar */}
+                          <td className="py-3.5 px-4 pl-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+                                {cg.avatarUrl ? (
+                                  <img
+                                    src={cg.avatarUrl}
+                                    alt={cg.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <User className="w-4 h-4 text-slate-400" />
+                                )}
+                              </div>
+                              <div>
+                                <Link
+                                  href={detailsHref}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors block text-xs"
+                                >
+                                  {cg.name}
+                                </Link>
+                                <div className="text-[11px] text-slate-400 mt-0.5">
+                                  {cg.personalInfo?.phone || cg.branch}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* ID */}
+                          <td className="py-3.5 px-3 font-mono font-medium text-slate-700">
+                            {cg.id}
+                          </td>
+
+                          {/* Type */}
+                          <td className="py-3.5 px-3">
+                            <span
+                              className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getTypeBadge(
+                                cg.type
+                              )}`}
+                            >
+                              {cg.type}
+                            </span>
+                          </td>
+
+                          {/* Household / Client */}
+                          <td className="py-3.5 px-3">
+                            <div className="text-slate-800 font-medium truncate max-w-[140px]">
+                              {cg.relationship?.linkedHousehold?.name || "Unlinked"}
+                            </div>
+                            {assignedClient && (
+                              <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
+                                Client: {assignedClient.name}
+                              </div>
+                            )}
+                          </td>
+
+                          {/* Hours */}
+                          <td className="py-3.5 px-3 font-semibold text-slate-800">
+                            {hours} hrs/wk
+                          </td>
+
+                          {/* Stage (Interactive Dropdown Select) */}
+                          <td className="py-3.5 px-3" onClick={(e) => e.stopPropagation()}>
+                            <select
+                              value={normStage}
+                              onChange={(e) =>
+                                handleMoveStage(cg.id, e.target.value as CaregiverPipelineStage)
+                              }
+                              className={`text-[11px] font-bold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#3D6B22] ${colConfig.badge.bg} ${colConfig.badge.text} ${colConfig.badge.border}`}
+                            >
+                              {EIGHT_CAREGIVER_KANBAN_STAGES.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                  {s.title}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+
+                          {/* Branch */}
+                          <td className="py-3.5 px-3 text-slate-600 truncate max-w-[120px]">
+                            {cg.branch}
+                          </td>
+
+                          {/* Hire Date */}
+                          <td className="py-3.5 px-3 text-slate-500 whitespace-nowrap">
+                            {cg.hireDate || "—"}
+                          </td>
+
+                          {/* Action Link */}
+                          <td
+                            className="py-3.5 px-4 pr-6 text-right"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Link
+                              href={detailsHref}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                            >
+                              <span>Details</span>
+                              <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
-    ) : (
-      /* GRID VIEW */
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredCaregivers.map((cg) => {
-            const isSelected = selectedCaregiverId === cg.id;
-            const assignedClient = cg.availabilityAssignments.assignedClient;
-
-            return (
-              <div
-                key={cg.id}
-                onClick={() => onSelectCaregiver(cg)}
-                className={`bg-white rounded-2xl p-5 border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between group relative overflow-hidden ${
-                  isSelected
-                    ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#F2F8EE]/30"
-                    : "border-slate-200 hover:border-[#3D6B22]/60"
-                }`}
-              >
-                <div>
-                  {/* Top Bar: Caregiver Avatar, Name & Status Badge */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-11 h-11 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                        {cg.avatarUrl ? (
-                          <img
-                            src={cg.avatarUrl}
-                            alt={cg.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User className="w-5 h-5 text-slate-400" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="text-base font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
-                          {cg.name}
-                        </h4>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                          <span className="font-mono text-slate-500 font-medium">{cg.id}</span>
-                          <span>•</span>
-                          <span className="truncate">{cg.branch}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <span
-                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${getStatusBadge(
-                        cg.status
-                      )}`}
-                    >
-                      {cg.status}
-                    </span>
-                  </div>
-
-                  {/* Badges: Type and Linked Household */}
-                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    <span
-                      className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-lg border ${getTypeBadge(
-                        cg.type
-                      )}`}
-                    >
-                      {cg.type}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-50 border border-slate-200/80 px-2.5 py-0.5 rounded-lg truncate max-w-[160px]">
-                      <Home className="w-3 h-3 text-slate-400 shrink-0" />
-                      <span className="truncate">{cg.relationship.linkedHousehold.name}</span>
-                    </span>
-                  </div>
-
-                  {/* Clean 2-line assignment & hours strip */}
-                  <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="text-slate-400 text-[11px] flex items-center gap-1.5 shrink-0">
-                        <Users className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                        Client:
-                      </span>
-                      {assignedClient ? (
-                        <span className="font-semibold text-slate-800 truncate max-w-[160px]">
-                          {assignedClient.name}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400 italic text-[11px]">Unassigned</span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="text-slate-400 text-[11px] flex items-center gap-1.5 shrink-0">
-                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        Hours:
-                      </span>
-                      <span className="font-semibold text-slate-800">
-                        {assignedClient ? `${assignedClient.weeklyAuthorizedHours} hrs/wk` : "0 hrs/wk"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer with actions */}
-                <div
-                  className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        cg.documentsCredentials.overallStatus === "Verified"
-                          ? "bg-emerald-500"
-                          : cg.documentsCredentials.overallStatus === "Expiring Soon"
-                          ? "bg-amber-500"
-                          : "bg-rose-500"
-                      }`}
-                    />
-                    <span className="text-slate-500 font-medium text-[11px]">
-                      {cg.documentsCredentials.overallStatus} Credentials
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onSelectCaregiver(cg)}
-                      className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
-                    >
-                      View Details
-                    </button>
-
-                    <Link
-                      href={`/caregivers/${cg.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:text-[#2C5217] transition-colors"
-                    >
-                      <span>Profile</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </section>
   );
 }

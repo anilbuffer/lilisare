@@ -717,9 +717,9 @@ export default function HouseholdsPage() {
                                     </span>
                                   </div>
 
-                                  {/* Row 2: Connected Members (Clean single line) */}
+                                  {/* Row 2: Caregiver / Family Contact */}
                                   <p className="text-xs text-slate-500 truncate">
-                                    {hh.client.name} <span className="text-slate-300">·</span> {hh.primaryCaregiver.name}
+                                    Caregiver: <span className="text-slate-700 font-medium">{hh.primaryCaregiver.name}</span>
                                   </p>
 
                                   {/* Row 3: Tags (Program & Hours) */}
@@ -733,20 +733,11 @@ export default function HouseholdsPage() {
                                   </div>
                                 </div>
 
-                                {/* Footer: Case Manager · Auth Status & Quick Move */}
+                                {/* Footer: Case Manager & Quick Move */}
                                 <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                                  <div className="flex items-center gap-1.5 truncate max-w-[150px]">
-                                    <span
-                                      className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${getAuthBadge(
-                                        hh.authStatus
-                                      )}`}
-                                    >
-                                      {hh.authStatus}
-                                    </span>
-                                    <span className="truncate text-slate-400 text-[11px]">
-                                      {hh.caseManager.name.split(" ")[0]}
-                                    </span>
-                                  </div>
+                                  <span className="truncate text-slate-500 text-[11px]">
+                                    CM: <span className="text-slate-700 font-medium">{hh.caseManager.name}</span>
+                                  </span>
 
                                   <div
                                     className="flex items-center gap-1 shrink-0"
@@ -822,11 +813,8 @@ export default function HouseholdsPage() {
                   <thead>
                     <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                       <th className="py-3 px-4">Household</th>
-                      <th className="py-3 px-4">Location</th>
-                      <th className="py-3 px-4">Care Recipient</th>
                       <th className="py-3 px-4">Caregiver</th>
                       <th className="py-3 px-4">Program</th>
-                      <th className="py-3 px-4">Auth Status</th>
                       <th className="py-3 px-4">Stage</th>
                       <th className="py-3 px-4">Hours</th>
                       <th className="py-3 px-4 text-right">Action</th>
@@ -851,27 +839,12 @@ export default function HouseholdsPage() {
                               {hh.code}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-slate-600 text-xs">
-                            {hh.city}, {hh.state}
-                          </td>
-                          <td className="py-3 px-4 font-semibold text-slate-800 text-xs">
-                            {hh.client.name}
-                          </td>
                           <td className="py-3 px-4 font-semibold text-slate-800 text-xs">
                             {hh.primaryCaregiver.name}
                           </td>
                           <td className="py-3 px-4">
                             <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md inline-block">
                               {hh.program}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span
-                              className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${getAuthBadge(
-                                hh.authStatus
-                              )}`}
-                            >
-                              {hh.authStatus}
                             </span>
                           </td>
                           <td className="py-3 px-4">

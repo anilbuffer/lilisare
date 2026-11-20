@@ -143,8 +143,8 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           d.status === "Verified"
             ? "Missing"
             : d.status === "Missing"
-            ? "Review needed"
-            : "Verified";
+              ? "Review needed"
+              : "Verified";
         return { ...d, status: nextStatus };
       }
       return d;
@@ -211,8 +211,8 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
         type === "call"
           ? "Phone Contact Logged"
           : type === "email"
-          ? "Email Sent to Family"
-          : "Communication Note Added",
+            ? "Email Sent to Family"
+            : "Communication Note Added",
       details: noteText,
     };
 
@@ -306,15 +306,14 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
             </div>
             <div className="absolute -bottom-2 -right-2">
               <span
-                className={`border-2 border-white shadow-sm font-semibold text-white whitespace-nowrap px-2.5 py-0.5 text-[10px] rounded-full uppercase tracking-wider ${
-                  client.status === "Active"
+                className={`border-2 border-white shadow-sm font-semibold text-white whitespace-nowrap px-2.5 py-0.5 text-[10px] rounded-full uppercase tracking-wider ${client.status === "Active"
                     ? "bg-[#3D6B22]"
                     : client.status === "Onboarding"
-                    ? "bg-amber-500"
-                    : client.status === "On Hold"
-                    ? "bg-slate-500"
-                    : "bg-rose-500"
-                }`}
+                      ? "bg-amber-500"
+                      : client.status === "On Hold"
+                        ? "bg-slate-500"
+                        : "bg-rose-500"
+                  }`}
               >
                 {client.status}
               </span>
@@ -366,11 +365,10 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                isActive
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
                   ? "bg-[#3D6B22] text-white shadow-[0_4px_12px_rgba(61,107,34,0.25)]"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
-              }`}
+                }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
@@ -385,65 +383,79 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           {/* Left Column (2 cols): Demographics & Three Connected Journeys */}
           <div className="lg:col-span-2 space-y-5">
             {/* Basic Client Demographics Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <User className="w-4.5 h-4.5 text-[#3D6B22]" />
-                Client Demographics & Residence
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-4 text-xs">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <User className="w-4 h-4 text-[#3D6B22]" />
+                  Client Demographics & Residence
+                </h3>
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                  {client.careType}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
                 <div>
-                  <span className="text-slate-500 block">Full Legal Name</span>
-                  <span className="font-semibold text-slate-800 text-sm mt-0.5 block">{client.name}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Full Legal Name</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{client.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Preferred Name</span>
-                  <span className="font-semibold text-slate-800 text-sm mt-0.5 block">{client.preferredName || client.name}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Preferred Name</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{client.preferredName || client.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Date of Birth / Age</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{client.dob} ({client.age} years old)</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Date of Birth / Age</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{client.dob} ({client.age} years old)</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Gender & Primary Language</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{client.gender} • {client.primaryLanguage}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Gender & Primary Language</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{client.gender} • {client.primaryLanguage}</span>
                 </div>
+              </div>
+
+              <div className="mt-4 pt-3.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-6">
                 <div>
-                  <span className="text-slate-500 block">Care Arrangement Classification</span>
-                  <span className="font-semibold text-[#1E5622] mt-0.5 block">{client.careType}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Client ID & Program</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">
-                    <span className="font-mono font-bold text-slate-700">{client.id}</span> · {client.carePlan.program}
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Client ID & Program</span>
+                  <span className="text-xs font-semibold text-slate-800 block">
+                    <span className="font-mono font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/70 mr-1.5">{client.id}</span>
+                    {client.carePlan.program}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Residence Address</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block flex items-start gap-1">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Residence Address</span>
+                  <p className="text-xs font-medium text-slate-700 flex items-start gap-1.5 mt-0.5">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
                     <span>{client.household.address}, {client.household.city}, {client.household.state} {client.household.zip}</span>
-                  </span>
+                  </p>
                 </div>
               </div>
             </Card>
 
             {/* Three Connected Journeys Card (RULES.md #L96) */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <Sparkles className="w-4.5 h-4.5 text-[#3D6B22]" />
-                Three Connected Journeys (Household Synchronization)
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#3D6B22]" />
+                  Three Connected Journeys (Household Synchronization)
+                </h3>
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                  Synchronized
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                 {/* 1. Client Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>1. Client Care</span>
-                    <span className="text-emerald-700 font-bold">{client.status}</span>
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">1. Client Care</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                      {client.status}
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-700 font-medium truncate">
-                    Care plan active with {formatShortProgram(client.carePlan.program)}
+                  <p className="text-xs text-slate-800 font-semibold truncate">
+                    {formatShortProgram(client.carePlan.program)}
                   </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <p className="text-[11px] text-slate-500">Care Plan Active</p>
+                  <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-[#3D6B22] h-1.5 rounded-full"
                       style={{ width: client.status === "Active" ? "100%" : "60%" }}
@@ -452,19 +464,23 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
                 </div>
 
                 {/* 2. Caregiver Workforce Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>2. Caregiver Workforce</span>
-                    <span className={client.assignedCareTeam.primaryCaregiver ? "text-emerald-700 font-bold" : "text-rose-600 font-bold"}>
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">2. Caregiver Workforce</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${client.assignedCareTeam.primaryCaregiver
+                        ? "bg-emerald-50 text-[#1E5622] border-emerald-200/70"
+                        : "bg-rose-50 text-rose-700 border-rose-200"
+                      }`}>
                       {client.assignedCareTeam.primaryCaregiver ? "Assigned" : "Unassigned"}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-700 font-medium truncate">
+                  <p className="text-xs text-slate-800 font-semibold truncate">
                     {client.assignedCareTeam.primaryCaregiver
                       ? client.assignedCareTeam.primaryCaregiver.name
                       : "Awaiting primary caregiver"}
                   </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <p className="text-[11px] text-slate-500">Primary Caregiver</p>
+                  <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
                     <div
                       className={`h-1.5 rounded-full ${client.assignedCareTeam.primaryCaregiver ? "bg-[#3D6B22]" : "bg-rose-400"}`}
                       style={{ width: client.assignedCareTeam.primaryCaregiver ? "100%" : "20%" }}
@@ -473,15 +489,18 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
                 </div>
 
                 {/* 3. Agency Operations Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>3. Agency Ops</span>
-                    <span className="text-emerald-700 font-bold">{client.authorization.status}</span>
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">3. Agency Ops</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                      {client.authorization.status}
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-700 font-medium truncate">
+                  <p className="text-xs text-slate-800 font-semibold truncate">
                     {client.carePlan.authorizedWeeklyHours} hrs/wk authorized
                   </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <p className="text-[11px] text-slate-500">Authorization Status</p>
+                  <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-[#3D6B22] h-1.5 rounded-full"
                       style={{ width: client.authorization.status === "Verified" ? "100%" : "50%" }}
@@ -495,16 +514,16 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
           {/* Right Column (1 col): Primary Contact & Emergency Contact */}
           <div className="space-y-5">
             {/* Primary Family Contact Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 mb-3">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#3D6B22]" />
                   Primary Family Contact
                 </h3>
                 <button
                   type="button"
                   onClick={() => setIsContactModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-[#3D6B22] bg-[#E3F1D9] hover:bg-[#d5eac8] rounded-xl transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-[#1E5622] bg-[#E3F1D9] hover:bg-[#d5eac8] rounded-lg transition-colors cursor-pointer"
                 >
                   <Phone className="w-3 h-3" />
                   <span>Contact</span>
@@ -512,28 +531,28 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
               </div>
               <div className="space-y-3 text-xs">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Contact Person</span>
-                  <span className="font-bold text-slate-800 text-sm mt-0.5 block">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Contact Person</span>
+                  <span className="text-sm font-semibold text-slate-800 block">
                     {client.primaryContact.name} ({client.primaryContact.relationship})
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Direct Phone</span>
-                  <a href={`tel:${client.primaryContact.phone}`} className="font-semibold text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Direct Phone</span>
+                  <a href={`tel:${client.primaryContact.phone}`} className="text-xs font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-slate-400" />
                     {client.primaryContact.phone}
                   </a>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Email</span>
-                  <a href={`mailto:${client.primaryContact.email}`} className="font-semibold text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Email Address</span>
+                  <a href={`mailto:${client.primaryContact.email}`} className="text-xs font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5 truncate">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     {client.primaryContact.email}
                   </a>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Preferred Communication</span>
-                  <span className="font-semibold text-slate-700 mt-0.5 block">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Preferred Communication</span>
+                  <span className="text-xs font-semibold text-slate-700 block">
                     {client.primaryContact.preferredMethod}
                   </span>
                 </div>
@@ -541,9 +560,9 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
             </Card>
 
             {/* Designated Emergency Contact Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-3">
-              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-rose-600" />
                   Emergency Contact
                 </h3>
@@ -551,18 +570,20 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
                   24/7 Response
                 </span>
               </div>
-              <div className="space-y-2 text-xs">
+              <div className="space-y-2.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Name:</span>
-                  <span className="font-bold text-slate-800">{client.emergencyContact.name}</span>
+                  <span className="text-slate-500">Name</span>
+                  <span className="font-semibold text-slate-800">{client.emergencyContact.name}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Relationship:</span>
+                  <span className="text-slate-500">Relationship</span>
                   <span className="font-semibold text-slate-700">{client.emergencyContact.relationship}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Telephone:</span>
-                  <span className="font-mono font-bold text-slate-900">{client.emergencyContact.phone}</span>
+                  <span className="text-slate-500">Telephone</span>
+                  <a href={`tel:${client.emergencyContact.phone}`} className="font-mono font-bold text-slate-900 hover:text-[#3D6B22] transition-colors">
+                    {client.emergencyContact.phone}
+                  </a>
                 </div>
               </div>
             </Card>
@@ -778,13 +799,12 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
                   <button
                     type="button"
                     onClick={() => handleToggleDocStatus(doc.id)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${
-                      doc.status === "Verified"
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors cursor-pointer ${doc.status === "Verified"
                         ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                         : doc.status === "Review needed"
-                        ? "bg-amber-50 text-amber-800 border-amber-200"
-                        : "bg-rose-50 text-rose-700 border-rose-200"
-                    }`}
+                          ? "bg-amber-50 text-amber-800 border-amber-200"
+                          : "bg-rose-50 text-rose-700 border-rose-200"
+                      }`}
                   >
                     {doc.status}
                   </button>

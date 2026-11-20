@@ -219,10 +219,10 @@ export function HouseholdDetailView({
             <div className="absolute -bottom-2 -right-2">
               <span
                 className={`border-2 border-white shadow-xs font-semibold text-white whitespace-nowrap px-2.5 py-0.5 text-[10px] rounded-full uppercase tracking-wider ${household.authStatus === "Approved"
-                    ? "bg-[#3D6B22]"
-                    : household.authStatus === "Expiring Soon"
-                      ? "bg-amber-500"
-                      : "bg-rose-500"
+                  ? "bg-[#3D6B22]"
+                  : household.authStatus === "Expiring Soon"
+                    ? "bg-amber-500"
+                    : "bg-rose-500"
                   }`}
               >
                 {household.authStatus}
@@ -282,8 +282,8 @@ export function HouseholdDetailView({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${isActive
-                  ? "bg-[#3D6B22] text-white shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "bg-[#3D6B22] text-white shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
             >
               <Icon className="w-4 h-4" />
@@ -299,80 +299,110 @@ export function HouseholdDetailView({
           {/* Left Column (2 cols): Residence & Three Connected Journeys */}
           <div className="lg:col-span-2 space-y-5">
             {/* Household Demographics & Residence */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 mb-4">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <Home className="w-4.5 h-4.5 text-[#3D6B22]" />
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Home className="w-4 h-4 text-[#3D6B22]" />
                   Household Residence & Contact
                 </h3>
                 <button
                   type="button"
                   onClick={() => setIsContactModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-[#3D6B22] bg-[#E3F1D9] hover:bg-[#d5eac8] rounded-xl transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-[#1E5622] bg-[#E3F1D9] hover:bg-[#d5eac8] rounded-lg transition-colors cursor-pointer"
                 >
                   <Phone className="w-3 h-3" />
                   <span>Contact</span>
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-4 text-xs">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
                 <div>
-                  <span className="text-slate-500 block">Household Name</span>
-                  <span className="font-semibold text-slate-800 text-sm mt-0.5 block">{household.name}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Household Name</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{household.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Household Code</span>
-                  <span className="font-mono font-bold text-slate-800 text-sm mt-0.5 block">{household.code}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 block">Physical Residence Address</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block flex items-start gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{household.address}, {household.city}, {household.state} {household.zip}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Household Code</span>
+                  <span className="font-mono text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/70 inline-block mt-0.5">
+                    {household.code}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Primary Telephone</span>
-                  <a href={`tel:${household.phone}`} className="font-medium text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Physical Residence Address</span>
+                  <p className="text-xs font-medium text-slate-700 flex items-start gap-1.5 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span>{household.address}, {household.city}, {household.state} {household.zip}</span>
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Primary Telephone</span>
+                  <a href={`tel:${household.phone}`} className="text-sm font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5 mt-0.5">
                     <Phone className="w-3.5 h-3.5 text-slate-400" />
                     {household.phone}
                   </a>
                 </div>
+              </div>
+
+              <div className="mt-4 pt-3.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-4 gap-y-3 gap-x-4">
                 <div>
-                  <span className="text-slate-500 block">Service Program</span>
-                  <span className="font-semibold text-slate-800 mt-0.5 block">{household.program}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Service Program</span>
+                  <span className="text-xs font-semibold text-slate-800 block">{household.program}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">EVV Verification Rate</span>
-                  <span className="font-semibold text-emerald-700 mt-0.5 block">{household.evvComplianceRate}% compliant</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Authorized Hours</span>
+                  <span className="text-xs font-semibold text-slate-800 block">{household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs/wk</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Authorized Hours & Auth</span>
+                  <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                    <span className="text-xs font-semibold text-slate-800">{household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs/wk</span>
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${household.authStatus === "Approved"
+                      ? "bg-[#E3F1D9] text-[#1E5622] border-[#3D6B22]/20"
+                      : household.authStatus === "Expiring Soon"
+                        ? "bg-amber-50 text-amber-800 border-amber-200"
+                        : household.authStatus === "Expired"
+                          ? "bg-rose-50 text-rose-700 border-rose-200"
+                          : "bg-blue-50 text-blue-700 border-blue-200"
+                      }`}>
+                      {household.authStatus}
+                    </span>
+                  </div>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Authorized Weekly Hours</span>
-                  <span className="font-semibold text-slate-800 mt-0.5 block">{household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs/wk</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">EVV Compliance</span>
+                  <span className="text-xs font-semibold text-emerald-700 block">{household.evvComplianceRate}% compliant</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Last Recorded Visit</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{household.lastVisitDate}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Last Recorded Visit</span>
+                  <span className="text-xs font-medium text-slate-700 block">{household.lastVisitDate}</span>
                 </div>
               </div>
             </Card>
 
             {/* Three Connected Journeys Tracker (RULES.md #L96) */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <Sparkles className="w-4.5 h-4.5 text-[#3D6B22]" />
-                Three Connected Journeys (LiliSare Operational Flow)
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#3D6B22]" />
+                  Three Connected Journeys (LiliSare Operational Flow)
+                </h3>
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                  Synchronized
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                 {/* 1. Client Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>1. Client Care</span>
-                    <span className="text-emerald-700">{household.triJourneyStatus.clientStage}</span>
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">1. Client Care</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                      {household.triJourneyStatus.clientStage}
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-700 font-medium">
-                    {household.client.name} ({household.client.relationship})
+                  <p className="text-xs text-slate-800 font-semibold">
+                    {household.client.name}
                   </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <p className="text-[11px] text-slate-500">
+                    {household.client.relationship || "Care Recipient"}
+                  </p>
+                  <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-[#3D6B22] h-1.5 rounded-full"
                       style={{ width: household.triJourneyStatus.clientStage === "Care Active" ? "100%" : "70%" }}
@@ -381,15 +411,20 @@ export function HouseholdDetailView({
                 </div>
 
                 {/* 2. Caregiver Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>2. Caregiver Workforce</span>
-                    <span className="text-emerald-700">{household.triJourneyStatus.caregiverStage}</span>
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">2. Caregiver Workforce</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                      {household.triJourneyStatus.caregiverStage}
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-700 font-medium">
-                    {household.primaryCaregiver.name} ({household.primaryCaregiver.relationship})
+                  <p className="text-xs text-slate-800 font-semibold">
+                    {household.primaryCaregiver.name}
                   </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <p className="text-[11px] text-slate-500">
+                    {household.primaryCaregiver.relationship || "Primary Caregiver"}
+                  </p>
+                  <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-[#3D6B22] h-1.5 rounded-full"
                       style={{ width: household.triJourneyStatus.caregiverStage === "Active" ? "100%" : "60%" }}
@@ -398,15 +433,20 @@ export function HouseholdDetailView({
                 </div>
 
                 {/* 3. Agency Operations Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>3. Agency Ops</span>
-                    <span className="text-emerald-700">{household.triJourneyStatus.opsStage}</span>
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">3. Agency Ops</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                      {household.triJourneyStatus.opsStage}
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-700 font-medium">
-                    Auth: {household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs verified
+                  <p className="text-xs text-slate-800 font-semibold">
+                    Auth: {household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs
                   </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <p className="text-[11px] text-slate-500">
+                    EVV Verified Schedule
+                  </p>
+                  <div className="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-[#3D6B22] h-1.5 rounded-full"
                       style={{ width: household.authStatus === "Approved" ? "100%" : "50%" }}
@@ -420,31 +460,41 @@ export function HouseholdDetailView({
           {/* Right Column (1 col): Case Manager Card & Quick Action Card */}
           <div className="space-y-5">
             {/* Case Manager Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <Building2 className="w-4 h-4 text-[#3D6B22]" />
-                Assigned Case Manager
-              </h3>
-              <div className="space-y-3 text-xs">
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Case Manager</span>
-                  <span className="font-bold text-slate-800 text-sm mt-0.5 block">{household.caseManager.name}</span>
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-[#3D6B22]" />
+                  Assigned Case Manager
+                </h3>
+                <span className="text-[11px] font-medium text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                  Waiver Agency
+                </span>
+              </div>
+
+              {/* Case Manager Profile */}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#1E5622] font-semibold flex items-center justify-center text-sm shrink-0">
+                  {household.caseManager.name.charAt(0)}
                 </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Waiver Agency</span>
-                  <span className="font-semibold text-slate-700 mt-0.5 block">{household.caseManager.agency}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 truncate">{household.caseManager.name}</p>
+                  <p className="text-xs text-slate-500 truncate">{household.caseManager.agency}</p>
                 </div>
+              </div>
+
+              {/* Details Breakdown */}
+              <div className="pt-3 border-t border-slate-100 space-y-2.5 text-xs">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Telephone</span>
-                  <a href={`tel:${household.caseManager.phone}`} className="font-semibold text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Telephone</span>
+                  <a href={`tel:${household.caseManager.phone}`} className="text-xs font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-slate-400" />
                     {household.caseManager.phone}
                   </a>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Email</span>
-                  <a href={`mailto:${household.caseManager.email}`} className="font-semibold text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Email Address</span>
+                  <a href={`mailto:${household.caseManager.email}`} className="text-xs font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5 truncate">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     {household.caseManager.email}
                   </a>
                 </div>
@@ -452,30 +502,45 @@ export function HouseholdDetailView({
             </Card>
 
             {/* Quick Action Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-2.5">
-              <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-100">
-                Connected Records
-              </h3>
-              <Link
-                href={`/clients/${household.client.id}`}
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-[#F2F8EE] border border-slate-200 transition-colors text-xs font-semibold text-slate-800 group cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-blue-600" />
-                  <span>{household.client.name} (Client Chart)</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#3D6B22] transition-colors" />
-              </Link>
-              <Link
-                href={`/caregivers/${household.primaryCaregiver.id}`}
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-[#F2F8EE] border border-slate-200 transition-colors text-xs font-semibold text-slate-800 group cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-rose-600" />
-                  <span>{household.primaryCaregiver.name} (Caregiver File)</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#3D6B22] transition-colors" />
-              </Link>
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+              <div className="pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#3D6B22]" />
+                  Connected Records
+                </h3>
+              </div>
+              <div className="space-y-2.5">
+                <Link
+                  href={`/clients/${household.client.id}`}
+                  className="flex items-center justify-between p-3 rounded-xl border border-slate-200/70 hover:border-[#3D6B22]/50 hover:bg-[#F2F8EE]/40 transition-all text-xs font-semibold text-slate-800 group cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-semibold text-xs shrink-0">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-semibold text-slate-800 group-hover:text-[#1E5622] transition-colors">{household.client.name}</span>
+                      <span className="block text-[11px] font-normal text-slate-400">Client Chart</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 transition-all" />
+                </Link>
+                <Link
+                  href={`/caregivers/${household.primaryCaregiver.id}`}
+                  className="flex items-center justify-between p-3 rounded-xl border border-slate-200/70 hover:border-[#3D6B22]/50 hover:bg-[#F2F8EE]/40 transition-all text-xs font-semibold text-slate-800 group cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center font-semibold text-xs shrink-0">
+                      <Heart className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-semibold text-slate-800 group-hover:text-[#1E5622] transition-colors">{household.primaryCaregiver.name}</span>
+                      <span className="block text-[11px] font-normal text-slate-400">Caregiver File</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 transition-all" />
+                </Link>
+              </div>
             </Card>
           </div>
         </div>

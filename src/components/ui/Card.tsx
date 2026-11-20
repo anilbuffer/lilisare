@@ -18,7 +18,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <motion.div
         ref={ref}
         className={cn(
-          "bg-white rounded-2xl border border-[#D5DFDA] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] transition-all duration-300 hover:shadow-[0_4px_12px_-1px_rgba(17,28,22,0.08)] hover:border-[#93C573]/80 relative overflow-hidden",
+          "relative bg-white rounded-xl lg:rounded-2xl border border-[#D5DFDA] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] transition-all duration-300 hover:shadow-[0_4px_12px_-1px_rgba(17,28,22,0.08)] hover:border-[#93C573]/80 relative overflow-hidden",
           !noPadding && "",
           className
         )}

@@ -10,7 +10,7 @@ interface BackgroundCheckWidgetProps {
 
 export function BackgroundCheckWidget({ onRunChecks, onViewDetails }: BackgroundCheckWidgetProps = {}) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
       <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
         <h3 className="font-semibold text-slate-900 flex items-center gap-2">
           <Shield className="w-4 h-4 text-brand-teal" />

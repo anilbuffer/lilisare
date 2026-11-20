@@ -268,7 +268,7 @@ export default function EVVMonitoringPage() {
             className="space-y-4"
           >
             {/* Exceptions Queue Card */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
+            <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
               <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   Exceptions Queue

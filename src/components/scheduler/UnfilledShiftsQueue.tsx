@@ -57,7 +57,7 @@ export function UnfilledShiftsQueue({ shifts: initialShifts, onAssign }: Unfille
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 mb-4">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 mb-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 mb-3.5 sm:mb-4">
         <div className="flex items-start gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold shrink-0">
@@ -175,7 +175,7 @@ export function UnfilledShiftsQueue({ shifts: initialShifts, onAssign }: Unfille
                             key={cg.id}
                             className={clsx(
                               "border rounded-xl p-2.5 flex items-center justify-between transition-all",
-                              cg.overtimeRisk 
+                              cg.overtimeRisk
                                 ? "bg-amber-50/30 border-amber-200 hover:border-amber-300 hover:shadow-sm"
                                 : "bg-white border-slate-200/90 hover:border-brand-teal/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
                             )}
@@ -193,7 +193,7 @@ export function UnfilledShiftsQueue({ shifts: initialShifts, onAssign }: Unfille
                                 </div>
                                 <div className="flex items-center flex-wrap gap-1 text-[10px] sm:text-[11px] text-slate-500 mt-0.5">
                                   {cg.matchScore && (
-                                    <span 
+                                    <span
                                       className="flex items-center text-emerald-600 font-bold"
                                       title="Close by, skill match, no OT risk"
                                     >

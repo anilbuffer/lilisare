@@ -17,7 +17,7 @@ export function TodayVisitsPanel({
   onSelectVisit,
 }: TodayVisitsPanelProps) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:border-brand-teal/30 transition-all duration-300 p-5 space-y-4">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:border-brand-teal/30 transition-all duration-300 p-5 space-y-4">
       <div className="flex items-center justify-between pb-3 border-b border-gray-100">
         <div>
           <h3 className="text-base font-bold text-gray-900">Today&apos;s Visits</h3>

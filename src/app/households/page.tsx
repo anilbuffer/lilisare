@@ -52,67 +52,67 @@ export const HOUSEHOLD_KANBAN_STAGES: {
     headerBadge: string;
   };
 }[] = [
-  {
-    id: "Intake & Discovery",
-    title: "Intake & Discovery",
-    icon: Sparkles,
-    badge: {
-      bg: "bg-sky-50",
-      text: "text-sky-800",
-      border: "border-sky-200",
-      dot: "bg-sky-600",
-      headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
+    {
+      id: "Intake & Discovery",
+      title: "Intake & Discovery",
+      icon: Sparkles,
+      badge: {
+        bg: "bg-sky-50",
+        text: "text-sky-800",
+        border: "border-sky-200",
+        dot: "bg-sky-600",
+        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
+      },
     },
-  },
-  {
-    id: "Onboarding & Docs",
-    title: "Onboarding & Docs",
-    icon: Clock,
-    badge: {
-      bg: "bg-amber-50",
-      text: "text-amber-800",
-      border: "border-amber-200",
-      dot: "bg-amber-500",
-      headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+    {
+      id: "Onboarding & Docs",
+      title: "Onboarding & Docs",
+      icon: Clock,
+      badge: {
+        bg: "bg-amber-50",
+        text: "text-amber-800",
+        border: "border-amber-200",
+        dot: "bg-amber-500",
+        headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+      },
     },
-  },
-  {
-    id: "Pending Authorization",
-    title: "Pending Auth",
-    icon: FileCheck2,
-    badge: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      border: "border-purple-200",
-      dot: "bg-purple-500",
-      headerBadge: "bg-purple-100 text-purple-800 border-purple-200",
+    {
+      id: "Pending Authorization",
+      title: "Pending Auth",
+      icon: FileCheck2,
+      badge: {
+        bg: "bg-purple-50",
+        text: "text-purple-700",
+        border: "border-purple-200",
+        dot: "bg-purple-500",
+        headerBadge: "bg-purple-100 text-purple-800 border-purple-200",
+      },
     },
-  },
-  {
-    id: "Care Active",
-    title: "Care Active",
-    icon: CheckCircle2,
-    badge: {
-      bg: "bg-[#E3F1D9]",
-      text: "text-[#1E5622]",
-      border: "border-[#3D6B22]/20",
-      dot: "bg-[#3D6B22]",
-      headerBadge: "bg-[#E8F2E4] text-[#1E5622] border-[#93C573]/30",
+    {
+      id: "Care Active",
+      title: "Care Active",
+      icon: CheckCircle2,
+      badge: {
+        bg: "bg-[#E3F1D9]",
+        text: "text-[#1E5622]",
+        border: "border-[#3D6B22]/20",
+        dot: "bg-[#3D6B22]",
+        headerBadge: "bg-[#E8F2E4] text-[#1E5622] border-[#93C573]/30",
+      },
     },
-  },
-  {
-    id: "On Hold / Inactive",
-    title: "On Hold / Inactive",
-    icon: Archive,
-    badge: {
-      bg: "bg-slate-100",
-      text: "text-slate-600",
-      border: "border-slate-200",
-      dot: "bg-slate-400",
-      headerBadge: "bg-slate-200 text-slate-700 border-slate-300",
+    {
+      id: "On Hold / Inactive",
+      title: "On Hold / Inactive",
+      icon: Archive,
+      badge: {
+        bg: "bg-slate-100",
+        text: "text-slate-600",
+        border: "border-slate-200",
+        dot: "bg-slate-400",
+        headerBadge: "bg-slate-200 text-slate-700 border-slate-300",
+      },
     },
-  },
-];
+  ];
 
 const STAGE_CONFIG_MAP = new Map(
   HOUSEHOLD_KANBAN_STAGES.map((col) => [col.id, col])
@@ -349,11 +349,10 @@ export default function HouseholdsPage() {
                       setSelectedDateRange(opt.id);
                       setIsDateOpen(false);
                     }}
-                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      selectedDateRange === opt.id
+                    className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedDateRange === opt.id
                         ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
                         : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     <span>{opt.label}</span>
                     {selectedDateRange === opt.id && <Check className="w-3 h-3" />}
@@ -420,11 +419,10 @@ export default function HouseholdsPage() {
               key={kpi.id}
               type="button"
               onClick={() => setSelectedTab(selectedTab === kpi.id ? "ALL" : kpi.id)}
-              className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${
-                isSelected
+              className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${isSelected
                   ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
                   : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
-              }`}
+                }`}
             >
               {/* Top row: Label & Animated Icon Container */}
               <div className="flex items-center justify-between mb-2">
@@ -452,7 +450,7 @@ export default function HouseholdsPage() {
 
       {/* 03. Household Management Workspace Card (Strict consistency with /intake/pipeline) */}
       <section aria-label="Household Management Workspace">
-        <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
+        <div className="bg-white border border-slate-200/90 rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
           {/* Workspace Toolbar Row */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
@@ -502,9 +500,8 @@ export default function HouseholdsPage() {
                     {currentStageFilter ? (
                       <>
                         <span
-                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                            STAGE_CONFIG_MAP.get(currentStageFilter)?.badge.dot || "bg-slate-400"
-                          }`}
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${STAGE_CONFIG_MAP.get(currentStageFilter)?.badge.dot || "bg-slate-400"
+                            }`}
                         />
                         <span className="truncate">
                           {STAGE_CONFIG_MAP.get(currentStageFilter)?.title}
@@ -515,9 +512,8 @@ export default function HouseholdsPage() {
                     )}
                   </span>
                   <ChevronDown
-                    className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                      isStageDropdownOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isStageDropdownOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -546,11 +542,10 @@ export default function HouseholdsPage() {
                           setSelectedTab("ALL");
                           setIsStageDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                          selectedTab === "ALL"
+                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${selectedTab === "ALL"
                             ? "bg-slate-50 font-bold text-slate-900"
                             : "text-slate-700 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <span>All Stages</span>
                         {selectedTab === "ALL" && (
@@ -572,11 +567,10 @@ export default function HouseholdsPage() {
                               setSelectedTab(s.id);
                               setIsStageDropdownOpen(false);
                             }}
-                            className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                              isSelected
+                            className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
                                 ? "bg-slate-50 font-bold text-slate-900"
                                 : "text-slate-700 hover:bg-slate-50"
-                            }`}
+                              }`}
                           >
                             <span className="flex items-center gap-2">
                               <span className={`w-2 h-2 rounded-full ${s.badge.dot}`} />
@@ -598,11 +592,10 @@ export default function HouseholdsPage() {
                 <button
                   type="button"
                   onClick={() => setViewMode("kanban")}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    viewMode === "kanban"
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
                       ? "bg-white text-[#3D6B22] shadow-xs"
                       : "text-slate-500 hover:text-slate-900"
-                  }`}
+                    }`}
                   title="Kanban Board View"
                 >
                   <Kanban className="w-3.5 h-3.5" />
@@ -611,11 +604,10 @@ export default function HouseholdsPage() {
                 <button
                   type="button"
                   onClick={() => setViewMode("list")}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    viewMode === "list"
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
                       ? "bg-white text-[#3D6B22] shadow-xs"
                       : "text-slate-500 hover:text-slate-900"
-                  }`}
+                    }`}
                   title="List View"
                 >
                   <List className="w-3.5 h-3.5" />
@@ -655,13 +647,12 @@ export default function HouseholdsPage() {
                       onDragOver={(e) => handleDragOver(e, col.id)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, col.id)}
-                      className={`w-[275px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${
-                        isDragOver
+                      className={`w-[275px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${isDragOver
                           ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
                           : isFilteredStage
-                          ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
-                          : "bg-[#F8FAF9] border-slate-200/80"
-                      }`}
+                            ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
+                            : "bg-[#F8FAF9] border-slate-200/80"
+                        }`}
                     >
                       {/* Lane Header */}
                       <div className="p-3 border-b border-slate-200/60 flex items-center justify-between">
@@ -702,9 +693,8 @@ export default function HouseholdsPage() {
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, hh.id)}
                                 onClick={() => router.push(`/households/${hh.id}`)}
-                                className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${
-                                  isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
-                                }`}
+                                className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
+                                  }`}
                               >
                                 <div>
                                   {/* Row 1: Household Name */}
@@ -843,16 +833,13 @@ export default function HouseholdsPage() {
                           </td>
                           <td className="py-3 px-4">
                             <span
-                              className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                                stageConfig?.badge.bg ?? "bg-slate-100"
-                              } ${stageConfig?.badge.text ?? "text-slate-700"} ${
-                                stageConfig?.badge.border ?? "border-slate-200"
-                              }`}
+                              className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${stageConfig?.badge.bg ?? "bg-slate-100"
+                                } ${stageConfig?.badge.text ?? "text-slate-700"} ${stageConfig?.badge.border ?? "border-slate-200"
+                                }`}
                             >
                               <span
-                                className={`w-1.5 h-1.5 rounded-full ${
-                                  stageConfig?.badge.dot ?? "bg-slate-400"
-                                }`}
+                                className={`w-1.5 h-1.5 rounded-full ${stageConfig?.badge.dot ?? "bg-slate-400"
+                                  }`}
                               />
                               <span>{stageConfig?.title ?? stage}</span>
                             </span>

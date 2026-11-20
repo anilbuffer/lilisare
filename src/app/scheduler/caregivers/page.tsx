@@ -187,7 +187,7 @@ export default function SchedulerCaregiversPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden"
+            className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden"
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs whitespace-nowrap">

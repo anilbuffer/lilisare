@@ -170,7 +170,7 @@ export function CaregiverEditView({ caregiverId }: CaregiverEditViewProps) {
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-6 space-y-6">
+        <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] p-6 space-y-6">
           <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-slate-900">Edit Caregiver Profile</h2>

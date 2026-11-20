@@ -276,7 +276,7 @@ export function PolicyAcknowledgmentMatrix({ policies }: PolicyAcknowledgmentMat
           <div className="absolute inset-0" onClick={() => setSelectedPolicy(null)} />
 
           {/* Modal Content Box */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative z-10">
+          <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative z-10">
 
             {/* Modal Header */}
             <div className="p-4 border-b border-slate-200 bg-slate-50/90 flex items-start justify-between gap-3 shrink-0">

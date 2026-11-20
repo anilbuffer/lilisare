@@ -644,7 +644,7 @@ export default function LoginPage() {
       </div>
 
       {/* Main Responsive Container Card */}
-      <div className="relative z-10 w-full max-w-[1560px] h-full lg:max-h-[calc(100vh-2rem)] xl:max-h-[calc(100vh-3rem)] rounded-2xl sm:rounded-3xl lg:rounded-[26px] xl:rounded-[32px] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] overflow-hidden flex flex-col justify-between">
+      <div className="relative z-10 w-full max-w-[1560px] h-full lg:max-h-[calc(100vh-2rem)] xl:max-h-[calc(100vh-3rem)] rounded-xl sm:rounded-2xl lg:rounded-[26px] xl:rounded-[32px] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] overflow-hidden flex flex-col justify-between">
 
         {/* Main Header (Visible on Mobile & Tablet above split, hidden on Desktop left panel) */}
         <div className="lg:hidden w-full bg-gradient-to-r from-[#1B3414] via-[#24461B] to-[#14280E] rounded-xl sm:rounded-2xl p-3 sm:p-3 text-white mb-2 sm:mb-3 border border-[#93C573]/30 flex items-center justify-between shadow-xs">

@@ -333,7 +333,7 @@ export default function PatientsPage() {
       {filteredPatients.length > 0 && (
         <>
           {viewMode === "list" ? (
-            <div className="w-full bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+            <div className="w-full relative bg-white rounded-xl lg:rounded-2xl border border-slate-200/90 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
               {/* Desktop / Tablet Table View (sm and up) */}
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm text-left border-collapse">

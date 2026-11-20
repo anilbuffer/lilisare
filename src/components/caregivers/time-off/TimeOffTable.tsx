@@ -62,7 +62,7 @@ export function TimeOffTable() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col">
       {/* Controls */}
       <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
         <div className="flex flex-1 items-center gap-3 max-w-xl">

@@ -57,7 +57,7 @@ export function ClientsTable({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-[#D5DFDA] shadow-xs overflow-hidden">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-[#D5DFDA] shadow-xs overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -92,11 +92,10 @@ export function ClientsTable({
                   <tr
                     key={client.id}
                     onClick={() => onSelectClient(client)}
-                    className={`group cursor-pointer transition-colors ${
-                      isSelected
+                    className={`group cursor-pointer transition-colors ${isSelected
                         ? "bg-[#F2F8EE] border-l-4 border-l-[#3D6B22]"
                         : "hover:bg-slate-50/80"
-                    }`}
+                      }`}
                   >
                     {/* Client Name & ID */}
                     <td className="py-3.5 px-4">
@@ -181,37 +180,33 @@ export function ClientsTable({
                       <div className="flex items-center gap-1.5">
                         <span
                           title={`Profile: ${client.readiness.clientProfile}`}
-                          className={`w-2 h-2 rounded-full ${
-                            client.readiness.clientProfile === "Complete"
+                          className={`w-2 h-2 rounded-full ${client.readiness.clientProfile === "Complete"
                               ? "bg-emerald-500"
                               : "bg-amber-500"
-                          }`}
+                            }`}
                         />
                         <span
                           title={`Care: ${client.readiness.careArrangement}`}
-                          className={`w-2 h-2 rounded-full ${
-                            client.readiness.careArrangement === "Complete"
+                          className={`w-2 h-2 rounded-full ${client.readiness.careArrangement === "Complete"
                               ? "bg-emerald-500"
                               : "bg-amber-500"
-                          }`}
+                            }`}
                         />
                         <span
                           title={`Docs: ${client.readiness.documents}`}
-                          className={`w-2 h-2 rounded-full ${
-                            client.readiness.documents === "Verified"
+                          className={`w-2 h-2 rounded-full ${client.readiness.documents === "Verified"
                               ? "bg-emerald-500"
                               : "bg-amber-500"
-                          }`}
+                            }`}
                         />
                         <span
                           title={`Auth: ${client.readiness.authorization}`}
-                          className={`w-2 h-2 rounded-full ${
-                            client.readiness.authorization === "Verified"
+                          className={`w-2 h-2 rounded-full ${client.readiness.authorization === "Verified"
                               ? "bg-emerald-500"
                               : client.readiness.authorization === "Expiring"
-                              ? "bg-rose-500"
-                              : "bg-amber-500"
-                          }`}
+                                ? "bg-rose-500"
+                                : "bg-amber-500"
+                            }`}
                         />
                         <span className="text-[11px] font-mono font-bold text-slate-600 ml-1">
                           {client.readiness.overallScore ?? 85}%

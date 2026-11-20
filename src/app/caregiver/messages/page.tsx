@@ -98,7 +98,7 @@ export default function CaregiverMessagesPage() {
         )}
 
         {/* Desktop Two-Pane Messaging Layout */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all duration-300 flex-1 overflow-hidden flex">
+        <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all duration-300 flex-1 overflow-hidden flex">
           {/* LEFT PANE: Conversation List (1/3 width) */}
           <div className="w-full md:w-80 lg:w-96 border-r border-gray-100 flex flex-col bg-gray-50/50">
             <div className="p-4 border-b border-gray-100 space-y-3">

@@ -183,7 +183,7 @@ export default function CaregiverSchedulePage() {
                 { day: "Sat", date: "Jul 25", shifts: [] },
                 { day: "Sun", date: "Jul 26", shifts: [] },
               ].map((d) => (
-                <div key={d.day} className="bg-white rounded-2xl border border-slate-200 p-3 min-h-[220px] flex flex-col space-y-2">
+                <div key={d.day} className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-3 min-h-[220px] flex flex-col space-y-2">
                   <div className="border-b border-gray-100 pb-2 text-center">
                     <span className="text-xs font-bold text-gray-500 uppercase">{d.day}</span>
                     <div className={`text-xs ${d.dateClass || "text-gray-700 font-semibold"}`}>{d.date}</div>
@@ -192,8 +192,8 @@ export default function CaregiverSchedulePage() {
                   <div className="space-y-2 flex-1">
                     {d.shifts.length > 0 ? (
                       d.shifts.map((s, i) => (
-                        <div 
-                          key={i} 
+                        <div
+                          key={i}
                           onClick={() => router.push('/caregiver/visits/active')}
                           className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 text-xs space-y-1 cursor-pointer hover:bg-blue-100 transition-colors"
                         >
@@ -220,7 +220,7 @@ export default function CaregiverSchedulePage() {
 
         {/* TAB 2: OPEN SHIFTS TABLE */}
         {activeTab === "open" && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
+          <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <div>
                 <h3 className="text-base font-bold text-gray-900">Available Open Shifts Board</h3>
@@ -287,7 +287,7 @@ export default function CaregiverSchedulePage() {
 
         {/* TAB 3: AVAILABILITY GRID */}
         {activeTab === "availability" && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+          <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div>
                 <h3 className="text-base font-bold text-gray-900">Weekly Availability Hours Editor</h3>
@@ -333,7 +333,7 @@ export default function CaregiverSchedulePage() {
 
         {/* TAB 4: TIME-OFF REQUESTS */}
         {activeTab === "timeoff" && (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+          <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div>
                 <h3 className="text-base font-bold text-gray-900">Time-Off Requests & Status</h3>

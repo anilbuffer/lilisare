@@ -58,7 +58,7 @@ export function ClientsGrid({
 
   if (clients.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-[#D5DFDA] p-12 text-center text-slate-500">
+      <div className="relative bg-white rounded-xl lg:rounded-2xl border border-[#D5DFDA] p-12 text-center text-slate-500">
         <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
         <p className="font-bold text-slate-700">No matching clients found</p>
         <p className="text-xs text-slate-400 mt-1">Try adjusting your search query or filters.</p>
@@ -76,11 +76,10 @@ export function ClientsGrid({
           <Card
             key={client.id}
             onClick={() => onSelectClient(client)}
-            className={`p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between border ${
-              isSelected
+            className={`p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between border ${isSelected
                 ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#F2F8EE]/30"
                 : "border-[#D5DFDA] bg-white hover:border-[#93C573] hover:shadow-md"
-            }`}
+              }`}
           >
             <div>
               {/* Card Header: Client Info & Status */}
@@ -168,35 +167,31 @@ export function ClientsGrid({
                   <div className="flex items-center gap-1">
                     <span
                       title={`Profile: ${client.readiness.clientProfile}`}
-                      className={`w-2 h-2 rounded-full ${
-                        client.readiness.clientProfile === "Complete"
+                      className={`w-2 h-2 rounded-full ${client.readiness.clientProfile === "Complete"
                           ? "bg-emerald-500"
                           : "bg-amber-500"
-                      }`}
+                        }`}
                     />
                     <span
                       title={`Care: ${client.readiness.careArrangement}`}
-                      className={`w-2 h-2 rounded-full ${
-                        client.readiness.careArrangement === "Complete"
+                      className={`w-2 h-2 rounded-full ${client.readiness.careArrangement === "Complete"
                           ? "bg-emerald-500"
                           : "bg-amber-500"
-                      }`}
+                        }`}
                     />
                     <span
                       title={`Docs: ${client.readiness.documents}`}
-                      className={`w-2 h-2 rounded-full ${
-                        client.readiness.documents === "Verified"
+                      className={`w-2 h-2 rounded-full ${client.readiness.documents === "Verified"
                           ? "bg-emerald-500"
                           : "bg-amber-500"
-                      }`}
+                        }`}
                     />
                     <span
                       title={`Auth: ${client.readiness.authorization}`}
-                      className={`w-2 h-2 rounded-full ${
-                        client.readiness.authorization === "Verified"
+                      className={`w-2 h-2 rounded-full ${client.readiness.authorization === "Verified"
                           ? "bg-emerald-500"
                           : "bg-amber-500"
-                      }`}
+                        }`}
                     />
                     <span className="text-[10px] font-mono font-bold text-slate-700 ml-1">
                       {client.readiness.overallScore ?? 85}%

@@ -86,7 +86,7 @@ export function CarePlanSignOff({ onComplete, onBack }: CarePlanSignOffProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1">
 
         {/* Left: Final Review Checklist */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col overflow-hidden">
           <div className="p-4 border-b border-slate-100 bg-slate-50/50">
             <h3 className="text-base font-semibold text-slate-900">Final Review Checklist</h3>
           </div>
@@ -105,7 +105,7 @@ export function CarePlanSignOff({ onComplete, onBack }: CarePlanSignOffProps) {
 
         {/* Right: Sign-Offs */}
         <div className="flex flex-col gap-4 h-fit sticky top-6">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col p-6">
+          <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col p-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-2">RN Sign-Off</h3>
             <p className="text-xs text-slate-500 mb-6">
               Your signature certifies clinical accuracy of every field in this care plan.
@@ -153,7 +153,7 @@ export function CarePlanSignOff({ onComplete, onBack }: CarePlanSignOffProps) {
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col p-6">
+          <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col p-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-2">POA / Client Sign-Off</h3>
             <p className="text-xs text-slate-500 mb-6">Electronic signature capture for Legal POA.</p>
             <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 mb-4">

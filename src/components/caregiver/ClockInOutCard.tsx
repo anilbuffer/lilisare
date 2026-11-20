@@ -97,7 +97,7 @@ export function ClockInOutCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:border-brand-teal/30 transition-all duration-300 p-6 relative overflow-hidden">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:border-brand-teal/30 transition-all duration-300 p-6 relative overflow-hidden">
       {/* Decorative top accent line */}
       <div className={`absolute top-0 left-0 right-0 h-1.5 ${isClockedIn ? "bg-brand-teal animate-pulse" : "bg-blue-600"}`} />
 

@@ -321,7 +321,7 @@ export function OnboardingList({ activeKpiFilter = "all", onSelectKpiFilter }: O
   });
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col relative">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col relative">
       {/* Controls Bar */}
       <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
         <div className="flex flex-1 items-center gap-3 max-w-xl">
@@ -363,7 +363,7 @@ export function OnboardingList({ activeKpiFilter = "all", onSelectKpiFilter }: O
 
             {/* Filter Menu Popover */}
             {isFilterDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl z-30 p-4 space-y-4">
+              <div className="absolute right-0 mt-2 w-64 relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-xl z-30 p-4 space-y-4">
                 <div>
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
                     Onboarding Status
@@ -622,7 +622,7 @@ export function OnboardingList({ activeKpiFilter = "all", onSelectKpiFilter }: O
 
                       {/* Floating Dropdown Action Menu */}
                       {activeMenuHireId === hire.id && (
-                        <div className="absolute right-0 top-10 w-52 bg-white rounded-2xl border border-slate-200 shadow-xl z-40 py-2 text-left space-y-0.5">
+                        <div className="absolute right-0 top-10 w-52 relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-xl z-40 py-2 text-left space-y-0.5">
                           <button
                             onClick={() => {
                               setSelectedHireForDossier(hire);

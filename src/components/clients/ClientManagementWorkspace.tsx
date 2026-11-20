@@ -7,7 +7,6 @@ import {
   Search,
   Kanban,
   List,
-  Users,
   FilterX,
   ChevronRight,
   ShieldAlert,
@@ -337,7 +336,7 @@ export function ClientManagementWorkspace({
   return (
     <section aria-label="Client Management Workspace">
       {/* Outer Card container matching IntakeReferralWorkspace */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
+      <div className="bg-white border border-slate-200/90 rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
         {/* Workspace Header & Toolbar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
@@ -583,54 +582,31 @@ export function ClientManagementWorkspace({
                                 }`}
                             >
                               <div>
-                                {/* Row 1: Client Name, ID & Attention Dot */}
-                                <div className="flex items-start justify-between gap-1.5 mb-1">
-                                  <div className="flex items-center gap-1.5 truncate flex-1">
-                                    <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate">
-                                      {client.name}
-                                    </h4>
-                                    {hasAttention && (
-                                      <span
-                                        className="w-2 h-2 rounded-full bg-amber-500 shrink-0"
-                                        title="Needs Attention"
-                                      />
-                                    )}
-                                  </div>
-                                  <span className="font-mono text-[10px] text-slate-400 shrink-0">
-                                    {client.id}
-                                  </span>
-                                </div>
-
-                                {/* Row 2: Connected Household & Age */}
-                                <p className="text-xs text-slate-500 truncate flex items-center gap-1">
-                                  <Home className="w-3 h-3 text-slate-400 shrink-0" />
-                                  <span className="truncate">{client.household.name}</span>
-                                  <span className="text-slate-400 font-normal">
-                                    · Age {client.age}
-                                  </span>
-                                </p>
-
-                                {/* Row 3: Assigned Caregiver */}
-                                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
-                                  <Users className="w-3 h-3 text-slate-400 shrink-0" />
-                                  <span className="text-slate-400 text-[11px]">Caregiver:</span>
-                                  {client.assignedCareTeam.primaryCaregiver ? (
-                                    <span className="text-[11px] font-medium text-slate-700 truncate">
-                                      {client.assignedCareTeam.primaryCaregiver.name}
-                                    </span>
-                                  ) : (
-                                    <span className="text-[10px] font-semibold text-rose-600">
-                                      Unassigned
-                                    </span>
+                                {/* Row 1: Client Name & Attention Dot */}
+                                <div className="flex items-center gap-1.5 mb-1 truncate">
+                                  <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate">
+                                    {client.name}
+                                  </h4>
+                                  {hasAttention && (
+                                    <span
+                                      className="w-2 h-2 rounded-full bg-amber-500 shrink-0"
+                                      title="Needs Attention"
+                                    />
                                   )}
                                 </div>
 
-                                {/* Row 4: Program Tag + Hours */}
+                                {/* Row 2: Connected Household */}
+                                <p className="text-xs text-slate-500 truncate flex items-center gap-1">
+                                  <Home className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span className="truncate">{client.household.name}</span>
+                                </p>
+
+                                {/* Row 3: Authorized Hours */}
                                 <div className="mt-2.5 flex items-center justify-between text-[11px]">
-                                  <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[155px]">
-                                    {formatShortProgram(client.carePlan.program)}
+                                  <span className="text-[10px] text-slate-500 font-medium">
+                                    Authorized Hours
                                   </span>
-                                  <span className="text-[10px] text-slate-500 font-semibold shrink-0">
+                                  <span className="text-[10px] text-slate-700 font-semibold shrink-0">
                                     {client.carePlan.authorizedWeeklyHours}h/wk
                                   </span>
                                 </div>
@@ -717,7 +693,7 @@ export function ClientManagementWorkspace({
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     <th className="py-3.5 px-4">Client</th>
                     <th className="py-3.5 px-4">Household</th>
-                    <th className="py-3.5 px-4">Assigned Caregiver</th>
+                    <th className="py-3.5 px-4">Caregiver</th>
                     <th className="py-3.5 px-4">Program</th>
                     <th className="py-3.5 px-4">Stage</th>
                     <th className="py-3.5 px-4 text-right">Action</th>
@@ -752,45 +728,30 @@ export function ClientManagementWorkspace({
                                 </div>
                               )}
                             </div>
-                            <div>
-                              <div className="flex items-center gap-1.5 font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-                                <span>{client.name}</span>
-                                {hasAttention && (
-                                  <span title="Needs Attention" className="text-amber-600">
-                                    <ShieldAlert className="w-3.5 h-3.5" />
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[11px] text-slate-400 font-mono">
-                                {client.id} • Age {client.age}
-                              </div>
+                            <div className="flex items-center gap-1.5 font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                              <span>{client.name}</span>
+                              {hasAttention && (
+                                <span title="Needs Attention" className="text-amber-600">
+                                  <ShieldAlert className="w-3.5 h-3.5" />
+                                </span>
+                              )}
                             </div>
                           </div>
                         </td>
 
                         {/* Household */}
                         <td className="py-3 px-3.5">
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-slate-800 truncate max-w-[150px]">
-                              {client.household.name}
-                            </span>
-                            <span className="text-[11px] text-slate-400 font-mono">
-                              {client.household.code}
-                            </span>
-                          </div>
+                          <span className="font-semibold text-slate-800 truncate max-w-[150px] block">
+                            {client.household.name}
+                          </span>
                         </td>
 
                         {/* Caregiver */}
                         <td className="py-3 px-3.5">
                           {client.assignedCareTeam.primaryCaregiver ? (
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-slate-800">
-                                {client.assignedCareTeam.primaryCaregiver.name}
-                              </span>
-                              <span className="text-[11px] text-slate-400">
-                                {client.assignedCareTeam.primaryCaregiver.relationship.split("(")[0]}
-                              </span>
-                            </div>
+                            <span className="font-semibold text-slate-800">
+                              {client.assignedCareTeam.primaryCaregiver.name}
+                            </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
                               <AlertCircle className="w-3.5 h-3.5" />

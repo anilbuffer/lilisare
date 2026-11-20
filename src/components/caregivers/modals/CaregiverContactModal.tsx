@@ -39,7 +39,7 @@ export function CaregiverContactModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-lg relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
           <div>
@@ -87,27 +87,24 @@ export function CaregiverContactModal({
               <button
                 type="button"
                 onClick={() => setCommType("call")}
-                className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
-                  commType === "call" ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${commType === "call" ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
               >
                 Phone Call
               </button>
               <button
                 type="button"
                 onClick={() => setCommType("email")}
-                className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
-                  commType === "email" ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${commType === "email" ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
               >
                 Email
               </button>
               <button
                 type="button"
                 onClick={() => setCommType("note")}
-                className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${
-                  commType === "note" ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                className={`p-2 rounded-xl border text-center font-semibold transition-all cursor-pointer ${commType === "note" ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-2xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
               >
                 App / In-Person
               </button>

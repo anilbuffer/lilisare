@@ -56,7 +56,7 @@ export default function CaregiverTrainingPage() {
             return (
               <div
                 key={course.id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:border-brand-teal/30 transition-all duration-300 overflow-hidden flex flex-col justify-between"
+                className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:border-brand-teal/30 transition-all duration-300 overflow-hidden flex flex-col justify-between"
               >
                 <div>
                   <div className="h-36 relative overflow-hidden bg-slate-900">

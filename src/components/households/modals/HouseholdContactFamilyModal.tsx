@@ -47,7 +47,7 @@ export function HouseholdContactFamilyModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-lg relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
           <div>
@@ -78,11 +78,10 @@ export function HouseholdContactFamilyModal({
               <button
                 type="button"
                 onClick={() => setTargetContact("caregiver")}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  targetContact === "caregiver"
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${targetContact === "caregiver"
                     ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#3D6B22] font-bold"
                     : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 <span className="block text-xs">{household.primaryCaregiver.name}</span>
                 <span className="block text-[11px] opacity-75 font-normal">Primary Caregiver</span>
@@ -90,11 +89,10 @@ export function HouseholdContactFamilyModal({
               <button
                 type="button"
                 onClick={() => setTargetContact("client")}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  targetContact === "client"
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${targetContact === "client"
                     ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#3D6B22] font-bold"
                     : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 <span className="block text-xs">{household.client.name}</span>
                 <span className="block text-[11px] opacity-75 font-normal">Care Recipient</span>
@@ -135,11 +133,10 @@ export function HouseholdContactFamilyModal({
                   type="button"
                   key={opt.id}
                   onClick={() => setCommType(opt.id as any)}
-                  className={`py-2 px-3 rounded-xl border text-center font-semibold transition-colors cursor-pointer ${
-                    commType === opt.id
+                  className={`py-2 px-3 rounded-xl border text-center font-semibold transition-colors cursor-pointer ${commType === opt.id
                       ? "border-[#3D6B22] bg-[#3D6B22] text-white shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   {opt.label}
                 </button>

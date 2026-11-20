@@ -9,7 +9,7 @@ export function CompactCoverageMap() {
   const activeCaregivers = mockCaregivers.slice(0, 4);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 mb-5">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 mb-5">
       <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 sm:gap-4 mb-3 sm:mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">

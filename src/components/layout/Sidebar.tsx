@@ -341,73 +341,171 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const navGroups = useMemo(() => getNavGroups(safeUser?.role), [safeUser?.role]);
 
   const activeItem = useMemo(() => {
-    // portal
-    if (pathname?.startsWith("/portal/visits")) return "visits";
-    if (pathname?.startsWith("/portal/schedule")) return "scheduling";
-    if (pathname?.startsWith("/portal/messages")) return "messages";
-    if (pathname?.startsWith("/portal/billing")) return "billing";
-    if (pathname?.startsWith("/portal/documents")) return "documents";
-    if (pathname?.startsWith("/portal/care-plan")) return "care-plan";
-    if (pathname === "/portal" || pathname?.startsWith("/portal")) return "overview";
+    if (!pathname) return "dashboard";
+    const path = pathname.replace(/\/$/, "") || "/";
+    const isPath = (target: string) => path === target || path.startsWith(`${target}/`);
 
-    // caregiver
-    if (pathname === "/caregiver/schedule" || pathname?.startsWith("/caregiver/schedule")) return "schedule";
-    if (pathname === "/caregiver/messages" || pathname?.startsWith("/caregiver/messages")) return "messages";
-    if (pathname === "/caregiver/training" || pathname?.startsWith("/caregiver/training")) return "training";
-    if (pathname === "/caregiver/profile" || pathname?.startsWith("/caregiver/profile")) return "profile";
-    if (pathname?.startsWith("/caregiver/incidents")) return "incidents";
-    if (pathname?.startsWith("/caregiver/assessments")) return "assessments";
-    if (pathname === "/caregiver" || pathname?.startsWith("/caregiver")) return "today";
+    const role = safeUser?.role;
 
-    // hr
-    if (pathname?.startsWith("/hr/recruiting")) return "recruiting";
-    if (pathname?.startsWith("/hr/caregivers")) return "caregivers";
-    if (pathname?.startsWith("/hr/training")) return "training";
-    if (pathname?.startsWith("/hr/payroll")) return "payroll";
-    if (pathname?.startsWith("/hr/messages")) return "messages";
-    if (pathname?.startsWith("/hr/dashboard") || pathname === "/hr") return "dashboard";
+    // 1. Role-specific portal & dedicated workspaces
+    if (role === "CLIENT" || role === "FAMILY") {
+      if (isPath("/portal/visits")) return "visits";
+      if (isPath("/portal/schedule")) return "scheduling";
+      if (isPath("/portal/care-plan")) return "care-plan";
+      if (isPath("/portal/billing")) return "billing";
+      if (isPath("/portal/messages")) return "messages";
+      if (isPath("/portal/documents")) return "documents";
+      if (isPath("/portal")) return "overview";
+    }
 
-    // scheduler
-    if (pathname?.startsWith("/scheduler/shifts") && !pathname?.startsWith("/scheduler/shifts/recurring")) return "scheduled-shifts";
-    if (pathname?.startsWith("/scheduler/shifts/recurring")) return "recurring-patterns";
-    if (pathname?.startsWith("/scheduler/dispatch/optimizer")) return "route-optimizer";
-    if (pathname?.startsWith("/scheduler/dispatch/visits")) return "visit-list";
-    if (pathname?.startsWith("/scheduler/caregivers/availability")) return "availability";
-    if (pathname?.startsWith("/scheduler/caregivers")) return "caregivers";
-    if (pathname?.startsWith("/scheduler/patients/list")) return "patients";
-    if (pathname?.startsWith("/scheduler/messages")) return "messages";
-    if (pathname === "/scheduler" || pathname === "/scheduler/") return "dashboard";
+    if (role === "CAREGIVER") {
+      if (isPath("/caregiver/schedule")) return "schedule";
+      if (isPath("/caregiver/messages")) return "messages";
+      if (isPath("/caregiver/training")) return "training";
+      if (isPath("/caregiver/incidents")) return "incidents";
+      if (isPath("/caregiver/assessments")) return "assessments";
+      if (isPath("/caregiver/profile")) return "profile";
+      if (isPath("/caregiver")) return "today";
+    }
 
-    // trainer
-    if (pathname?.startsWith("/training-admin/courses/builder")) return "course-builder";
-    if (pathname?.startsWith("/training-admin/courses")) return "courses";
-    if (pathname?.startsWith("/training-admin/quizzes")) return "quizzes";
-    if (pathname?.startsWith("/training-admin/compliance")) return "compliance";
-    if (pathname?.startsWith("/training-admin/messages")) return "messages";
-    if (pathname === "/training-admin" || pathname?.startsWith("/training-admin")) return "dashboard";
+    if (role === "HR") {
+      if (isPath("/hr/recruiting")) return "recruiting";
+      if (isPath("/hr/caregivers")) return "caregivers";
+      if (isPath("/hr/training")) return "training";
+      if (isPath("/hr/payroll")) return "payroll";
+      if (isPath("/hr/messages")) return "messages";
+      if (isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/households")) return "households";
+      if (isPath("/hr/dashboard") || isPath("/hr")) return "dashboard";
+    }
 
-    // Admin & General Operational Mappings
-    if (pathname?.startsWith("/households")) return "households";
-    if (pathname?.startsWith("/audit-logs")) return "audit-logs";
-    if (pathname?.startsWith("/automation")) return "automation-rules";
-    if (pathname?.startsWith("/intake") || pathname?.startsWith("/referrals")) return "intake-referrals";
-    if (pathname?.startsWith("/clients") || pathname?.startsWith("/patients")) return "clients";
-    if (pathname?.startsWith("/caregivers")) return "caregivers";
-    if (pathname?.startsWith("/billing/authorizations") || pathname?.startsWith("/authorizations")) return "authorizations";
-    if (pathname?.startsWith("/scheduling") || pathname?.startsWith("/scheduler")) return "scheduling";
-    if (pathname?.startsWith("/evv-monitoring") || pathname?.startsWith("/caregivers-tracker")) return "evv-visits";
-    if (pathname?.startsWith("/clinical/visit-notes") || pathname?.startsWith("/care-notes")) return "care-notes";
-    if (pathname?.startsWith("/clinical")) return "clinical-supervisory";
-    if (pathname?.startsWith("/compliance")) return "compliance";
-    if (pathname?.startsWith("/training") || pathname?.startsWith("/training-admin")) return "training-credentials";
-    if (pathname?.startsWith("/billing")) return "billing-claims";
-    if (pathname?.startsWith("/payroll")) return "payroll";
-    if (pathname?.startsWith("/reports")) return "reports-analytics";
-    if (pathname?.startsWith("/users")) return "user-role-mgmt";
-    if (pathname?.startsWith("/communications") || pathname?.startsWith("/notifications")) return "notifications";
-    if (pathname?.startsWith("/settings") || pathname?.startsWith("/admin-settings")) return "settings";
-    if (pathname?.startsWith("/admin/command-center")) return "command-center";
-    if (pathname === "/dashboard" || pathname === "/" || pathname?.startsWith("/intake/dashboard") || pathname === "/clinical" || pathname === "/compliance" || pathname === "/field-supervisor" || pathname === "/training-admin") return "dashboard";
+    if (role === "SCHEDULER") {
+      if (isPath("/scheduler/shifts/recurring")) return "recurring-patterns";
+      if (isPath("/scheduler/shifts")) return "scheduled-shifts";
+      if (isPath("/scheduler/dispatch/optimizer")) return "route-optimizer";
+      if (isPath("/scheduler/dispatch/visits")) return "visit-list";
+      if (isPath("/scheduler/caregivers/availability")) return "availability";
+      if (isPath("/scheduler/caregivers")) return "caregivers";
+      if (isPath("/scheduler/patients") || isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/households")) return "households";
+      if (isPath("/scheduler/messages")) return "messages";
+      if (isPath("/scheduler")) return "dashboard";
+    }
+
+    if (role === "INTAKE_COORDINATOR") {
+      if (isPath("/intake/referrals") || isPath("/referrals")) return "referrals";
+      if (isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/households")) return "households";
+      if (isPath("/intake/reports") || isPath("/reports")) return "reports";
+      if (isPath("/intake/dashboard") || isPath("/intake")) return "dashboard";
+    }
+
+    if (role === "BILLING_FINANCE_STAFF") {
+      if (isPath("/billing/authorizations") || isPath("/authorizations")) return "authorizations";
+      if (isPath("/billing/payroll")) return "payroll";
+      if (isPath("/billing/reports")) return "reports";
+      if (isPath("/billing/messages")) return "messages";
+      if (isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/households")) return "households";
+      if (isPath("/billing/workspace") || isPath("/billing")) return "billing-workspace";
+      if (isPath("/dashboard") || path === "/") return "dashboard";
+    }
+
+    if (role === "CLINICAL_SUPERVISOR_RN") {
+      if (isPath("/clinical/assessments")) return "assessments";
+      if (isPath("/clinical/qa")) return "qa";
+      if (isPath("/clinical/incidents")) return "incidents";
+      if (isPath("/clinical/messages")) return "messages";
+      if (isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/households")) return "households";
+      if (isPath("/clinical")) return "dashboard";
+    }
+
+    if (role === "QA_COMPLIANCE_OFFICER") {
+      if (isPath("/compliance/tracking")) return "compliance";
+      if (isPath("/compliance/qa")) return "qa";
+      if (isPath("/compliance/incidents")) return "incidents";
+      if (isPath("/compliance/reports")) return "reports";
+      if (isPath("/compliance/messages")) return "messages";
+      if (isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/households")) return "households";
+      if (isPath("/compliance")) return "dashboard";
+    }
+
+    if (role === "FIELD_SUPERVISOR") {
+      if (isPath("/field-supervisor/visits")) return "visits";
+      if (isPath("/field-supervisor/caregivers")) return "caregivers";
+      if (isPath("/field-supervisor/incidents")) return "incidents";
+      if (isPath("/field-supervisor/messages")) return "messages";
+      if (isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/households")) return "households";
+      if (isPath("/field-supervisor")) return "dashboard";
+    }
+
+    if (role === "TRAINER") {
+      if (isPath("/training-admin/courses/builder")) return "course-builder";
+      if (isPath("/training-admin/courses")) return "courses";
+      if (isPath("/training-admin/quizzes")) return "quizzes";
+      if (isPath("/training-admin/compliance")) return "compliance";
+      if (isPath("/training-admin/messages")) return "messages";
+      if (isPath("/training-admin")) return "dashboard";
+    }
+
+    // 2. Specific sub-portal / standalone paths when accessed directly (even if role is not set)
+    if (isPath("/portal/visits")) return "visits";
+    if (isPath("/portal/schedule")) return "scheduling";
+    if (isPath("/portal/care-plan")) return "care-plan";
+    if (isPath("/portal/billing")) return "billing";
+    if (isPath("/portal/messages")) return "messages";
+    if (isPath("/portal/documents")) return "documents";
+    if (isPath("/portal")) return "overview";
+
+    if (isPath("/caregiver/schedule")) return "schedule";
+    if (isPath("/caregiver/messages")) return "messages";
+    if (isPath("/caregiver/training")) return "training";
+    if (isPath("/caregiver/incidents")) return "incidents";
+    if (isPath("/caregiver/assessments")) return "assessments";
+    if (isPath("/caregiver/profile")) return "profile";
+    if (isPath("/caregiver")) return "today";
+
+    if (isPath("/hr/recruiting")) return "recruiting";
+    if (isPath("/hr/caregivers")) return "caregivers";
+    if (isPath("/hr/training")) return "training";
+    if (isPath("/hr/payroll")) return "payroll";
+    if (isPath("/hr/messages")) return "messages";
+
+    // 3. Admin & General Agency Operational Mappings (Default ADMIN role & fallback)
+    if (isPath("/households")) return "households";
+    if (isPath("/audit-logs")) return "audit-logs";
+    if (isPath("/automation")) return "automation-rules";
+    if (isPath("/intake") || isPath("/referrals") || isPath("/refer")) return "intake-referrals";
+    if (isPath("/clients") || isPath("/patients")) return "clients";
+
+    // Caregivers directory & management (Admin / Agency)
+    if (isPath("/caregivers")) return "caregivers";
+
+    // Care Operations
+    if (isPath("/billing/authorizations") || isPath("/authorizations")) return "authorizations";
+    if (isPath("/evv-monitoring") || isPath("/caregivers-tracker")) return "evv-visits";
+    if (isPath("/scheduling") || isPath("/scheduler")) return "scheduling";
+    if (isPath("/clinical/visit-notes") || isPath("/care-notes")) return "care-notes";
+    if (isPath("/clinical")) return "clinical-supervisory";
+
+    // Administration
+    if (isPath("/compliance") || isPath("/quality-assurance")) return "compliance";
+    if (isPath("/training-admin") || isPath("/training")) return "training-credentials";
+    if (isPath("/billing/payroll") || isPath("/payroll")) return "payroll";
+    if (isPath("/billing")) return "billing-claims";
+    if (isPath("/reports")) return "reports-analytics";
+
+    // System
+    if (isPath("/users")) return "user-role-mgmt";
+    if (isPath("/communications") || isPath("/notifications")) return "notifications";
+    if (isPath("/settings") || isPath("/admin-settings")) return "settings";
+    if (isPath("/admin/command-center")) return "command-center";
+
+    if (isPath("/dashboard") || path === "/") return "dashboard";
+
     return "dashboard";
   }, [pathname, safeUser?.role]);
 
@@ -667,7 +765,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                               {isActive && (
                                 <div
                                   className="absolute inset-0 bg-[#3D6B22] rounded-xl border border-[#528730]/60 shadow-sm transition-opacity duration-150"
-                                />
+                                >
+                                  <span className="absolute left-1 top-2.5 bottom-2.5 w-1 rounded-full bg-[#93C573]" />
+                                </div>
                               )}
 
                               <Link

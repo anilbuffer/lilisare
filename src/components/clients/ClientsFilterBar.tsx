@@ -50,7 +50,7 @@ export function ClientsFilterBar({
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-[#D5DFDA] p-3.5 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+    <div className="relative bg-white rounded-xl lg:rounded-2xl border border-[#D5DFDA] p-3.5 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
       {/* Search Input */}
       <div className="relative flex-1 min-w-[260px]">
         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -123,11 +123,10 @@ export function ClientsFilterBar({
         <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/80">
           <button
             onClick={() => onViewModeChange("table")}
-            className={`p-1.5 rounded-lg text-xs font-medium transition-all ${
-              viewMode === "table"
+            className={`p-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === "table"
                 ? "bg-white text-slate-900 shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-800"
-            }`}
+              }`}
             title="Table View"
             aria-label="Table View"
           >
@@ -135,11 +134,10 @@ export function ClientsFilterBar({
           </button>
           <button
             onClick={() => onViewModeChange("grid")}
-            className={`p-1.5 rounded-lg text-xs font-medium transition-all ${
-              viewMode === "grid"
+            className={`p-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === "grid"
                 ? "bg-white text-slate-900 shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-800"
-            }`}
+              }`}
             title="Card Grid View"
             aria-label="Card Grid View"
           >

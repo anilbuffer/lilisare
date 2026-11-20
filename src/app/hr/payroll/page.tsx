@@ -1459,7 +1459,7 @@ export default function HrPayrollPage() {
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.04)] space-y-3">
+                  <div className="p-4 relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.04)] space-y-3">
                     <div className="font-semibold text-slate-900 text-sm flex items-center gap-2.5 pb-2 border-b border-slate-200">
                       <div className="w-7 h-7 rounded-lg bg-teal-100 flex items-center justify-center">
                         <Building2 className="w-4 h-4 text-brand-teal" />
@@ -1767,7 +1767,7 @@ export default function HrPayrollPage() {
                 </p>
               </div>
 
-              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-3">
+              <div className="p-4 relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-3">
                 <div className="font-semibold text-slate-900 text-sm border-b border-slate-100 pb-2">
                   California Overtime Calculation Rules
                 </div>

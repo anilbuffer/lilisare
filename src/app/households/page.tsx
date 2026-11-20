@@ -707,58 +707,24 @@ export default function HouseholdsPage() {
                                 }`}
                               >
                                 <div>
-                                  {/* Row 1: Household Name, Code & Auth Badge */}
+                                  {/* Row 1: Household Name & Code */}
                                   <div className="flex items-start justify-between gap-1.5 mb-1">
                                     <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate flex-1">
                                       {hh.name}
                                     </h4>
-                                    <div className="flex items-center gap-1 shrink-0">
-                                      <span
-                                        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getAuthBadge(
-                                          hh.authStatus
-                                        )}`}
-                                      >
-                                        {hh.authStatus}
-                                      </span>
-                                      <span className="font-mono text-[10px] text-slate-400">
-                                        {hh.code}
-                                      </span>
-                                    </div>
+                                    <span className="font-mono text-[10px] text-slate-400 shrink-0">
+                                      {hh.code}
+                                    </span>
                                   </div>
 
-                                  {/* Row 2: Location */}
-                                  <p className="text-xs text-slate-500 truncate flex items-center gap-1">
-                                    <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                                    <span>
-                                      {hh.city}, {hh.state}
-                                    </span>
+                                  {/* Row 2: Connected Members (Clean single line) */}
+                                  <p className="text-xs text-slate-500 truncate">
+                                    {hh.client.name} <span className="text-slate-300">·</span> {hh.primaryCaregiver.name}
                                   </p>
 
-                                  {/* Row 3: Connected Members (Household Specific) */}
-                                  <div className="mt-2.5 pt-2 border-t border-slate-100 space-y-1 text-[11px]">
-                                    <div className="flex items-center justify-between text-slate-600">
-                                      <span className="text-slate-400 flex items-center gap-1 shrink-0">
-                                        <Users className="w-3 h-3 text-blue-600 shrink-0" />
-                                        Client:
-                                      </span>
-                                      <span className="font-semibold text-slate-800 truncate max-w-[140px]">
-                                        {hh.client.name}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-slate-600">
-                                      <span className="text-slate-400 flex items-center gap-1 shrink-0">
-                                        <Heart className="w-3 h-3 text-rose-500 shrink-0" />
-                                        Caregiver:
-                                      </span>
-                                      <span className="font-semibold text-slate-800 truncate max-w-[140px]">
-                                        {hh.primaryCaregiver.name}
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {/* Row 4: Program Tag + Hours */}
+                                  {/* Row 3: Tags (Program & Hours) */}
                                   <div className="mt-2.5 flex items-center justify-between text-[11px]">
-                                    <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[155px]">
+                                    <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[170px]">
                                       {hh.program}
                                     </span>
                                     <span className="text-[10px] text-slate-500 font-semibold shrink-0">
@@ -767,11 +733,20 @@ export default function HouseholdsPage() {
                                   </div>
                                 </div>
 
-                                {/* Footer: Case Manager + Quick Stage Move Dropdown */}
+                                {/* Footer: Case Manager · Auth Status & Quick Move */}
                                 <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                                  <span className="truncate max-w-[130px] text-slate-400 text-[11px]">
-                                    {hh.caseManager.name.replace(/,.*$/, "")} · {hh.lastVisitDate}
-                                  </span>
+                                  <div className="flex items-center gap-1.5 truncate max-w-[150px]">
+                                    <span
+                                      className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${getAuthBadge(
+                                        hh.authStatus
+                                      )}`}
+                                    >
+                                      {hh.authStatus}
+                                    </span>
+                                    <span className="truncate text-slate-400 text-[11px]">
+                                      {hh.caseManager.name.split(" ")[0]}
+                                    </span>
+                                  </div>
 
                                   <div
                                     className="flex items-center gap-1 shrink-0"
@@ -846,15 +821,15 @@ export default function HouseholdsPage() {
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                      <th className="py-3.5 px-4">Household</th>
-                      <th className="py-3.5 px-4">Program</th>
-                      <th className="py-3.5 px-4">Care Recipient (Client)</th>
-                      <th className="py-3.5 px-4">Family Caregiver</th>
-                      <th className="py-3.5 px-4">Case Manager</th>
-                      <th className="py-3.5 px-4">Auth Status</th>
-                      <th className="py-3.5 px-4">Stage</th>
-                      <th className="py-3.5 px-4">Weekly Hours</th>
-                      <th className="py-3.5 px-4 text-right">Action</th>
+                      <th className="py-3 px-4">Household</th>
+                      <th className="py-3 px-4">Location</th>
+                      <th className="py-3 px-4">Care Recipient</th>
+                      <th className="py-3 px-4">Caregiver</th>
+                      <th className="py-3 px-4">Program</th>
+                      <th className="py-3 px-4">Auth Status</th>
+                      <th className="py-3 px-4">Stage</th>
+                      <th className="py-3 px-4">Hours</th>
+                      <th className="py-3 px-4 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -868,53 +843,38 @@ export default function HouseholdsPage() {
                           onClick={() => router.push(`/households/${hh.id}`)}
                           className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                         >
-                          <td className="py-3.5 px-4">
-                            <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-xs">
+                          <td className="py-3 px-4">
+                            <span className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-xs">
                               {hh.name}
-                            </div>
-                            <div className="text-[11px] font-mono text-slate-400 mt-0.5">
-                              {hh.code} • {hh.city}, {hh.state}
-                            </div>
+                            </span>
+                            <span className="text-[11px] font-mono text-slate-400 ml-1.5">
+                              {hh.code}
+                            </span>
                           </td>
-                          <td className="py-3.5 px-4">
-                            <span className="text-[11px] font-medium text-[#1E5622] bg-[#E3F1D9] border border-[#3D6B22]/20 px-2.5 py-0.5 rounded-full inline-block">
+                          <td className="py-3 px-4 text-slate-600 text-xs">
+                            {hh.city}, {hh.state}
+                          </td>
+                          <td className="py-3 px-4 font-semibold text-slate-800 text-xs">
+                            {hh.client.name}
+                          </td>
+                          <td className="py-3 px-4 font-semibold text-slate-800 text-xs">
+                            {hh.primaryCaregiver.name}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md inline-block">
                               {hh.program}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4">
-                            <div className="font-semibold text-slate-800 text-xs">
-                              {hh.client.name}
-                            </div>
-                            <div className="text-[11px] text-slate-400">
-                              {hh.client.relationship}
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <div className="font-semibold text-slate-800 text-xs">
-                              {hh.primaryCaregiver.name}
-                            </div>
-                            <div className="text-[11px] text-slate-400">
-                              {hh.primaryCaregiver.relationship}
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-4 text-slate-600 text-xs">
-                            <div className="font-medium text-slate-800">
-                              {hh.caseManager.name.replace(/,.*$/, "")}
-                            </div>
-                            <div className="text-[11px] text-slate-400 truncate max-w-[140px]">
-                              {hh.caseManager.agency}
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-4">
+                          <td className="py-3 px-4">
                             <span
-                              className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${getAuthBadge(
+                              className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${getAuthBadge(
                                 hh.authStatus
                               )}`}
                             >
                               {hh.authStatus}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4">
+                          <td className="py-3 px-4">
                             <span
                               className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                                 stageConfig?.badge.bg ?? "bg-slate-100"
@@ -930,11 +890,11 @@ export default function HouseholdsPage() {
                               <span>{stageConfig?.title ?? stage}</span>
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 font-semibold text-slate-800 text-xs">
-                            {hh.scheduledHoursPerWeek} / {hh.authorizedHoursPerWeek} hrs
+                          <td className="py-3 px-4 font-semibold text-slate-800 text-xs">
+                            {hh.authorizedHoursPerWeek}h/wk
                           </td>
                           <td
-                            className="py-3.5 px-4 text-right"
+                            className="py-3 px-4 text-right"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Link
@@ -955,147 +915,6 @@ export default function HouseholdsPage() {
           )}
         </div>
       </section>
-
-      {/* 04. Secondary Sections: Household Bottlenecks & Coordination Activity matching /intake/pipeline & /clients */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left: Actionable Bottlenecks Card */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
-                  Household Journey Bottlenecks
-                </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                  2 Approvals Due
-                </span>
-              </div>
-              <span className="text-xs font-semibold text-[#3D6B22]">3 Items</span>
-            </div>
-
-            <div className="mt-3.5 space-y-2">
-              <div className="p-3.5 rounded-xl border border-rose-300 bg-rose-50/30 text-xs flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-rose-100 text-rose-700 transition-transform group-hover:scale-105">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-slate-900 truncate">
-                      CMA Prior Auth Expiring (14 days)
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      Miller Household (HH-1001) · Needs waiver re-certification
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/households/hh-1001"
-                  className="px-2.5 py-1.5 text-[11px] font-bold text-rose-700 bg-white border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors shrink-0 cursor-pointer shadow-xs"
-                >
-                  Resolve
-                </Link>
-              </div>
-
-              <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50/30 text-xs flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-amber-100 text-amber-800 transition-transform group-hover:scale-105">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-slate-900 truncate">
-                      Caregiver CPR/First Aid Renewal Due
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      Whitfield Household (HH-1002) · Compliance verification pending
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/households/hh-1002"
-                  className="px-2.5 py-1.5 text-[11px] font-bold text-amber-800 bg-white border border-amber-200 rounded-lg hover:bg-amber-50 transition-colors shrink-0 cursor-pointer shadow-xs"
-                >
-                  Verify
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-slate-400">All alerts monitored daily</span>
-            <Link
-              href="/compliance"
-              className="font-bold text-[#3D6B22] hover:text-[#345C1D] inline-flex items-center gap-1 group"
-            >
-              <span>View Compliance Hub</span>
-              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Right: Coordination & Activity Log */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
-                  Recent Household Activity
-                </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E3F1D9] text-[#1E5622] border border-[#3D6B22]/20">
-                  Live
-                </span>
-              </div>
-              <span className="text-xs text-slate-400">Updated just now</span>
-            </div>
-
-            <div className="mt-3.5 space-y-3">
-              <div className="flex items-start gap-3 text-xs">
-                <div className="w-7 h-7 rounded-lg bg-[#E3F1D9] text-[#1E5622] flex items-center justify-center shrink-0 mt-0.5">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="font-bold text-slate-900">
-                      EVV Shift Verified
-                    </span>
-                    <span className="text-[11px] text-slate-400 shrink-0">15m ago</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Sarah Miller completed 4.0h shift for Leo Miller (HH-1001)
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 text-xs">
-                <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <FileCheck2 className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="font-bold text-slate-900">
-                      Auth Approval Received
-                    </span>
-                    <span className="text-[11px] text-slate-400 shrink-0">2h ago</span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Medicaid Waiver approved 40 hrs/wk for Whitfield Household (HH-1002)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span className="text-slate-400">Synchronized across EVV & Ops</span>
-            <Link
-              href="/audit-logs"
-              className="font-bold text-[#3D6B22] hover:text-[#345C1D] inline-flex items-center gap-1 group"
-            >
-              <span>View Audit History</span>
-              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

@@ -113,7 +113,7 @@ export function CaregiverOvertime() {
   const currentOtCost = (currentOtHours * 37.5).toFixed(2); // 1.5x average wage premium
 
   return (
-    <Card className="flex flex-col w-full bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm transition-all duration-300 space-y-6">
+    <Card className="flex flex-col w-full bg-white rounded-2xl p-6 border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 space-y-6">
       {/* 01. Full-Row Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">

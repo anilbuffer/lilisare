@@ -15,7 +15,7 @@ const payerData = [
 
 export function FinancialHealth() {
   return (
-    <Card className="flex flex-col h-full bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm transition-all duration-300">
+    <Card className="flex flex-col h-full bg-white rounded-2xl p-5 border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-emerald-50 text-[#3D6B22] rounded-xl">

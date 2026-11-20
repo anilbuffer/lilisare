@@ -231,7 +231,7 @@ export function NeedsYourAttentionCard() {
   };
 
   return (
-    <Card className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden transition-all duration-300">
+    <Card className="bg-white rounded-2xl border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
       {/* Header Bar */}
       <div className="p-4 sm:px-6 sm:py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h3 className="text-base font-bold text-slate-900 tracking-tight">

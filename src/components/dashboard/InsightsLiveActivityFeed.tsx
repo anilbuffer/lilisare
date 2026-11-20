@@ -2,15 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { 
-  Sparkles, 
-  Activity, 
-  ArrowRight, 
-  Users, 
-  ShieldCheck, 
-  DollarSign, 
-  FileText, 
-  MapPin, 
+import {
+  Sparkles,
+  Activity,
+  ArrowRight,
+  Users,
+  ShieldCheck,
+  DollarSign,
+  FileText,
+  MapPin,
   Send
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
@@ -166,7 +166,7 @@ export function InsightsLiveActivityFeed() {
   };
 
   return (
-    <Card className="p-5 border-slate-200 bg-white shadow-sm space-y-4">
+    <Card className="p-5 border border-slate-200 hover:border-[#3D6B22]/50 bg-white rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 space-y-4">
       {/* Tab Navigation Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-2.5">
@@ -188,21 +188,19 @@ export function InsightsLiveActivityFeed() {
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
           <button
             onClick={() => setActiveTab("insights")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === "insights"
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeTab === "insights"
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
-            }`}
+              }`}
           >
             Insights List (4)
           </button>
           <button
             onClick={() => setActiveTab("activity")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === "activity"
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeTab === "activity"
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
-            }`}
+              }`}
           >
             Live Activity List
           </button>

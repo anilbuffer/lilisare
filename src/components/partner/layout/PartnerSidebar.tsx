@@ -85,7 +85,7 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
 
       <aside
         className={clsx(
-          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-all duration-300 ease-in-out min-[1120px]:translate-x-0 min-[1120px]:sticky min-[1120px]:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] min-[1120px]:shadow-none select-none",
+          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-[width,transform] duration-300 ease-in-out min-[1120px]:translate-x-0 min-[1120px]:sticky min-[1120px]:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] min-[1120px]:shadow-none select-none",
           isOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "min-[1120px]:w-[76px] w-[260px]" : "w-[260px]"
         )}
@@ -107,7 +107,7 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
         {/* Header / Logo Area */}
         <div
           className={clsx(
-            "flex items-center h-20 border-b border-sidebar-active/40 transition-all duration-300 relative",
+            "flex items-center h-20 border-b border-sidebar-active/40 relative",
             isCollapsed ? "px-3 justify-center" : "px-5 justify-start"
           )}
         >
@@ -147,11 +147,8 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
               return (
                 <li key={item.id} className="relative group">
                   {isActive && (
-                    <motion.div
-                      layoutId="active-nav-partner"
-                      className="absolute inset-0 bg-brand-teal rounded-xl shadow-md shadow-brand-teal/20"
-                      initial={false}
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                    <div
+                      className="absolute inset-0 bg-brand-teal rounded-xl shadow-md shadow-brand-teal/20 transition-opacity duration-150"
                     />
                   )}
 

@@ -324,6 +324,8 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
+const cachedExpandedGroups: Record<string, boolean> = {};
+
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -331,16 +333,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const { isCollapsed, toggleCollapse } = useSidebarCollapse();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showHipaaTooltip, setShowHipaaTooltip] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
-  // Expandable group state
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  // Expandable group state initialized from cache so page switches don't reset
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(cachedExpandedGroups);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const safeUser = mounted ? currentUser : null;
+  const safeUser = currentUser;
   const navGroups = useMemo(() => getNavGroups(safeUser?.role), [safeUser?.role]);
 
   const activeItem = useMemo(() => {
@@ -420,18 +417,27 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       if (group.label) {
         const groupKey = group.label || `group-${index}`;
         const containsActive = group.items.some((item) => item.id === activeItem);
-        if (containsActive) {
-          setExpandedGroups((prev) => ({ ...prev, [groupKey]: true }));
+        if (containsActive && expandedGroups[groupKey] === false) {
+          setExpandedGroups((prev) => {
+            const updated = { ...prev, [groupKey]: true };
+            cachedExpandedGroups[groupKey] = true;
+            return updated;
+          });
         }
       }
     });
-  }, [activeItem, navGroups]);
+  }, [activeItem, navGroups, expandedGroups]);
 
   const toggleGroup = (groupKey: string) => {
-    setExpandedGroups((prev) => ({
-      ...prev,
-      [groupKey]: prev[groupKey] === undefined ? false : !prev[groupKey],
-    }));
+    setExpandedGroups((prev) => {
+      const nextVal = prev[groupKey] === undefined ? false : !prev[groupKey];
+      const updated = {
+        ...prev,
+        [groupKey]: nextVal,
+      };
+      cachedExpandedGroups[groupKey] = nextVal;
+      return updated;
+    });
   };
 
   const handleLogout = () => {
@@ -515,7 +521,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
       <aside
         className={clsx(
-          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-all duration-300 ease-in-out min-[1120px]:translate-x-0 min-[1120px]:sticky min-[1120px]:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] min-[1120px]:shadow-none select-none",
+          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-[width,transform] duration-300 ease-in-out min-[1120px]:translate-x-0 min-[1120px]:sticky min-[1120px]:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] min-[1120px]:shadow-none select-none",
           isOpen ? "translate-x-0" : "-translate-x-full",
           isCollapsed ? "min-[1120px]:w-[76px] w-[260px]" : "w-[260px]"
         )}
@@ -537,7 +543,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         {/* Header / Logo Area */}
         <div
           className={clsx(
-            "flex items-center h-20 border-b border-sidebar-active/40 transition-all duration-300 relative",
+            "flex items-center h-20 border-b border-sidebar-active/40 relative",
             isCollapsed ? "px-3 justify-center" : "px-5 justify-start"
           )}
         >
@@ -644,10 +650,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   {(!group.label || isCollapsed || isExpanded) && (
                     <motion.div
                       key={`${groupKey}-content`}
-                      initial={group.label ? { height: 0, opacity: 0 } : false}
+                      initial={false}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      transition={{ duration: 0.15, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
                       <ul className="space-y-0.5">
@@ -659,11 +665,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                           return (
                             <li key={item.id} className="relative group">
                               {isActive && (
-                                <motion.div
-                                  layoutId="active-nav"
-                                  className="absolute inset-0 bg-[#3D6B22] rounded-xl border border-[#528730]/60 shadow-sm"
-                                  initial={false}
-                                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                                <div
+                                  className="absolute inset-0 bg-[#3D6B22] rounded-xl border border-[#528730]/60 shadow-sm transition-opacity duration-150"
                                 />
                               )}
 

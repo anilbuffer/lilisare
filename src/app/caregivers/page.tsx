@@ -18,12 +18,9 @@ import {
 import { CaregiverRecord } from "@/types/caregiver";
 import {
   getCaregiversFromStorage,
-  CAREGIVER_RECENT_ACTIVITIES,
   INITIAL_CAREGIVERS,
 } from "@/lib/caregivers/mockData";
 import { CaregiverKpiStrip } from "@/components/caregivers/CaregiverKpiStrip";
-import { CaregiverAttentionSection } from "@/components/caregivers/CaregiverAttentionSection";
-import { CaregiverRecentActivitySection } from "@/components/caregivers/CaregiverRecentActivitySection";
 import { CaregiverManagementWorkspace } from "@/components/caregivers/CaregiverManagementWorkspace";
 import { CaregiverContextualDrawer } from "@/components/caregivers/CaregiverContextualDrawer";
 import { toast } from "sonner";
@@ -78,23 +75,8 @@ export default function CaregiversPage() {
     router.push(`/caregivers/${cg.id}`);
   };
 
-  const handleSelectCaregiverId = (id: string) => {
-    router.push(`/caregivers/${id}`);
-  };
-
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
-  };
-
-  // Handle clicking Attention issue
-  const handleAttentionCategorySelect = (category: string) => {
-    setActiveAttentionCategory(category);
-    // Smooth scroll down to the directory table
-    const el = document.getElementById("caregiver-directory-anchor");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-    toast.info(`Filtered directory for: ${category.replace(/_/g, " ")}`);
   };
 
   const needsAttentionCount = caregivers.filter(
@@ -227,20 +209,6 @@ export default function CaregiversPage() {
           onSelectCaregiver={handleSelectCaregiver}
           activeAttentionCategory={activeAttentionCategory}
           onClearAttentionCategory={() => setActiveAttentionCategory(null)}
-        />
-      </div>
-
-      {/* 04. Secondary Sections: Needs Attention & Recent Activity (Side-by-side matching /intake/pipeline) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <CaregiverAttentionSection
-          caregivers={caregivers}
-          onSelectCategoryFilter={handleAttentionCategorySelect}
-          onSelectCaregiverId={handleSelectCaregiverId}
-          activeAttentionCategory={activeAttentionCategory}
-        />
-        <CaregiverRecentActivitySection
-          activities={CAREGIVER_RECENT_ACTIVITIES}
-          onSelectCaregiverId={handleSelectCaregiverId}
         />
       </div>
 

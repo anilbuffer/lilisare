@@ -39,7 +39,7 @@ export function CaregiverLayout({
           pendingSyncCount={localPendingSync}
           onSyncCompleted={() => setLocalPendingSync(0)}
         />
-        <main className="flex-1 overflow-y-auto px-4 lg:px-6 py-5 pb-20 sm:pb-10 transition-all duration-300 ease-in-out">
+        <main className="flex-1 overflow-y-auto px-4 lg:px-6 py-5 pb-20 sm:pb-10">
           {children}
         </main>
       </div>

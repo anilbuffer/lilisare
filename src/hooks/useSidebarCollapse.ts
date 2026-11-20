@@ -1,56 +1,74 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "lilisare_sidebar_collapsed_v2";
 // Laptops (< 1536px) and iPad Pro (1024px-1366px) default to minimized sidebar (76px).
 // Large Desktop (>= 1536px) defaults to expanded sidebar (260px).
 const LARGE_DESKTOP_BREAKPOINT = 1536;
 
-export function useSidebarCollapse() {
-  // Default to true (minimized) for safe initial load on laptops and tablets
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
+// Module-level persistent state so navigation between layouts retains the exact same state without flashing or fluctuating
+let currentCollapsed = false;
+let isInitialized = false;
+const listeners = new Set<() => void>();
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+function initializeState(): boolean {
+  if (typeof window === "undefined") return false;
+  if (isInitialized) return currentCollapsed;
 
-    // Check if the user previously explicitly set a preference
+  isInitialized = true;
+  try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored !== null) {
-      try {
-        setIsCollapsed(JSON.parse(stored));
-        return;
-      } catch {
-        // Fallback to screen-size based default
-      }
+      currentCollapsed = JSON.parse(stored);
+      return currentCollapsed;
     }
+  } catch {}
 
-    // Default by screen size:
-    // Laptop / Pro iPad (< 1536px): minimized sidebar (isCollapsed: true)
-    // Large Desktop (>= 1536px): expanded sidebar (isCollapsed: false)
-    const isLargeDesktop = window.innerWidth >= LARGE_DESKTOP_BREAKPOINT;
-    setIsCollapsed(!isLargeDesktop);
+  const isLargeDesktop = window.innerWidth >= LARGE_DESKTOP_BREAKPOINT;
+  currentCollapsed = !isLargeDesktop;
+  return currentCollapsed;
+}
 
-    const handleResize = () => {
-      // Only auto-adjust if user hasn't explicitly saved a preference
-      if (localStorage.getItem(STORAGE_KEY) === null) {
-        const desktop = window.innerWidth >= LARGE_DESKTOP_BREAKPOINT;
-        setIsCollapsed(!desktop);
-      }
-    };
+function subscribe(callback: () => void) {
+  listeners.add(callback);
+  return () => {
+    listeners.delete(callback);
+  };
+}
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+function getSnapshot(): boolean {
+  if (typeof window !== "undefined" && !isInitialized) {
+    initializeState();
+  }
+  return currentCollapsed;
+}
+
+function getServerSnapshot(): boolean {
+  return false;
+}
+
+function setCollapsedState(value: boolean | ((prev: boolean) => boolean)) {
+  const next = typeof value === "function" ? value(currentCollapsed) : value;
+  if (next === currentCollapsed) return;
+  currentCollapsed = next;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {}
+  }
+  listeners.forEach((listener) => listener());
+}
+
+export function useSidebarCollapse() {
+  const isCollapsed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggleCollapse = useCallback(() => {
-    setIsCollapsed((prev) => {
-      const next = !prev;
-      if (typeof window !== "undefined") {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      }
-      return next;
-    });
+    setCollapsedState((prev) => !prev);
+  }, []);
+
+  const setIsCollapsed = useCallback((val: boolean) => {
+    setCollapsedState(val);
   }, []);
 
   useEffect(() => {
@@ -61,8 +79,20 @@ export function useSidebarCollapse() {
       }
     };
 
+    const handleResize = () => {
+      if (typeof window === "undefined") return;
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        const isLarge = window.innerWidth >= LARGE_DESKTOP_BREAKPOINT;
+        setCollapsedState(!isLarge);
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
+    };
   }, [toggleCollapse]);
 
   return {

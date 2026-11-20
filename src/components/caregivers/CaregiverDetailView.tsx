@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -17,27 +17,34 @@ import {
   CheckCircle2,
   AlertCircle,
   FileText,
-  Printer,
   ChevronRight,
+  ChevronDown,
   ArrowRight,
   Send,
   Sparkles,
   RefreshCw,
-  Download,
   Edit3,
   Lock,
   Eye,
   EyeOff,
-  Upload,
   AlertTriangle,
   Award,
-  GraduationCap,
   Users,
   CalendarPlus,
   Globe,
+  Heart,
+  HeartHandshake,
 } from "lucide-react";
-import { CaregiverRecord } from "@/types/caregiver";
-import { getCaregiversFromStorage, saveCaregiversToStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
+import { CaregiverRecord, CaregiverPipelineStage, CaregiverStatus } from "@/types/caregiver";
+import {
+  getCaregiversFromStorage,
+  saveCaregiversToStorage,
+  INITIAL_CAREGIVERS,
+} from "@/lib/caregivers/mockData";
+import {
+  EIGHT_CAREGIVER_KANBAN_STAGES,
+  normalizeCaregiverStage,
+} from "./CaregiverManagementWorkspace";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { toast } from "sonner";
@@ -47,6 +54,17 @@ import { CaregiverScheduleShiftModal } from "./modals/CaregiverScheduleShiftModa
 interface CaregiverDetailViewProps {
   caregiverId: string;
 }
+
+const STAGE_SOLID_BG: Record<string, string> = {
+  "New Application": "bg-rose-500",
+  "Phone Screened": "bg-amber-500",
+  "Interview Scheduled": "bg-purple-500",
+  "Training": "bg-blue-600",
+  "Hiring Decision": "bg-sky-600",
+  "Offer Extended": "bg-teal-600",
+  "Hired & Onboarding": "bg-[#3D6B22]",
+  "Archived": "bg-slate-500",
+};
 
 export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
   const router = useRouter();
@@ -62,6 +80,20 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
   // Modals
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const statusDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsStatusDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setIsMounted(true);
@@ -84,9 +116,19 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
     );
   }
 
-  const handleStatusChange = (newStatus: CaregiverRecord["status"]) => {
+  const currentStage = normalizeCaregiverStage(caregiver);
+  const solidBg = STAGE_SOLID_BG[currentStage] || "bg-[#3D6B22]";
+
+  const handleStageChange = (newStage: CaregiverPipelineStage) => {
+    let newStatus: CaregiverStatus = caregiver.status;
+    if (newStage === "Hired & Onboarding") newStatus = "Active";
+    else if (newStage === "Archived") newStatus = "Inactive";
+    else if (newStage === "Training") newStatus = "Onboarding";
+    else if (newStage === "New Application" || newStage === "Phone Screened") newStatus = "Pending";
+
     const updated: CaregiverRecord = {
       ...caregiver,
+      pipelineStage: newStage,
       status: newStatus,
       activityHistory: {
         ...caregiver.activityHistory,
@@ -95,9 +137,9 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             id: `ACT-${Date.now()}`,
             timestamp: new Date().toISOString(),
             relativeTime: "Just now",
-            title: `Status Changed to ${newStatus}`,
-            description: `Caregiver workforce status manually updated to ${newStatus}.`,
-            actor: "Agency Admin",
+            title: `Pipeline Stage Updated to "${newStage}"`,
+            description: `Caregiver candidate progressed to stage "${newStage}".`,
+            actor: "HR Coordinator",
             type: "profile" as const,
           },
           ...caregiver.activityHistory.recentUpdates,
@@ -115,7 +157,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       saveCaregiversToStorage(all);
     }
 
-    toast.success(`Caregiver status updated to ${newStatus}`);
+    toast.success(`Pipeline stage updated to "${newStage}"`);
   };
 
   const handleAddNote = (e: React.FormEvent) => {
@@ -128,7 +170,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       relativeTime: "Just now",
       title: "Staff Coordination Note Added",
       description: newNote.trim(),
-      actor: "Agency Admin",
+      actor: "HR Coordinator",
       type: "profile" as const,
     };
 
@@ -154,7 +196,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
   };
 
   const handleLogCommunication = (
-    caregiverId: string,
+    _id: string,
     type: "call" | "email" | "note",
     noteText: string
   ) => {
@@ -192,7 +234,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
   };
 
   const handleScheduleShift = (
-    caregiverId: string,
+    _id: string,
     shift: {
       clientName: string;
       date: string;
@@ -245,7 +287,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-4 pb-16 animate-in fade-in duration-300">
-      {/* Back Navigation Button */}
+      {/* Back Navigation Button matching /intake/pipeline */}
       <div>
         <Link
           href="/caregivers"
@@ -256,171 +298,71 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
         </Link>
       </div>
 
-      {/* 01. PatientHeader Style: Hero Identity & Actions Card */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] border border-slate-200 flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          {/* Avatar Box with Floating Status Badge */}
+      {/* 01. PatientHeader Style: Hero Identity & Actions Card (Identical to /intake/pipeline/INQ-1042/) */}
+      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200/80 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+        <div className="flex items-center gap-4 sm:gap-5 min-w-0 flex-1">
+          {/* Avatar Box with Floating Stage Badge */}
           <div className="relative shrink-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#3D6B22]/10 to-emerald-100/60 text-[#3D6B22] border-2 border-white shadow-[0_6px_24px_rgba(0,0,0,0.06)] flex items-center justify-center text-2xl font-extrabold overflow-hidden">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center text-xl font-bold overflow-hidden">
               {caregiver.avatarUrl ? (
-                <img src={caregiver.avatarUrl} alt={caregiver.name} className="w-full h-full object-cover" />
+                <img
+                  src={caregiver.avatarUrl}
+                  alt={caregiver.name}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 caregiverInitials
               )}
             </div>
-            <div className="absolute -bottom-2 -right-2">
+            <div className="absolute -bottom-1 -right-1">
               <span
-                className={`border-2 border-white shadow-sm font-semibold text-white whitespace-nowrap px-2.5 py-0.5 text-[10px] rounded-full uppercase tracking-wider ${
-                  caregiver.status === "Active"
-                    ? "bg-[#3D6B22]"
-                    : caregiver.status === "Onboarding"
-                    ? "bg-amber-500"
-                    : "bg-rose-500"
-                }`}
+                className={`border-2 border-white shadow-xs font-medium text-white whitespace-nowrap px-2 py-0.5 text-[10px] rounded-full tracking-wide ${solidBg}`}
               >
-                {caregiver.status}
+                {currentStage}
               </span>
             </div>
           </div>
 
-          {/* Heading & Badges */}
-          <div>
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-                {caregiver.id}
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                {caregiver.employmentClassification}
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200">
-                {caregiver.type}
-              </span>
-            </div>
-
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mb-2">
+          {/* Heading & Subtitle */}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1 truncate sm:overflow-visible sm:whitespace-normal">
               {caregiver.name}
             </h1>
 
             {/* Metadata Line */}
-            <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500 mb-3">
-              <span className="font-medium text-slate-700">
-                Household: <strong className="text-slate-900 font-semibold">{caregiver.relationship.linkedHousehold.name}</strong>
-              </span>
-              <span className="w-1 h-1 rounded-full bg-slate-300" />
-              <span className="flex items-center gap-1 text-slate-600">
-                <Building className="w-3.5 h-3.5 text-slate-400" />
-                {caregiver.branch} Branch
-              </span>
-              <span className="w-1 h-1 rounded-full bg-slate-300" />
-              <span className="flex items-center gap-1 text-slate-600">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                Hired {caregiver.hireDate}
-              </span>
-              <span className="w-1 h-1 rounded-full bg-slate-300" />
-              <span className="flex items-center gap-1 text-slate-600">
-                <Phone className="w-3.5 h-3.5 text-slate-400" />
-                {caregiver.personalInfo.phone}
-              </span>
-            </div>
-
-            {/* Program & Info Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="brand" className="bg-emerald-50 text-[#1E5622] border-emerald-200 text-xs font-semibold px-2.5 py-0.5">
-                {caregiver.relationship.relationshipToClient}
-              </Badge>
-              <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[10px] uppercase font-bold px-2 py-0.5 border">
-                DOB: {caregiver.personalInfo.dob}
-              </Badge>
-              <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] uppercase font-bold px-2 py-0.5 border flex items-center gap-1">
-                <Globe className="w-3 h-3" />
-                EVV Compliance: {caregiver.evvVisitHistory.overallComplianceRate}%
-              </Badge>
-              <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[10px] uppercase font-bold px-2 py-0.5 border">
-                {caregiver.availabilityAssignments.assignedClient
-                  ? `Assigned: ${caregiver.availabilityAssignments.assignedClient.name}`
-                  : "Unassigned"}
-              </Badge>
-            </div>
+            <p className="text-xs text-slate-600">
+              Household:{" "}
+              <strong className="text-slate-800 font-semibold">
+                {caregiver.relationship?.linkedHousehold?.name || "Unlinked Household"}
+              </strong>
+            </p>
           </div>
         </div>
 
-        {/* Action Controls Column */}
-        <div className="flex flex-col items-start lg:items-end justify-between gap-3 w-full lg:w-auto shrink-0 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
-          <div className="flex items-center gap-2 self-stretch lg:self-auto justify-between lg:justify-end">
-            <span className="text-xs font-semibold text-slate-500">Compliance Readiness</span>
-            <Badge variant="success" className="text-xs px-2.5 py-0.5 bg-emerald-100 text-[#1E5622] border-emerald-200 font-semibold">
-              100% Compliant
-            </Badge>
-          </div>
+        {/* Action Controls Column (Only Schedule Shift & Edit Profile) */}
+        <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto shrink-0 border-t xl:border-t-0 pt-3.5 xl:pt-0 border-slate-100">
+          {/* Schedule Shift Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsScheduleModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+          >
+            <CalendarPlus className="w-3.5 h-3.5 text-sky-700" />
+            <span>Schedule Shift</span>
+          </button>
 
-          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-            {/* Contact Caregiver Modal Trigger */}
-            <button
-              type="button"
-              onClick={() => setIsContactModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
-            >
-              <Phone className="w-3.5 h-3.5 text-[#3D6B22]" />
-              <span>Contact Caregiver</span>
-            </button>
-
-            {/* Schedule Shift Modal Trigger */}
-            <button
-              type="button"
-              onClick={() => setIsScheduleModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
-            >
-              <CalendarPlus className="w-3.5 h-3.5 text-sky-700" />
-              <span>Schedule Shift</span>
-            </button>
-
-            {/* Advance Status Dropdown */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
-                <span>{caregiver.status}</span>
-              </button>
-              {isStatusDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-lg z-30 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 border-b border-slate-100">
-                    Update Workforce Status
-                  </div>
-                  {(["Active", "Onboarding", "Inactive", "Terminated"] as CaregiverRecord["status"][]).map((st) => (
-                    <button
-                      key={st}
-                      onClick={() => handleStatusChange(st)}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${
-                        caregiver.status === st
-                          ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
-                          : "text-slate-800"
-                      }`}
-                    >
-                      <span>{st}</span>
-                      {caregiver.status === st && <CheckCircle2 className="w-3.5 h-3.5 text-[#3D6B22]" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Edit Profile Primary CTA */}
-            <Link
-              href={`/caregivers/${caregiver.id}/edit`}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer"
-            >
-              <Edit3 className="w-3.5 h-3.5 text-white" />
-              <span>Edit Profile</span>
-              <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-            </Link>
-          </div>
+          {/* Primary CTA: Edit Profile */}
+          <Link
+            href={`/caregivers/${caregiver.id}/edit`}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] hover:shadow-[0_4px_12px_rgba(61,107,34,0.25)] cursor-pointer whitespace-nowrap"
+          >
+            <span>Edit Profile</span>
+            <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />
+          </Link>
         </div>
       </div>
 
-      {/* 02. PatientTabs Style: Floating Pill Navigation Bar */}
+      {/* 02. PatientTabs Style: Floating Pill Navigation Bar (Identical to /intake/pipeline/INQ-1042/) */}
       <div className="flex items-center gap-1 p-1.5 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] rounded-2xl overflow-x-auto no-scrollbar border border-slate-200/90 w-full">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -430,13 +372,13 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`relative px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap rounded-xl flex items-center gap-2 cursor-pointer ${
                 isActive
-                  ? "bg-[#3D6B22] text-white shadow-[0_4px_12px_rgba(61,107,34,0.25)]"
+                  ? "bg-[#3D6B22] text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4 shrink-0" />
               <span>{tab.label}</span>
             </button>
           );
@@ -446,77 +388,153 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       {/* 03. Tab Content Modules */}
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
+          {/* Left Column (2 cols): Profile & Assignment Demographics */}
           <div className="lg:col-span-2 space-y-5">
-            {/* Personal Information & Demographics Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <User className="w-4.5 h-4.5 text-[#3D6B22]" />
-                Personal Profile & Identifiers
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-4 text-xs">
+            {/* Personal Profile & Demographics Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <User className="w-4 h-4 text-[#3D6B22]" />
+                  Caregiver Personal Profile & Contact
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                    {caregiver.id}
+                  </span>
+                  <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
+                    {caregiver.type}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
                 <div>
-                  <span className="text-slate-500 block">Full Name</span>
-                  <span className="font-semibold text-slate-800 text-sm mt-0.5 block">{caregiver.name}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Full Legal Name
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {caregiver.name}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Preferred Name</span>
-                  <span className="font-semibold text-slate-800 text-sm mt-0.5 block">{caregiver.personalInfo.preferredName || caregiver.name}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Preferred Name
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {caregiver.personalInfo.preferredName || caregiver.name}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Date of Birth & Gender</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{caregiver.personalInfo.dob} · {caregiver.personalInfo.gender}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Date of Birth & Gender
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {caregiver.personalInfo.dob} · {caregiver.personalInfo.gender}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Languages Spoken</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{caregiver.personalInfo.languages.join(", ")}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Languages Spoken
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {caregiver.personalInfo.languages.join(", ")}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Direct Telephone</span>
-                  <a href={`tel:${caregiver.personalInfo.phone}`} className="font-semibold text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Direct Telephone
+                  </span>
+                  <a
+                    href={`tel:${caregiver.personalInfo.phone}`}
+                    className="text-sm font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5 mt-0.5"
+                  >
                     <Phone className="w-3.5 h-3.5 text-slate-400" />
                     {caregiver.personalInfo.phone}
                   </a>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Email Address</span>
-                  <a href={`mailto:${caregiver.personalInfo.email}`} className="font-semibold text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Email Address
+                  </span>
+                  <a
+                    href={`mailto:${caregiver.personalInfo.email}`}
+                    className="text-sm font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5 mt-0.5 truncate"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     {caregiver.personalInfo.email}
                   </a>
+                </div>
+              </div>
+
+              {/* Residence & Branch */}
+              <div className="mt-4 pt-3.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Primary Residence
+                  </span>
+                  <p className="text-xs font-medium text-slate-700 flex items-start gap-1.5 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span>
+                      {caregiver.personalInfo.address.street},{" "}
+                      {caregiver.personalInfo.address.city},{" "}
+                      {caregiver.personalInfo.address.state}{" "}
+                      {caregiver.personalInfo.address.zip}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Assigned Service Branch
+                  </span>
+                  <p className="text-xs font-semibold text-slate-800 mt-0.5">
+                    {caregiver.branch} Branch (Hire: {caregiver.hireDate})
+                  </p>
                 </div>
               </div>
 
               {/* Masked Identifiers */}
               <div className="mt-4 pt-3.5 border-t border-slate-100 text-xs">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold text-slate-700 flex items-center gap-1.5">
+                  <span className="font-semibold text-slate-700 flex items-center gap-1.5 text-xs">
                     <Lock className="w-3.5 h-3.5 text-slate-400" />
-                    Encrypted Tax & Government Identifiers
+                    Encrypted Tax & Identity Records
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowMaskedSsn(!showMaskedSsn)}
                     className="text-[11px] font-semibold text-[#3D6B22] hover:underline flex items-center gap-1 cursor-pointer"
                   >
-                    {showMaskedSsn ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    {showMaskedSsn ? (
+                      <EyeOff className="w-3 h-3" />
+                    ) : (
+                      <Eye className="w-3 h-3" />
+                    )}
                     <span>{showMaskedSsn ? "Hide Identifiers" : "Show Identifiers"}</span>
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                    <span className="text-slate-400 text-[10px] uppercase font-bold block">SSN Masked</span>
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
+                      SSN Masked
+                    </span>
                     <span className="font-mono text-xs text-slate-800 font-bold">
-                      {showMaskedSsn ? "123-45-6789" : caregiver.personalInfo.maskedIdentifiers.ssnMasked}
+                      {showMaskedSsn
+                        ? "123-45-6789"
+                        : caregiver.personalInfo.maskedIdentifiers.ssnMasked}
                     </span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                    <span className="text-slate-400 text-[10px] uppercase font-bold block">Driver&apos;s License</span>
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
+                      Driver&apos;s License
+                    </span>
                     <span className="font-mono text-xs text-slate-800 font-bold">
                       {caregiver.personalInfo.maskedIdentifiers.driversLicenseMasked}
                     </span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                    <span className="text-slate-400 text-[10px] uppercase font-bold block">TIN / W-9 Status</span>
+                    <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
+                      TIN / W-9 Status
+                    </span>
                     <span className="font-mono text-xs text-slate-800 font-bold">
                       {caregiver.personalInfo.maskedIdentifiers.taxIdMasked}
                     </span>
@@ -525,113 +543,289 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
               </div>
             </Card>
 
-            {/* Three Connected Journeys Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <Sparkles className="w-4.5 h-4.5 text-[#3D6B22]" />
-                Three Connected Journeys (Workforce Synchronization)
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
-                {/* 1. Caregiver Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>1. Caregiver Status</span>
-                    <span className="text-emerald-700 font-bold">{caregiver.status}</span>
-                  </div>
-                  <p className="text-xs text-slate-700 font-medium truncate">
-                    {caregiver.type} ({caregiver.employmentClassification})
-                  </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
-                    <div
-                      className="bg-[#3D6B22] h-1.5 rounded-full"
-                      style={{ width: caregiver.status === "Active" ? "100%" : "70%" }}
-                    />
-                  </div>
-                </div>
+            {/* Care Recipient & Assignment Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-[#3D6B22]" />
+                  Care Recipient & Work Assignment
+                </h3>
+                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                  {caregiver.employmentClassification}
+                </span>
+              </div>
 
-                {/* 2. Client Pairing Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>2. Client Link</span>
-                    <span className="text-emerald-700 font-bold">
-                      {caregiver.availabilityAssignments.assignedClient ? "Assigned" : "Available"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-700 font-medium truncate">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-4">
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Assigned Care Recipient
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
                     {caregiver.availabilityAssignments.assignedClient
                       ? caregiver.availabilityAssignments.assignedClient.name
-                      : "Open for dispatch"}
-                  </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
-                    <div
-                      className="bg-[#3D6B22] h-1.5 rounded-full"
-                      style={{ width: caregiver.availabilityAssignments.assignedClient ? "100%" : "30%" }}
-                    />
-                  </div>
+                      : "Unassigned (Available)"}
+                  </span>
                 </div>
-
-                {/* 3. Agency Operations Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between font-bold text-[11px] uppercase tracking-wider text-slate-500">
-                    <span>3. EVV & Hours</span>
-                    <span className="text-emerald-700 font-bold">{caregiver.evvVisitHistory.overallComplianceRate}% EVV</span>
-                  </div>
-                  <p className="text-xs text-slate-700 font-medium truncate">
-                    {caregiver.availabilityAssignments.weeklyCapacityHours} hrs/wk capacity
-                  </p>
-                  <div className="w-full bg-slate-200 rounded-full h-1.5">
-                    <div
-                      className="bg-[#3D6B22] h-1.5 rounded-full"
-                      style={{ width: `${caregiver.evvVisitHistory.overallComplianceRate}%` }}
-                    />
-                  </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Relationship to Client
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {caregiver.relationship.relationshipToClient}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Authorized Hours / Week
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {caregiver.availabilityAssignments.weeklyCapacityHours} hrs/wk
+                  </span>
                 </div>
               </div>
+
+              {/* Boundaries & Schedule Details */}
+              <div className="mt-4 pt-3.5 border-t border-slate-100">
+                <span className="text-[11px] font-medium text-slate-400 block mb-1">
+                  Caregiving Scope & Household Permissions
+                </span>
+                <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200/70 leading-relaxed">
+                  {caregiver.relationship.caregivingBoundaries ||
+                    "Authorized in-home activities of daily living (ADL), sensory assistance, and scheduled companionship hours."}
+                </p>
+              </div>
+            </Card>
+
+            {/* Quick Coordination Note Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 pb-3 mb-3 border-b border-slate-100">
+                <FileText className="w-4 h-4 text-[#3D6B22]" />
+                Log Staff Coordination Note
+              </h3>
+              <form onSubmit={handleAddNote} className="space-y-3">
+                <textarea
+                  rows={3}
+                  value={newNote}
+                  onChange={(e) => setNewNote(e.target.value)}
+                  placeholder="Record scheduling updates, supervision check-ins, or credential notes..."
+                  className="w-full text-xs p-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all resize-none text-slate-800 placeholder:text-slate-400"
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={!newNote.trim()}
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#3D6B22] hover:bg-[#2C5217] disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all shadow-[0_2px_8px_rgba(61,107,34,0.2)] cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Save Note to Timeline</span>
+                  </button>
+                </div>
+              </form>
             </Card>
           </div>
 
+          {/* Right Column (1 col): Household & Compliance & Actions matching INQ-1042 */}
           <div className="space-y-5">
-            {/* Primary Residence & Emergency Contact Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <MapPin className="w-4 h-4 text-[#3D6B22]" />
-                Primary Residence
-              </h3>
-              <div className="space-y-2.5 text-xs">
-                <p className="font-medium text-slate-800">
-                  {caregiver.personalInfo.address.street}
-                </p>
-                <p className="font-medium text-slate-800">
-                  {caregiver.personalInfo.address.city}, {caregiver.personalInfo.address.state} {caregiver.personalInfo.address.zip}
-                </p>
-                <span className="text-[11px] text-slate-400 block pt-1 border-t border-slate-100">
-                  Assigned Branch Area: {caregiver.branch}
+            {/* Recruitment Stage & Direct Contact Card */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] relative z-30">
+              <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#3D6B22]" />
+                  Recruitment Stage & Actions
+                </h3>
+                <span
+                  className={`shadow-2xs font-semibold text-white whitespace-nowrap px-2.5 py-0.5 text-[10px] rounded-full tracking-wide ${solidBg}`}
+                >
+                  {currentStage}
                 </span>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-1">
+                    Current Pipeline Stage
+                  </span>
+                  <div className="relative" ref={statusDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                      className="w-full inline-flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="text-slate-800">{currentStage}</span>
+                      </span>
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                    </button>
+                    {isStatusDropdownOpen && (
+                      <div className="absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                        <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 border-b border-slate-100">
+                          Advance Pipeline Stage
+                        </div>
+                        <div className="max-h-56 overflow-y-auto py-1">
+                          {EIGHT_CAREGIVER_KANBAN_STAGES.map((stg) => (
+                            <button
+                              key={stg.id}
+                              onClick={() => handleStageChange(stg.id)}
+                              className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${
+                                currentStage === stg.id
+                                  ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
+                                  : "text-slate-800"
+                              }`}
+                            >
+                              <span className="flex items-center gap-2">
+                                <span className={`w-1.5 h-1.5 rounded-full ${stg.badge.dot}`} />
+                                <span>{stg.title}</span>
+                              </span>
+                              {currentStage === stg.id && (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#3D6B22]" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsContactModalOpen(true)}
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-[#3D6B22]" />
+                    <span>Contact Caregiver</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Linked Household Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Home className="w-4 h-4 text-[#3D6B22]" />
+                  Linked Household
+                </h3>
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                  {caregiver.relationship.linkedHousehold.code}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Household Name
+                  </span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {caregiver.relationship.linkedHousehold.name}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Household Address
+                  </span>
+                  <span className="text-xs text-slate-700 block">
+                    {caregiver.relationship.linkedHousehold.address}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">
+                    Household Phone
+                  </span>
+                  <a
+                    href={`tel:${caregiver.relationship.linkedHousehold.phone}`}
+                    className="text-xs font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    {caregiver.relationship.linkedHousehold.phone}
+                  </a>
+                </div>
+                <div className="pt-2 border-t border-slate-100">
+                  <Link
+                    href={`/households/${caregiver.relationship.linkedHousehold.id}`}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#3D6B22] hover:underline"
+                  >
+                    <span>View Household Hub</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             </Card>
 
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-3">
-              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-rose-600" />
+            {/* Workforce Compliance Readiness Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#3D6B22]" />
+                  Compliance & Verification
+                </h3>
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-[#1E5622] border border-emerald-200">
+                  {caregiver.evvVisitHistory.overallComplianceRate}% Match
+                </span>
+              </div>
+
+              <div className="space-y-2.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Identity Record</span>
+                  <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {caregiver.verificationChecklist.identity}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">State Background Check</span>
+                  <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {caregiver.verificationChecklist.screening}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">CPR & First Aid BLS</span>
+                  <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {caregiver.verificationChecklist.cprFirstAid}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Required Training</span>
+                  <span className="font-semibold text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {caregiver.verificationChecklist.training}
+                  </span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Emergency Contact Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-rose-500" />
                   Emergency Contact
                 </h3>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                  24/7 Response
+                  24/7 Primary
                 </span>
               </div>
+
               <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Name:</span>
-                  <span className="font-bold text-slate-800">{caregiver.personalInfo.emergencyContact.name}</span>
+                <div>
+                  <span className="text-slate-400 text-[11px] block">Contact Person</span>
+                  <span className="font-semibold text-slate-800">
+                    {caregiver.personalInfo.emergencyContact.name} (
+                    {caregiver.personalInfo.emergencyContact.relationship})
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Relationship:</span>
-                  <span className="font-semibold text-slate-700">{caregiver.personalInfo.emergencyContact.relationship}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Telephone:</span>
-                  <span className="font-mono font-bold text-slate-900">{caregiver.personalInfo.emergencyContact.phone}</span>
+                <div>
+                  <span className="text-slate-400 text-[11px] block">Emergency Phone</span>
+                  <a
+                    href={`tel:${caregiver.personalInfo.emergencyContact.phone}`}
+                    className="font-mono font-bold text-[#3D6B22] hover:underline"
+                  >
+                    {caregiver.personalInfo.emergencyContact.phone}
+                  </a>
                 </div>
               </div>
             </Card>
@@ -642,19 +836,23 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       {/* Tab 02: Household & Assignments */}
       {activeTab === "household" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-in fade-in duration-200">
-          <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-4">
+          <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#1E5622] flex items-center justify-center font-bold text-sm">
                   <Home className="w-5 h-5 text-[#3D6B22]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">{caregiver.relationship.linkedHousehold.name}</h3>
-                  <span className="font-mono text-xs text-slate-500">{caregiver.relationship.linkedHousehold.code}</span>
+                  <h3 className="font-bold text-slate-900 text-sm">
+                    {caregiver.relationship.linkedHousehold.name}
+                  </h3>
+                  <span className="font-mono text-xs text-slate-500">
+                    {caregiver.relationship.linkedHousehold.code}
+                  </span>
                 </div>
               </div>
               <Link
-                href="/households"
+                href={`/households/${caregiver.relationship.linkedHousehold.id}`}
                 className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:underline"
               >
                 <span>Household Hub</span>
@@ -665,24 +863,29 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             <div className="space-y-2.5 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">Telephone:</span>
-                <span className="font-medium text-slate-800">{caregiver.relationship.linkedHousehold.phone}</span>
+                <span className="font-medium text-slate-800">
+                  {caregiver.relationship.linkedHousehold.phone}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">Residence Address:</span>
                 <span className="font-medium text-slate-800">
-                  {caregiver.relationship.linkedHousehold.address}, {caregiver.relationship.linkedHousehold.city}, {caregiver.relationship.linkedHousehold.state}
+                  {caregiver.relationship.linkedHousehold.address},{" "}
+                  {caregiver.relationship.linkedHousehold.city},{" "}
+                  {caregiver.relationship.linkedHousehold.state}
                 </span>
               </div>
               <div className="pt-2 border-t border-slate-100">
                 <span className="text-slate-500 block mb-1">Caregiving Scope & Boundaries:</span>
                 <p className="text-slate-700 italic bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                  {caregiver.relationship.caregivingBoundaries || "Assigned authorized in-home hours and respite support."}
+                  {caregiver.relationship.caregivingBoundaries ||
+                    "Assigned authorized in-home hours and respite support."}
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-4">
+          <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-sm">
@@ -730,7 +933,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
               </div>
             ) : (
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
-                Caregiver currently has no designated client assigned. Dispatch to client from the Clients Workspace.
+                Caregiver currently has no designated client assigned.
               </div>
             )}
           </Card>
@@ -739,11 +942,11 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
 
       {/* Tab 03: Credentials & Screening */}
       {activeTab === "credentials" && (
-        <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-4 animate-in fade-in duration-200">
+        <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 animate-in fade-in duration-200">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-4.5 h-4.5 text-[#3D6B22]" />
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#3D6B22]" />
                 Workforce Credentials & Background Check
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -765,7 +968,8 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                   <div>
                     <p className="font-bold text-slate-800">{cred.name}</p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      Category: {cred.category} · Issuer: {cred.issuer} {cred.expiryDate ? `· Expiry: ${cred.expiryDate}` : ""}
+                      Category: {cred.category} · Issuer: {cred.issuer}{" "}
+                      {cred.expiryDate ? `· Expiry: ${cred.expiryDate}` : ""}
                     </p>
                   </div>
                 </div>
@@ -787,15 +991,15 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
 
       {/* Tab 04: EVV & Visit History */}
       {activeTab === "evv" && (
-        <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-4 animate-in fade-in duration-200">
+        <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 animate-in fade-in duration-200">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Calendar className="w-4.5 h-4.5 text-[#3D6B22]" />
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#3D6B22]" />
                 Electronic Visit Verification (EVV) Log
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Real-time GPS geofence clock-in/out records, task completions, and supervisor scrub logs
+                Real-time GPS geofence clock-in/out records and compliance logs
               </p>
             </div>
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
@@ -806,15 +1010,21 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
               <span className="text-slate-400 block text-[11px]">Total Completed Shifts</span>
-              <strong className="text-slate-900 text-sm font-bold">{caregiver.evvVisitHistory.totalVisitsCompleted} Visits</strong>
+              <strong className="text-slate-900 text-sm font-bold">
+                {caregiver.evvVisitHistory.totalVisitsCompleted} Visits
+              </strong>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
               <span className="text-slate-400 block text-[11px]">GPS Verification Rate</span>
-              <strong className="text-emerald-700 text-sm font-bold">{caregiver.evvVisitHistory.gpsVerificationRate}%</strong>
+              <strong className="text-emerald-700 text-sm font-bold">
+                {caregiver.evvVisitHistory.gpsVerificationRate}%
+              </strong>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
               <span className="text-slate-400 block text-[11px]">Missed Clock-Outs</span>
-              <strong className="text-slate-900 text-sm font-bold">{caregiver.evvVisitHistory.missedClockOutCount}</strong>
+              <strong className="text-slate-900 text-sm font-bold">
+                {caregiver.evvVisitHistory.missedClockOutCount}
+              </strong>
             </div>
             <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
               <span className="text-slate-400 block text-[11px]">EVV Protocol</span>
@@ -828,8 +1038,8 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       {activeTab === "timeline" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-1">
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 pb-2.5 border-b border-slate-100">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 pb-2.5 border-b border-slate-100">
                 <FileText className="w-4 h-4 text-[#3D6B22]" />
                 Log Caregiver Note
               </h3>
@@ -844,7 +1054,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                 <button
                   type="submit"
                   disabled={!newNote.trim()}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#3D6B22] hover:bg-[#345C1D] disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_16px_rgba(61,107,34,0.25)] cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#3D6B22] hover:bg-[#2C5217] disabled:opacity-50 text-white rounded-xl text-xs font-semibold transition-all shadow-[0_2px_8px_rgba(61,107,34,0.2)] cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Save Note to Timeline</span>
@@ -854,8 +1064,8 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
           </div>
 
           <div className="lg:col-span-2">
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-4">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 pb-2.5 border-b border-slate-100">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 pb-2.5 border-b border-slate-100">
                 <Clock className="w-4 h-4 text-[#3D6B22]" />
                 Caregiver Workforce History & Activity
               </h3>
@@ -864,10 +1074,14 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                   <div key={item.id} className="relative group">
                     <div className="absolute -left-[31px] top-1 w-3.5 h-3.5 rounded-full bg-white border-2 border-[#3D6B22]" />
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-slate-800 text-xs">{item.title}</span>
-                      <span className="text-[11px] text-slate-400 font-medium">{item.relativeTime || item.timestamp}</span>
+                      <span className="font-semibold text-slate-800 text-xs">{item.title}</span>
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {item.relativeTime || item.timestamp}
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">{item.description}</p>
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                      {item.description}
+                    </p>
                     <span className="text-[10px] text-slate-400 block mt-1 font-mono">
                       Logged by {item.actor}
                     </span>

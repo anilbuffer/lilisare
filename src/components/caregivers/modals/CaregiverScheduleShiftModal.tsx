@@ -95,7 +95,7 @@ export function CaregiverScheduleShiftModal({
             >
               {INITIAL_CLIENTS.map((c) => (
                 <option key={c.id} value={c.name}>
-                  {c.name} ({c.id}) · {c.primaryService} ({c.household.name})
+                  {c.name} ({c.id}) · {c.careType} ({c.household.name})
                 </option>
               ))}
             </select>

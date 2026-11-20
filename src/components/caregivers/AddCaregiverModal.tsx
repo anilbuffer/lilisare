@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
-import { Upload, X } from "lucide-react";
+import { Upload, X, UserPlus } from "lucide-react";
 
 interface AddCaregiverModalProps {
   isOpen: boolean;
@@ -41,77 +43,91 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
       isOpen={isOpen}
       onClose={onClose}
       title="Add New Caregiver"
-      description="Create a new profile and upload compliance documents."
+      description="Create a new caregiver profile and upload compliance credentials."
       maxWidth="xl"
+      icon={
+        <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
+          <UserPlus className="w-5 h-5 stroke-[2.2]" />
+        </div>
+      }
       footer={
         <>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm font-medium text-white bg-brand-teal rounded-full hover:bg-brand-teal/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Saving..." : "Save Caregiver"}
           </button>
         </>
       }
     >
-      <form id="add-caregiver-form" onSubmit={handleSubmit} className="space-y-6">
+      <form id="add-caregiver-form" onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Full Name <span className="text-red-500">*</span></label>
+          <div>
+            <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
+              Full Name <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               required
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all"
+              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
               placeholder="e.g. Sarah Connor"
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Role <span className="text-red-500">*</span></label>
-            <select required className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all">
+          <div>
+            <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
+              Role Classification <span className="text-red-500">*</span>
+            </label>
+            <select
+              required
+              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
+            >
               <option value="">Select role...</option>
               <option value="hha">Home Health Aide (HHA)</option>
+              <option value="pca">Personal Care Aide (PCA)</option>
+              <option value="cna">Certified Nursing Assistant (CNA)</option>
               <option value="rn">Registered Nurse (RN)</option>
               <option value="lpn">Licensed Practical Nurse (LPN)</option>
-              <option value="pt">Physical Therapist (PT)</option>
-              <option value="ot">Occupational Therapist (OT)</option>
+              <option value="sfc">Family Caregiver (SFC)</option>
             </select>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Email Address</label>
+          <div>
+            <label className="text-[13px] font-medium text-slate-700 block mb-1.5">Email Address</label>
             <input
               type="email"
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all"
+              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
               placeholder="sarah@example.com"
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Phone Number</label>
+          <div>
+            <label className="text-[13px] font-medium text-slate-700 block mb-1.5">Phone Number</label>
             <input
               type="tel"
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all"
+              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
               placeholder="(555) 123-4567"
             />
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-700">Skills & Qualifications</label>
+        <div>
+          <label className="text-[13px] font-medium text-slate-700 block mb-1.5">Skills & Qualifications</label>
           <div className="flex flex-wrap gap-2 mb-2">
             {skills.map((skill) => (
-              <span key={skill} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-brand-teal/10 text-brand-teal">
+              <span key={skill} className="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-semibold bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20">
                 {skill}
-                <button type="button" onClick={() => removeSkill(skill)} className="hover:text-teal-700 focus:outline-none">
+                <button type="button" onClick={() => removeSkill(skill)} className="hover:text-[#2C5217] focus:outline-none cursor-pointer">
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -122,23 +138,23 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
             value={currentSkill}
             onChange={(e) => setCurrentSkill(e.target.value)}
             onKeyDown={handleAddSkill}
-            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all"
-            placeholder="Type a skill and press Enter (e.g. Wound Care, CPR)"
+            className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+            placeholder="Type a skill and press Enter (e.g. ADL Assistance, Transfer Support, CPR)"
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-sm font-medium text-slate-700">Compliance Documents</label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:bg-slate-50 transition-colors cursor-pointer">
+        <div>
+          <label className="text-[13px] font-medium text-slate-700 block mb-1.5">Compliance Documents</label>
+          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 border-dashed rounded-xl hover:bg-slate-50/80 hover:border-[#3D6B22]/40 transition-all cursor-pointer bg-slate-50/30">
             <div className="space-y-1 text-center">
-              <Upload className="mx-auto h-8 w-8 text-slate-400" />
-              <div className="flex text-sm text-slate-600">
-                <span className="relative cursor-pointer bg-transparent rounded-md font-medium text-brand-teal hover:text-teal-600 focus-within:outline-none">
+              <Upload className="mx-auto h-8 w-8 text-[#3D6B22]" />
+              <div className="flex text-sm text-slate-600 justify-center">
+                <span className="font-semibold text-[#3D6B22] hover:underline">
                   Upload credentials
                 </span>
-                <p className="pl-1">or drag and drop</p>
+                <p className="pl-1 text-slate-500">or drag and drop</p>
               </div>
-              <p className="text-xs text-slate-500">License, Background Check, TB Test (PDF, up to 10MB)</p>
+              <p className="text-xs text-slate-400">Driver License, Background Check, TB Test, CPR Card (PDF, up to 10MB)</p>
             </div>
           </div>
         </div>

@@ -118,9 +118,8 @@ export function ConvertToOnboardingModal({
             </h4>
 
             {/* Journey 1: Client Onboarding */}
-            <label className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${
-              createClient ? "bg-[#3D6B22]/5 border-[#3D6B22] shadow-2xs" : "bg-slate-50/50 border-slate-200 hover:bg-slate-50"
-            }`}>
+            <label className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${createClient ? "bg-[#3D6B22]/5 border-[#3D6B22] shadow-2xs" : "bg-slate-50/50 border-slate-200 hover:bg-slate-50"
+              }`}>
               <input
                 type="checkbox"
                 checked={createClient}
@@ -141,9 +140,8 @@ export function ConvertToOnboardingModal({
             </label>
 
             {/* Journey 2: Caregiver Onboarding */}
-            <label className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${
-              createCaregiver ? "bg-[#3D6B22]/5 border-[#3D6B22] shadow-2xs" : "bg-slate-50/50 border-slate-200 hover:bg-slate-50"
-            }`}>
+            <label className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${createCaregiver ? "bg-[#3D6B22]/5 border-[#3D6B22] shadow-2xs" : "bg-slate-50/50 border-slate-200 hover:bg-slate-50"
+              }`}>
               <input
                 type="checkbox"
                 checked={createCaregiver}

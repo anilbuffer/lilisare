@@ -92,33 +92,30 @@ export function ContactFamilyModal({
               <button
                 type="button"
                 onClick={() => setCommType("call")}
-                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                  commType === "call"
-                    ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${commType === "call"
+                  ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
               >
                 Phone Call
               </button>
               <button
                 type="button"
                 onClick={() => setCommType("email")}
-                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                  commType === "email"
-                    ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${commType === "email"
+                  ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
               >
                 Email
               </button>
               <button
                 type="button"
                 onClick={() => setCommType("note")}
-                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                  commType === "note"
-                    ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${commType === "note"
+                  ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                  : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
               >
                 Internal Note
               </button>

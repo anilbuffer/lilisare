@@ -265,22 +265,20 @@ export function IntakeAttentionQueue({
             <button
               type="button"
               onClick={() => setFilterUser("all")}
-              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                filterUser === "all"
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${filterUser === "all"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-500 hover:text-slate-800"
+                }`}
             >
               All
             </button>
             <button
               type="button"
               onClick={() => setFilterUser("my")}
-              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                filterUser === "my"
-                  ? "bg-white text-slate-900 shadow-xs"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${filterUser === "my"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-500 hover:text-slate-800"
+                }`}
             >
               My Tasks
             </button>
@@ -373,9 +371,8 @@ export function IntakeAttentionQueue({
                 overdueList.map((task) => (
                   <div
                     key={task.id}
-                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs flex items-start gap-2.5 ${
-                      task.completed ? "opacity-50 bg-slate-50" : ""
-                    }`}
+                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs flex items-start gap-2.5 ${task.completed ? "opacity-50 bg-slate-50" : ""
+                      }`}
                   >
                     <button
                       type="button"
@@ -391,9 +388,8 @@ export function IntakeAttentionQueue({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-1.5">
                         <div
-                          className={`text-xs font-semibold text-slate-900 leading-snug ${
-                            task.completed ? "line-through text-slate-400" : ""
-                          }`}
+                          className={`text-xs font-semibold text-slate-900 leading-snug ${task.completed ? "line-through text-slate-400" : ""
+                            }`}
                         >
                           {task.title}
                         </div>
@@ -479,9 +475,8 @@ export function IntakeAttentionQueue({
                 todayList.map((task) => (
                   <div
                     key={task.id}
-                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs flex items-start gap-2.5 ${
-                      task.completed ? "opacity-50 bg-slate-50" : ""
-                    }`}
+                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs flex items-start gap-2.5 ${task.completed ? "opacity-50 bg-slate-50" : ""
+                      }`}
                   >
                     <button
                       type="button"
@@ -497,9 +492,8 @@ export function IntakeAttentionQueue({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-1.5">
                         <div
-                          className={`text-xs font-semibold text-slate-900 leading-snug ${
-                            task.completed ? "line-through text-slate-400" : ""
-                          }`}
+                          className={`text-xs font-semibold text-slate-900 leading-snug ${task.completed ? "line-through text-slate-400" : ""
+                            }`}
                         >
                           {task.title}
                         </div>
@@ -585,9 +579,8 @@ export function IntakeAttentionQueue({
                 tomorrowList.map((task) => (
                   <div
                     key={task.id}
-                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs flex items-start gap-2.5 ${
-                      task.completed ? "opacity-50 bg-slate-50" : ""
-                    }`}
+                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs flex items-start gap-2.5 ${task.completed ? "opacity-50 bg-slate-50" : ""
+                      }`}
                   >
                     <button
                       type="button"
@@ -603,9 +596,8 @@ export function IntakeAttentionQueue({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-1.5">
                         <div
-                          className={`text-xs font-semibold text-slate-900 leading-snug ${
-                            task.completed ? "line-through text-slate-400" : ""
-                          }`}
+                          className={`text-xs font-semibold text-slate-900 leading-snug ${task.completed ? "line-through text-slate-400" : ""
+                            }`}
                         >
                           {task.title}
                         </div>
@@ -670,26 +662,33 @@ export function IntakeAttentionQueue({
 
       {/* Add Task Modal (Mirrors Agency Admin Dashboard task creation modal) */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-sm w-full border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="p-4 bg-gradient-to-r from-[#1B3414] to-[#2E5A22] text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#93C573]" />
-                <h4 className="font-bold text-sm">Add Intake Priority Task</h4>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-2xl sm:rounded-[20px] max-w-md w-full border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
+                  <Plus className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 text-base tracking-tight leading-tight">Add Intake Priority Task</h4>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">Create an intake SLA or outreach follow-up item</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-white/10 text-white/80 cursor-pointer"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                aria-label="Close modal"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateTask} className="p-4 space-y-3.5 text-xs">
+            <form onSubmit={handleCreateTask} className="p-5 sm:p-6 space-y-4 text-xs bg-white">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
-                  Task Title *
+                <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
+                  Task Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -697,19 +696,19 @@ export function IntakeAttentionQueue({
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. Call hospital discharge planner for PT-101"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-1 focus:ring-[#3D6B22] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">
+                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
                     Timeline
                   </label>
                   <select
                     value={newTimeline}
                     onChange={(e) => setNewTimeline(e.target.value as TaskTimeline)}
-                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-1 focus:ring-[#3D6B22]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
                   >
                     <option value="Overdue">Overdue</option>
                     <option value="Today">Today</option>
@@ -718,13 +717,13 @@ export function IntakeAttentionQueue({
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">
+                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
                     LiliSare Stage
                   </label>
                   <select
                     value={newStage}
                     onChange={(e) => setNewStage(e.target.value as IntakeTaskItem["stage"])}
-                    className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-1 focus:ring-[#3D6B22]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
                   >
                     <option value="Intake">Intake</option>
                     <option value="Caregiver">Caregiver</option>
@@ -736,7 +735,7 @@ export function IntakeAttentionQueue({
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
                   Reference / Due Context
                 </label>
                 <input
@@ -744,7 +743,7 @@ export function IntakeAttentionQueue({
                   value={newDueText}
                   onChange={(e) => setNewDueText(e.target.value)}
                   placeholder="e.g. Household #108 · Urgent SLA"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-1 focus:ring-[#3D6B22] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
                 />
               </div>
 
@@ -754,24 +753,25 @@ export function IntakeAttentionQueue({
                   id="intakeUrgentCheck"
                   checked={newIsUrgent}
                   onChange={(e) => setNewIsUrgent(e.target.checked)}
-                  className="rounded text-[#3D6B22] focus:ring-[#3D6B22]"
+                  className="rounded text-[#3D6B22] focus:ring-[#3D6B22] accent-[#3D6B22] w-4 h-4 cursor-pointer"
                 />
-                <label htmlFor="intakeUrgentCheck" className="text-slate-700 font-medium cursor-pointer">
+                <label htmlFor="intakeUrgentCheck" className="text-slate-700 font-medium text-xs cursor-pointer select-none">
                   Mark as High Priority / Urgent SLA
                 </label>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-end gap-2">
+              {/* Footer */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-[#1B3414] hover:bg-[#274C1D] text-white font-bold rounded-xl shadow-xs cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
                 >
                   Save Task
                 </button>

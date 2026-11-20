@@ -78,7 +78,7 @@ export function ReportView({ report, onClose }: ReportViewProps) {
             <button
               onClick={() => handleExport('PDF')}
               disabled={isExporting}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
             >
               {isExporting && exportType === 'PDF' ? (
                 <span className="animate-pulse">Generating...</span>
@@ -89,13 +89,15 @@ export function ReportView({ report, onClose }: ReportViewProps) {
             <button
               onClick={() => handleExport('Excel')}
               disabled={isExporting}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
             >
               <FileSpreadsheet className="w-4 h-4" /> Excel
             </button>
             <button
+              type="button"
               onClick={onClose}
-              className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 rounded-full transition-colors ml-4"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer ml-1"
+              aria-label="Close report view"
             >
               <X className="w-5 h-5" />
             </button>

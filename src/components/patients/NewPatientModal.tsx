@@ -28,8 +28,8 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
       description="Enter patient details to create a new intake record."
       maxWidth="2xl"
       icon={
-        <div className="w-10 h-10 rounded-xl bg-brand-teal/10 flex items-center justify-center border border-brand-teal/20 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
-          <UserPlus className="w-5 h-5 text-brand-teal" />
+        <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 flex items-center justify-center border border-[#3D6B22]/20 text-[#3D6B22]">
+          <UserPlus className="w-5 h-5 stroke-[2.2]" />
         </div>
       }
       footer={
@@ -37,14 +37,14 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)]"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-6 py-2.5 text-sm font-medium text-white bg-brand-teal rounded-xl hover:bg-brand-teal/90 transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] shadow-brand-teal/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

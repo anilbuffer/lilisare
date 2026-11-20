@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
 import { getClientsFromStorage } from "@/lib/clients/mockData";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 import { ClientKpiStrip } from "@/components/clients/ClientKpiStrip";
 import { ClientManagementWorkspace } from "@/components/clients/ClientManagementWorkspace";
 import { ClientContextualDrawer } from "@/components/clients/ClientContextualDrawer";
@@ -37,8 +38,11 @@ export default function ClientsPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    const data = getClientsFromStorage();
-    setClients(data);
+    setClients(getClientsFromStorage());
+
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setClients(getClientsFromStorage());
+    });
 
     function handleClickOutside(event: MouseEvent) {
       if (dateRef.current && !dateRef.current.contains(event.target as Node)) {
@@ -46,7 +50,10 @@ export default function ClientsPage() {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      unsubscribe();
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleSelectClient = (client: ClientRecord) => {

@@ -1514,6 +1514,11 @@ export function saveClientsToStorage(clients: ClientRecord[]): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem("lilisare_clients_records", JSON.stringify(clients));
+    window.dispatchEvent(
+      new CustomEvent("lilisare_intake_sync", {
+        detail: { type: "clients", count: clients.length, timestamp: Date.now() },
+      })
+    );
   } catch (e) {
     console.error("Failed to save clients to localStorage", e);
   }

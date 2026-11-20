@@ -25,6 +25,11 @@ import {
   GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  saveIntakeInquiriesToStorage,
+  getIntakeInquiriesFromStorage,
+  convertInquiryToLiveEntities,
+} from "@/lib/intake/intakeSync";
 
 interface InquiryManagementWorkspaceProps {
   inquiries: InquiryRecord[];
@@ -267,12 +272,23 @@ export function InquiryManagementWorkspace({
     const currentNormalized = normalizeStage(targetItem.stage);
     if (currentNormalized === targetStage) return;
 
-    setItems((prev) =>
-      prev.map((i) => (i.id === inquiryId ? { ...i, stage: targetStage } : i))
-    );
-
-    setActiveMenuId(null);
-    toast.success(`Moved ${targetItem.familyName} to "${targetStage}"`);
+    if (targetStage === "Converted") {
+      convertInquiryToLiveEntities(inquiryId);
+      const reloaded = getIntakeInquiriesFromStorage();
+      setItems(reloaded);
+      setActiveMenuId(null);
+      toast.success(
+        `Converted ${targetItem.familyName} and synchronized with Agency Admin (Client, Caregiver, & Household created)!`
+      );
+    } else {
+      const updated = items.map((i) =>
+        i.id === inquiryId ? { ...i, stage: targetStage } : i
+      );
+      setItems(updated);
+      saveIntakeInquiriesToStorage(updated);
+      setActiveMenuId(null);
+      toast.success(`Moved ${targetItem.familyName} to "${targetStage}"`);
+    }
   };
 
   // HTML5 Drag and Drop handlers

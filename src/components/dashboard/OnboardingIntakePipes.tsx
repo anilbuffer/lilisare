@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserPlus, Inbox, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { computeDashboardMetrics } from "@/lib/dashboard/metricsEngine";
+import { computeDashboardMetrics, DashboardMetricsSummary } from "@/lib/dashboard/metricsEngine";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 
 interface FunnelStage {
   name: string;
@@ -15,9 +16,23 @@ interface FunnelStage {
   href: string;
 }
 
-export function OnboardingIntakePipes() {
+interface OnboardingIntakePipesProps {
+  metrics?: DashboardMetricsSummary;
+}
+
+export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntakePipesProps) {
   const router = useRouter();
-  const metrics = useMemo(() => computeDashboardMetrics(), []);
+  const [internalMetrics, setInternalMetrics] = useState<DashboardMetricsSummary>(computeDashboardMetrics);
+
+  useEffect(() => {
+    setInternalMetrics(computeDashboardMetrics());
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setInternalMetrics(computeDashboardMetrics());
+    });
+    return unsubscribe;
+  }, []);
+
+  const metrics = propMetrics || internalMetrics;
 
   // LiliSare Brand Palette Progression (Soft Sage Mist -> Sage -> Foliage -> Deep Forest)
   const caregiverFunnel: FunnelStage[] = [

@@ -20,6 +20,7 @@ import {
   getCaregiversFromStorage,
   INITIAL_CAREGIVERS,
 } from "@/lib/caregivers/mockData";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 import { CaregiverKpiStrip } from "@/components/caregivers/CaregiverKpiStrip";
 import { CaregiverManagementWorkspace } from "@/components/caregivers/CaregiverManagementWorkspace";
 import { CaregiverContextualDrawer } from "@/components/caregivers/CaregiverContextualDrawer";
@@ -56,8 +57,11 @@ export default function CaregiversPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    const data = getCaregiversFromStorage();
-    setCaregivers(data);
+    setCaregivers(getCaregiversFromStorage());
+
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setCaregivers(getCaregiversFromStorage());
+    });
 
     function handleClickOutside(event: MouseEvent) {
       if (addMenuRef.current && !addMenuRef.current.contains(event.target as Node)) {
@@ -68,7 +72,10 @@ export default function CaregiversPage() {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      unsubscribe();
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleSelectCaregiver = (cg: CaregiverRecord) => {

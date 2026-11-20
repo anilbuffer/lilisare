@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles, MapPin, Calendar } from "lucide-react";
+import { Sparkles, MapPin, Calendar, RefreshCw } from "lucide-react";
 
 import { AdminKpiRow } from "@/components/dashboard/AdminKpiRow";
 import { NeedsYourAttentionCard } from "@/components/dashboard/NeedsYourAttentionCard";
@@ -15,9 +15,24 @@ import { FinancialHealth } from "@/components/dashboard/FinancialHealth";
 import { PatientSatisfaction } from "@/components/dashboard/PatientSatisfaction";
 import { InsightsLiveActivityFeed } from "@/components/dashboard/InsightsLiveActivityFeed";
 import { AiBriefingDrawer } from "@/components/dashboard/AiBriefingDrawer";
+import { computeDashboardMetrics, DashboardMetricsSummary } from "@/lib/dashboard/metricsEngine";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 
 export default function DashboardPage() {
   const [isAiBriefingOpen, setIsAiBriefingOpen] = useState(false);
+  const [metrics, setMetrics] = useState<DashboardMetricsSummary>(computeDashboardMetrics);
+  const [lastSyncTime, setLastSyncTime] = useState<string>("Just now");
+
+  useEffect(() => {
+    setMetrics(computeDashboardMetrics());
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setMetrics(computeDashboardMetrics());
+      setLastSyncTime(
+        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      );
+    });
+    return unsubscribe;
+  }, []);
 
   const today = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -34,9 +49,16 @@ export default function DashboardPage() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Good morning, Sarah!
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            {today}
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-2">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              {today}
+            </span>
+            <span className="inline-block w-1 h-1 rounded-full bg-slate-300" />
+            <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Synced in Real-time · {lastSyncTime}
+            </span>
           </p>
         </div>
 
@@ -62,7 +84,7 @@ export default function DashboardPage() {
 
       {/* 03. KPI Cards Strip */}
       <section aria-label="Key Performance Indicators">
-        <AdminKpiRow />
+        <AdminKpiRow metrics={metrics} />
       </section>
 
       {/* 04. Needs Your Attention (High-Priority Action Queue) */}
@@ -78,12 +100,12 @@ export default function DashboardPage() {
 
       {/* 06. Onboarding Funnel & Intake Pipeline */}
       <section aria-label="Onboarding & Intake Pipeline">
-        <OnboardingIntakePipes />
+        <OnboardingIntakePipes metrics={metrics} />
       </section>
 
       {/* 07. Authorizations & Compliance Cards in one full row */}
       <section aria-label="Authorizations and Compliance">
-        <AuthorizationsComplianceCard />
+        <AuthorizationsComplianceCard metrics={metrics} />
       </section>
 
       {/* 08. Caregiver Overtime Cards: Full one row */}

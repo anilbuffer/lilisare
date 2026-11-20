@@ -528,7 +528,16 @@ export function getHouseholdsFromStorage(): Household[] {
 
 export function saveHouseholdsToStorage(households: Household[]): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(HOUSEHOLDS_STORAGE_KEY, JSON.stringify(households));
+  try {
+    localStorage.setItem(HOUSEHOLDS_STORAGE_KEY, JSON.stringify(households));
+    window.dispatchEvent(
+      new CustomEvent("lilisare_intake_sync", {
+        detail: { type: "households", count: households.length, timestamp: Date.now() },
+      })
+    );
+  } catch (err) {
+    console.error("Failed to save households to localStorage", err);
+  }
 }
 
 export function getHouseholdById(id: string): Household | undefined {

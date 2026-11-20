@@ -61,6 +61,23 @@ export function IntakeReferralWorkspace() {
     else if (!stage) setActiveKpiKey("ALL");
   };
 
+  // Computed dynamic KPI metrics from live synced inquiries
+  const kpiCounts = useMemo(() => {
+    const total = inquiries.length;
+    const newCount = inquiries.filter((i) => i.stage === "New Inquiry" || i.stage === "New Lead").length;
+    const inAssessmentCount = inquiries.filter(
+      (i) => i.stage === "Needs Discussion" || i.stage === "CMA Coordination" || i.stage === "In Assessment" || i.stage === "CM Coordination"
+    ).length;
+    const convertedCount = inquiries.filter((i) => i.stage === "Converted").length;
+
+    return {
+      total,
+      newCount,
+      inAssessmentCount,
+      convertedCount,
+    };
+  }, [inquiries]);
+
   // Export Functionality
   const handleExport = (format: "csv" | "summary") => {
     if (format === "csv") {
@@ -118,10 +135,10 @@ export function IntakeReferralWorkspace() {
 
       {/* 02. KPI Overview (Four clean, dashboard-style cards) */}
       <IntakeKpiStrip
-        totalInquiries={79}
-        newInquiries={24}
-        inAssessment={21}
-        converted={16}
+        totalInquiries={kpiCounts.total}
+        newInquiries={kpiCounts.newCount}
+        inAssessment={kpiCounts.inAssessmentCount}
+        converted={kpiCounts.convertedCount}
         activeFilter={activeKpiKey}
         onSelectKpiFilter={handleSelectKpiFilter}
       />

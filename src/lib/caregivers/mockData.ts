@@ -2131,6 +2131,11 @@ export function saveCaregiversToStorage(caregivers: CaregiverRecord[]): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(CAREGIVERS_STORAGE_KEY, JSON.stringify(caregivers));
+    window.dispatchEvent(
+      new CustomEvent("lilisare_intake_sync", {
+        detail: { type: "caregivers", count: caregivers.length, timestamp: Date.now() },
+      })
+    );
   } catch (err) {
     console.error("Failed to save caregivers to localStorage", err);
   }

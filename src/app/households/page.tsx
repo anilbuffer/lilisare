@@ -30,7 +30,13 @@ import {
   Inbox,
   Filter,
 } from "lucide-react";
-import { MOCK_HOUSEHOLDS, Household, getHouseholdsFromStorage } from "@/lib/households/mockData";
+import {
+  MOCK_HOUSEHOLDS,
+  Household,
+  getHouseholdsFromStorage,
+  saveHouseholdsToStorage,
+} from "@/lib/households/mockData";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 import { toast } from "sonner";
 
 export type HouseholdKanbanStage =
@@ -175,6 +181,10 @@ export default function HouseholdsPage() {
 
   useEffect(() => {
     setHouseholdsList(getHouseholdsFromStorage());
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setHouseholdsList(getHouseholdsFromStorage());
+    });
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -262,6 +272,45 @@ export default function HouseholdsPage() {
       ...prev,
       [householdId]: targetStage,
     }));
+
+    // Persist to shared LiliSare storage and broadcast sync across portals
+    const updatedList = householdsList.map((hh) => {
+      if (hh.id === householdId) {
+        let clientStage: "Inquiry" | "Registered" | "Assessment" | "Authorized" | "Care Active" = hh.triJourneyStatus.clientStage;
+        let authStatus = hh.authStatus;
+        let bottleneckMessage = hh.triJourneyStatus.bottleneckMessage;
+
+        if (targetStage === "Intake & Discovery") {
+          clientStage = "Inquiry";
+        } else if (targetStage === "Onboarding & Docs") {
+          clientStage = "Registered";
+        } else if (targetStage === "Pending Authorization") {
+          clientStage = "Authorized";
+          authStatus = "Pending Review";
+        } else if (targetStage === "Care Active") {
+          clientStage = "Care Active";
+          authStatus = "Approved";
+          bottleneckMessage = undefined;
+        } else if (targetStage === "On Hold / Inactive") {
+          authStatus = "Expired";
+        }
+
+        return {
+          ...hh,
+          authStatus,
+          triJourneyStatus: {
+            ...hh.triJourneyStatus,
+            clientStage,
+            bottleneckMessage,
+          },
+        };
+      }
+      return hh;
+    });
+
+    setHouseholdsList(updatedList);
+    saveHouseholdsToStorage(updatedList);
+
     setActiveMenuId(null);
     toast.success(`Moved ${targetHh.name} to "${targetStage}"`);
   };

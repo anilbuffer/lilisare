@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ClipboardCheck, ShieldCheck, ArrowRight, AlertCircle, Clock, Send, Eye, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { computeDashboardMetrics } from "@/lib/dashboard/metricsEngine";
+import { computeDashboardMetrics, DashboardMetricsSummary } from "@/lib/dashboard/metricsEngine";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 
 interface OverdueAuth {
   clientCode: string;
@@ -31,9 +32,23 @@ const COMPLIANCE_ITEMS: ComplianceAlert[] = [
   { caregiverCode: "CG-103", credential: "TB Test", status: "12d left", isExpired: false },
 ];
 
-export function AuthorizationsComplianceCard() {
+interface AuthorizationsComplianceCardProps {
+  metrics?: DashboardMetricsSummary;
+}
+
+export function AuthorizationsComplianceCard({ metrics: propMetrics }: AuthorizationsComplianceCardProps) {
   const [followupStatus, setFollowupStatus] = useState<string | null>(null);
-  const metrics = useMemo(() => computeDashboardMetrics(), []);
+  const [internalMetrics, setInternalMetrics] = useState<DashboardMetricsSummary>(computeDashboardMetrics);
+
+  useEffect(() => {
+    setInternalMetrics(computeDashboardMetrics());
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setInternalMetrics(computeDashboardMetrics());
+    });
+    return unsubscribe;
+  }, []);
+
+  const metrics = propMetrics || internalMetrics;
 
   const handleSendFollowup = (clientCode: string, cmCode: string) => {
     setFollowupStatus(`Sent priority nudge to ${cmCode} regarding ${clientCode}`);
@@ -181,11 +196,10 @@ export function AuthorizationsComplianceCard() {
 
                   <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                     <span
-                      className={`px-2 py-0.5 rounded text-[11px] font-bold whitespace-nowrap ${
-                        item.isExpired
-                          ? "bg-rose-100 text-rose-800 border border-rose-200"
-                          : "bg-amber-100 text-amber-800 border border-amber-200"
-                      }`}
+                      className={`px-2 py-0.5 rounded text-[11px] font-bold whitespace-nowrap ${item.isExpired
+                        ? "bg-rose-100 text-rose-800 border border-rose-200"
+                        : "bg-amber-100 text-amber-800 border border-amber-200"
+                        }`}
                     >
                       {item.status}
                     </span>

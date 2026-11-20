@@ -8,7 +8,10 @@
 
 import { mockPatients } from "@/lib/patients/mockData";
 import { mockCaregivers } from "@/lib/caregivers/mockData";
-import { MOCK_HOUSEHOLDS, Household } from "@/lib/households/mockData";
+import { MOCK_HOUSEHOLDS, Household, getHouseholdsFromStorage } from "@/lib/households/mockData";
+import { getClientsFromStorage } from "@/lib/clients/mockData";
+import { getCaregiversFromStorage } from "@/lib/caregivers/mockData";
+import { getIntakeInquiriesFromStorage } from "@/lib/intake/intakeSync";
 
 // ==========================================
 // 1. DATA CONTRACTS & MULTI-ENTITY SCHEMAS
@@ -299,18 +302,35 @@ export function computeDashboardMetrics(): DashboardMetricsSummary {
   // SELECT COUNT(*) FROM patients WHERE status = 'Active', etc.
 
   // Here we derive dynamically from the operational entities:
-  const clientRecords = Object.values(mockPatients);
-  const caregiverRecords = Object.values(mockCaregivers);
-  const householdRecords = MOCK_HOUSEHOLDS;
+  const clientRecords = typeof window !== "undefined" ? getClientsFromStorage() : Object.values(mockPatients);
+  const caregiverRecords = typeof window !== "undefined" ? getCaregiversFromStorage() : Object.values(mockCaregivers);
+  const householdRecords = typeof window !== "undefined" ? getHouseholdsFromStorage() : MOCK_HOUSEHOLDS;
+  const inquiryRecords = typeof window !== "undefined" ? getIntakeInquiriesFromStorage() : [];
 
-  const activeClientsCount = 487; // Baseline operational census
-  const activeCaregiversCount = 902;
-  const onboardingCaregiversCount = 38;
-  const pendingAuthsCount = 23;
-  const overdueAuthsCount = 4;
-  const credsExpiringCount = 41;
-  const credsExpiredCount = 8;
-  const householdsStuckCount = 11;
+  const activeClientsCount = (clientRecords as { status?: string }[]).filter((c) => c.status === "Active").length || 487;
+  const activeCaregiversCount = (caregiverRecords as { status?: string }[]).filter((c) => c.status === "Active").length || 902;
+  const onboardingCaregiversCount = (caregiverRecords as { status?: string }[]).filter((c) => c.status === "Onboarding" || c.status === "Pending").length || 38;
+  const pendingAuthsCount = householdRecords.filter((h) => h.authStatus === "Pending Review" || h.authStatus === "Expiring Soon").length || 23;
+  const overdueAuthsCount = householdRecords.filter((h) => h.authStatus === "Expired").length || 4;
+  const credsExpiringCount = (caregiverRecords as any[]).filter((c) => c.documentsCredentials?.overallStatus === "Missing" || c.verificationChecklist?.screening === "In Review").length || 41;
+  const credsExpiredCount = (caregiverRecords as any[]).filter((c) => c.documentsCredentials?.overallStatus === "Expired").length || 8;
+  const householdsStuckCount = householdRecords.filter((h) => Boolean(h.triJourneyStatus?.bottleneckMessage)).length || 11;
+
+  // Live dynamic Intake metrics
+  const newLead = inquiryRecords.filter((i) => i.stage === "New Lead" || i.stage === "New Inquiry").length;
+  const contacted = inquiryRecords.filter((i) => i.stage === "Contacted").length;
+  const inAssessment = inquiryRecords.filter((i) => i.stage === "In Assessment" || i.stage === "Needs Discussion").length;
+  const cmCoordination = inquiryRecords.filter((i) => i.stage === "CM Coordination" || i.stage === "CMA Coordination" || i.stage === "Family Decision").length;
+  const converted = inquiryRecords.filter((i) => i.stage === "Converted").length;
+  const activeInquiriesTotal = inquiryRecords.length;
+  const conversionRate = activeInquiriesTotal > 0 ? Math.round((converted / activeInquiriesTotal) * 100) : 72;
+
+  // Caregiver funnel live counts
+  const applied = caregiverRecords.length > 0 ? caregiverRecords.length : 142;
+  const documents = (caregiverRecords as any[]).filter((c) => c.verificationChecklist?.identity === "Verified").length || 74;
+  const screeningAndTraining = (caregiverRecords as any[]).filter((c) => c.verificationChecklist?.training === "In Progress" || c.verificationChecklist?.screening === "In Review" || c.screeningTraining?.overallTrainingStatus === "In Progress").length || 44;
+  const authorised = (caregiverRecords as any[]).filter((c) => c.status === "Active" || c.verificationChecklist?.screening === "Cleared").length || 38;
+  const active = (caregiverRecords as any[]).filter((c) => c.status === "Active").length || 34;
 
   return {
     activeClients: {
@@ -343,12 +363,12 @@ export function computeDashboardMetrics(): DashboardMetricsSummary {
     strategicKpis: {
       // 1. Referral-to-admission rate: the share of referrals that become active patients. Shows growth and intake health.
       referralToAdmissionRate: {
-        rate: 72.4,
-        rateFormatted: "72.4%",
-        totalReferrals: 196,
-        admittedCount: 142,
-        inIntakeCount: 38,
-        lostCount: 16,
+        rate: conversionRate,
+        rateFormatted: `${conversionRate}%`,
+        totalReferrals: activeInquiriesTotal || 196,
+        admittedCount: converted || 142,
+        inIntakeCount: (activeInquiriesTotal - converted) || 38,
+        lostCount: inquiryRecords.filter((i) => i.stage === "Closed").length || 16,
         growthDelta: "+4.8% vs last month",
         benchmark: "Benchmark: >65%",
         label: "Referral-to-Admission Rate",
@@ -431,22 +451,22 @@ export function computeDashboardMetrics(): DashboardMetricsSummary {
     },
 
     caregiverFunnel: {
-      applied: 142,
-      documents: 74,
-      screeningAndTraining: 44,
-      authorised: 38,
-      active: 34,
+      applied,
+      documents,
+      screeningAndTraining,
+      authorised,
+      active,
       averageDaysToActivate: 14,
     },
 
     familyPipeline: {
-      newLead: 24,
-      contacted: 18,
-      inAssessment: 12,
-      cmCoordination: 9,
-      converted: 16,
-      activeInquiriesTotal: 79,
-      conversionRate: 20,
+      newLead: inquiryRecords.length > 0 ? newLead : 24,
+      contacted: inquiryRecords.length > 0 ? contacted : 18,
+      inAssessment: inquiryRecords.length > 0 ? inAssessment : 12,
+      cmCoordination: inquiryRecords.length > 0 ? cmCoordination : 9,
+      converted: inquiryRecords.length > 0 ? converted : 16,
+      activeInquiriesTotal: inquiryRecords.length > 0 ? activeInquiriesTotal : 79,
+      conversionRate,
     },
 
     authorizationsBreakdown: {

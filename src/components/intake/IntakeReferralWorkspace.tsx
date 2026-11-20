@@ -5,20 +5,14 @@ import { useRouter } from "next/navigation";
 import {
   InquiryRecord,
   InquiryStage,
-  FollowUpTask,
-  RecentActivityItem,
 } from "@/types/intake";
 import {
   INITIAL_INQUIRIES,
-  INITIAL_FOLLOW_UP_TASKS,
-  INITIAL_RECENT_ACTIVITIES,
 } from "@/lib/intake/mockIntakeData";
 
 import { IntakePageHeader } from "./IntakePageHeader";
 import { IntakeKpiStrip } from "./IntakeKpiStrip";
 import { InquiryManagementWorkspace } from "./InquiryManagementWorkspace";
-import { FollowUpTasksSection } from "./FollowUpTasksSection";
-import { RecentActivitySection } from "./RecentActivitySection";
 import { toast } from "sonner";
 
 export function IntakeReferralWorkspace() {
@@ -26,8 +20,6 @@ export function IntakeReferralWorkspace() {
 
   // Main Data States
   const [inquiries] = useState<InquiryRecord[]>(INITIAL_INQUIRIES);
-  const [tasks] = useState<FollowUpTask[]>(INITIAL_FOLLOW_UP_TASKS);
-  const [activities] = useState<RecentActivityItem[]>(INITIAL_RECENT_ACTIVITIES);
 
   // Filter States
   const [selectedStage, setSelectedStage] = useState<InquiryStage | null>(null);
@@ -40,9 +32,9 @@ export function IntakeReferralWorkspace() {
     if (key === "ALL") {
       setSelectedStage(null);
     } else if (key === "NEW") {
-      setSelectedStage("New Lead");
+      setSelectedStage("New Inquiry");
     } else if (key === "ASSESSMENT") {
-      setSelectedStage("In Assessment");
+      setSelectedStage("Needs Discussion");
     } else if (key === "CONVERTED") {
       setSelectedStage("Converted");
     }
@@ -51,8 +43,8 @@ export function IntakeReferralWorkspace() {
   // Stage tab filter click in workspace
   const handleSelectStageFilter = (stage: InquiryStage | null) => {
     setSelectedStage(stage);
-    if (stage === "New Lead") setActiveKpiKey("NEW");
-    else if (stage === "In Assessment" || stage === "CM Coordination") setActiveKpiKey("ASSESSMENT");
+    if (stage === "New Inquiry" || stage === "New Lead") setActiveKpiKey("NEW");
+    else if (stage === "Needs Discussion" || stage === "CMA Coordination" || stage === "In Assessment" || stage === "CM Coordination") setActiveKpiKey("ASSESSMENT");
     else if (stage === "Converted") setActiveKpiKey("CONVERTED");
     else if (!stage) setActiveKpiKey("ALL");
   };
@@ -103,14 +95,6 @@ export function IntakeReferralWorkspace() {
     }
   };
 
-  const handleSelectInquiryById = (id: string) => {
-    router.push(`/intake/pipeline/${id}/`);
-  };
-
-  const handleTaskAction = (task: FollowUpTask) => {
-    router.push(`/intake/pipeline/${task.inquiryId}/`);
-  };
-
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Page Header */}
@@ -130,26 +114,13 @@ export function IntakeReferralWorkspace() {
         onSelectKpiFilter={handleSelectKpiFilter}
       />
 
-      {/* 03. Inquiry Management Workspace (Full-Width with Grid & List View toggles and Stage filters) */}
+      {/* 03. Inquiry Management Workspace (Full-Width with Kanban & List View toggles and Stage filters) */}
       <InquiryManagementWorkspace
         inquiries={inquiries}
         selectedStageFilter={selectedStage}
         onSelectStageFilter={handleSelectStageFilter}
         baseDetailsPath="/intake/pipeline"
       />
-
-      {/* 04. Secondary Sections: Follow-up & Tasks | Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <FollowUpTasksSection
-          tasks={tasks}
-          onTaskAction={handleTaskAction}
-          onSelectInquiryById={handleSelectInquiryById}
-        />
-        <RecentActivitySection
-          activities={activities}
-          onSelectInquiryById={handleSelectInquiryById}
-        />
-      </div>
     </div>
   );
 }

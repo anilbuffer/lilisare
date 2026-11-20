@@ -2,34 +2,46 @@ import { InquiryRecord, FollowUpTask, RecentActivityItem, PipelineStageCount } f
 
 export const PIPELINE_STAGE_DATA: PipelineStageCount[] = [
   {
-    stage: "New Lead",
+    stage: "New Inquiry",
     count: 24,
-    percentageOfMax: 100, // 24 / 24 = 100%
+    percentageOfMax: 100,
     description: "Awaiting first contact",
   },
   {
     stage: "Contacted",
     count: 18,
-    percentageOfMax: 75, // 18 / 24 = 75%
+    percentageOfMax: 75,
     description: "Initial discovery & engagement",
   },
   {
-    stage: "In Assessment",
-    count: 12,
-    percentageOfMax: 50, // 12 / 24 = 50%
-    description: "Clinical & RN home evaluation",
+    stage: "Needs Discussion",
+    count: 14,
+    percentageOfMax: 58.3,
+    description: "Clinical & care discussion pending",
   },
   {
-    stage: "CM Coordination",
-    count: 9,
-    percentageOfMax: 37.5, // 9 / 24 = 37.5%
+    stage: "CMA Coordination",
+    count: 11,
+    percentageOfMax: 45.8,
     description: "Case manager & payer authorization",
+  },
+  {
+    stage: "Family Decision",
+    count: 8,
+    percentageOfMax: 33.3,
+    description: "Care proposal review with family",
   },
   {
     stage: "Converted",
     count: 16,
-    percentageOfMax: 66.7, // 16 / 24 = 66.7%
+    percentageOfMax: 66.7,
     description: "Qualified & transferred to onboarding",
+  },
+  {
+    stage: "Closed",
+    count: 6,
+    percentageOfMax: 25,
+    description: "Archived or referred to external provider",
   },
 ];
 
@@ -37,7 +49,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1042",
     familyName: "The Miller Family",
-    stage: "New Lead",
+    stage: "New Inquiry",
     dateReceived: "Today",
     dateReceivedRaw: "2026-11-19T09:15:00Z",
     source: "Website",
@@ -133,7 +145,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1041",
     familyName: "Eleanor & Arthur Vance",
-    stage: "In Assessment",
+    stage: "Needs Discussion",
     dateReceived: "Yesterday",
     dateReceivedRaw: "2026-11-18T14:20:00Z",
     source: "Phone",
@@ -316,7 +328,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1039",
     familyName: "The Henderson Family",
-    stage: "CM Coordination",
+    stage: "CMA Coordination",
     dateReceived: "2 days ago",
     dateReceivedRaw: "2026-11-17T11:45:00Z",
     source: "Case Manager",
@@ -516,7 +528,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1037",
     familyName: "The Gomez Household",
-    stage: "New Lead",
+    stage: "New Inquiry",
     dateReceived: "3 days ago",
     dateReceivedRaw: "2026-11-16T14:10:00Z",
     source: "Website",
@@ -593,7 +605,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1036",
     familyName: "The Chen Household",
-    stage: "Contacted",
+    stage: "Family Decision",
     dateReceived: "4 days ago",
     dateReceivedRaw: "2026-11-15T16:00:00Z",
     source: "Physician",
@@ -669,7 +681,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1035",
     familyName: "The Taylor Family",
-    stage: "In Assessment",
+    stage: "Needs Discussion",
     dateReceived: "4 days ago",
     dateReceivedRaw: "2026-11-15T11:25:00Z",
     source: "Referral",
@@ -747,7 +759,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1034",
     familyName: "The Martinez Family",
-    stage: "CM Coordination",
+    stage: "CMA Coordination",
     dateReceived: "5 days ago",
     dateReceivedRaw: "2026-11-14T09:40:00Z",
     source: "Case Manager",
@@ -909,6 +921,72 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
       convertedAt: "Nov 15, 2026  -  02:30 PM",
       clientProfileId: "CLI-8994",
     },
+  },
+  {
+    id: "INQ-1032",
+    familyName: "The Foster Family",
+    stage: "Closed",
+    dateReceived: "7 days ago",
+    dateReceivedRaw: "2026-11-12T10:00:00Z",
+    source: "Phone",
+    sourceDetail: "Direct Inbound Intake Line",
+    branch: "North Metro Branch",
+    urgency: "Normal",
+    familyInfo: {
+      primaryContact: "David Foster",
+      relationship: "Son",
+      phone: "(404) 555-0812",
+      email: "david.foster@outlook.com",
+      preferredContactMethod: "Phone",
+      householdLocation: {
+        address: "520 Northside Pkwy NW",
+        city: "Atlanta",
+        state: "GA",
+        zip: "30327",
+        branch: "North Metro Branch",
+      },
+      clientInfo: {
+        name: "Mildred Foster",
+        age: 82,
+        relationship: "Mother",
+        dob: "1944-07-15",
+        gender: "Female",
+        primaryLanguage: "English",
+        mobilityNotes: "Assisted living facility transition chosen.",
+      },
+    },
+    referralInfo: {
+      source: "Phone",
+      organization: "Private Inquiry",
+      dateReceived: "Nov 12, 2026  -  10:00 AM",
+      assignedCoordinator: {
+        name: "Marcus Vance",
+        role: "Intake Specialist",
+        avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+        email: "m.vance@lilisare.com",
+      },
+    },
+    careRequirements: {
+      careType: ["Personal Care", "Companion Support"],
+      supportRequirements: "Family decided on residential assisted living facility closer to son. Case closed with courtesy referral.",
+      preferredLocation: "Northside Pkwy Home",
+      programInterest: "Private Pay",
+      hoursPerWeek: 20,
+      targetStartDate: "Declined",
+    },
+    documents: [],
+    missingInformation: [],
+    assessmentStatus: "Completed",
+    timeline: [
+      {
+        id: "t-102",
+        type: "status_change",
+        author: "Marcus Vance",
+        timestamp: "Nov 14, 2026  -  11:15 AM",
+        title: "Inquiry Closed  -  Family Selected Facility",
+        details: "Family decided on assisted living placement. Warm referral provided and record closed.",
+      },
+    ],
   },
 ];
 

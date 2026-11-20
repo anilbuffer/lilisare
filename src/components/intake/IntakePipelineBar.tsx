@@ -26,21 +26,50 @@ interface IntakePipelineBarProps {
 }
 
 const STAGE_ICONS: Record<InquiryStage, React.ElementType> = {
-  "New Lead": Sparkles,
+  "New Inquiry": Sparkles,
   "Contacted": PhoneCall,
+  "Needs Discussion": Stethoscope,
+  "CMA Coordination": FileText,
+  "Family Decision": CheckCircle2,
+  "Converted": CheckCircle2,
+  "Closed": Inbox,
+  "New Lead": Sparkles,
   "In Assessment": Stethoscope,
   "CM Coordination": FileText,
-  "Converted": CheckCircle2,
 };
 
 const STAGE_BAR_COLORS: Record<InquiryStage, { bar: string; badge: string }> = {
-  "New Lead": {
+  "New Inquiry": {
     bar: "bg-[#FF6E61]",
     badge: "bg-rose-50 text-rose-700 border-rose-200",
   },
   "Contacted": {
     bar: "bg-[#F59E0B]",
     badge: "bg-amber-50 text-amber-800 border-amber-200",
+  },
+  "Needs Discussion": {
+    bar: "bg-[#A855F7]",
+    badge: "bg-purple-50 text-purple-700 border-purple-200",
+  },
+  "CMA Coordination": {
+    bar: "bg-[#0284C7]",
+    badge: "bg-sky-50 text-sky-800 border-sky-200",
+  },
+  "Family Decision": {
+    bar: "bg-[#0D9488]",
+    badge: "bg-teal-50 text-teal-800 border-teal-200",
+  },
+  "Converted": {
+    bar: "bg-[#3D6B22]",
+    badge: "bg-emerald-50 text-[#1E5622] border-emerald-200",
+  },
+  "Closed": {
+    bar: "bg-slate-400",
+    badge: "bg-slate-100 text-slate-600 border-slate-200",
+  },
+  "New Lead": {
+    bar: "bg-[#FF6E61]",
+    badge: "bg-rose-50 text-rose-700 border-rose-200",
   },
   "In Assessment": {
     bar: "bg-[#0284C7]",
@@ -49,10 +78,6 @@ const STAGE_BAR_COLORS: Record<InquiryStage, { bar: string; badge: string }> = {
   "CM Coordination": {
     bar: "bg-[#6366F1]",
     badge: "bg-indigo-50 text-indigo-800 border-indigo-200",
-  },
-  "Converted": {
-    bar: "bg-[#3D6B22]",
-    badge: "bg-emerald-50 text-[#1E5622] border-emerald-200",
   },
 };
 

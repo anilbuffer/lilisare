@@ -1,9 +1,14 @@
 export type InquiryStage =
-  | "New Lead"
+  | "New Inquiry"
   | "Contacted"
+  | "Needs Discussion"
+  | "CMA Coordination"
+  | "Family Decision"
+  | "Converted"
+  | "Closed"
+  | "New Lead"
   | "In Assessment"
-  | "CM Coordination"
-  | "Converted";
+  | "CM Coordination";
 
 export type ReferralSourceType =
   | "Website"

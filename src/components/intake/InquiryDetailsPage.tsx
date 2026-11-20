@@ -46,11 +46,16 @@ interface InquiryDetailsPageProps {
 }
 
 const STAGE_STYLES: Record<InquiryStage, { bg: string; text: string; border: string; solidBg: string }> = {
-  "New Lead": { bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200", solidBg: "bg-rose-500" },
+  "New Inquiry": { bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200", solidBg: "bg-rose-500" },
   "Contacted": { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200", solidBg: "bg-amber-500" },
+  "Needs Discussion": { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200", solidBg: "bg-purple-600" },
+  "CMA Coordination": { bg: "bg-sky-50", text: "text-sky-800", border: "border-sky-200", solidBg: "bg-sky-600" },
+  "Family Decision": { bg: "bg-teal-50", text: "text-teal-800", border: "border-teal-200", solidBg: "bg-teal-600" },
+  "Converted": { bg: "bg-emerald-50", text: "text-[#1E5622]", border: "border-emerald-200", solidBg: "bg-[#3D6B22]" },
+  "Closed": { bg: "bg-slate-100", text: "text-slate-600", border: "border-slate-200", solidBg: "bg-slate-500" },
+  "New Lead": { bg: "bg-rose-50", text: "text-rose-700", border: "border-rose-200", solidBg: "bg-rose-500" },
   "In Assessment": { bg: "bg-sky-50", text: "text-sky-800", border: "border-sky-200", solidBg: "bg-sky-600" },
   "CM Coordination": { bg: "bg-indigo-50", text: "text-indigo-800", border: "border-indigo-200", solidBg: "bg-indigo-600" },
-  "Converted": { bg: "bg-emerald-50", text: "text-[#1E5622]", border: "border-emerald-200", solidBg: "bg-[#3D6B22]" },
 };
 
 const formatShortProgram = (program: string): string => {
@@ -297,16 +302,16 @@ export function InquiryDetailsPage({
       </div>
 
       {/* 01. PatientHeader Style: Hero Identity & Actions Card */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] border border-slate-200 flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200/80 flex flex-col lg:flex-row lg:items-start justify-between gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           {/* Avatar Box with Floating Stage Badge */}
           <div className="relative shrink-0">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#3D6B22]/10 to-emerald-100/60 text-[#3D6B22] border-2 border-white shadow-[0_6px_24px_rgba(0,0,0,0.06)] flex items-center justify-center text-2xl font-extrabold">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center text-xl font-bold">
               {familyInitials}
             </div>
-            <div className="absolute -bottom-2 -right-2">
+            <div className="absolute -bottom-1.5 -right-1.5">
               <span
-                className={`border-2 border-white shadow-sm font-semibold text-white whitespace-nowrap px-2.5 py-0.5 text-[10px] rounded-full uppercase tracking-wider ${stageStyle.solidBg}`}
+                className={`border-2 border-white shadow-xs font-medium text-white whitespace-nowrap px-2 py-0.5 text-[10px] rounded-full tracking-wide ${stageStyle.solidBg}`}
               >
                 {inquiry.stage}
               </span>
@@ -316,38 +321,39 @@ export function InquiryDetailsPage({
           {/* Family Heading & Badges */}
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="font-mono text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/70">
                 {inquiry.id}
               </span>
               {inquiry.urgency === "Urgent" && (
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
-                  <AlertTriangle className="w-2.5 h-2.5 text-rose-600" />
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200/70 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-rose-600" />
                   Urgent Priority
                 </span>
               )}
               {inquiry.onboardingStatus?.converted && (
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200">
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
                   Admitted to Onboarding
                 </span>
               )}
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1.5">
               {inquiry.familyName}
             </h1>
 
             {/* Metadata Line */}
             <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500 mb-3">
-              <span className="font-medium text-slate-700">
-                Loved One: <strong className="text-slate-900 font-semibold">{inquiry.familyInfo.clientInfo.name}</strong> ({inquiry.familyInfo.clientInfo.age}y, {inquiry.familyInfo.clientInfo.relationship})
+              <span className="text-slate-700">
+                Loved One: <span className="font-medium text-slate-800">{inquiry.familyInfo.clientInfo.name}</span>{" "}
+                <span className="text-slate-400">({inquiry.familyInfo.clientInfo.age}y, {inquiry.familyInfo.clientInfo.relationship})</span>
               </span>
               <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-              <span className="flex items-center gap-1 text-slate-600">
+              <span className="flex items-center gap-1 text-slate-500">
                 <MapPin className="w-3.5 h-3.5 text-slate-400" />
                 {inquiry.familyInfo.householdLocation.city}, {inquiry.familyInfo.householdLocation.state}
               </span>
               <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-              <span className="flex items-center gap-1 text-slate-600">
+              <span className="flex items-center gap-1 text-slate-500">
                 <Phone className="w-3.5 h-3.5 text-slate-400" />
                 {inquiry.familyInfo.phone}
               </span>
@@ -355,19 +361,19 @@ export function InquiryDetailsPage({
 
             {/* Program & Safety Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="brand" className="bg-emerald-50 text-[#1E5622] border-emerald-200 text-xs font-semibold px-2.5 py-0.5">
+              <span className="bg-emerald-50/80 text-[#1E5622] border border-emerald-200/70 text-xs font-medium px-2.5 py-0.5 rounded-md">
                 {formatShortProgram(inquiry.careRequirements.programInterest)}
-              </Badge>
-              <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[10px] uppercase font-bold px-2 py-0.5 border">
-                Source: {inquiry.source}
-              </Badge>
-              <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] uppercase font-bold px-2 py-0.5 border flex items-center gap-1">
-                <Globe className="w-3 h-3" />
+              </span>
+              <span className="bg-slate-50 text-slate-600 border border-slate-200/70 text-xs font-normal px-2.5 py-0.5 rounded-md">
+                {inquiry.source}
+              </span>
+              <span className="bg-slate-50 text-slate-600 border border-slate-200/70 text-xs font-normal px-2.5 py-0.5 rounded-md flex items-center gap-1">
+                <Globe className="w-3 h-3 text-slate-400" />
                 {inquiry.familyInfo.clientInfo.primaryLanguage}
-              </Badge>
-              <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[10px] uppercase font-bold px-2 py-0.5 border">
-                Requested: {inquiry.careRequirements.hoursPerWeek}h/wk
-              </Badge>
+              </span>
+              <span className="bg-slate-50 text-slate-600 border border-slate-200/70 text-xs font-normal px-2.5 py-0.5 rounded-md">
+                {inquiry.careRequirements.hoursPerWeek} hrs/wk requested
+              </span>
             </div>
           </div>
         </div>
@@ -375,15 +381,15 @@ export function InquiryDetailsPage({
         {/* Action Controls Column */}
         <div className="flex flex-col items-start lg:items-end justify-between gap-3 w-full lg:w-auto shrink-0 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
           <div className="flex items-center gap-2 self-stretch lg:self-auto justify-between lg:justify-end">
-            <span className="text-xs font-semibold text-slate-500">Missing Docs</span>
+            <span className="text-xs text-slate-500">Missing Docs</span>
             {missingDocsCount > 0 ? (
-              <Badge variant="error" className="text-xs px-2.5 py-0.5 bg-rose-100 text-rose-700 border-rose-200 font-semibold">
+              <span className="text-xs px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-md font-medium">
                 {missingDocsCount} Missing
-              </Badge>
+              </span>
             ) : (
-              <Badge variant="success" className="text-xs px-2.5 py-0.5 bg-emerald-100 text-[#1E5622] border-emerald-200 font-semibold">
+              <span className="text-xs px-2.5 py-0.5 bg-emerald-50 text-[#1E5622] border border-emerald-200 rounded-md font-medium">
                 Complete
-              </Badge>
+              </span>
             )}
           </div>
 
@@ -391,7 +397,7 @@ export function InquiryDetailsPage({
             <button
               type="button"
               onClick={() => setIsContactModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5 text-[#3D6B22]" />
               <span>Contact Family</span>
@@ -400,7 +406,7 @@ export function InquiryDetailsPage({
             <button
               type="button"
               onClick={() => setIsScheduleModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
             >
               <CalendarPlus className="w-3.5 h-3.5 text-sky-700" />
               <span>Schedule RN</span>
@@ -411,7 +417,7 @@ export function InquiryDetailsPage({
               <button
                 type="button"
                 onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
                 <span>{inquiry.stage}</span>
@@ -440,10 +446,10 @@ export function InquiryDetailsPage({
             <button
               type="button"
               onClick={() => setIsConvertModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] hover:shadow-[0_4px_12px_rgba(61,107,34,0.25)] cursor-pointer"
             >
               <span>Convert to Onboarding</span>
-              <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+              <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />
             </button>
           </div>
         </div>
@@ -477,83 +483,145 @@ export function InquiryDetailsPage({
           {/* Left Column (2 cols): Family & Loved One Demographics */}
           <div className="lg:col-span-2 space-y-5">
             {/* Family & Contact Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <Users className="w-4.5 h-4.5 text-[#3D6B22]" />
-                Primary Family Contact
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-4 text-xs">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#3D6B22]" />
+                  Primary Family Contact
+                </h3>
+                <span className="text-[11px] font-medium text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                  {inquiry.familyInfo.relationship}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6">
                 <div>
-                  <span className="text-slate-500 block">Primary Contact Name</span>
-                  <span className="font-semibold text-slate-800 text-sm mt-0.5 block">{inquiry.familyInfo.primaryContact}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Primary Contact Name</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.primaryContact}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Relationship to Loved One</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{inquiry.familyInfo.relationship}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Relationship to Loved One</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.relationship}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Phone Number</span>
-                  <a href={`tel:${inquiry.familyInfo.phone}`} className="font-medium text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Phone Number</span>
+                  <a href={`tel:${inquiry.familyInfo.phone}`} className="text-sm font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5 mt-0.5">
                     <Phone className="w-3.5 h-3.5 text-slate-400" />
                     {inquiry.familyInfo.phone}
                   </a>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Email Address</span>
-                  <a href={`mailto:${inquiry.familyInfo.email}`} className="font-medium text-[#3D6B22] hover:underline flex items-center gap-1 mt-0.5 truncate">
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Email Address</span>
+                  <a href={`mailto:${inquiry.familyInfo.email}`} className="text-sm font-semibold text-[#3D6B22] hover:underline flex items-center gap-1.5 mt-0.5 truncate">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     {inquiry.familyInfo.email}
                   </a>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Preferred Contact Method</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{inquiry.familyInfo.preferredContactMethod}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Preferred Contact Method</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.preferredContactMethod}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Best Time to Call</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{inquiry.familyInfo.bestTimeToCall}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Best Time to Call</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.bestTimeToCall || "Anytime"}</span>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3.5 border-t border-slate-100 text-xs">
-                <span className="text-slate-500 block mb-1">Household Location</span>
-                <p className="font-medium text-slate-800 flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-[#3D6B22] shrink-0" />
-                  {inquiry.familyInfo.householdLocation.address}, {inquiry.familyInfo.householdLocation.city}, {inquiry.familyInfo.householdLocation.state} {inquiry.familyInfo.householdLocation.zip}
-                </p>
-                <span className="text-[11px] text-slate-400 mt-1 block">Assigned Service Area: {inquiry.branch}</span>
+              <div className="mt-4 pt-3.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Household Location</span>
+                  <p className="text-xs font-medium text-slate-700 flex items-start gap-1.5 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                    <span>
+                      {inquiry.familyInfo.householdLocation.address}, {inquiry.familyInfo.householdLocation.city}, {inquiry.familyInfo.householdLocation.state} {inquiry.familyInfo.householdLocation.zip}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Assigned Service Branch</span>
+                  <p className="text-xs font-semibold text-slate-800 mt-0.5">{inquiry.branch}</p>
+                </div>
               </div>
             </Card>
 
-            {/* Loved One (Client) Profile Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <Heart className="w-4.5 h-4.5 text-[#FF6E61]" />
-                Loved One Demographics & Mobility
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-4 text-xs">
+            {/* Loved One Demographics & Care Profile Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-rose-500" />
+                  Loved One Demographics & Care Profile
+                </h3>
+                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
+                  {formatShortProgram(inquiry.careRequirements.programInterest)}
+                </span>
+              </div>
+
+              {/* Core Demographics Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-4 gap-x-4">
                 <div>
-                  <span className="text-slate-500 block">Full Name</span>
-                  <span className="font-semibold text-slate-800 text-sm mt-0.5 block">{inquiry.familyInfo.clientInfo.name}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Full Name</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.clientInfo.name}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Age & Gender</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{inquiry.familyInfo.clientInfo.age} years old · {inquiry.familyInfo.clientInfo.gender}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Age & Gender</span>
+                  <span className="text-sm font-semibold text-slate-800 block">
+                    {inquiry.familyInfo.clientInfo.age} yrs · {inquiry.familyInfo.clientInfo.gender || "Female"}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Date of Birth</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{inquiry.familyInfo.clientInfo.dob || "On File"}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Date of Birth</span>
+                  <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.clientInfo.dob || "On File"}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Primary Language</span>
-                  <span className="font-medium text-slate-800 mt-0.5 block">{inquiry.familyInfo.clientInfo.primaryLanguage}</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Primary Language</span>
+                  <span className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-slate-400" />
+                    {inquiry.familyInfo.clientInfo.primaryLanguage || "English"}
+                  </span>
                 </div>
               </div>
 
+              {/* Header Required Data: Care Program & Service Request */}
+              <div className="mt-4 pt-3.5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-y-3 gap-x-4">
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Program / Coverage</span>
+                  <span className="text-xs font-semibold text-slate-800 block">
+                    {inquiry.careRequirements.programInterest}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Requested Care Volume</span>
+                  <span className="text-xs font-semibold text-slate-800 block">
+                    {inquiry.careRequirements.hoursPerWeek} hrs / week
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Target Start Date</span>
+                  <span className="text-xs font-semibold text-slate-800 block">
+                    {inquiry.careRequirements.targetStartDate || "Immediate"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Requested Care Types */}
+              {inquiry.careRequirements.careType && inquiry.careRequirements.careType.length > 0 && (
+                <div className="mt-3.5 pt-3 border-t border-slate-100">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-1.5">Requested Care Types</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {inquiry.careRequirements.careType.map((type) => (
+                      <span key={type} className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-normal border border-slate-200/60">
+                        {type}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mobility & Daily Living Notes */}
               {inquiry.familyInfo.clientInfo.mobilityNotes && (
-                <div className="mt-4 pt-3.5 border-t border-slate-100 text-xs">
-                  <span className="text-slate-500 block mb-1">Mobility & Daily Living Notes</span>
-                  <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200/80 text-amber-900 text-xs leading-relaxed">
+                <div className="mt-3.5 pt-3 border-t border-slate-100">
+                  <span className="text-[11px] font-medium text-slate-400 block mb-1">Mobility & Daily Living Notes</span>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700 text-xs leading-relaxed">
                     {inquiry.familyInfo.clientInfo.mobilityNotes}
                   </div>
                 </div>
@@ -564,48 +632,65 @@ export function InquiryDetailsPage({
           {/* Right Column (1 col): Potential Caregiver & Assigned Coordinator */}
           <div className="space-y-5">
             {/* Potential Family Caregiver Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2 pb-2.5 border-b border-slate-100">
-                <HeartHandshakeIcon className="w-4 h-4 text-[#3D6B22]" />
-                In-Home Family Caregiver
-              </h3>
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+              <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <HeartHandshakeIcon className="w-4 h-4 text-[#3D6B22]" />
+                  In-Home Family Caregiver
+                </h3>
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                  inquiry.familyInfo.potentialCaregiver?.name
+                    ? "bg-emerald-50 text-[#1E5622] border border-emerald-200/70"
+                    : "bg-slate-100 text-slate-600 border border-slate-200/70"
+                }`}>
+                  {inquiry.familyInfo.potentialCaregiver?.name ? "Family Caregiver" : "Agency Staff Match"}
+                </span>
+              </div>
+
               {inquiry.familyInfo.potentialCaregiver?.name ? (
-                <div className="space-y-3 text-xs">
+                <div className="space-y-3">
                   <div>
-                    <span className="text-slate-500 block">Caregiver Name</span>
-                    <span className="font-bold text-slate-900 text-sm">{inquiry.familyInfo.potentialCaregiver.name}</span>
+                    <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Caregiver Name</span>
+                    <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.potentialCaregiver.name}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">Relationship</span>
-                    <span className="font-medium text-slate-700">{inquiry.familyInfo.potentialCaregiver.relationship}</span>
+                    <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Relationship</span>
+                    <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.potentialCaregiver.relationship}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block">Payroll / Worker Intent</span>
-                    <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] font-semibold border border-emerald-200">
+                    <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Payroll / Worker Intent</span>
+                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md bg-emerald-50 text-[#1E5622] text-xs font-medium border border-emerald-200/70">
                       {inquiry.familyInfo.potentialCaregiver.classificationInterest || "W-2 Employee"}
                     </span>
                   </div>
                   {inquiry.familyInfo.potentialCaregiver.phone && (
                     <div>
-                      <span className="text-slate-500 block">Contact</span>
-                      <span className="font-medium text-slate-700">{inquiry.familyInfo.potentialCaregiver.phone}</span>
+                      <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Contact</span>
+                      <span className="text-sm font-semibold text-slate-800 block">{inquiry.familyInfo.potentialCaregiver.phone}</span>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-xs text-slate-400 py-3 text-center">
-                  <p>No family caregiver identified yet.</p>
-                  <p className="text-[11px] mt-1 text-slate-500">Will be matched with agency staff.</p>
+                <div className="py-4 px-3 rounded-xl bg-slate-50/70 border border-dashed border-slate-200 text-center">
+                  <p className="text-xs font-medium text-slate-700">No family caregiver identified yet</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Care will be matched with LiliSare agency care staff.</p>
                 </div>
               )}
             </Card>
 
-            {/* Coordination & Intake Snapshot */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_35px_rgba(0,0,0,0.08)] transition-all duration-300 space-y-3.5 text-xs">
-              <h3 className="text-sm font-bold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-slate-600" />
-                Assigned Coordinator
-              </h3>
+            {/* Coordination & Intake Summary Card */}
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-slate-600" />
+                  Intake & Coordinator Summary
+                </h3>
+                <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/70">
+                  {inquiry.id}
+                </span>
+              </div>
+
+              {/* Coordinator Profile */}
               <div className="flex items-center gap-3">
                 {inquiry.referralInfo.assignedCoordinator.avatarUrl ? (
                   <img
@@ -614,24 +699,61 @@ export function InquiryDetailsPage({
                     className="w-10 h-10 rounded-full object-cover border border-slate-200"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#1E5622] font-bold flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 text-[#1E5622] font-semibold flex items-center justify-center text-sm">
                     {inquiry.referralInfo.assignedCoordinator.name.charAt(0)}
                   </div>
                 )}
                 <div>
-                  <p className="font-bold text-slate-900">{inquiry.referralInfo.assignedCoordinator.name}</p>
-                  <p className="text-[11px] text-slate-400">{inquiry.referralInfo.assignedCoordinator.role}</p>
+                  <p className="text-sm font-semibold text-slate-900">{inquiry.referralInfo.assignedCoordinator.name}</p>
+                  <p className="text-xs text-slate-500">{inquiry.referralInfo.assignedCoordinator.role}</p>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 space-y-2">
-                <div className="flex items-center justify-between text-slate-500">
-                  <span>Referral Received</span>
+              {/* Header Data Breakdown */}
+              <div className="pt-3 border-t border-slate-100 space-y-2.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Pipeline Stage</span>
+                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${stageStyle.bg} ${stageStyle.text} border ${stageStyle.border}`}>
+                    {inquiry.stage}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Referral Source</span>
+                  <span className="font-semibold text-slate-800">{inquiry.source}</span>
+                </div>
+                {inquiry.referralInfo.organization && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Referring Organization</span>
+                    <span className="font-medium text-slate-800 text-right truncate max-w-[180px]">{inquiry.referralInfo.organization}</span>
+                  </div>
+                )}
+                {inquiry.referralInfo.caseManager?.name && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Referring Provider</span>
+                    <span className="font-medium text-slate-800 text-right truncate max-w-[180px]">{inquiry.referralInfo.caseManager.name}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Referral Received</span>
                   <span className="font-medium text-slate-800">{inquiry.dateReceived}</span>
                 </div>
-                <div className="flex items-center justify-between text-slate-500">
-                  <span>Referral Channel</span>
-                  <span className="font-medium text-slate-800">{inquiry.source}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Intake Priority</span>
+                  <span className={`font-medium ${inquiry.urgency === "Urgent" ? "text-rose-600" : "text-slate-700"}`}>
+                    {inquiry.urgency} Priority
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Documents Status</span>
+                  {missingDocsCount > 0 ? (
+                    <span className="text-[11px] font-medium text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                      {missingDocsCount} Missing
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-medium text-[#1E5622] bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                      Complete
+                    </span>
+                  )}
                 </div>
               </div>
             </Card>
@@ -644,22 +766,22 @@ export function InquiryDetailsPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-2 space-y-5">
             {/* Service & Schedule Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-4">
-              <h3 className="text-base font-bold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
-                <Calendar className="w-4.5 h-4.5 text-[#3D6B22]" />
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#3D6B22]" />
                 Authorized Hours & Schedule Preference
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-slate-500 block mb-1">Requested Care Hours</span>
-                  <p className="text-xl font-extrabold text-slate-900">{inquiry.careRequirements.hoursPerWeek} hrs / week</p>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-1">Requested Care Hours</span>
+                  <p className="text-lg font-bold text-slate-900">{inquiry.careRequirements.hoursPerWeek} hrs / week</p>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-slate-500 block mb-1">Target Start Date</span>
-                  <p className="text-sm font-bold text-slate-800">{inquiry.careRequirements.targetStartDate || "Immediate"}</p>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-1">Target Start Date</span>
+                  <p className="text-sm font-semibold text-slate-800">{inquiry.careRequirements.targetStartDate || "Immediate"}</p>
                 </div>
                 <div className="sm:col-span-2 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-slate-500 block mb-1">Preferred Daily Schedule</span>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-1">Preferred Daily Schedule</span>
                   <p className="text-sm font-semibold text-slate-800">{inquiry.careRequirements.schedulePreference}</p>
                 </div>
               </div>
@@ -678,9 +800,9 @@ export function InquiryDetailsPage({
             </Card>
 
             {/* Clinical & Support Narrative */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-3">
-              <h3 className="text-base font-bold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
-                <Stethoscope className="w-4.5 h-4.5 text-sky-700" />
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
+                <Stethoscope className="w-4 h-4 text-sky-700" />
                 Support Requirements & Clinical Context
               </h3>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200/70">
@@ -691,8 +813,8 @@ export function InquiryDetailsPage({
 
           <div className="space-y-5">
             {/* Preferred Location Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-3 text-xs">
-              <h3 className="text-sm font-bold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3 text-xs">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#3D6B22]" />
                 Service Delivery Location
               </h3>
@@ -710,10 +832,10 @@ export function InquiryDetailsPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-2 space-y-5">
             {/* Document Checklist Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-4">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <FileText className="w-4.5 h-4.5 text-[#3D6B22]" />
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-[#3D6B22]" />
                   Required Intake Documents
                 </h3>
                 <span className="text-xs text-slate-400">Click to toggle status</span>
@@ -738,7 +860,7 @@ export function InquiryDetailsPage({
                           <FileText className="w-4 h-4 text-slate-500" />
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                          <p className="text-xs font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                             {doc.name}
                           </p>
                           <p className="text-[11px] text-slate-400">
@@ -747,7 +869,7 @@ export function InquiryDetailsPage({
                         </div>
                       </div>
 
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${statusColors}`}>
+                      <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${statusColors}`}>
                         {doc.status}
                       </span>
                     </div>
@@ -759,15 +881,15 @@ export function InquiryDetailsPage({
 
           <div className="space-y-5">
             {/* Payer & Case Manager Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-4 text-xs">
-              <h3 className="text-sm font-bold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 text-xs">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#3D6B22]" />
                 Payer & Case Manager
               </h3>
               <div className="space-y-3">
                 <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <span className="text-slate-400 block text-[11px]">Primary Program</span>
-                  <p className="font-bold text-slate-800 text-sm mt-0.5">{inquiry.careRequirements.programInterest}</p>
+                  <p className="font-semibold text-slate-800 text-sm mt-0.5">{inquiry.careRequirements.programInterest}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 block text-[11px]">Assigned Case Manager</span>
@@ -785,8 +907,8 @@ export function InquiryDetailsPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-2 space-y-5">
             {/* Log Note Form */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-3">
-              <h3 className="text-sm font-bold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <Send className="w-4 h-4 text-[#3D6B22]" />
                 Log Coordinator Call / Follow-up Note
               </h3>
@@ -801,7 +923,7 @@ export function InquiryDetailsPage({
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] transition-all cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Post Note</span>
@@ -811,9 +933,9 @@ export function InquiryDetailsPage({
             </Card>
 
             {/* Timeline Feed */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-4">
-              <h3 className="text-base font-bold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
-                <Clock className="w-4.5 h-4.5 text-slate-600" />
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+              <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-slate-600" />
                 Inquiry Activity & Communication Log
               </h3>
               <div className="space-y-3">
@@ -827,7 +949,7 @@ export function InquiryDetailsPage({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-slate-900">{item.title}</span>
+                        <span className="font-semibold text-slate-900">{item.title}</span>
                         <span className="text-[10px] text-slate-400 shrink-0">{item.timestamp}</span>
                       </div>
                       <p className="text-slate-600 mt-1 leading-relaxed">{item.details}</p>
@@ -840,8 +962,8 @@ export function InquiryDetailsPage({
           </div>
 
           <div className="space-y-5">
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] text-xs space-y-2">
-              <span className="font-bold text-slate-800 block">Audit & Compliance</span>
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-xs space-y-2">
+              <span className="font-semibold text-slate-800 block">Audit & Compliance</span>
               <p className="text-slate-500 leading-relaxed">
                 All phone notes, status shifts, and coordinator assignments are cryptographically signed and stored under HIPAA audit logging regulations.
               </p>

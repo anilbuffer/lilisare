@@ -18,7 +18,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <motion.div
         ref={ref}
         className={cn(
-          "relative bg-white rounded-xl lg:rounded-2xl border border-[#D5DFDA] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] transition-all duration-300 hover:shadow-[0_4px_12px_-1px_rgba(17,28,22,0.08)] hover:border-[#93C573]/80 relative overflow-hidden",
+          "relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs transition-all duration-200 hover:border-[#3D6B22]/50 hover:shadow-md overflow-hidden",
           !noPadding && "",
           className
         )}
@@ -45,8 +45,8 @@ export function CardHeader({
   return (
     <div className={cn("flex items-center justify-between mb-4", className)}>
       <div>
-        <h3 className="text-base font-semibold text-text-primary">{title}</h3>
-        {subtitle && <p className="text-sm text-text-secondary mt-0.5">{subtitle}</p>}
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">{title}</h3>
+        {subtitle && <p className="text-xs sm:text-sm text-slate-500 mt-0.5">{subtitle}</p>}
       </div>
       {action && <div className="text-sm">{action}</div>}
     </div>

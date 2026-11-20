@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -34,7 +34,6 @@ import {
   Repeat,
   List,
   Clock,
-  UserCheck,
   ClipboardCheck,
   Stethoscope,
   Wallet,
@@ -48,7 +47,18 @@ import clsx from "clsx";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 import { useAuth } from "@/hooks/useAuth";
 
-const getNavGroups = (role?: string) => {
+export interface NavItem {
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  id: string;
+}
+
+export interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const getNavGroups = (role?: string): NavGroup[] => {
   if (role === "CLIENT") {
     return [
       {
@@ -90,8 +100,8 @@ const getNavGroups = (role?: string) => {
         items: [
           { name: "Today", icon: LayoutDashboard, id: "today" },
           { name: "Schedule", icon: CalendarDays, id: "schedule" },
-          { name: "Messages", icon: MessageSquare, id: "messages", badge: 1 },
-          { name: "Training", icon: GraduationCap, id: "training", badge: 1 },
+          { name: "Messages", icon: MessageSquare, id: "messages" },
+          { name: "Training", icon: GraduationCap, id: "training" },
           { name: "Incident Report", icon: ShieldAlert, id: "incidents" },
           { name: "Daily Assessment", icon: CheckSquare, id: "assessments" },
           { name: "Profile", icon: User, id: "profile" },
@@ -109,7 +119,7 @@ const getNavGroups = (role?: string) => {
           { name: "Recruiting", icon: UserPlus, id: "recruiting" },
           { name: "Caregivers", icon: HeartHandshake, id: "caregivers" },
           { name: "Clients", icon: Users, id: "clients" },
-          { name: "Households", icon: Home, id: "households", badge: 11 },
+          { name: "Households", icon: Home, id: "households" },
           { name: "Training", icon: GraduationCap, id: "training" },
           { name: "Payroll", icon: Receipt, id: "payroll" },
           { name: "Messages", icon: MessageSquare, id: "messages" },
@@ -151,7 +161,7 @@ const getNavGroups = (role?: string) => {
         label: "Clients & Households",
         items: [
           { name: "Clients", icon: Users, id: "clients" },
-          { name: "Households", icon: Home, id: "households", badge: 11 },
+          { name: "Households", icon: Home, id: "households" },
         ],
       },
       {
@@ -171,7 +181,7 @@ const getNavGroups = (role?: string) => {
           { name: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Referral & Intake", icon: Inbox, id: "referrals" },
           { name: "Clients", icon: Users, id: "clients" },
-          { name: "Households", icon: Home, id: "households", badge: 11 },
+          { name: "Households", icon: Home, id: "households" },
           { name: "Reports", icon: BarChart3, id: "reports" },
         ],
       },
@@ -187,7 +197,7 @@ const getNavGroups = (role?: string) => {
           { name: "Billing & Claims", icon: Receipt, id: "billing-workspace" },
           { name: "Authorizations", icon: ShieldCheck, id: "authorizations" },
           { name: "Clients", icon: Users, id: "clients" },
-          { name: "Households", icon: Home, id: "households", badge: 11 },
+          { name: "Households", icon: Home, id: "households" },
           { name: "Payroll", icon: Receipt, id: "payroll" },
           { name: "Reports (Financial)", icon: BarChart3, id: "reports" },
           { name: "Messages", icon: MessageSquare, id: "messages" },
@@ -203,7 +213,7 @@ const getNavGroups = (role?: string) => {
         items: [
           { name: "Clinical Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Clients", icon: Users, id: "clients" },
-          { name: "Households", icon: Home, id: "households", badge: 11 },
+          { name: "Households", icon: Home, id: "households" },
           { name: "Assessments & Care Plan", icon: CheckSquare, id: "assessments" },
           { name: "QA (Audits)", icon: Award, id: "qa" },
           { name: "Incident Reports", icon: ShieldAlert, id: "incidents" },
@@ -220,7 +230,7 @@ const getNavGroups = (role?: string) => {
         items: [
           { name: "Compliance Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Clients", icon: Users, id: "clients" },
-          { name: "Households", icon: Home, id: "households", badge: 11 },
+          { name: "Households", icon: Home, id: "households" },
           { name: "Compliance Tracking", icon: CheckSquare, id: "compliance" },
           { name: "Quality Assurance", icon: Award, id: "qa" },
           { name: "Incident Reports", icon: ShieldAlert, id: "incidents" },
@@ -239,7 +249,7 @@ const getNavGroups = (role?: string) => {
           { name: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Supervisory Visits", icon: CheckSquare, id: "visits" },
           { name: "Clients", icon: Users, id: "clients" },
-          { name: "Households", icon: Home, id: "households", badge: 11 },
+          { name: "Households", icon: Home, id: "households" },
           { name: "Caregivers", icon: Users, id: "caregivers" },
           { name: "Incident Reports", icon: ShieldAlert, id: "incidents" },
           { name: "Messages", icon: MessageSquare, id: "messages" },
@@ -264,17 +274,16 @@ const getNavGroups = (role?: string) => {
     ];
   }
 
-
-  // Default ADMIN / Agency Admin role navigation
+  // Default ADMIN / Agency Admin role navigation with original menu names
   return [
     {
       label: "",
       items: [
         { name: "Dashboard", icon: LayoutGrid, id: "dashboard" },
-        { name: "Intake & Referrals", icon: Inbox, id: "intake-referrals", badge: 24 },
+        { name: "Intake & Referrals", icon: Inbox, id: "intake-referrals" },
         { name: "Clients", icon: Users, id: "clients" },
-        { name: "Caregivers", icon: Heart, id: "caregivers", badge: 38 },
-        { name: "Households", icon: Home, id: "households", badge: 11 },
+        { name: "Caregivers", icon: Heart, id: "caregivers" },
+        { name: "Households", icon: Home, id: "households" },
       ],
     },
     {
@@ -324,19 +333,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [showHipaaTooltip, setShowHipaaTooltip] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  // Expandable group state
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
     setMounted(true);
   }, []);
 
   const safeUser = mounted ? currentUser : null;
+  const navGroups = useMemo(() => getNavGroups(safeUser?.role), [safeUser?.role]);
 
-  const handleLogout = () => {
-    setIsProfileOpen(false);
-    logout();
-    router.push("/login");
-  };
-
-  const activeItem = React.useMemo(() => {
+  const activeItem = useMemo(() => {
     // portal
     if (pathname?.startsWith("/portal/visits")) return "visits";
     if (pathname?.startsWith("/portal/schedule")) return "scheduling";
@@ -407,6 +414,89 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     return "dashboard";
   }, [pathname, safeUser?.role]);
 
+  // Ensure active category is expanded
+  useEffect(() => {
+    navGroups.forEach((group, index) => {
+      if (group.label) {
+        const groupKey = group.label || `group-${index}`;
+        const containsActive = group.items.some((item) => item.id === activeItem);
+        if (containsActive) {
+          setExpandedGroups((prev) => ({ ...prev, [groupKey]: true }));
+        }
+      }
+    });
+  }, [activeItem, navGroups]);
+
+  const toggleGroup = (groupKey: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupKey]: prev[groupKey] === undefined ? false : !prev[groupKey],
+    }));
+  };
+
+  const handleLogout = () => {
+    setIsProfileOpen(false);
+    logout();
+    router.push("/login");
+  };
+
+  const getItemHref = (id: string) => {
+    if (id === "dashboard") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : "/dashboard";
+    if (id === "intake-referrals") return "/intake/pipeline";
+    if (id === "clients") return "/clients";
+    if (id === "caregivers") return safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : "/caregivers";
+    if (id === "households") return "/households";
+    if (id === "authorizations") return "/billing/authorizations";
+    if (id === "scheduling") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/schedule" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/scheduling" : "/scheduling";
+    if (id === "evv-visits") return "/evv-monitoring";
+    if (id === "care-notes") return "/clinical/visit-notes";
+    if (id === "clinical-supervisory") return "/clinical";
+    if (id === "compliance") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/tracking" : safeUser?.role === "TRAINER" ? "/training-admin/compliance" : "/compliance";
+    if (id === "training-credentials") return "/training-admin";
+    if (id === "billing-claims") return "/billing/workspace";
+    if (id === "payroll") return safeUser?.role === "HR" ? "/hr/payroll" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/payroll" : "/payroll";
+    if (id === "reports-analytics") return "/reports";
+    if (id === "user-role-mgmt") return "/users";
+    if (id === "automation-rules") return "/automation";
+    if (id === "notifications") return "/communications";
+    if (id === "audit-logs") return "/audit-logs";
+    if (id === "settings") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/settings" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/settings" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/settings" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/settings" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/settings" : safeUser?.role === "TRAINER" ? "/training-admin/settings" : "/settings";
+
+    // Backward compatibility for other sub-portal roles
+    if (id === "command-center") return "/admin/command-center";
+    if (id === "users") return "/users";
+    if (id === "training") return safeUser?.role === "CAREGIVER" ? "/caregiver/training" : safeUser?.role === "HR" ? "/hr/training" : "/training";
+    if (id === "billing-admin") return "/billing/workspace";
+    if (id === "billing-workspace") return "/billing/workspace";
+    if (id === "reports") return safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/reports" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/reports" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/reports" : "/reports";
+    if (id === "messages") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/messages" : safeUser?.role === "CAREGIVER" ? "/caregiver/messages" : safeUser?.role === "HR" ? "/hr/messages" : safeUser?.role === "SCHEDULER" ? "/scheduler/messages" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/messages" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/messages" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/messages" : safeUser?.role === "TRAINER" ? "/training-admin/messages" : "/billing/messages";
+    if (id === "patients") return "/clients";
+    if (id === "evv-monitoring") return "/evv-monitoring";
+    if (id === "qa") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/qa" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/qa" : "/quality-assurance";
+    if (id === "visits") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/visits" : "/field-supervisor/visits";
+    if (id === "incidents") return safeUser?.role === "CAREGIVER" ? "/caregiver/incidents" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/incidents" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/incidents" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/incidents" : "/incidents";
+    if (id === "assessments") return safeUser?.role === "CAREGIVER" ? "/caregiver/assessments" : "/clinical/assessments";
+    if (id === "referrals") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/referrals" : "/referrals";
+    if (id === "communications") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/communications" : "/communications";
+    if (id === "overview") return "/portal";
+    if (id === "care-plan") return "/portal/care-plan";
+    if (id === "billing") return "/portal/billing";
+    if (id === "documents") return "/portal/documents";
+    if (id === "today") return "/caregiver";
+    if (id === "schedule") return "/caregiver/schedule";
+    if (id === "profile") return "/caregiver/profile";
+    if (id === "recruiting") return "/hr/recruiting";
+    if (id === "scheduled-shifts") return "/scheduler/shifts/list";
+    if (id === "recurring-patterns") return "/scheduler/shifts/recurring";
+    if (id === "route-optimizer") return "/scheduler/dispatch/optimizer";
+    if (id === "visit-list") return "/scheduler/dispatch/visits";
+    if (id === "availability") return "/scheduler/caregivers/availability";
+    if (id === "course-builder") return "/training-admin/courses/builder";
+    if (id === "courses") return "/training-admin/courses";
+    if (id === "quizzes") return "/training-admin/quizzes";
+    return "/dashboard";
+  };
+
   return (
     <>
       {/* Mobile overlay */}
@@ -430,7 +520,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           isCollapsed ? "min-[1120px]:w-[76px] w-[260px]" : "w-[260px]"
         )}
       >
-        {/* Floating Edge Toggle Button matching requested screenshot */}
+        {/* Floating Edge Toggle Button */}
         <button
           onClick={toggleCollapse}
           title={isCollapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}
@@ -451,7 +541,32 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             isCollapsed ? "px-3 justify-center" : "px-5 justify-start"
           )}
         >
-          <Link href={safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal" : safeUser?.role === "CAREGIVER" ? "/caregiver" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : "/dashboard"} className="flex items-center gap-3 overflow-hidden group">
+          <Link
+            href={
+              safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY"
+                ? "/portal"
+                : safeUser?.role === "CAREGIVER"
+                ? "/caregiver"
+                : safeUser?.role === "HR"
+                ? "/hr/dashboard"
+                : safeUser?.role === "SCHEDULER"
+                ? "/scheduler"
+                : safeUser?.role === "QA_COMPLIANCE_OFFICER"
+                ? "/compliance"
+                : safeUser?.role === "INTAKE_COORDINATOR"
+                ? "/intake/dashboard"
+                : safeUser?.role === "BILLING_FINANCE_STAFF"
+                ? "/billing"
+                : safeUser?.role === "CLINICAL_SUPERVISOR_RN"
+                ? "/clinical"
+                : safeUser?.role === "FIELD_SUPERVISOR"
+                ? "/field-supervisor"
+                : safeUser?.role === "TRAINER"
+                ? "/training-admin"
+                : "/dashboard"
+            }
+            className="flex items-center gap-3 overflow-hidden group"
+          >
             <div className="w-12 h-12 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow-md shadow-brand-teal/20 shrink-0 group-hover:scale-105 transition-transform">
               <img src="/logo-mark.svg" alt="LiliSare Logo" className="w-10 h-10 object-contain" />
             </div>
@@ -492,141 +607,113 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-600/80">
-          {getNavGroups(safeUser?.role).map((group, index) => (
-            <div key={index} className="space-y-1">
-              {index > 0 && (
-                <div className="h-px bg-[#26481C] my-2 mx-1.5" />
-              )}
+        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-2.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-600/80">
+          {navGroups.map((group, groupIndex) => {
+            const groupKey = group.label || `group-${groupIndex}`;
+            // By default, groups are expanded unless explicitly toggled off
+            const isExpanded = expandedGroups[groupKey] !== false;
 
-              {group.label ? (
-                !isCollapsed ? (
-                  <div className="px-3 pt-2.5 pb-1 text-[11px] font-bold text-[#8DBE6A] tracking-wider uppercase truncate">
-                    {group.label}
-                  </div>
-                ) : (
-                  <div className="h-px bg-[#26481C] my-2 mx-2" />
-                )
-              ) : null}
+            return (
+              <div key={groupKey} className="space-y-1">
+                {groupIndex > 0 && <div className="h-px bg-[#26481C] my-2 mx-1.5" />}
 
-              <ul className="space-y-0.5">
-                {group.items.map((item) => {
-                  const isActive = activeItem === item.id;
-                  const Icon = item.icon;
-
-                  let href = "#";
-                  if (item.id === "dashboard") href = safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : "/dashboard";
-                  if (item.id === "intake-referrals") href = "/intake/pipeline";
-                  if (item.id === "clients") href = "/clients";
-                  if (item.id === "caregivers") href = safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : "/caregivers";
-                  if (item.id === "households") href = "/households";
-                  if (item.id === "authorizations") href = "/billing/authorizations";
-                  if (item.id === "scheduling") href = safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/schedule" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/scheduling" : "/scheduling";
-                  if (item.id === "evv-visits") href = "/evv-monitoring";
-                  if (item.id === "care-notes") href = "/clinical/visit-notes";
-                  if (item.id === "clinical-supervisory") href = "/clinical";
-                  if (item.id === "compliance") href = safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/tracking" : safeUser?.role === "TRAINER" ? "/training-admin/compliance" : "/compliance";
-                  if (item.id === "training-credentials") href = "/training-admin";
-                  if (item.id === "billing-claims") href = "/billing/workspace";
-                  if (item.id === "payroll") href = safeUser?.role === "HR" ? "/hr/payroll" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/payroll" : "/payroll";
-                  if (item.id === "reports-analytics") href = "/reports";
-                  if (item.id === "user-role-mgmt") href = "/users";
-                  if (item.id === "automation-rules") href = "/automation";
-                  if (item.id === "notifications") href = "/communications";
-                  if (item.id === "audit-logs") href = "/audit-logs";
-                  if (item.id === "settings") href = safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/settings" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/settings" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/settings" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/settings" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/settings" : safeUser?.role === "TRAINER" ? "/training-admin/settings" : "/settings";
-
-                  // Backward compatibility for other sub-portal roles
-                  if (item.id === "command-center") href = "/admin/command-center";
-                  if (item.id === "users") href = "/users";
-                  if (item.id === "training") href = safeUser?.role === "CAREGIVER" ? "/caregiver/training" : safeUser?.role === "HR" ? "/hr/training" : "/training";
-                  if (item.id === "billing-admin") href = "/billing/workspace";
-                  if (item.id === "billing-workspace") href = "/billing/workspace";
-                  if (item.id === "reports") href = safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/reports" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/reports" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/reports" : "/reports";
-                  if (item.id === "messages") href = safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/messages" : safeUser?.role === "CAREGIVER" ? "/caregiver/messages" : safeUser?.role === "HR" ? "/hr/messages" : safeUser?.role === "SCHEDULER" ? "/scheduler/messages" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/messages" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/messages" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/messages" : safeUser?.role === "TRAINER" ? "/training-admin/messages" : "/billing/messages";
-                  if (item.id === "patients") href = "/clients";
-                  if (item.id === "evv-monitoring") href = "/evv-monitoring";
-                  if (item.id === "qa") href = safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/qa" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/qa" : "/quality-assurance";
-                  if (item.id === "visits") href = safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/visits" : "/field-supervisor/visits";
-                  if (item.id === "incidents") href = safeUser?.role === "CAREGIVER" ? "/caregiver/incidents" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/incidents" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/incidents" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/incidents" : "/incidents";
-                  if (item.id === "assessments") href = safeUser?.role === "CAREGIVER" ? "/caregiver/assessments" : "/clinical/assessments";
-                  if (item.id === "referrals") href = safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/referrals" : "/referrals";
-                  if (item.id === "communications") href = safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/communications" : "/communications";
-                  if (item.id === "overview") href = "/portal";
-                  if (item.id === "care-plan") href = "/portal/care-plan";
-                  if (item.id === "billing") href = "/portal/billing";
-                  if (item.id === "documents") href = "/portal/documents";
-                  if (item.id === "today") href = "/caregiver";
-                  if (item.id === "schedule") href = "/caregiver/schedule";
-                  if (item.id === "profile") href = "/caregiver/profile";
-                  if (item.id === "recruiting") href = "/hr/recruiting";
-                  if (item.id === "scheduled-shifts") href = "/scheduler/shifts/list";
-                  if (item.id === "recurring-patterns") href = "/scheduler/shifts/recurring";
-                  if (item.id === "route-optimizer") href = "/scheduler/dispatch/optimizer";
-                  if (item.id === "visit-list") href = "/scheduler/dispatch/visits";
-                  if (item.id === "availability") href = "/scheduler/caregivers/availability";
-                  if (item.id === "course-builder") href = "/training-admin/courses/builder";
-                  if (item.id === "courses") href = "/training-admin/courses";
-                  if (item.id === "quizzes") href = "/training-admin/quizzes";
-
-                  return (
-                    <li key={item.id} className="relative group">
-                      {isActive && (
-                        <motion.div
-                          layoutId="active-nav"
-                          className="absolute inset-0 bg-[#3D6B22] rounded-xl border border-[#528730]/60 shadow-sm"
-                          initial={false}
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                        />
-                      )}
-
-                      <Link
-                        href={href}
-                        onClick={() => {
-                          if (onClose) onClose();
-                        }}
+                {/* Section Header / Expandable Menu Trigger */}
+                {group.label ? (
+                  !isCollapsed ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleGroup(groupKey)}
+                      className="w-full flex items-center justify-between px-3 pt-2 pb-1 text-[11px] font-bold text-[#8DBE6A] hover:text-white tracking-wider uppercase truncate rounded-lg hover:bg-white/5 transition-colors cursor-pointer select-none group"
+                      aria-expanded={isExpanded}
+                    >
+                      <span className="truncate">{group.label}</span>
+                      <ChevronDown
                         className={clsx(
-                          "relative flex items-center justify-between rounded-xl text-sm font-medium transition-colors z-10",
-                          isCollapsed ? "p-3" : "px-3 py-2",
-                          isActive ? "text-white font-semibold" : "text-[#D2E0D4] hover:text-white hover:bg-[#25461C]/70"
+                          "w-3.5 h-3.5 text-[#8DBE6A]/70 group-hover:text-white transition-transform duration-200 shrink-0",
+                          isExpanded ? "rotate-0" : "-rotate-90"
                         )}
-                      >
-                        <div className={clsx("flex items-center gap-2.5", isCollapsed && "justify-center w-full")}>
-                          <Icon className={clsx("w-4 h-4 shrink-0 transition-colors", isActive ? "text-[#93C573]" : "text-[#B6CDB9] group-hover:text-white")} />
-                          {!isCollapsed && <span className="truncate">{item.name}</span>}
-                        </div>
-                        {/* Badge */}
-                        {(item as any).badge && (item as any).badge > 0 && (
-                          <span
-                            className={clsx(
-                              "flex items-center justify-center font-bold rounded-full transition-colors shrink-0",
-                              isCollapsed
-                                ? "absolute -top-1 -right-1 w-5 h-5 text-[10px] bg-[#E88C38] text-white ring-2 ring-[#1B3414]"
-                                : "px-2 py-0.5 text-[11px] bg-[#4D2810] text-[#E88C38] border border-[#6B3714]"
-                            )}
-                          >
-                            {(item as any).badge}
-                          </span>
-                        )}
-                      </Link>
+                      />
+                    </button>
+                  ) : (
+                    <div className="h-px bg-[#26481C] my-2 mx-2" />
+                  )
+                ) : null}
 
-                      {/* Tooltip for Mini View */}
-                      {isCollapsed && (
-                        <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl border border-slate-700/80 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2 translate-x-1 group-hover:translate-x-0">
-                          <span>{item.name}</span>
-                          {(item as any).badge && (item as any).badge > 0 && (
-                            <span className="bg-[#E88C38] text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                              {(item as any).badge}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+                {/* Group Items (Collapsible / Expandable with smooth transition) */}
+                <AnimatePresence initial={false}>
+                  {(!group.label || isCollapsed || isExpanded) && (
+                    <motion.div
+                      key={`${groupKey}-content`}
+                      initial={group.label ? { height: 0, opacity: 0 } : false}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <ul className="space-y-0.5">
+                        {group.items.map((item) => {
+                          const isActive = activeItem === item.id;
+                          const Icon = item.icon;
+                          const href = getItemHref(item.id);
+
+                          return (
+                            <li key={item.id} className="relative group">
+                              {isActive && (
+                                <motion.div
+                                  layoutId="active-nav"
+                                  className="absolute inset-0 bg-[#3D6B22] rounded-xl border border-[#528730]/60 shadow-sm"
+                                  initial={false}
+                                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                                />
+                              )}
+
+                              <Link
+                                href={href}
+                                onClick={() => {
+                                  if (onClose) onClose();
+                                }}
+                                className={clsx(
+                                  "relative flex items-center justify-between rounded-xl text-sm font-medium transition-colors z-10",
+                                  isCollapsed ? "p-3" : "px-3 py-2",
+                                  isActive
+                                    ? "text-white font-semibold"
+                                    : "text-[#D2E0D4] hover:text-white hover:bg-[#25461C]/70"
+                                )}
+                              >
+                                <div
+                                  className={clsx(
+                                    "flex items-center gap-2.5",
+                                    isCollapsed && "justify-center w-full"
+                                  )}
+                                >
+                                  <Icon
+                                    className={clsx(
+                                      "w-4 h-4 shrink-0 transition-colors",
+                                      isActive
+                                        ? "text-[#93C573]"
+                                        : "text-[#B6CDB9] group-hover:text-white"
+                                    )}
+                                  />
+                                  {!isCollapsed && <span className="truncate">{item.name}</span>}
+                                </div>
+                              </Link>
+
+                              {/* Tooltip for Mini View (without counter numbers) */}
+                              {isCollapsed && (
+                                <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl border border-slate-700/80 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2 translate-x-1 group-hover:translate-x-0">
+                                  <span>{item.name}</span>
+                                </div>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </nav>
 
         {/* HIPAA Card */}
@@ -654,10 +741,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     >
                       <div className="flex items-center gap-2 text-xs font-bold text-white mb-1">
                         <ShieldCheck className="w-4 h-4 text-[#93C573]" />
-                        {safeUser?.role === "CAREGIVER" ? "EVV & HIPAA Compliant" : safeUser?.role === "SCHEDULER" ? "HIPAA Protected" : "HIPAA Compliant"}
+                        {safeUser?.role === "CAREGIVER"
+                          ? "EVV & HIPAA Compliant"
+                          : safeUser?.role === "SCHEDULER"
+                          ? "HIPAA Protected"
+                          : "HIPAA Compliant"}
                       </div>
                       <p className="text-[11px] text-slate-300 leading-normal">
-                        {safeUser?.role === "SCHEDULER" ? "Role-scoped scheduler view." : "Data encrypted in transit and at rest."}
+                        {safeUser?.role === "SCHEDULER"
+                          ? "Role-scoped scheduler view."
+                          : "Data encrypted in transit and at rest."}
                       </p>
                     </motion.div>
                   )}
@@ -668,10 +761,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 <ShieldCheck className="w-5 h-5 text-[#93C573] shrink-0 mt-0.5" />
                 <div>
                   <div className="text-sm font-medium text-white">
-                    {safeUser?.role === "CAREGIVER" ? "EVV & HIPAA Compliant" : safeUser?.role === "SCHEDULER" ? "HIPAA Protected" : "HIPAA Compliant"}
+                    {safeUser?.role === "CAREGIVER"
+                      ? "EVV & HIPAA Compliant"
+                      : safeUser?.role === "SCHEDULER"
+                      ? "HIPAA Protected"
+                      : "HIPAA Compliant"}
                   </div>
                   <div className="text-xs text-slate-400 mt-1">
-                    {safeUser?.role === "SCHEDULER" ? "Role-scoped scheduler view." : "Data encrypted in transit and at rest."}
+                    {safeUser?.role === "SCHEDULER"
+                      ? "Role-scoped scheduler view."
+                      : "Data encrypted in transit and at rest."}
                   </div>
                 </div>
               </div>
@@ -699,11 +798,26 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     {safeUser?.name || "Agency Executive"}
                   </div>
                   <div className="text-xs text-slate-400 truncate">
-                    {safeUser?.role === "CLIENT" ? "Patient" : safeUser?.role === "FAMILY" ? "Family Member" : safeUser?.role === "CAREGIVER" ? "Caregiver (Field Staff)" : safeUser?.role === "SCHEDULER" ? "Scheduler / Dispatcher" : safeUser?.role === "HR" ? "HR Recruiter" : safeUser?.role === "TRAINER" ? "Trainer / LMS Admin" : safeUser?.role || "ADMIN"}
+                    {safeUser?.role === "CLIENT"
+                      ? "Patient"
+                      : safeUser?.role === "FAMILY"
+                      ? "Family Member"
+                      : safeUser?.role === "CAREGIVER"
+                      ? "Caregiver (Field Staff)"
+                      : safeUser?.role === "SCHEDULER"
+                      ? "Scheduler / Dispatcher"
+                      : safeUser?.role === "HR"
+                      ? "HR Recruiter"
+                      : safeUser?.role === "TRAINER"
+                      ? "Trainer / LMS Admin"
+                      : safeUser?.role || "ADMIN"}
                   </div>
                 </div>
                 <ChevronDown
-                  className={clsx("w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200", isProfileOpen && "rotate-180")}
+                  className={clsx(
+                    "w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200",
+                    isProfileOpen && "rotate-180"
+                  )}
                 />
               </>
             )}
@@ -725,7 +839,21 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               >
                 <div className="flex flex-col gap-1">
                   <Link
-                    href={safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/settings" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/settings" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/settings" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/settings" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/settings" : safeUser?.role === "TRAINER" ? "/training-admin/settings" : "/settings"}
+                    href={
+                      safeUser?.role === "QA_COMPLIANCE_OFFICER"
+                        ? "/compliance/settings"
+                        : safeUser?.role === "INTAKE_COORDINATOR"
+                        ? "/intake/settings"
+                        : safeUser?.role === "BILLING_FINANCE_STAFF"
+                        ? "/billing/settings"
+                        : safeUser?.role === "CLINICAL_SUPERVISOR_RN"
+                        ? "/clinical/settings"
+                        : safeUser?.role === "FIELD_SUPERVISOR"
+                        ? "/field-supervisor/settings"
+                        : safeUser?.role === "TRAINER"
+                        ? "/training-admin/settings"
+                        : "/settings"
+                    }
                     className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-sidebar-active rounded-xl transition-colors"
                     onClick={() => setIsProfileOpen(false)}
                   >

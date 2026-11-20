@@ -93,7 +93,7 @@ All administrative features, user flows, and intake processes must strictly alig
     - **Payroll Team:** Eligible work hours review, worker classification, payroll coordination via ADP, corrections and reconciliation.
 
 ## 8. The Three Connected Journeys (Core Product Architecture)
-The Agency Admin Portal must NEVER be designed as isolated, fragmented department screens. Instead, it is architected around **three synchronized, interdependent journeys** unified within LiliSphere (often tied together by a Household):
+The Agency Admin Portal must NEVER be designed as isolated, fragmented department screens. Instead, it is architected around **three synchronized, interdependent journeys** unified within LiliSare (often tied together by a Household):
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐

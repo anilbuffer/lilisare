@@ -22,7 +22,7 @@ export function AiBriefingDrawer({ isOpen, onClose }: AiBriefingDrawerProps) {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">LiliSphere AI Executive Briefing</h2>
+              <h2 className="text-lg font-bold">LiliSare AI Executive Briefing</h2>
               <p className="text-xs text-teal-100">Synthesized Daily Operational Summary</p>
             </div>
           </div>

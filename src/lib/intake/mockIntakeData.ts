@@ -114,7 +114,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
       {
         id: "t-1",
         type: "system",
-        author: "LiliSphere System",
+        author: "LiliSare System",
         timestamp: "Nov 19, 2026  -  09:15 AM",
         title: "Online Inquiry Submitted",
         details: "Form completed via LiliSare Family Portal. Urgency flagged as 'Urgent' due to recent hospital discharge.",
@@ -583,7 +583,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
       {
         id: "t-61",
         type: "system",
-        author: "LiliSphere System",
+        author: "LiliSare System",
         timestamp: "Nov 16, 2026  -  02:10 PM",
         title: "Bilingual Inquiry Registered",
         details: "Family flagged as Spanish primary language. Routing to bilingual coordinator queue.",

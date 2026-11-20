@@ -15,7 +15,7 @@ export function AutomationSummaryCard() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2 py-0.5 bg-[#93C573]/20 text-[#93C573] text-[10px] uppercase font-bold tracking-wider rounded-md border border-[#93C573]/30">
-              LiliSphere Automation Engine
+              LiliSare Automation Engine
             </span>
             <span className="text-xs text-teal-200/80">• This week</span>
           </div>

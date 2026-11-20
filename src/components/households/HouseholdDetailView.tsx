@@ -348,8 +348,6 @@ export function HouseholdDetailView({
                   <span className="text-xs font-semibold text-slate-800 block">{household.program}</span>
                 </div>
                 <div>
-                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Authorized Hours</span>
-                  <span className="text-xs font-semibold text-slate-800 block">{household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs/wk</span>
                   <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Authorized Hours & Auth</span>
                   <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                     <span className="text-xs font-semibold text-slate-800">{household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs/wk</span>

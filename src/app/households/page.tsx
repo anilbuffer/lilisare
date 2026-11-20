@@ -707,14 +707,11 @@ export default function HouseholdsPage() {
                                 }`}
                               >
                                 <div>
-                                  {/* Row 1: Household Name & Code */}
+                                  {/* Row 1: Household Name */}
                                   <div className="flex items-start justify-between gap-1.5 mb-1">
                                     <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate flex-1">
                                       {hh.name}
                                     </h4>
-                                    <span className="font-mono text-[10px] text-slate-400 shrink-0">
-                                      {hh.code}
-                                    </span>
                                   </div>
 
                                   {/* Row 2: Caregiver / Family Contact */}
@@ -834,9 +831,6 @@ export default function HouseholdsPage() {
                           <td className="py-3 px-4">
                             <span className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-xs">
                               {hh.name}
-                            </span>
-                            <span className="text-[11px] font-mono text-slate-400 ml-1.5">
-                              {hh.code}
                             </span>
                           </td>
                           <td className="py-3 px-4 font-semibold text-slate-800 text-xs">

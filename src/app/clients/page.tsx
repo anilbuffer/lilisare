@@ -14,8 +14,6 @@ import { ClientRecord } from "@/types/client";
 import { getClientsFromStorage } from "@/lib/clients/mockData";
 import { ClientKpiStrip } from "@/components/clients/ClientKpiStrip";
 import { ClientManagementWorkspace } from "@/components/clients/ClientManagementWorkspace";
-import { ClientAttentionSection } from "@/components/clients/ClientAttentionSection";
-import { ClientRecentActivitySection } from "@/components/clients/ClientRecentActivitySection";
 import { ClientContextualDrawer } from "@/components/clients/ClientContextualDrawer";
 import { toast } from "sonner";
 
@@ -168,18 +166,7 @@ export default function ClientsPage() {
         onSelectClient={handleSelectClient}
       />
 
-      {/* 04. Secondary Sections: Actionable Items & Recent Activity matching /intake/pipeline */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ClientAttentionSection
-          clients={clients}
-          onSelectClient={handleSelectClientId}
-        />
-        <ClientRecentActivitySection
-          onSelectClient={handleSelectClientId}
-        />
-      </div>
-
-      {/* 05. Contextual Quick Overview Drawer */}
+      {/* 04. Contextual Quick Overview Drawer */}
       <ClientContextualDrawer
         client={selectedClient}
         isOpen={isDrawerOpen}

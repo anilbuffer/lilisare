@@ -542,21 +542,16 @@ export function InquiryManagementWorkspace({
                                 }`}
                             >
                               <div>
-                                {/* Top Row: Family Name + ID & Urgent Chip */}
+                                {/* Top Row: Family Name + Urgent Chip */}
                                 <div className="flex items-start justify-between gap-1.5 mb-1">
                                   <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate flex-1">
                                     {inquiry.familyName}
                                   </h4>
-                                  <div className="flex items-center gap-1 shrink-0">
-                                    {isUrgent && (
-                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-100">
-                                        Urgent
-                                      </span>
-                                    )}
-                                    <span className="font-mono text-[10px] text-slate-400">
-                                      {inquiry.id}
+                                  {isUrgent && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-100 shrink-0">
+                                      Urgent
                                     </span>
-                                  </div>
+                                  )}
                                 </div>
 
                                 {/* Loved One: Eleanor Miller (78y) */}
@@ -565,21 +560,21 @@ export function InquiryManagementWorkspace({
                                   <span className="text-slate-400 font-normal"> ({inquiry.familyInfo.clientInfo.age}y)</span>
                                 </p>
 
-                                {/* Tags: Program & Hours */}
+                                {/* Tags: Care Volume */}
                                 <div className="mt-2.5 flex items-center justify-between text-[11px]">
-                                  <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[170px]">
-                                    {formatShortProgram(inquiry.careRequirements.programInterest)}
+                                  <span className="text-[10px] text-slate-500 font-medium">
+                                    Requested Volume
                                   </span>
-                                  <span className="text-[10px] text-slate-400 font-medium shrink-0">
+                                  <span className="text-[10px] text-slate-700 font-semibold shrink-0">
                                     {inquiry.careRequirements.hoursPerWeek}h/wk
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Footer: Coordinator / Date + Quick Actions */}
+                              {/* Footer: Coordinator + Quick Actions */}
                               <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                                <span className="truncate max-w-[140px] text-slate-400 text-[11px]">
-                                  {inquiry.referralInfo.assignedCoordinator.name.split(" ")[0]} · {inquiry.dateReceived}
+                                <span className="truncate max-w-[140px] text-slate-500 text-[11px]">
+                                  Coord: <span className="text-slate-700 font-medium">{inquiry.referralInfo.assignedCoordinator.name.split(" ")[0]}</span>
                                 </span>
 
                                 <div
@@ -655,20 +650,17 @@ export function InquiryManagementWorkspace({
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-100/70 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                   <tr>
-                    <th className="py-3.5 px-4 pl-6">Family & Loved One</th>
-                    <th className="py-3.5 px-3">Inquiry ID</th>
-                    <th className="py-3.5 px-3">Program</th>
+                    <th className="py-3.5 px-4 pl-6">Family</th>
                     <th className="py-3.5 px-3">Hours</th>
                     <th className="py-3.5 px-3">Stage</th>
                     <th className="py-3.5 px-3">Coordinator</th>
-                    <th className="py-3.5 px-3">Received</th>
                     <th className="py-3.5 px-4 pr-6 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {filteredInquiries.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-10 text-center text-slate-400">
+                      <td colSpan={5} className="py-10 text-center text-slate-400">
                         <Inbox className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="text-xs font-medium text-slate-700">
                           No inquiries found
@@ -698,22 +690,6 @@ export function InquiryManagementWorkspace({
                             >
                               {inquiry.familyName}
                             </Link>
-                            <div className="text-[11px] text-slate-400 mt-0.5">
-                              {inquiry.familyInfo.clientInfo.name} (
-                              {inquiry.familyInfo.clientInfo.age}y) • {inquiry.branch}
-                            </div>
-                          </td>
-
-                          <td className="py-3.5 px-3 font-mono font-medium text-slate-700">
-                            {inquiry.id}
-                          </td>
-
-                          <td className="py-3.5 px-3">
-                            <span className="text-[11px] font-medium bg-[#E3F1D9] text-[#1E5622] px-2.5 py-0.5 rounded-full border border-[#3D6B22]/20 inline-block">
-                              {formatShortProgram(
-                                inquiry.careRequirements.programInterest
-                              )}
-                            </span>
                           </td>
 
                           <td className="py-3.5 px-3 font-semibold text-slate-800">
@@ -742,17 +718,8 @@ export function InquiryManagementWorkspace({
                             </select>
                           </td>
 
-                          <td className="py-3.5 px-3 text-slate-700">
-                            <div className="font-medium text-slate-800">
-                              {inquiry.referralInfo.assignedCoordinator.name}
-                            </div>
-                            <div className="text-[11px] text-slate-400">
-                              {inquiry.source}
-                            </div>
-                          </td>
-
-                          <td className="py-3.5 px-3 text-slate-500 whitespace-nowrap">
-                            {inquiry.dateReceived}
+                          <td className="py-3.5 px-3 text-slate-800 font-medium">
+                            {inquiry.referralInfo.assignedCoordinator.name}
                           </td>
 
                           <td

@@ -429,6 +429,33 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
                   </p>
                 </div>
               </div>
+
+              {/* Operational Metadata: Care Arrangement, Readiness, and Last Updated */}
+              <div className="mt-3.5 pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-y-3 gap-x-4">
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Care Arrangement</span>
+                  <span className="text-xs font-semibold text-[#1E5622] block">
+                    {client.careType}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Care Readiness</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-xs font-semibold text-[#1E5622] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/70">
+                      {client.readiness.overallScore ?? 85}% Verified
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      ({client.readiness.authorization} Auth)
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Last Record Update</span>
+                  <span className="text-xs font-semibold text-slate-700 block mt-0.5">
+                    {client.updatedAtRelative}
+                  </span>
+                </div>
+              </div>
             </Card>
 
             {/* Three Connected Journeys Card (RULES.md #L96) */}

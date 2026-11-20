@@ -492,8 +492,8 @@ export function CaregiverManagementWorkspace({
                         setIsStageDropdownOpen(false);
                       }}
                       className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${!currentStage || currentStage === "ALL"
-                          ? "bg-slate-50 font-bold text-slate-900"
-                          : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-slate-50 font-bold text-slate-900"
+                        : "text-slate-700 hover:bg-slate-50"
                         }`}
                     >
                       <div className="flex items-center gap-2">
@@ -525,8 +525,8 @@ export function CaregiverManagementWorkspace({
                             setIsStageDropdownOpen(false);
                           }}
                           className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
-                              ? "bg-slate-50 font-bold text-slate-900"
-                              : "text-slate-700 hover:bg-slate-50"
+                            ? "bg-slate-50 font-bold text-slate-900"
+                            : "text-slate-700 hover:bg-slate-50"
                             }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
@@ -555,8 +555,8 @@ export function CaregiverManagementWorkspace({
                 type="button"
                 onClick={() => setViewMode("kanban")}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
-                    ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-[#3D6B22] shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
                 title="Kanban Board View (8 Columns)"
               >
@@ -567,8 +567,8 @@ export function CaregiverManagementWorkspace({
                 type="button"
                 onClick={() => setViewMode("list")}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
-                    ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-[#3D6B22] shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
                 title="List View"
               >
@@ -626,10 +626,10 @@ export function CaregiverManagementWorkspace({
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, col.id)}
                     className={`w-[280px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${isDragOver
-                        ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
-                        : isFilteredStage
-                          ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
-                          : "bg-[#F8FAF9] border-slate-200/80"
+                      ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
+                      : isFilteredStage
+                        ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
+                        : "bg-[#F8FAF9] border-slate-200/80"
                       }`}
                   >
                     {/* Column Lane Header */}
@@ -681,47 +681,38 @@ export function CaregiverManagementWorkspace({
                                 }`}
                             >
                               <div>
-                                {/* Top Row: Name + ID & Attention Badge */}
+                                {/* Top Row: Name & Attention Badge */}
                                 <div className="flex items-start justify-between gap-1.5 mb-1">
                                   <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate flex-1">
                                     {cg.name}
                                   </h4>
-                                  <div className="flex items-center gap-1 shrink-0">
-                                    {hasAttention && (
-                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-100">
-                                        Action Req
-                                      </span>
-                                    )}
-                                    <span className="font-mono text-[10px] text-slate-400">
-                                      {cg.id}
+                                  {hasAttention && (
+                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-100 shrink-0">
+                                      Action Req
                                     </span>
-                                  </div>
+                                  )}
                                 </div>
 
-                                {/* Subtitle: Type & Linked Household */}
+                                {/* Subtitle: Linked Household */}
                                 <p className="text-xs text-slate-500 truncate">
-                                  {cg.type}
-                                  <span className="text-slate-400 font-normal">
-                                    {" "}
-                                    · {cg.relationship?.linkedHousehold?.name || cg.branch}
-                                  </span>
+                                  Household: <span className="text-slate-700 font-medium">{cg.relationship?.linkedHousehold?.name || "Unlinked"}</span>
                                 </p>
 
-                                {/* Tags: Branch & Weekly Hours */}
+                                {/* Tags: Scheduled Capacity */}
                                 <div className="mt-2.5 flex items-center justify-between text-[11px]">
-                                  <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[160px]">
-                                    {cg.branch}
+                                  <span className="text-[10px] text-slate-500 font-medium">
+                                    Scheduled Capacity
                                   </span>
-                                  <span className="text-[10px] text-slate-400 font-medium shrink-0">
+                                  <span className="text-[10px] text-slate-700 font-semibold shrink-0">
                                     {hours}h/wk
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Footer: Date / Branch + Quick Move Stage dropdown + ArrowUpRight */}
+                              {/* Footer: Hire Date + Quick Move Stage dropdown + ArrowUpRight */}
                               <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                                <span className="truncate max-w-[130px] text-slate-400 text-[11px]">
-                                  {cg.hireDate || "Recent"} · {cg.branch.split(" ")[0]}
+                                <span className="truncate max-w-[140px] text-slate-500 text-[11px]">
+                                  Hire Date: <span className="text-slate-700 font-medium">{cg.hireDate || "Recent"}</span>
                                 </span>
 
                                 <div
@@ -792,13 +783,10 @@ export function CaregiverManagementWorkspace({
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-100/70 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                   <tr>
-                    <th className="py-3.5 px-4 pl-6">Caregiver / Applicant</th>
-                    <th className="py-3.5 px-3">ID</th>
-                    <th className="py-3.5 px-3">Type</th>
-                    <th className="py-3.5 px-3">Household / Client</th>
+                    <th className="py-3.5 px-4 pl-6">Caregiver</th>
+                    <th className="py-3.5 px-3">Household</th>
                     <th className="py-3.5 px-3">Hours</th>
                     <th className="py-3.5 px-3">Stage</th>
-                    <th className="py-3.5 px-3">Branch</th>
                     <th className="py-3.5 px-3">Hire Date</th>
                     <th className="py-3.5 px-4 pr-6 text-right">Action</th>
                   </tr>
@@ -806,7 +794,7 @@ export function CaregiverManagementWorkspace({
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {filteredCaregivers.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="py-10 text-center text-slate-400">
+                      <td colSpan={6} className="py-10 text-center text-slate-400">
                         <Inbox className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="text-xs font-medium text-slate-700">No caregivers found</p>
                         <p className="text-[11px] text-slate-400 mt-0.5">
@@ -820,7 +808,6 @@ export function CaregiverManagementWorkspace({
                       const colConfig =
                         STAGE_CONFIG_MAP.get(normStage) || EIGHT_CAREGIVER_KANBAN_STAGES[0];
                       const detailsHref = getDetailsHref(cg.id);
-                      const assignedClient = cg.availabilityAssignments?.assignedClient;
                       const hours =
                         cg.availabilityAssignments?.scheduledWeeklyHours ||
                         cg.availabilityAssignments?.weeklyCapacityHours ||
@@ -846,47 +833,19 @@ export function CaregiverManagementWorkspace({
                                   <User className="w-4 h-4 text-slate-400" />
                                 )}
                               </div>
-                              <div>
-                                <Link
-                                  href={detailsHref}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors block text-xs"
-                                >
-                                  {cg.name}
-                                </Link>
-                                <div className="text-[11px] text-slate-400 mt-0.5">
-                                  {cg.personalInfo?.phone || cg.branch}
-                                </div>
-                              </div>
+                              <Link
+                                href={detailsHref}
+                                onClick={(e) => e.stopPropagation()}
+                                className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-xs"
+                              >
+                                {cg.name}
+                              </Link>
                             </div>
                           </td>
 
-                          {/* ID */}
-                          <td className="py-3.5 px-3 font-mono font-medium text-slate-700">
-                            {cg.id}
-                          </td>
-
-                          {/* Type */}
-                          <td className="py-3.5 px-3">
-                            <span
-                              className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getTypeBadge(
-                                cg.type
-                              )}`}
-                            >
-                              {cg.type}
-                            </span>
-                          </td>
-
-                          {/* Household / Client */}
-                          <td className="py-3.5 px-3">
-                            <div className="text-slate-800 font-medium truncate max-w-[140px]">
-                              {cg.relationship?.linkedHousehold?.name || "Unlinked"}
-                            </div>
-                            {assignedClient && (
-                              <div className="text-[10px] text-slate-400 truncate max-w-[140px]">
-                                Client: {assignedClient.name}
-                              </div>
-                            )}
+                          {/* Household */}
+                          <td className="py-3.5 px-3 font-medium text-slate-800 text-xs truncate max-w-[150px]">
+                            {cg.relationship?.linkedHousehold?.name || "Unlinked"}
                           </td>
 
                           {/* Hours */}
@@ -909,11 +868,6 @@ export function CaregiverManagementWorkspace({
                                 </option>
                               ))}
                             </select>
-                          </td>
-
-                          {/* Branch */}
-                          <td className="py-3.5 px-3 text-slate-600 truncate max-w-[120px]">
-                            {cg.branch}
                           </td>
 
                           {/* Hire Date */}

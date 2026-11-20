@@ -610,20 +610,13 @@ export function ClientManagementWorkspace({
                                   </span>
                                 </p>
 
-                                {/* Row 3: Care Arrangement / Primary Caregiver */}
-                                <div className="mt-2 text-[11px] text-slate-600 flex items-center justify-between">
-                                  <span
-                                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border truncate max-w-[130px] ${getCareTypeBadge(
-                                      client.careType
-                                    )}`}
-                                  >
-                                    {client.careType}
-                                  </span>
-
+                                {/* Row 3: Assigned Caregiver */}
+                                <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
+                                  <Users className="w-3 h-3 text-slate-400 shrink-0" />
+                                  <span className="text-slate-400 text-[11px]">Caregiver:</span>
                                   {client.assignedCareTeam.primaryCaregiver ? (
-                                    <span className="text-[10px] font-medium text-slate-600 truncate max-w-[110px] flex items-center gap-1">
-                                      <Users className="w-3 h-3 text-slate-400 shrink-0" />
-                                      {client.assignedCareTeam.primaryCaregiver.name.split(" ")[0]}
+                                    <span className="text-[11px] font-medium text-slate-700 truncate">
+                                      {client.assignedCareTeam.primaryCaregiver.name}
                                     </span>
                                   ) : (
                                     <span className="text-[10px] font-semibold text-rose-600">
@@ -643,10 +636,10 @@ export function ClientManagementWorkspace({
                                 </div>
                               </div>
 
-                              {/* Footer: Coordinator/Update + Quick Move Dropdown */}
+                              {/* Footer: Coordinator + Quick Move Dropdown */}
                               <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                                <span className="truncate max-w-[130px] text-slate-400 text-[11px]">
-                                  {client.assignedCareTeam.onboardingCoordinator?.name.split(" ")[0] || "Coordinator"} · {client.updatedAtRelative}
+                                <span className="truncate max-w-[140px] text-slate-500 text-[11px]">
+                                  Coord: <span className="text-slate-700 font-medium">{client.assignedCareTeam.onboardingCoordinator?.name.split(" ")[0] || "Care Team"}</span>
                                 </span>
 
                                 <div
@@ -724,11 +717,9 @@ export function ClientManagementWorkspace({
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     <th className="py-3.5 px-4">Client</th>
                     <th className="py-3.5 px-4">Household</th>
-                    <th className="py-3.5 px-4">Care Arrangement</th>
                     <th className="py-3.5 px-4">Assigned Caregiver</th>
-                    <th className="py-3.5 px-4">Readiness</th>
+                    <th className="py-3.5 px-4">Program</th>
                     <th className="py-3.5 px-4">Stage</th>
-                    <th className="py-3.5 px-4">Updated</th>
                     <th className="py-3.5 px-4 text-right">Action</th>
                   </tr>
                 </thead>
@@ -789,17 +780,6 @@ export function ClientManagementWorkspace({
                           </div>
                         </td>
 
-                        {/* Care Arrangement */}
-                        <td className="py-3 px-3.5">
-                          <span
-                            className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getCareTypeBadge(
-                              client.careType
-                            )}`}
-                          >
-                            {client.careType}
-                          </span>
-                        </td>
-
                         {/* Caregiver */}
                         <td className="py-3 px-3.5">
                           {client.assignedCareTeam.primaryCaregiver ? (
@@ -819,43 +799,11 @@ export function ClientManagementWorkspace({
                           )}
                         </td>
 
-                        {/* Care Readiness */}
+                        {/* Program & Hours */}
                         <td className="py-3 px-3.5">
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              title={`Profile: ${client.readiness.clientProfile}`}
-                              className={`w-2 h-2 rounded-full ${client.readiness.clientProfile === "Complete"
-                                ? "bg-emerald-500"
-                                : "bg-amber-500"
-                                }`}
-                            />
-                            <span
-                              title={`Care: ${client.readiness.careArrangement}`}
-                              className={`w-2 h-2 rounded-full ${client.readiness.careArrangement === "Complete"
-                                ? "bg-emerald-500"
-                                : "bg-amber-500"
-                                }`}
-                            />
-                            <span
-                              title={`Docs: ${client.readiness.documents}`}
-                              className={`w-2 h-2 rounded-full ${client.readiness.documents === "Verified"
-                                ? "bg-emerald-500"
-                                : "bg-amber-500"
-                                }`}
-                            />
-                            <span
-                              title={`Auth: ${client.readiness.authorization}`}
-                              className={`w-2 h-2 rounded-full ${client.readiness.authorization === "Verified"
-                                ? "bg-emerald-500"
-                                : client.readiness.authorization === "Expiring"
-                                  ? "bg-rose-500"
-                                  : "bg-amber-500"
-                                }`}
-                            />
-                            <span className="text-[11px] font-mono font-bold text-slate-600 ml-1">
-                              {client.readiness.overallScore ?? 85}%
-                            </span>
-                          </div>
+                          <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md inline-block">
+                            {formatShortProgram(client.carePlan.program)} · {client.carePlan.authorizedWeeklyHours}h/wk
+                          </span>
                         </td>
 
                         {/* Stage Badge */}
@@ -871,11 +819,6 @@ export function ClientManagementWorkspace({
                             />
                             <span>{stageConfig?.title ?? stage}</span>
                           </span>
-                        </td>
-
-                        {/* Updated */}
-                        <td className="py-3 px-3.5 text-[11px] text-slate-500 whitespace-nowrap">
-                          {client.updatedAtRelative}
                         </td>
 
                         {/* Actions */}

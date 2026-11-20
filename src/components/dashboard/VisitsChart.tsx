@@ -34,12 +34,7 @@ export function VisitsChart() {
             <CalendarCheck className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-900">Visits this week</h3>
-              <span className="px-2.5 py-0.5 bg-[#E3F1D9] text-[#1E5622] border border-[#93C573]/30 text-xs font-bold rounded-full">
-                96% Completion
-              </span>
-            </div>
+            <h3 className="text-base font-bold text-slate-900">Visits this week</h3>
           </div>
         </div>
 
@@ -88,11 +83,11 @@ export function VisitsChart() {
       </div>
 
       <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <span className="font-semibold text-emerald-800">836 Completed (96.0%)</span>
-          <span className="text-slate-300">•</span>
+          <span className="text-slate-300 hidden sm:inline">•</span>
           <span className="text-amber-800 font-medium">21 Rescheduled (2.4%)</span>
-          <span className="text-slate-300">•</span>
+          <span className="text-slate-300 hidden sm:inline">•</span>
           <span className="text-rose-700 font-bold">14 Missed (1.6%)</span>
         </div>
         <span className="text-slate-400 font-medium">871 total scheduled shifts</span>

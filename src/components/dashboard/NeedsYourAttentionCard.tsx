@@ -176,10 +176,6 @@ export function NeedsYourAttentionCard() {
   const todayList = sortTaskList(filteredTasks.filter((t) => t.timeline === "Today"));
   const tomorrowList = sortTaskList(filteredTasks.filter((t) => t.timeline === "Tomorrow"));
 
-  const overdueCount = tasks.filter((t) => t.timeline === "Overdue" && !t.completed).length;
-  const todayCount = tasks.filter((t) => t.timeline === "Today" && !t.completed).length;
-  const tomorrowCount = tasks.filter((t) => t.timeline === "Tomorrow" && !t.completed).length;
-
   const handleToggleTask = (id: string) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
@@ -238,22 +234,9 @@ export function NeedsYourAttentionCard() {
     <Card className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden transition-all duration-300">
       {/* Header Bar */}
       <div className="p-4 sm:px-6 sm:py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <h3 className="text-base font-bold text-slate-900 tracking-tight">
-            Tasks
-          </h3>
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="px-2 py-0.5 rounded-full font-bold bg-rose-50 text-rose-700 border border-rose-200/60">
-              {overdueCount} Overdue
-            </span>
-            <span className="px-2 py-0.5 rounded-full font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
-              {todayCount} Today
-            </span>
-            <span className="px-2 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-700 border border-slate-200/60">
-              {tomorrowCount} Tomorrow
-            </span>
-          </div>
-        </div>
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">
+          Tasks
+        </h3>
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Quick Filter: All vs My Tasks */}
@@ -261,22 +244,20 @@ export function NeedsYourAttentionCard() {
             <button
               type="button"
               onClick={() => setFilterUser("all")}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                filterUser === "all"
+              className={`px-3 py-1 rounded-lg transition-all ${filterUser === "all"
                   ? "bg-white text-slate-900 shadow-xs"
                   : "text-slate-500 hover:text-slate-800"
-              }`}
+                }`}
             >
               All
             </button>
             <button
               type="button"
               onClick={() => setFilterUser("my")}
-              className={`px-3 py-1 rounded-lg transition-all ${
-                filterUser === "my"
+              className={`px-3 py-1 rounded-lg transition-all ${filterUser === "my"
                   ? "bg-white text-slate-900 shadow-xs"
                   : "text-slate-500 hover:text-slate-800"
-              }`}
+                }`}
             >
               My Tasks
             </button>
@@ -345,7 +326,7 @@ export function NeedsYourAttentionCard() {
 
       {/* 3-Column Horizontal Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100 bg-slate-50/40">
-        
+
         {/* Column 1: Overdue */}
         <div className="p-4 sm:p-5 flex flex-col justify-between">
           <div>
@@ -371,9 +352,8 @@ export function NeedsYourAttentionCard() {
                   <div
                     key={task.id}
                     onClick={() => handleToggleTask(task.id)}
-                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs cursor-pointer flex items-start gap-2.5 ${
-                      task.completed ? "opacity-50 bg-slate-50" : ""
-                    }`}
+                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs cursor-pointer flex items-start gap-2.5 ${task.completed ? "opacity-50 bg-slate-50" : ""
+                      }`}
                   >
                     <button
                       type="button"
@@ -388,9 +368,8 @@ export function NeedsYourAttentionCard() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-1.5">
                         <div
-                          className={`text-xs font-semibold text-slate-900 leading-snug ${
-                            task.completed ? "line-through text-slate-400" : ""
-                          }`}
+                          className={`text-xs font-semibold text-slate-900 leading-snug ${task.completed ? "line-through text-slate-400" : ""
+                            }`}
                         >
                           {task.title}
                         </div>
@@ -400,11 +379,11 @@ export function NeedsYourAttentionCard() {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 mt-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
                             task.stage
-                          )}`}
+                          )} shrink-0`}
                         >
                           {task.stage}
                         </span>
@@ -445,9 +424,8 @@ export function NeedsYourAttentionCard() {
                   <div
                     key={task.id}
                     onClick={() => handleToggleTask(task.id)}
-                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs cursor-pointer flex items-start gap-2.5 ${
-                      task.completed ? "opacity-50 bg-slate-50" : ""
-                    }`}
+                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs cursor-pointer flex items-start gap-2.5 ${task.completed ? "opacity-50 bg-slate-50" : ""
+                      }`}
                   >
                     <button
                       type="button"
@@ -462,9 +440,8 @@ export function NeedsYourAttentionCard() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-1.5">
                         <div
-                          className={`text-xs font-semibold text-slate-900 leading-snug ${
-                            task.completed ? "line-through text-slate-400" : ""
-                          }`}
+                          className={`text-xs font-semibold text-slate-900 leading-snug ${task.completed ? "line-through text-slate-400" : ""
+                            }`}
                         >
                           {task.title}
                         </div>
@@ -474,11 +451,11 @@ export function NeedsYourAttentionCard() {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 mt-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
                             task.stage
-                          )}`}
+                          )} shrink-0`}
                         >
                           {task.stage}
                         </span>
@@ -519,9 +496,8 @@ export function NeedsYourAttentionCard() {
                   <div
                     key={task.id}
                     onClick={() => handleToggleTask(task.id)}
-                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs cursor-pointer flex items-start gap-2.5 ${
-                      task.completed ? "opacity-50 bg-slate-50" : ""
-                    }`}
+                    className={`p-3 bg-white border border-slate-200/90 rounded-xl transition-all hover:border-slate-300 hover:shadow-xs cursor-pointer flex items-start gap-2.5 ${task.completed ? "opacity-50 bg-slate-50" : ""
+                      }`}
                   >
                     <button
                       type="button"
@@ -536,9 +512,8 @@ export function NeedsYourAttentionCard() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-1.5">
                         <div
-                          className={`text-xs font-semibold text-slate-900 leading-snug ${
-                            task.completed ? "line-through text-slate-400" : ""
-                          }`}
+                          className={`text-xs font-semibold text-slate-900 leading-snug ${task.completed ? "line-through text-slate-400" : ""
+                            }`}
                         >
                           {task.title}
                         </div>
@@ -548,11 +523,11 @@ export function NeedsYourAttentionCard() {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 mt-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
                             task.stage
-                          )}`}
+                          )} shrink-0`}
                         >
                           {task.stage}
                         </span>

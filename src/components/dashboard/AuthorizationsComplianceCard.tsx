@@ -43,20 +43,15 @@ export function AuthorizationsComplianceCard() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch">
       {/* Left: Authorizations Card */}
-      <Card className="p-6 border-slate-200/80 bg-white rounded-2xl shadow-sm flex flex-col justify-between space-y-5">
+      <Card className="p-4 sm:p-6 border-slate-200/80 bg-white rounded-2xl shadow-sm flex flex-col justify-between space-y-5">
         <div>
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2.5 bg-amber-50 text-amber-700 rounded-xl shrink-0">
+              <div className="p-2 sm:p-2.5 bg-amber-50 text-amber-700 rounded-xl shrink-0">
                 <ClipboardCheck className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-slate-900 text-base">Authorizations</h3>
-                  <span className="px-2.5 py-0.5 bg-rose-100 text-rose-700 text-xs font-bold rounded-full whitespace-nowrap shrink-0">
-                    {metrics.authorizationsBreakdown.overdue} overdue
-                  </span>
-                </div>
+                <h3 className="font-bold text-slate-900 text-base">Authorizations</h3>
               </div>
             </div>
 
@@ -69,18 +64,18 @@ export function AuthorizationsComplianceCard() {
           </div>
 
           {/* Status Breakdown Pills */}
-          <div className="grid grid-cols-3 gap-3 mt-4 text-center">
-            <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
-              <span className="text-[10px] uppercase font-bold text-emerald-700 block">Approved</span>
-              <span className="text-lg font-extrabold text-emerald-950 mt-0.5 block">{metrics.authorizationsBreakdown.approved}</span>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 text-center">
+            <div className="p-2 sm:p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-emerald-700 block truncate">Approved</span>
+              <span className="text-base sm:text-lg font-extrabold text-emerald-950 mt-0.5 block">{metrics.authorizationsBreakdown.approved}</span>
             </div>
-            <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-100">
-              <span className="text-[10px] uppercase font-bold text-amber-700 block">Awaiting State</span>
-              <span className="text-lg font-extrabold text-amber-950 mt-0.5 block">{metrics.authorizationsBreakdown.awaitingState}</span>
+            <div className="p-2 sm:p-2.5 bg-amber-50 rounded-xl border border-amber-100">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-amber-700 block truncate">Awaiting State</span>
+              <span className="text-base sm:text-lg font-extrabold text-amber-950 mt-0.5 block">{metrics.authorizationsBreakdown.awaitingState}</span>
             </div>
-            <div className="p-2.5 bg-rose-50 rounded-xl border border-rose-100">
-              <span className="text-[10px] uppercase font-bold text-rose-700 block">Overdue</span>
-              <span className="text-lg font-extrabold text-rose-950 mt-0.5 block">{metrics.authorizationsBreakdown.overdue}</span>
+            <div className="p-2 sm:p-2.5 bg-rose-50 rounded-xl border border-rose-100">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-rose-700 block truncate">Overdue</span>
+              <span className="text-base sm:text-lg font-extrabold text-rose-950 mt-0.5 block">{metrics.authorizationsBreakdown.overdue}</span>
             </div>
           </div>
 
@@ -98,14 +93,14 @@ export function AuthorizationsComplianceCard() {
             </span>
             <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto thin-scrollbar pr-1.5">
               {OVERDUE_AUTHS.map((item) => (
-                <div key={item.clientCode} className="py-3 flex items-center justify-between text-xs gap-3">
+                <div key={item.clientCode} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2 sm:gap-3">
                   <div className="min-w-0">
                     <span className="font-semibold text-slate-800">{item.clientCode}</span>
                     <span className="text-slate-400 mx-1.5">•</span>
                     <span className="text-slate-500">{item.caseManagerCode}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                     <span className="px-2 py-0.5 bg-rose-50 text-rose-700 font-bold rounded text-[11px] whitespace-nowrap">
                       {item.delayDays} days delay
                     </span>
@@ -129,20 +124,15 @@ export function AuthorizationsComplianceCard() {
       </Card>
 
       {/* Right: Compliance Card */}
-      <Card className="p-6 border-slate-200/80 bg-white rounded-2xl shadow-sm flex flex-col justify-between space-y-5">
+      <Card className="p-4 sm:p-6 border-slate-200/80 bg-white rounded-2xl shadow-sm flex flex-col justify-between space-y-5">
         <div>
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2.5 bg-rose-50 text-rose-700 rounded-xl shrink-0">
+              <div className="p-2 sm:p-2.5 bg-rose-50 text-rose-700 rounded-xl shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-slate-900 text-base">Documentation & Compliance</h3>
-                  <span className="px-2.5 py-0.5 bg-amber-100 text-amber-900 text-xs font-bold rounded-full whitespace-nowrap shrink-0">
-                    17 Items Pending
-                  </span>
-                </div>
+                <h3 className="font-bold text-slate-900 text-base">Documentation & Compliance</h3>
               </div>
             </div>
 
@@ -155,27 +145,24 @@ export function AuthorizationsComplianceCard() {
           </div>
 
           {/* Documentation & Compliance Triad Pills */}
-          <div className="grid grid-cols-3 gap-3 mt-4 text-center">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 text-center">
             <Link
               href="/clinical/visit-notes"
-              className="p-2.5 bg-amber-50 hover:bg-amber-100/80 rounded-xl border border-amber-200 transition-colors block text-left"
+              className="p-2 sm:p-2.5 bg-amber-50 hover:bg-amber-100/80 rounded-xl border border-amber-200 transition-colors block"
             >
-              <span className="text-[10px] uppercase font-bold text-amber-700 block">Overdue Notes</span>
-              <span className="text-lg font-extrabold text-amber-950 mt-0.5 block">12</span>
-              <span className="text-[10px] text-amber-800/80">&gt;24h RN sign-off</span>
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-amber-700 block truncate">Overdue Notes</span>
+              <span className="text-base sm:text-lg font-extrabold text-amber-950 mt-0.5 block">12</span>
             </Link>
-            <div className="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200 text-left">
-              <span className="text-[10px] uppercase font-bold text-amber-700 block">Unsigned Orders</span>
-              <span className="text-lg font-extrabold text-amber-950 mt-0.5 block">5</span>
-              <span className="text-[10px] text-amber-800/80">CMS-485 plans</span>
+            <div className="p-2 sm:p-2.5 bg-amber-50/70 rounded-xl border border-amber-200">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-amber-700 block truncate">Unsigned Orders</span>
+              <span className="text-base sm:text-lg font-extrabold text-amber-950 mt-0.5 block">5</span>
             </div>
             <Link
               href="/compliance"
-              className="p-2.5 bg-rose-50 hover:bg-rose-100/80 rounded-xl border border-rose-200 transition-colors block text-left"
+              className="p-2 sm:p-2.5 bg-rose-50 hover:bg-rose-100/80 rounded-xl border border-rose-200 transition-colors block"
             >
-              <span className="text-[10px] uppercase font-bold text-rose-700 block">Staff Licenses</span>
-              <span className="text-lg font-extrabold text-rose-950 mt-0.5 block">8</span>
-              <span className="text-[10px] text-rose-800/80">≤30d to expire</span>
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-rose-700 block truncate">Staff Licenses</span>
+              <span className="text-base sm:text-lg font-extrabold text-rose-950 mt-0.5 block">8</span>
             </Link>
           </div>
 
@@ -185,14 +172,14 @@ export function AuthorizationsComplianceCard() {
             </span>
             <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto thin-scrollbar pr-1.5">
               {COMPLIANCE_ITEMS.map((item) => (
-                <div key={item.caregiverCode} className="py-3.5 flex items-center justify-between text-xs gap-3">
+                <div key={item.caregiverCode} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2 sm:gap-3">
                   <div className="min-w-0">
                     <span className="font-bold text-slate-900">{item.caregiverCode}</span>
                     <span className="text-slate-400 mx-1.5">•</span>
                     <span className="font-medium text-slate-700">{item.credential}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                     <span
                       className={`px-2 py-0.5 rounded text-[11px] font-bold whitespace-nowrap ${
                         item.isExpired

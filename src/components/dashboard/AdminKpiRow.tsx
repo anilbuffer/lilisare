@@ -78,7 +78,7 @@ const KPIS: SimpleKpi[] = [
 
 export function AdminKpiRow() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
       {KPIS.map((kpi) => {
         const Icon = kpi.icon;
 
@@ -89,25 +89,25 @@ export function AdminKpiRow() {
             className="group block focus:outline-none"
           >
             <Card
-              className={`p-4 h-full bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border border-slate-200 ${kpi.borderHover} flex flex-col justify-between`}
+              className={`p-3 sm:p-4 h-full bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border border-slate-200 ${kpi.borderHover} flex flex-col justify-between`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+              <div className="flex items-center justify-between gap-1 mb-2 sm:mb-3">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
                   {kpi.label}
                 </span>
                 <div
-                  className={`p-1.5 rounded-lg shrink-0 ${kpi.iconBg} ${kpi.iconColor}`}
+                  className={`p-1 sm:p-1.5 rounded-lg shrink-0 ${kpi.iconBg} ${kpi.iconColor}`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 truncate">
                     {kpi.value}
                   </span>
-                  <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] transition-opacity" />
+                  <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] transition-opacity shrink-0 ml-1" />
                 </div>
               </div>
             </Card>

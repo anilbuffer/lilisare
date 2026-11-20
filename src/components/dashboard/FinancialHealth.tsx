@@ -22,12 +22,7 @@ export function FinancialHealth() {
             <DollarSign className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-slate-900">Revenue Cycle Health</h3>
-              <span className="px-2 py-0.5 bg-[#E8F2E4] text-[#1E5622] border border-[#93C573]/30 text-[11px] font-bold rounded-full">
-                3.2% Denials · 28.4d A/R
-              </span>
-            </div>
+            <h3 className="text-base font-bold text-slate-900">Revenue Cycle Health</h3>
           </div>
         </div>
 
@@ -39,9 +34,9 @@ export function FinancialHealth() {
         </Link>
       </div>
 
-      <div className="flex items-center gap-4 my-4">
+      <div className="flex flex-col sm:flex-row items-center gap-4 my-4">
         {/* Donut Chart: Total Revenue */}
-        <div className="relative w-36 h-36 shrink-0">
+        <div className="relative w-36 h-36 shrink-0 mx-auto sm:mx-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -67,7 +62,7 @@ export function FinancialHealth() {
         </div>
 
         {/* Legend */}
-        <div className="flex-1 space-y-1.5 text-xs">
+        <div className="w-full sm:flex-1 space-y-1.5 text-xs">
           {payerData.map((item) => (
             <div key={item.name} className="flex justify-between items-center text-slate-600">
               <div className="flex items-center gap-1.5">
@@ -85,15 +80,10 @@ export function FinancialHealth() {
         <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
           <div className="text-[11px] font-medium text-slate-500 mb-0.5">Unbilled Care</div>
           <div className="font-bold text-base text-slate-900">$42,500</div>
-          <div className="text-[10px] text-slate-400 mt-0.5">84 notes awaiting sign-off</div>
         </div>
         <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3">
-          <div className="flex items-center justify-between mb-0.5">
-            <span className="text-[11px] font-medium text-rose-700">Denied Claims</span>
-            <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded">3.2% rate</span>
-          </div>
+          <div className="text-[11px] font-medium text-rose-700 mb-0.5">Denied Claims</div>
           <div className="font-bold text-base text-rose-700">$8,240</div>
-          <div className="text-[10px] text-rose-600 mt-0.5">3 claims flagged for review</div>
         </div>
       </div>
 

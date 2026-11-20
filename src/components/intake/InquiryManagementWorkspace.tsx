@@ -12,7 +12,6 @@ import {
   ArrowUpRight,
   ChevronDown,
   Check,
-  Users,
   Filter,
   FilterX,
   Inbox,
@@ -485,16 +484,15 @@ export function InquiryManagementWorkspace({
 
         {/* Main Content Area: Kanban Board vs List View */}
         {viewMode === "kanban" ? (
-          /* PROPER KANBAN BOARD VIEW (7 Columns with clear lane contrast) */
+          /* PROPER KANBAN BOARD VIEW (7 Columns with clean, scannable cards) */
           <div className="w-full overflow-x-auto pb-3 pt-1 no-scrollbar sm:scrollbar-thin">
-            <div className="flex gap-4 min-w-[1450px] items-start">
+            <div className="flex gap-3.5 min-w-[1400px] items-start">
               {SEVEN_KANBAN_STAGES.map((col) => {
                 const columnInquiries = filteredInquiries.filter(
                   (i) => normalizeStage(i.stage) === col.id
                 );
                 const isDragOver = dragOverStage === col.id;
                 const isFilteredStage = currentStage === col.id;
-                const Icon = col.icon;
 
                 return (
                   <div
@@ -502,40 +500,37 @@ export function InquiryManagementWorkspace({
                     onDragOver={(e) => handleDragOver(e, col.id)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, col.id)}
-                    className={`w-[305px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${
+                    className={`w-[290px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${
                       isDragOver
                         ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
                         : isFilteredStage
                         ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
-                        : "bg-[#F4F7F5] border-slate-200/80"
+                        : "bg-[#F8FAF9] border-slate-200/80"
                     }`}
                   >
                     {/* Column Lane Header */}
-                    <div className="p-3.5 border-b border-slate-200/60 flex items-center justify-between">
+                    <div className="p-3 border-b border-slate-200/60 flex items-center justify-between">
                       <div className="flex items-center gap-2 min-w-0">
                         <div className={`w-2 h-2 rounded-full shrink-0 ${col.badge.dot}`} />
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-800 truncate">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-700 truncate">
                           {col.title}
                         </span>
                       </div>
 
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[11px] font-bold border shrink-0 bg-white ${col.badge.text} ${col.badge.border} shadow-2xs`}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 bg-white ${col.badge.text} ${col.badge.border} shadow-2xs`}
                       >
                         {columnInquiries.length}
                       </span>
                     </div>
 
                     {/* Card List Stack */}
-                    <div className="p-3 space-y-3 min-h-[440px] flex flex-col">
+                    <div className="p-2.5 space-y-2.5 min-h-[440px] flex flex-col">
                       {columnInquiries.length === 0 ? (
-                        <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-300/80 rounded-2xl text-center bg-white/40">
-                          <Inbox className="w-6 h-6 text-slate-300 mb-1" />
+                        <div className="flex-1 flex flex-col items-center justify-center p-6 border border-dashed border-slate-300/70 rounded-xl text-center bg-white/40">
+                          <Inbox className="w-5 h-5 text-slate-300 mb-1" />
                           <span className="text-xs font-medium text-slate-400">
                             No inquiries
-                          </span>
-                          <span className="text-[10px] text-slate-400 mt-0.5">
-                            Drag card here
                           </span>
                         </div>
                       ) : (
@@ -550,80 +545,53 @@ export function InquiryManagementWorkspace({
                               draggable
                               onDragStart={(e) => handleDragStart(e, inquiry.id)}
                               onClick={() => router.push(getDetailsHref(inquiry.id))}
-                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60 transition-all duration-300 relative overflow-hidden flex flex-col justify-between select-none ${
+                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${
                                 isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
                               }`}
                             >
-                              {/* Card Body matching KPI Card structure */}
                               <div>
-                                {/* Top Row: Title + Animated Icon Container (exact KPI DNA) */}
-                                <div className="flex items-start justify-between gap-2 mb-2.5">
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-1.5">
-                                      <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-snug truncate">
-                                        {inquiry.familyName}
-                                      </h4>
-                                      {isUrgent && (
-                                        <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200/60 shrink-0">
-                                          Urgent
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-0.5">
-                                      <span className="font-mono font-medium text-slate-500">
-                                        {inquiry.id}
+                                {/* Top Row: Family Name + ID & Urgent Chip */}
+                                <div className="flex items-start justify-between gap-1.5 mb-1">
+                                  <h4 className="text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors leading-tight truncate flex-1">
+                                    {inquiry.familyName}
+                                  </h4>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    {isUrgent && (
+                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-600 border border-rose-100">
+                                        Urgent
                                       </span>
-                                      <span>•</span>
-                                      <span className="truncate">{inquiry.branch}</span>
-                                    </div>
-                                  </div>
-
-                                  {/* Icon container styled exactly like KPI Strip icon */}
-                                  <div
-                                    className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0 ${
-                                      isUrgent
-                                        ? "bg-rose-100 text-rose-700"
-                                        : col.badge.headerBadge
-                                    }`}
-                                  >
-                                    <Icon className="w-4 h-4" />
-                                  </div>
-                                </div>
-
-                                {/* Loved One Snippet Box */}
-                                <div className="py-2 px-2.5 bg-slate-50/90 rounded-xl border border-slate-100 mb-2.5 flex items-center justify-between text-xs">
-                                  <span className="text-slate-500 text-[11px] flex items-center gap-1.5 shrink-0">
-                                    <Users className="w-3.5 h-3.5 text-[#3D6B22] shrink-0" />
-                                    Loved One:
-                                  </span>
-                                  <span className="font-semibold text-slate-800 truncate max-w-[140px]">
-                                    {inquiry.familyInfo.clientInfo.name}{" "}
-                                    <span className="text-slate-400 font-normal">
-                                      ({inquiry.familyInfo.clientInfo.age}y)
+                                    )}
+                                    <span className="font-mono text-[10px] text-slate-400">
+                                      {inquiry.id}
                                     </span>
-                                  </span>
+                                  </div>
                                 </div>
 
-                                {/* Tags Row */}
-                                <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                  <span className="text-[10px] font-semibold bg-[#E3F1D9] text-[#1E5622] px-2 py-0.5 rounded-lg border border-[#3D6B22]/20 truncate">
+                                {/* Loved One: Eleanor Miller (78y) */}
+                                <p className="text-xs text-slate-500 truncate">
+                                  {inquiry.familyInfo.clientInfo.name}
+                                  <span className="text-slate-400 font-normal"> ({inquiry.familyInfo.clientInfo.age}y)</span>
+                                </p>
+
+                                {/* Tags: Program & Hours */}
+                                <div className="mt-2.5 flex items-center justify-between text-[11px]">
+                                  <span className="text-[10px] font-medium text-slate-600 bg-slate-100/90 px-2 py-0.5 rounded-md truncate max-w-[170px]">
                                     {formatShortProgram(inquiry.careRequirements.programInterest)}
                                   </span>
-                                  <span className="text-[10px] font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded-lg border border-slate-200/60 shrink-0">
-                                    {inquiry.careRequirements.hoursPerWeek} hrs/wk
+                                  <span className="text-[10px] text-slate-400 font-medium shrink-0">
+                                    {inquiry.careRequirements.hoursPerWeek}h/wk
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Card Footer: Coordinator/Date + Stage Dropdown & Hover ArrowUpRight */}
-                              <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                                <span className="truncate max-w-[130px] text-slate-500 font-medium">
-                                  {inquiry.referralInfo.assignedCoordinator.name.split(" ")[0]} ·{" "}
-                                  {inquiry.dateReceived}
+                              {/* Footer: Coordinator / Date + Quick Actions */}
+                              <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                                <span className="truncate max-w-[140px] text-slate-400 text-[11px]">
+                                  {inquiry.referralInfo.assignedCoordinator.name.split(" ")[0]} · {inquiry.dateReceived}
                                 </span>
 
                                 <div
-                                  className="flex items-center gap-1.5 shrink-0"
+                                  className="flex items-center gap-1 shrink-0"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {/* Quick Move Stage dropdown */}
@@ -636,13 +604,13 @@ export function InquiryManagementWorkspace({
                                         )
                                       }
                                       title="Move to another stage"
-                                      className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                                      className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
                                     >
                                       <ChevronDown className="w-3.5 h-3.5" />
                                     </button>
 
                                     {activeMenuId === inquiry.id && (
-                                      <div className="absolute right-0 bottom-full mb-1 w-44 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
+                                      <div className="absolute right-0 bottom-full mb-1 w-44 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
                                         <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
                                           Move Stage
                                         </div>
@@ -674,10 +642,8 @@ export function InquiryManagementWorkspace({
                                     )}
                                   </div>
 
-                                  {/* ArrowUpRight with hover reveal matching KPI card */}
-                                  <div className="inline-flex items-center gap-0.5 font-semibold text-xs text-[#3D6B22]">
-                                    <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-60 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                                  </div>
+                                  {/* ArrowUpRight hover indicator */}
+                                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 opacity-60 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                                 </div>
                               </div>
                             </div>

@@ -57,9 +57,6 @@ export function AuthorizationsComplianceCard() {
                     {metrics.authorizationsBreakdown.overdue} overdue
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 truncate mt-0.5">
-                  Service hour approvals and state waivers
-                </p>
               </div>
             </div>
 
@@ -141,14 +138,11 @@ export function AuthorizationsComplianceCard() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-slate-900 text-base">Compliance</h3>
-                  <span className="px-2.5 py-0.5 bg-rose-100 text-rose-700 text-xs font-bold rounded-full whitespace-nowrap shrink-0">
-                    8 expired
+                  <h3 className="font-bold text-slate-900 text-base">Documentation & Compliance</h3>
+                  <span className="px-2.5 py-0.5 bg-amber-100 text-amber-900 text-xs font-bold rounded-full whitespace-nowrap shrink-0">
+                    17 Items Pending
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 truncate mt-0.5">
-                  Caregivers with urgent credential renewal deadlines
-                </p>
               </div>
             </div>
 
@@ -157,6 +151,31 @@ export function AuthorizationsComplianceCard() {
               className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 shrink-0 whitespace-nowrap transition-colors"
             >
               View All <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Documentation & Compliance Triad Pills */}
+          <div className="grid grid-cols-3 gap-3 mt-4 text-center">
+            <Link
+              href="/clinical/visit-notes"
+              className="p-2.5 bg-amber-50 hover:bg-amber-100/80 rounded-xl border border-amber-200 transition-colors block text-left"
+            >
+              <span className="text-[10px] uppercase font-bold text-amber-700 block">Overdue Notes</span>
+              <span className="text-lg font-extrabold text-amber-950 mt-0.5 block">12</span>
+              <span className="text-[10px] text-amber-800/80">&gt;24h RN sign-off</span>
+            </Link>
+            <div className="p-2.5 bg-amber-50/70 rounded-xl border border-amber-200 text-left">
+              <span className="text-[10px] uppercase font-bold text-amber-700 block">Unsigned Orders</span>
+              <span className="text-lg font-extrabold text-amber-950 mt-0.5 block">5</span>
+              <span className="text-[10px] text-amber-800/80">CMS-485 plans</span>
+            </div>
+            <Link
+              href="/compliance"
+              className="p-2.5 bg-rose-50 hover:bg-rose-100/80 rounded-xl border border-rose-200 transition-colors block text-left"
+            >
+              <span className="text-[10px] uppercase font-bold text-rose-700 block">Staff Licenses</span>
+              <span className="text-lg font-extrabold text-rose-950 mt-0.5 block">8</span>
+              <span className="text-[10px] text-rose-800/80">≤30d to expire</span>
             </Link>
           </div>
 

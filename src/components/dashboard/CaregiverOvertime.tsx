@@ -124,9 +124,6 @@ export function CaregiverOvertime() {
             <h3 className="text-lg font-bold text-slate-900">
               Caregiver Overtime & Utilization
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              40-hour weekly cap tracking, shift reallocation & payroll leakage mitigation
-            </p>
           </div>
         </div>
 

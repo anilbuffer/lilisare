@@ -109,9 +109,6 @@ export function OnboardingIntakePipes() {
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 text-base leading-tight">Onboarding Funnel</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Average <strong className="text-slate-800">14 days</strong> to activate (target: 11 days).
-                </p>
               </div>
             </div>
 
@@ -122,10 +119,6 @@ export function OnboardingIntakePipes() {
               Roster <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-
-          <p className="text-[11px] text-slate-400 italic mt-1.5 mb-2">
-            Tracks caregiver recruitment, credentials, and activation velocity.
-          </p>
 
           {/* Thin, Sleek Progressive Visual Bars with LiliSare Brand Colors */}
           <div className="space-y-1">
@@ -172,9 +165,6 @@ export function OnboardingIntakePipes() {
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 text-base leading-tight">Intake Pipeline</h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  <strong className="text-slate-800">79 active inquiries</strong> • 16 converted (20% conversion rate).
-                </p>
               </div>
             </div>
 
@@ -185,10 +175,6 @@ export function OnboardingIntakePipes() {
               Pipeline <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-
-          <p className="text-[11px] text-slate-400 italic mt-1.5 mb-2">
-            Tracks family inquiries, assessments, and case manager authorization.
-          </p>
 
           {/* Thin, Sleek Progressive Visual Bars with LiliSare Brand Colors */}
           <div className="space-y-1">

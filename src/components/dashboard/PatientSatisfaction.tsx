@@ -26,7 +26,6 @@ export function PatientSatisfaction() {
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900">Client & Family Satisfaction</h3>
-            <p className="text-xs text-slate-500">Family-centred care sentiment score</p>
           </div>
         </div>
 

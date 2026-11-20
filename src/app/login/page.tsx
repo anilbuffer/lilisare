@@ -28,10 +28,7 @@ import {
   PhoneCall,
   Stethoscope,
   ClipboardCheck,
-  GraduationCap,
-  Heart,
-  Compass,
-  X
+  GraduationCap
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Role } from "@/types/rbac";
@@ -523,7 +520,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [rememberMe, setRememberMe] = useState<boolean>(true);
   const [showForgotModal, setShowForgotModal] = useState<boolean>(false);
-  const [showStoryModal, setShowStoryModal] = useState<boolean>(false);
   const [resetSent, setResetSent] = useState<boolean>(false);
 
   // Auto update form credentials when a role is selected
@@ -582,17 +578,17 @@ export default function LoginPage() {
 
   // Reusable Role Selector Pill Grid Component
   const RoleSelectorGrid = () => (
-    <div className="flex flex-col space-y-2.5">
+    <div className="flex flex-col space-y-1.5 xl:space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs font-semibold uppercase tracking-wider text-emerald-200/90 flex items-center gap-1.5">
+        <span className="text-[11px] xl:text-xs font-semibold uppercase tracking-wider text-emerald-200/90 flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-[#93C573]" />
           Select Workspace Role:
         </span>
-        <span className="text-[11px] text-emerald-300/70 hidden sm:inline-block">
+        <span className="text-[10px] xl:text-[11px] text-emerald-300/70 hidden sm:inline-block">
           Auto-fills demo credentials
         </span>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-7 2xl:grid-cols-7 gap-1.5 xl:gap-2">
         {(Object.keys(ROLE_DATA) as LoginRole[]).map((roleKey) => {
           const rItem = ROLE_DATA[roleKey];
           const isSel = selectedRole === roleKey;
@@ -603,22 +599,22 @@ export default function LoginPage() {
               key={roleKey}
               type="button"
               onClick={() => handleRoleSelect(roleKey)}
-              className={`p-2 sm:px-3 sm:py-2 rounded-xl border text-left transition-all duration-150 flex items-center space-x-2 cursor-pointer ${isSel
+              className={`p-1.5 xl:px-2.5 xl:py-2 rounded-lg xl:rounded-xl border text-left transition-all duration-150 flex items-center space-x-1.5 xl:space-x-2 cursor-pointer ${isSel
                 ? "bg-[#274C1D] border-[#93C573] text-white shadow-md ring-1 ring-[#93C573]/40"
                 : "bg-[#14280E]/70 hover:bg-[#274C1D]/60 border-[#274C1D] text-emerald-100/70 hover:text-white"
                 }`}
             >
               <div
-                className={`p-1.5 rounded-lg shrink-0 ${isSel ? "bg-[#93C573] text-[#1B3414]" : "bg-[#14280E] text-[#93C573]"
+                className={`p-1 xl:p-1.5 rounded-md xl:rounded-lg shrink-0 ${isSel ? "bg-[#93C573] text-[#1B3414]" : "bg-[#14280E] text-[#93C573]"
                   }`}
               >
-                <RIcon className="w-4 h-4" />
+                <RIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
               </div>
-              <div className="overflow-hidden">
-                <div className="font-bold text-xs truncate leading-tight">
+              <div className="overflow-hidden min-w-0">
+                <div className="font-bold text-[11px] xl:text-xs truncate leading-tight">
                   {rItem.title.split(" ")[0]}
                 </div>
-                <div className="text-[10px] text-emerald-200/60 truncate">
+                <div className="text-[9px] xl:text-[10px] text-emerald-200/60 truncate leading-none mt-0.5">
                   {rItem.badge}
                 </div>
               </div>
@@ -630,7 +626,7 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen w-full bg-[#EEF2F0] font-sans flex items-center justify-center p-2 sm:p-4 lg:p-6 relative overflow-x-hidden select-none">
+    <div className="min-h-screen lg:h-screen w-full bg-[#EEF2F0] font-sans flex items-center justify-center p-2 sm:p-3 lg:p-4 xl:p-6 relative overflow-x-hidden overflow-y-auto lg:overflow-hidden select-none">
       {/* Ambient Enterprise Backdrop */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-40 -left-40 w-[750px] h-[750px] rounded-full bg-[#93C573]/20 blur-[150px]" />
@@ -648,10 +644,10 @@ export default function LoginPage() {
       </div>
 
       {/* Main Responsive Container Card */}
-      <div className="relative z-10 w-full max-w-[1560px] min-h-0 lg:min-h-[calc(100vh-3rem)] rounded-2xl sm:rounded-3xl lg:rounded-[36px] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] overflow-hidden flex flex-col justify-between">
+      <div className="relative z-10 w-full max-w-[1560px] h-full lg:max-h-[calc(100vh-2rem)] xl:max-h-[calc(100vh-3rem)] rounded-2xl sm:rounded-3xl lg:rounded-[26px] xl:rounded-[32px] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] overflow-hidden flex flex-col justify-between">
 
         {/* Main Header (Visible on Mobile & Tablet above split, hidden on Desktop left panel) */}
-        <div className="lg:hidden w-full bg-gradient-to-r from-[#1B3414] via-[#24461B] to-[#14280E] rounded-xl sm:rounded-2xl p-3 sm:p-3 text-white mb-3 sm:mb-3 border border-[#93C573]/30 flex items-center justify-between shadow-xs">
+        <div className="lg:hidden w-full bg-gradient-to-r from-[#1B3414] via-[#24461B] to-[#14280E] rounded-xl sm:rounded-2xl p-3 sm:p-3 text-white mb-2 sm:mb-3 border border-[#93C573]/30 flex items-center justify-between shadow-xs">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 p-1.5 flex items-center justify-center border border-[#93C573]/30 shadow-md shadow-brand-teal/20 shrink-0">
               <img src="/logo-mark.svg" alt="LiliSare" className="w-8 h-8 object-contain" />
@@ -667,14 +663,6 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <button
-              type="button"
-              onClick={() => setShowStoryModal(true)}
-              className="bg-[#93C573]/20 hover:bg-[#93C573]/30 text-[#93C573] px-2.5 py-1 rounded-full border border-[#93C573]/40 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <Heart className="w-3 h-3 text-[#FF6E61]" />
-              <span>Our Story</span>
-            </button>
             <div className="flex items-center space-x-1.5 bg-[#14280E]/80 text-[#93C573] px-2.5 py-1 rounded-full border border-[#93C573]/40 text-[11px] font-semibold">
               <span className="w-2 h-2 rounded-full bg-[#93C573] animate-pulse" />
               <span className="hidden sm:inline">Operational</span>
@@ -683,53 +671,47 @@ export default function LoginPage() {
         </div>
 
         {/* MOBILE & TABLET ROLE SELECTOR CONTAINER (Appears directly ABOVE the login form on mobile/tablet) */}
-        <div className="lg:hidden w-full bg-[#1B3414] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-white mb-3 sm:mb-4 border border-[#93C573]/30 shadow-xs">
+        <div className="lg:hidden w-full bg-[#1B3414] rounded-xl sm:rounded-2xl p-3 sm:p-4 text-white mb-3 border border-[#93C573]/30 shadow-xs">
           <RoleSelectorGrid />
         </div>
 
-        {/* 2-COLUMN SPLIT LAYOUT (Desktop: 70/30 Split | Tablet: 50/50 Side-by-Side Split | Mobile: Stacked) */}
-        <div className="flex-1 flex flex-col md:flex-row lg:flex-row gap-3 sm:gap-4 lg:gap-6 items-stretch">
+        {/* 2-COLUMN SPLIT LAYOUT (Desktop: 70/30 Split | Tablet/Mobile: Stacked) */}
+        <div className="flex-1 flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-4 xl:gap-6 items-stretch min-h-0">
 
           {/* ========================================================================= */}
-          {/* LEFT PANEL: Enterprise Spotlight & Details (Desktop 70% | Tablet 50% | Mobile Stacked) */}
+          {/* LEFT PANEL: Enterprise Spotlight & Details */}
           {/* ========================================================================= */}
-          <div className="order-2 md:order-1 w-full md:w-1/2 lg:w-[67%] xl:w-[70%] bg-gradient-to-br from-[#1B3414] via-[#24461B] to-[#14280E] rounded-xl sm:rounded-2xl lg:rounded-[32px] p-4 sm:p-6 lg:p-10 flex flex-col justify-between text-white relative overflow-hidden shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] border border-[#93C573]/30">
+          <div className="order-2 lg:order-1 w-full lg:w-[67%] xl:w-[70%] bg-gradient-to-br from-[#1B3414] via-[#24461B] to-[#14280E] rounded-xl sm:rounded-2xl lg:rounded-[24px] xl:rounded-[30px] p-3.5 sm:p-5 lg:p-5 xl:p-8 flex flex-col justify-between text-white relative overflow-hidden shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] border border-[#93C573]/30 min-h-0">
             {/* Background Ambient Spotlight Glow */}
             <div className="absolute -top-20 -right-20 w-96 h-96 bg-[#93C573]/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-[#FF6E61]/12 rounded-full blur-2xl pointer-events-none" />
 
-            <div className="h-full flex flex-col justify-between lg:gap-4">
+            <div className="h-full flex flex-col justify-between gap-2 xl:gap-3 min-h-0">
               {/* Desktop Header Bar (Hidden on mobile/tablet as they have top header) */}
-              <div className="hidden lg:flex justify-between items-center w-full gap-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 p-2 flex items-center justify-center border border-[#93C573]/30 shadow-md shadow-brand-teal/20 shrink-0">
-                    <img src="/logo-mark.svg" alt="LiliSare" className="w-10 h-10 object-contain" />
+              <div className="hidden lg:flex justify-between items-center w-full gap-3 shrink-0">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-xl xl:rounded-2xl bg-white/10 p-1.5 flex items-center justify-center border border-[#93C573]/30 shadow-md shadow-brand-teal/20 shrink-0">
+                    <img src="/logo-mark.svg" alt="LiliSare" className="w-7 h-7 xl:w-8 xl:h-8 object-contain" />
                   </div>
                   <div>
-                    <span className="font-bold text-2xl tracking-wide text-white block">
+                    <span className="font-bold text-xl xl:text-2xl tracking-wide text-white block leading-tight">
                       LiliSare
                     </span>
-                    <span className="text-[11px] text-emerald-200/80 font-medium">
+                    <span className="text-[10px] xl:text-[11px] text-emerald-200/80 font-medium">
                       Live-In Caregivers, Family Caregivers, and Family Friends
                     </span>
                   </div>
                 </div>
 
-                {/* Header Action Buttons */}
-                <div className="flex items-center space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowStoryModal(true)}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-[#93C573]/20 to-[#274C1D]/60 hover:from-[#93C573]/30 hover:to-[#274C1D]/80 text-white px-3.5 py-1.5 rounded-full border border-[#93C573]/40 text-xs font-semibold cursor-pointer transition-all shadow-xs group"
-                  >
-                    <Heart className="w-3.5 h-3.5 text-[#FF6E61] group-hover:scale-110 transition-transform" />
-                    <span>Who We Are & Mission</span>
-                  </button>
+                {/* System Status Pill */}
+                <div className="flex items-center space-x-1.5 bg-[#14280E]/80 text-[#93C573] px-2.5 py-1 rounded-full border border-[#93C573]/40 text-[11px] font-semibold shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-[#93C573] animate-pulse" />
+                  <span>Operational</span>
                 </div>
               </div>
 
               {/* Desktop Role Selector Grid (Hidden on mobile/tablet) */}
-              <div className="hidden lg:block mb-2">
+              <div className="hidden lg:block shrink-0">
                 <RoleSelectorGrid />
               </div>
 
@@ -741,20 +723,20 @@ export default function LoginPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="mb-4 lg:mb-6"
+                  className="my-auto py-1 xl:py-3"
                 >
-                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#93C573]/15 text-[#93C573] border border-[#93C573]/30 mb-3">
-                    <CurrentRoleIcon className="w-3.5 h-3.5" />
+                  <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 xl:px-3 xl:py-1 rounded-full text-[11px] xl:text-xs font-semibold bg-[#93C573]/15 text-[#93C573] border border-[#93C573]/30 mb-1.5 xl:mb-2.5">
+                    <CurrentRoleIcon className="w-3 h-3 xl:w-3.5 xl:h-3.5" />
                     <span>{currentRoleInfo.title}</span>
                   </div>
 
-                  <h1 className="text-xl sm:text-3xl lg:text-5xl font-bold text-white tracking-tight leading-[1.15] mb-2 sm:mb-4">
+                  <h1 className="text-lg sm:text-2xl lg:text-2xl xl:text-4xl 2xl:text-5xl font-bold text-white tracking-tight leading-[1.15] mb-1.5 xl:mb-2.5">
                     {currentRoleInfo.spotlightTitle}{" "}
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#93C573] via-[#C7E4B3] to-[#FF6E61]">
                       {currentRoleInfo.spotlightHighlight}
                     </span>
                   </h1>
-                  <p className="text-xs sm:text-sm text-emerald-100/75 max-w-2xl leading-relaxed">
+                  <p className="text-xs xl:text-sm text-emerald-100/75 max-w-2xl leading-relaxed line-clamp-2 xl:line-clamp-3">
                     {currentRoleInfo.description}
                   </p>
                 </motion.div>
@@ -768,23 +750,23 @@ export default function LoginPage() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.25 }}
-                  className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4"
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-2 xl:gap-3 shrink-0"
                 >
                   {currentRoleInfo.features.map((feat, idx) => {
                     const FeatIcon = feat.icon;
                     return (
                       <div
                         key={idx}
-                        className="bg-[#14280E]/70 border border-[#274C1D] p-3 rounded-xl flex flex-col lg:flex-row gap-3 lg:gap-4 justify-between space-y-1.5"
+                        className="bg-[#14280E]/70 border border-[#274C1D] p-2 xl:p-2.5 rounded-lg xl:rounded-xl flex items-start gap-2 xl:gap-2.5"
                       >
-                        <div className="w-7 h-7 rounded-lg bg-[#274C1D] text-[#93C573] flex items-center justify-center shrink-0 border border-[#93C573]/30">
-                          <FeatIcon className="w-4 h-4" />
+                        <div className="w-6 h-6 xl:w-7 xl:h-7 rounded-md xl:rounded-lg bg-[#274C1D] text-[#93C573] flex items-center justify-center shrink-0 border border-[#93C573]/30 mt-0.5">
+                          <FeatIcon className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
                         </div>
-                        <div>
-                          <div className="font-bold text-xs text-white mb-0.5 leading-snug">
+                        <div className="min-w-0">
+                          <div className="font-bold text-[11px] xl:text-xs text-white mb-0.5 leading-snug truncate">
                             {feat.title}
                           </div>
-                          <div className="text-[10px] sm:text-[11px] text-emerald-100/70 leading-relaxed line-clamp-2 sm:line-clamp-3">
+                          <div className="text-[10px] xl:text-[11px] text-emerald-100/70 leading-relaxed line-clamp-2">
                             {feat.desc}
                           </div>
                         </div>
@@ -794,22 +776,15 @@ export default function LoginPage() {
                 </motion.div>
               </AnimatePresence>
             </div>
+
             {/* Left Panel Footer */}
-            <div className="pt-4 lg:pt-6 mt-6 border-t border-[#274C1D] flex flex-wrap flex-col lg:flex-row items-center justify-between w-full text-xs text-emerald-200/60 gap-2">
+            <div className="pt-2 xl:pt-3 mt-2 xl:mt-3 border-t border-[#274C1D] flex flex-wrap flex-col lg:flex-row items-center justify-between w-full text-[11px] xl:text-xs text-emerald-200/60 gap-1.5 shrink-0">
               <div className="flex items-center gap-3">
                 <span>&copy; 2026 LiliSare. All rights reserved.</span>
-                <span>•</span>
-                <button
-                  type="button"
-                  onClick={() => setShowStoryModal(true)}
-                  className="text-emerald-300 hover:text-white transition-colors cursor-pointer underline font-medium"
-                >
-                  Our Story & Mission
-                </button>
               </div>
-              <div className="flex items-center space-x-3 text-[11px] text-emerald-200/60">
+              <div className="flex items-center space-x-3 text-[10px] xl:text-[11px] text-emerald-200/60">
                 <span className="flex items-center space-x-1">
-                  <LockKeyhole className="w-3.5 h-3.5 text-[#93C573]" />
+                  <LockKeyhole className="w-3 h-3 xl:w-3.5 xl:h-3.5 text-[#93C573]" />
                   <span>256-Bit SSL</span>
                 </span>
                 <span>•</span>
@@ -817,22 +792,23 @@ export default function LoginPage() {
               </div>
             </div>
           </div>
+
           {/* ========================================================================= */}
-          {/* RIGHT PANEL: Authentication Form (Desktop 30% | Tablet 50% | Mobile Stacked) */}
+          {/* RIGHT PANEL: Authentication Form */}
           {/* ========================================================================= */}
-          <div className="order-1 md:order-2 w-full md:w-1/2 lg:w-[33%] xl:w-[30%] bg-white rounded-xl sm:rounded-2xl lg:rounded-[28px] p-4 sm:p-6 lg:p-8 flex flex-col justify-between border border-[#D5DFDA] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)]">
+          <div className="order-1 lg:order-2 w-full lg:w-[33%] xl:w-[30%] bg-white rounded-xl sm:rounded-2xl lg:rounded-[24px] xl:rounded-[28px] p-4 sm:p-5 lg:p-5 xl:p-8 flex flex-col justify-between border border-[#D5DFDA] shadow-[0_2px_6px_-1px_rgba(17,28,22,0.06),0_1px_2px_-1px_rgba(17,28,22,0.04)] min-h-0">
             <div className="flex flex-col h-full justify-between">
               {/* Form Header */}
-              <div className="mb-3 sm:mb-4">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E3F1D9] text-[#1E5622] border border-[#1E5622]/20">
+              <div className="mb-2 xl:mb-3 shrink-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] xl:text-xs font-semibold bg-[#E3F1D9] text-[#1E5622] border border-[#1E5622]/20">
                     <CurrentRoleIcon className="w-3.5 h-3.5" />
-                    <span>{currentRoleInfo.title}</span>
+                    <span className="truncate max-w-[170px] sm:max-w-none">{currentRoleInfo.title}</span>
                   </span>
                   <button
                     type="button"
                     onClick={handleResetCredentials}
-                    className="text-xs font-medium text-[#3D6B22] hover:text-[#2C5217] flex items-center space-x-1 bg-[#E3F1D9]/60 hover:bg-[#E3F1D9] px-2.5 py-1 rounded-full transition-colors border border-[#3D6B22]/20 cursor-pointer"
+                    className="text-xs font-medium text-[#3D6B22] hover:text-[#2C5217] flex items-center space-x-1 bg-[#E3F1D9]/60 hover:bg-[#E3F1D9] px-2.5 py-1 rounded-full transition-colors border border-[#3D6B22]/20 cursor-pointer shrink-0"
                     title="Reset credentials to role default"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -840,20 +816,23 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-              <div className="flex-1 flex flex-col justify-center gap-3 lg:gap-4">
+
+              {/* Form Content Centered */}
+              <div className="my-auto py-1 xl:py-2 flex flex-col justify-center gap-2.5 xl:gap-3.5">
                 {/* Header Text */}
-                <div className="flex flex-col mb-3">
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#111C16] tracking-tight">
+                <div className="flex flex-col mb-0.5 xl:mb-1">
+                  <h2 className="text-xl sm:text-2xl xl:text-3xl font-extrabold text-[#111C16] tracking-tight">
                     Welcome Back
                   </h2>
-                  <p className="text-xs text-[#4A5D52] mt-1">
+                  <p className="text-xs text-[#4A5D52] mt-0.5">
                     Sign-in to your account to continue
                   </p>
                 </div>
+
                 {/* Login Form */}
-                <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
+                <form onSubmit={handleLogin} className="space-y-3 xl:space-y-4">
                   {/* Email Address */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <label className="text-xs font-semibold text-[#111C16] block">
                       Email Address
                     </label>
@@ -867,13 +846,13 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@company.com"
-                        className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-[#F7F9F8] border border-[#D5DFDA] rounded-xl text-sm text-[#111C16] placeholder:text-[#74877C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#93C573] focus:border-[#3D6B22] transition-all"
+                        className="w-full pl-10 pr-4 py-2 xl:py-2.5 bg-[#F7F9F8] border border-[#D5DFDA] rounded-xl text-xs sm:text-sm text-[#111C16] placeholder:text-[#74877C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#93C573] focus:border-[#3D6B22] transition-all"
                       />
                     </div>
                   </div>
 
                   {/* Password Field */}
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <div className="flex items-center justify-between gap-3">
                       <label className="text-xs font-semibold text-[#111C16] block">
                         Password
@@ -896,7 +875,7 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full pl-10 pr-10 py-2.5 sm:py-3 bg-[#F7F9F8] border border-[#D5DFDA] rounded-xl text-sm text-[#111C16] placeholder:text-[#74877C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#93C573] focus:border-[#3D6B22] transition-all"
+                        className="w-full pl-10 pr-10 py-2 xl:py-2.5 bg-[#F7F9F8] border border-[#D5DFDA] rounded-xl text-xs sm:text-sm text-[#111C16] placeholder:text-[#74877C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#93C573] focus:border-[#3D6B22] transition-all"
                       />
                       <button
                         type="button"
@@ -909,7 +888,7 @@ export default function LoginPage() {
                   </div>
 
                   {/* Keep Me Signed In Checkbox */}
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-0.5">
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -925,11 +904,11 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full mt-2 bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.99] text-white font-bold py-3 sm:py-3.5 px-4 rounded-xl transition-all duration-150 flex items-center justify-center space-x-2 shadow-md shadow-[#3D6B22]/20 border border-[#3D6B22]/30 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full mt-1 xl:mt-2 bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.99] text-white font-bold py-2.5 xl:py-3.5 px-4 rounded-xl transition-all duration-150 flex items-center justify-center space-x-2 shadow-md shadow-[#3D6B22]/20 border border-[#3D6B22]/30 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer text-sm"
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="w-5 h-5 animate-spin text-white" />
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
                         <span>Authenticating...</span>
                       </>
                     ) : (
@@ -941,25 +920,17 @@ export default function LoginPage() {
                   </button>
                 </form>
               </div>
-              {/* Form Footer Link */}
-              <div className="mt-6 pt-4 border-t border-slate-100 text-center">
-                <p className="text-xs text-gray-500">
-                  Don't have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotModal(true)}
-                    className="font-bold text-brand-primary hover:text-brand-primary-hover hover:underline cursor-pointer"
-                  >
-                    Request Access
-                  </button>
-                </p>
+
+              {/* Secure note */}
+              <div className="pt-2 text-center text-[11px] text-[#74877C] shrink-0">
+                <span>Enterprise HIPAA Compliant Gateway</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Forgot Password / Request Access Modal */}
+      {/* Forgot Password Modal */}
       <AnimatePresence>
         {showForgotModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
@@ -969,18 +940,18 @@ export default function LoginPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative"
             >
-              <h3 className="text-lg font-bold text-gray-900 mb-1">Request Corporate Access / Reset</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">Reset Password</h3>
               <p className="text-xs text-gray-500 mb-4">
-                Enter your work email address below and our security administrator will verify your credentials.
+                Enter your work email address below to receive password reset instructions.
               </p>
 
               {resetSent ? (
                 <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs space-y-2 mb-4">
                   <div className="flex items-center space-x-2 font-semibold text-sm">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Access Request Submitted!</span>
+                    <span>Password Reset Link Sent!</span>
                   </div>
-                  <p>Check your inbox at <strong>{email}</strong> for authorization instructions.</p>
+                  <p>Check your inbox at <strong>{email}</strong> for instructions to reset your password.</p>
                 </div>
               ) : (
                 <div className="space-y-4 mb-4">
@@ -1013,101 +984,9 @@ export default function LoginPage() {
                     onClick={() => setResetSent(true)}
                     className="px-4 py-2 text-xs font-semibold bg-[#3D6B22] text-white rounded-xl hover:bg-[#2C5217] transition-colors shadow-sm cursor-pointer"
                   >
-                    Submit Request
+                    Send Reset Link
                   </button>
                 )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* LiliSare Story, Mission & Vision Modal */}
-      <AnimatePresence>
-        {showStoryModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative max-h-[90vh] overflow-y-auto"
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between pb-4 border-b border-slate-100 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#E3F1D9] border border-[#93C573]/30 p-2 flex items-center justify-center shadow-xs">
-                    <img src="/logo-mark.svg" alt="LiliSare" className="w-8 h-8 object-contain" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 leading-tight">LiliSare</h3>
-                    <p className="text-xs font-semibold text-brand-primary">
-                      Live-In Caregivers, Family Caregivers, and Family Friends
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowStoryModal(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-gray-700 hover:bg-slate-100 transition-colors cursor-pointer"
-                  aria-label="Close dialog"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Belief Banner */}
-              <div className="bg-[#E3F1D9]/70 border border-[#93C573]/40 rounded-2xl p-4 sm:p-5 mb-6 text-sm text-[#1E5622] leading-relaxed shadow-xs">
-                <p className="font-medium">
-                  At LiliSare, we believe caregiving comes in many forms. Whether you&apos;re a family member or a close friend, we&apos;re here to support you. We value the strength of community and the deep bond between those who provide care and those who receive it. No matter your role, we&apos;re here to guide and empower you every step of the way.
-                </p>
-              </div>
-
-              {/* Story Section */}
-              <div className="space-y-6 text-slate-700 text-sm leading-relaxed">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-base font-bold text-gray-900">
-                    <Heart className="w-5 h-5 text-[#FF6E61]" />
-                    <h4>Who We Are</h4>
-                  </div>
-                  <p>
-                    LiliSare was founded by two mothers of children with special needs who understand both the challenges and rewards of caregiving. We created this company to share our experience, knowledge, and support with others navigating similar journeys.
-                  </p>
-                  <p>
-                    You&apos;re why we do what we do. At LiliSare, we lead with the heart, understanding the love, strength, and dedication it takes to care for someone close to you—whether you&apos;re a family member or a family friend providing care. We&apos;re here for you. Our team offers compassion, guidance, and real connection—treating you like family every step of the way.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 bg-[#F7F9F8] rounded-2xl border border-[#D5DFDA] space-y-2">
-                    <div className="flex items-center gap-2 font-bold text-brand-primary text-sm">
-                      <Compass className="w-4 h-4 text-brand-primary" />
-                      <h5>Mission Statement</h5>
-                    </div>
-                    <p className="text-xs text-text-secondary leading-relaxed">
-                      At LiliSare, our mission is to care for the whole family—both the loved one receiving care and the caregiver giving it. We share what we&apos;ve learned, navigate services alongside you, and offer the knowledge, guidance, and support that help your family thrive together.
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-[#F7F9F8] rounded-2xl border border-[#D5DFDA] space-y-2">
-                    <div className="flex items-center gap-2 font-bold text-brand-primary text-sm">
-                      <Eye className="w-4 h-4 text-brand-primary" />
-                      <h5>Vision Statement</h5>
-                    </div>
-                    <p className="text-xs text-text-secondary leading-relaxed">
-                      We envision a world where no one in a caregiving family is overlooked—where the person receiving care is seen and valued, and the caregiver is supported, never depleted, and never alone. We treat your family like our own: lifting one another through compassion, connection, and community.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-6 mt-6 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setShowStoryModal(false)}
-                  className="px-5 py-2.5 bg-brand-primary hover:bg-brand-primary-hover text-white font-semibold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
-                >
-                  Back to Login
-                </button>
               </div>
             </motion.div>
           </div>

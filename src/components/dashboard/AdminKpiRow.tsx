@@ -1,109 +1,114 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React from "react";
 import Link from "next/link";
-import { Users, Heart, ClipboardCheck, ShieldCheck, Home, ArrowUpRight } from "lucide-react";
+import {
+  UserCheck,
+  Clock,
+  CalendarCheck,
+  FileCheck2,
+  CircleDollarSign,
+  ArrowUpRight,
+} from "lucide-react";
 import { Card } from "@/components/ui/Card";
-import { computeDashboardMetrics } from "@/lib/dashboard/metricsEngine";
 
-interface KpiData {
+interface SimpleKpi {
   id: string;
   label: string;
   value: string;
   icon: React.ComponentType<{ className?: string }>;
-  tone: "forest" | "amber" | "coral";
+  iconBg: string;
+  iconColor: string;
+  borderHover: string;
   href: string;
 }
 
-export function AdminKpiRow() {
-  const metrics = useMemo(() => computeDashboardMetrics(), []);
+const KPIS: SimpleKpi[] = [
+  {
+    id: "referral-admission",
+    label: "Referral-to-Admission",
+    value: "72.4%",
+    icon: UserCheck,
+    iconBg: "bg-emerald-50",
+    iconColor: "text-[#3D6B22]",
+    borderHover: "hover:border-[#3D6B22]/50",
+    href: "/intake/pipeline",
+  },
+  {
+    id: "time-to-soc",
+    label: "Time to Start of Care",
+    value: "38.5 hrs",
+    icon: Clock,
+    iconBg: "bg-teal-50",
+    iconColor: "text-teal-700",
+    borderHover: "hover:border-teal-500/50",
+    href: "/intake/dashboard",
+  },
+  {
+    id: "visit-completion",
+    label: "Visit Completion Rate",
+    value: "96.0%",
+    icon: CalendarCheck,
+    iconBg: "bg-emerald-50",
+    iconColor: "text-[#3D6B22]",
+    borderHover: "hover:border-[#3D6B22]/50",
+    href: "/scheduling",
+  },
+  {
+    id: "doc-compliance",
+    label: "Doc & Compliance Status",
+    value: "94.8%",
+    icon: FileCheck2,
+    iconBg: "bg-amber-50",
+    iconColor: "text-amber-700",
+    borderHover: "hover:border-amber-400",
+    href: "/compliance",
+  },
+  {
+    id: "revenue-health",
+    label: "Revenue Health",
+    value: "3.2%",
+    icon: CircleDollarSign,
+    iconBg: "bg-emerald-50",
+    iconColor: "text-[#3D6B22]",
+    borderHover: "hover:border-[#3D6B22]/50",
+    href: "/billing/workspace",
+  },
+];
 
-  const kpis: KpiData[] = [
-    {
-      id: "clients",
-      label: "Active Clients",
-      value: metrics.activeClients.count.toLocaleString(),
-      icon: Users,
-      tone: metrics.activeClients.tone,
-      href: "/clients?status=Active",
-    },
-    {
-      id: "caregivers",
-      label: "Active Caregivers",
-      value: metrics.activeCaregivers.count.toLocaleString(),
-      icon: Heart,
-      tone: metrics.activeCaregivers.tone,
-      href: "/caregivers?status=active",
-    },
-    {
-      id: "authorizations",
-      label: "Pending Authorisations",
-      value: metrics.pendingAuthorisations.count.toLocaleString(),
-      icon: ClipboardCheck,
-      tone: metrics.pendingAuthorisations.tone,
-      href: "/billing/authorizations?tab=pending",
-    },
-    {
-      id: "credentials",
-      label: "Credentials Expiring",
-      value: metrics.credentialsExpiring.count.toLocaleString(),
-      icon: ShieldCheck,
-      tone: metrics.credentialsExpiring.tone,
-      href: "/compliance?status=expiring",
-    },
-    {
-      id: "households",
-      label: "Households Stuck",
-      value: metrics.householdsStuck.count.toLocaleString(),
-      icon: Home,
-      tone: metrics.householdsStuck.tone,
-      href: "/households?status=delayed",
-    },
-  ];
+export function AdminKpiRow() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
-      {kpis.map((kpi) => {
+      {KPIS.map((kpi) => {
         const Icon = kpi.icon;
 
-        // Semantic Colors
-        // Forest Green for normal, Amber for pending, Coral for urgent
-        const toneStyles = {
-          forest: {
-            cardBorder: "border-slate-200 hover:border-[#3D6B22]/50",
-            iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
-            valText: "text-slate-900",
-          },
-          amber: {
-            cardBorder: "border-amber-200 hover:border-amber-400",
-            iconBg: "bg-amber-100 text-amber-800",
-            valText: "text-amber-900",
-          },
-          coral: {
-            cardBorder: "border-rose-200 hover:border-rose-400",
-            iconBg: "bg-rose-100 text-rose-700",
-            valText: "text-rose-900",
-          },
-        }[kpi.tone];
-
         return (
-          <Link key={kpi.id} href={kpi.href} className="group block focus:outline-none">
+          <Link
+            key={kpi.id}
+            href={kpi.href}
+            className="group block focus:outline-none"
+          >
             <Card
-              className={`p-4 h-full bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border ${toneStyles.cardBorder}`}
+              className={`p-4 h-full bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border border-slate-200 ${kpi.borderHover} flex flex-col justify-between`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
                   {kpi.label}
                 </span>
-                <div className={`p-1.5 rounded-lg shrink-0 ${toneStyles.iconBg}`}>
+                <div
+                  className={`p-1.5 rounded-lg shrink-0 ${kpi.iconBg} ${kpi.iconColor}`}
+                >
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="flex items-baseline justify-between mt-1">
-                <span className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${toneStyles.valText}`}>
-                  {kpi.value}
-                </span>
-                <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                    {kpi.value}
+                  </span>
+                  <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] transition-opacity" />
+                </div>
               </div>
             </Card>
           </Link>

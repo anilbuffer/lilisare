@@ -14,7 +14,6 @@ import { CaregiverOvertime } from "@/components/dashboard/CaregiverOvertime";
 import { FinancialHealth } from "@/components/dashboard/FinancialHealth";
 import { PatientSatisfaction } from "@/components/dashboard/PatientSatisfaction";
 import { InsightsLiveActivityFeed } from "@/components/dashboard/InsightsLiveActivityFeed";
-import { AutomationSummaryCard } from "@/components/dashboard/AutomationSummaryCard";
 import { AiBriefingDrawer } from "@/components/dashboard/AiBriefingDrawer";
 
 export default function DashboardPage() {
@@ -101,11 +100,6 @@ export default function DashboardPage() {
       {/* 10. Operational Intelligence & Live Activity Feed */}
       <section aria-label="Operational Insights and Live Activity">
         <InsightsLiveActivityFeed />
-      </section>
-
-      {/* 11. Bottom Automation Summary */}
-      <section aria-label="Automation Summary">
-        <AutomationSummaryCard />
       </section>
 
       {/* AI Briefing Drawer */}

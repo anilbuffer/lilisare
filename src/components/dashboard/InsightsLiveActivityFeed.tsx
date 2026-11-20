@@ -181,11 +181,6 @@ export function InsightsLiveActivityFeed() {
             <h3 className="font-bold text-slate-900 text-base">
               {activeTab === "insights" ? "Insights List" : "Live Activity List"}
             </h3>
-            <p className="text-xs text-slate-500">
-              {activeTab === "insights" 
-                ? "Proactive operational recommendations and resource balancing alerts." 
-                : "Continuous chronological feed of operational and care events."}
-            </p>
           </div>
         </div>
 

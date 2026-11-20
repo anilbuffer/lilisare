@@ -22,8 +22,12 @@ export function FinancialHealth() {
             <DollarSign className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">Financial Health</h3>
-            <p className="text-xs text-slate-500">Payer mix & claims revenue cycle</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900">Revenue Cycle Health</h3>
+              <span className="px-2 py-0.5 bg-[#E8F2E4] text-[#1E5622] border border-[#93C573]/30 text-[11px] font-bold rounded-full">
+                3.2% Denials · 28.4d A/R
+              </span>
+            </div>
           </div>
         </div>
 
@@ -84,7 +88,10 @@ export function FinancialHealth() {
           <div className="text-[10px] text-slate-400 mt-0.5">84 notes awaiting sign-off</div>
         </div>
         <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3">
-          <div className="text-[11px] font-medium text-rose-700 mb-0.5">Denied Claims</div>
+          <div className="flex items-center justify-between mb-0.5">
+            <span className="text-[11px] font-medium text-rose-700">Denied Claims</span>
+            <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-1.5 py-0.5 rounded">3.2% rate</span>
+          </div>
           <div className="font-bold text-base text-rose-700">$8,240</div>
           <div className="text-[10px] text-rose-600 mt-0.5">3 claims flagged for review</div>
         </div>
@@ -93,7 +100,7 @@ export function FinancialHealth() {
       {/* AR Aging Bar */}
       <div className="mt-auto pt-2 border-t border-slate-100">
         <div className="flex justify-between text-xs text-slate-600 mb-1.5 font-medium">
-          <span>AR Aging Distribution</span>
+          <span>AR Aging (DSO: 28.4 Days)</span>
           <span className="text-[#3D6B22] font-semibold">60% current (0-30d)</span>
         </div>
         <div className="w-full h-2.5 flex rounded-full overflow-hidden bg-slate-100">

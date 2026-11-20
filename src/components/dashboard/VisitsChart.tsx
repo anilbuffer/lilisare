@@ -40,9 +40,6 @@ export function VisitsChart() {
                 96% Completion
               </span>
             </div>
-            <p className="text-xs text-slate-500">
-              Scheduled vs. verified care visits across active households
-            </p>
           </div>
         </div>
 
@@ -90,9 +87,15 @@ export function VisitsChart() {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <span>Total: 836 of 871 visits completed</span>
-        <span className="font-semibold text-emerald-700">35 remaining shifts scheduled</span>
+      <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-2">
+        <div className="flex items-center gap-3">
+          <span className="font-semibold text-emerald-800">836 Completed (96.0%)</span>
+          <span className="text-slate-300">•</span>
+          <span className="text-amber-800 font-medium">21 Rescheduled (2.4%)</span>
+          <span className="text-slate-300">•</span>
+          <span className="text-rose-700 font-bold">14 Missed (1.6%)</span>
+        </div>
+        <span className="text-slate-400 font-medium">871 total scheduled shifts</span>
       </div>
     </Card>
   );

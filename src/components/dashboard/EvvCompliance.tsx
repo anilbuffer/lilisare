@@ -22,7 +22,6 @@ export function EvvCompliance() {
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900">EVV Compliance</h3>
-            <p className="text-xs text-slate-500">Electronic Visit Verification accuracy</p>
           </div>
         </div>
 

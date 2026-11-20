@@ -46,91 +46,91 @@ export const SEVEN_KANBAN_STAGES: {
     headerBadge: string;
   };
 }[] = [
-  {
-    id: "New Inquiry",
-    title: "New Inquiry",
-    icon: Sparkles,
-    badge: {
-      bg: "bg-rose-50",
-      text: "text-rose-700",
-      border: "border-rose-200",
-      dot: "bg-rose-500",
-      headerBadge: "bg-rose-100 text-rose-800 border-rose-200",
+    {
+      id: "New Inquiry",
+      title: "New Inquiry",
+      icon: Sparkles,
+      badge: {
+        bg: "bg-rose-50",
+        text: "text-rose-700",
+        border: "border-rose-200",
+        dot: "bg-rose-500",
+        headerBadge: "bg-rose-100 text-rose-800 border-rose-200",
+      },
     },
-  },
-  {
-    id: "Contacted",
-    title: "Contacted",
-    icon: PhoneCall,
-    badge: {
-      bg: "bg-amber-50",
-      text: "text-amber-800",
-      border: "border-amber-200",
-      dot: "bg-amber-500",
-      headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+    {
+      id: "Contacted",
+      title: "Contacted",
+      icon: PhoneCall,
+      badge: {
+        bg: "bg-amber-50",
+        text: "text-amber-800",
+        border: "border-amber-200",
+        dot: "bg-amber-500",
+        headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+      },
     },
-  },
-  {
-    id: "Needs Discussion",
-    title: "Needs Discussion",
-    icon: MessageSquare,
-    badge: {
-      bg: "bg-purple-50",
-      text: "text-purple-700",
-      border: "border-purple-200",
-      dot: "bg-purple-500",
-      headerBadge: "bg-purple-100 text-purple-800 border-purple-200",
+    {
+      id: "Needs Discussion",
+      title: "Needs Discussion",
+      icon: MessageSquare,
+      badge: {
+        bg: "bg-purple-50",
+        text: "text-purple-700",
+        border: "border-purple-200",
+        dot: "bg-purple-500",
+        headerBadge: "bg-purple-100 text-purple-800 border-purple-200",
+      },
     },
-  },
-  {
-    id: "CMA Coordination",
-    title: "CMA Coordination",
-    icon: FileCheck2,
-    badge: {
-      bg: "bg-sky-50",
-      text: "text-sky-800",
-      border: "border-sky-200",
-      dot: "bg-sky-600",
-      headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
+    {
+      id: "CMA Coordination",
+      title: "CMA Coordination",
+      icon: FileCheck2,
+      badge: {
+        bg: "bg-sky-50",
+        text: "text-sky-800",
+        border: "border-sky-200",
+        dot: "bg-sky-600",
+        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
+      },
     },
-  },
-  {
-    id: "Family Decision",
-    title: "Family Decision",
-    icon: ThumbsUp,
-    badge: {
-      bg: "bg-teal-50",
-      text: "text-teal-800",
-      border: "border-teal-200",
-      dot: "bg-teal-600",
-      headerBadge: "bg-teal-100 text-teal-800 border-teal-200",
+    {
+      id: "Family Decision",
+      title: "Family Decision",
+      icon: ThumbsUp,
+      badge: {
+        bg: "bg-teal-50",
+        text: "text-teal-800",
+        border: "border-teal-200",
+        dot: "bg-teal-600",
+        headerBadge: "bg-teal-100 text-teal-800 border-teal-200",
+      },
     },
-  },
-  {
-    id: "Converted",
-    title: "Converted",
-    icon: CheckCircle2,
-    badge: {
-      bg: "bg-[#E3F1D9]",
-      text: "text-[#1E5622]",
-      border: "border-[#3D6B22]/20",
-      dot: "bg-[#3D6B22]",
-      headerBadge: "bg-[#E8F2E4] text-[#1E5622] border-[#93C573]/30",
+    {
+      id: "Converted",
+      title: "Converted",
+      icon: CheckCircle2,
+      badge: {
+        bg: "bg-[#E3F1D9]",
+        text: "text-[#1E5622]",
+        border: "border-[#3D6B22]/20",
+        dot: "bg-[#3D6B22]",
+        headerBadge: "bg-[#E8F2E4] text-[#1E5622] border-[#93C573]/30",
+      },
     },
-  },
-  {
-    id: "Closed",
-    title: "Closed",
-    icon: Archive,
-    badge: {
-      bg: "bg-slate-100",
-      text: "text-slate-600",
-      border: "border-slate-200",
-      dot: "bg-slate-400",
-      headerBadge: "bg-slate-200 text-slate-700 border-slate-300",
+    {
+      id: "Closed",
+      title: "Closed",
+      icon: Archive,
+      badge: {
+        bg: "bg-slate-100",
+        text: "text-slate-600",
+        border: "border-slate-200",
+        dot: "bg-slate-400",
+        headerBadge: "bg-slate-200 text-slate-700 border-slate-300",
+      },
     },
-  },
-];
+  ];
 
 const STAGE_CONFIG_MAP = new Map(
   SEVEN_KANBAN_STAGES.map((col) => [col.id, col])
@@ -308,7 +308,7 @@ export function InquiryManagementWorkspace({
   return (
     <section aria-label="Inquiry Management Workspace">
       {/* Unified Outer Container Card matching KPI and Dashboard container style (elevated, no mix with page BG) */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
+      <div className="bg-white border border-slate-200/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
         {/* Workspace Header & Toolbar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
@@ -344,9 +344,8 @@ export function InquiryManagementWorkspace({
                   {currentStage ? (
                     <>
                       <span
-                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                          STAGE_CONFIG_MAP.get(currentStage)?.badge.dot || "bg-slate-400"
-                        }`}
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${STAGE_CONFIG_MAP.get(currentStage)?.badge.dot || "bg-slate-400"
+                          }`}
                       />
                       <span className="truncate">{currentStage}</span>
                     </>
@@ -358,9 +357,8 @@ export function InquiryManagementWorkspace({
                   {currentStage ? stageCounts[currentStage] || 0 : items.length}
                 </span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
-                    isStageDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isStageDropdownOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -392,11 +390,10 @@ export function InquiryManagementWorkspace({
                         onSelectStageFilter(null);
                         setIsStageDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                        !currentStage
+                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${!currentStage
                           ? "bg-slate-50 font-bold text-slate-900"
                           : "text-slate-700 hover:bg-slate-50"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
@@ -424,11 +421,10 @@ export function InquiryManagementWorkspace({
                             onSelectStageFilter(col.id);
                             setIsStageDropdownOpen(false);
                           }}
-                          className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                            isSelected
+                          className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
                               ? "bg-slate-50 font-bold text-slate-900"
                               : "text-slate-700 hover:bg-slate-50"
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span className={`w-2 h-2 rounded-full shrink-0 ${col.badge.dot}`} />
@@ -455,11 +451,10 @@ export function InquiryManagementWorkspace({
               <button
                 type="button"
                 onClick={() => setViewMode("kanban")}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  viewMode === "kanban"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
                     ? "bg-white text-[#3D6B22] shadow-xs"
                     : "text-slate-500 hover:text-slate-900"
-                }`}
+                  }`}
                 title="Kanban Board View (7 Columns)"
               >
                 <Kanban className="w-3.5 h-3.5" />
@@ -468,11 +463,10 @@ export function InquiryManagementWorkspace({
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  viewMode === "list"
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
                     ? "bg-white text-[#3D6B22] shadow-xs"
                     : "text-slate-500 hover:text-slate-900"
-                }`}
+                  }`}
                 title="List View"
               >
                 <List className="w-3.5 h-3.5" />
@@ -500,13 +494,12 @@ export function InquiryManagementWorkspace({
                     onDragOver={(e) => handleDragOver(e, col.id)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, col.id)}
-                    className={`w-[290px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${
-                      isDragOver
+                    className={`w-[290px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${isDragOver
                         ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
                         : isFilteredStage
-                        ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
-                        : "bg-[#F8FAF9] border-slate-200/80"
-                    }`}
+                          ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
+                          : "bg-[#F8FAF9] border-slate-200/80"
+                      }`}
                   >
                     {/* Column Lane Header */}
                     <div className="p-3 border-b border-slate-200/60 flex items-center justify-between">
@@ -545,9 +538,8 @@ export function InquiryManagementWorkspace({
                               draggable
                               onDragStart={(e) => handleDragStart(e, inquiry.id)}
                               onClick={() => router.push(getDetailsHref(inquiry.id))}
-                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${
-                                isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
-                              }`}
+                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
+                                }`}
                             >
                               <div>
                                 {/* Top Row: Family Name + ID & Urgent Chip */}

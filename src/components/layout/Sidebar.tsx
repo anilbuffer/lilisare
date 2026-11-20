@@ -181,6 +181,7 @@ const getNavGroups = (role?: string): NavGroup[] => {
           { name: "Dashboard", icon: LayoutDashboard, id: "dashboard" },
           { name: "Referral & Intake", icon: Inbox, id: "referrals" },
           { name: "Clients", icon: Users, id: "clients" },
+          { name: "Caregivers", icon: HeartHandshake, id: "caregivers" },
           { name: "Households", icon: Home, id: "households" },
           { name: "Reports", icon: BarChart3, id: "reports" },
         ],
@@ -395,6 +396,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (role === "INTAKE_COORDINATOR") {
       if (isPath("/intake/referrals") || isPath("/referrals")) return "referrals";
       if (isPath("/clients") || isPath("/patients")) return "clients";
+      if (isPath("/intake/caregivers") || isPath("/caregivers")) return "caregivers";
       if (isPath("/households")) return "households";
       if (isPath("/intake/reports") || isPath("/reports")) return "reports";
       if (isPath("/intake/dashboard") || isPath("/intake")) return "dashboard";
@@ -548,7 +550,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (id === "dashboard") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : "/dashboard";
     if (id === "intake-referrals") return "/intake/pipeline";
     if (id === "clients") return "/clients";
-    if (id === "caregivers") return safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : "/caregivers";
+    if (id === "caregivers") return safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/caregivers" : "/caregivers";
     if (id === "households") return "/households";
     if (id === "authorizations") return "/billing/authorizations";
     if (id === "scheduling") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/schedule" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/scheduling" : "/scheduling";

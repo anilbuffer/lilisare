@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   InquiryRecord,
@@ -9,6 +9,10 @@ import {
 import {
   INITIAL_INQUIRIES,
 } from "@/lib/intake/mockIntakeData";
+import {
+  getIntakeInquiriesFromStorage,
+  subscribeToIntakeSync,
+} from "@/lib/intake/intakeSync";
 
 import { IntakePageHeader } from "./IntakePageHeader";
 import { IntakeKpiStrip } from "./IntakeKpiStrip";
@@ -19,7 +23,15 @@ export function IntakeReferralWorkspace() {
   const router = useRouter();
 
   // Main Data States
-  const [inquiries] = useState<InquiryRecord[]>(INITIAL_INQUIRIES);
+  const [inquiries, setInquiries] = useState<InquiryRecord[]>(INITIAL_INQUIRIES);
+
+  useEffect(() => {
+    setInquiries(getIntakeInquiriesFromStorage());
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setInquiries(getIntakeInquiriesFromStorage());
+    });
+    return unsubscribe;
+  }, []);
 
   // Filter States
   const [selectedStage, setSelectedStage] = useState<InquiryStage | null>(null);

@@ -1102,9 +1102,34 @@ export const INITIAL_RECENT_ACTIVITIES: RecentActivityItem[] = [
 ];
 
 export function getInquiryById(id: string): InquiryRecord | undefined {
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("lilisare_intake_inquiries");
+      if (raw) {
+        const stored: InquiryRecord[] = JSON.parse(raw);
+        const found = stored.find((i) => i.id.toLowerCase() === id.toLowerCase());
+        if (found) return found;
+      }
+    } catch {
+      // fallback to INITIAL_INQUIRIES
+    }
+  }
   return INITIAL_INQUIRIES.find((i) => i.id.toLowerCase() === id.toLowerCase());
 }
 
 export function getAllInquiryIds(): string[] {
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("lilisare_intake_inquiries");
+      if (raw) {
+        const stored: InquiryRecord[] = JSON.parse(raw);
+        if (Array.isArray(stored) && stored.length > 0) {
+          return stored.map((i) => i.id);
+        }
+      }
+    } catch {
+      // fallback to INITIAL_INQUIRIES
+    }
+  }
   return INITIAL_INQUIRIES.map((i) => i.id);
 }

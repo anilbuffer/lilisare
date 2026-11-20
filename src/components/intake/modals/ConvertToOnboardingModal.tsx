@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { InquiryRecord } from "@/types/intake";
+import { convertInquiryToLiveEntities } from "@/lib/intake/intakeSync";
 import {
   X,
   CheckCircle2,
@@ -32,8 +33,11 @@ export function ConvertToOnboardingModal({
   if (!isOpen) return null;
 
   const handleConvert = () => {
+    // Synchronize to live Agency Admin storage
+    convertInquiryToLiveEntities(inquiry.id, { createClient, createCaregiver });
     onConfirmConversion(inquiry.id);
-    toast.success(`${inquiry.familyName} qualified and converted to onboarding!`);
+    toast.success(`${inquiry.familyName} qualified, converted, and synced with Agency Admin!`);
+    onClose();
   };
 
   return (

@@ -1,64 +1,95 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
-import { IntakeKpiStrip } from "@/components/intake/IntakeKpiStrip";
-import { IntakeUrgencyQueue } from "@/components/intake/IntakeUrgencyQueue";
-import { AssessmentBookingWidget } from "@/components/intake/AssessmentBookingWidget";
-import { PipelineSnapshot } from "@/components/intake/PipelineSnapshot";
-import { FollowUpQueue } from "@/components/intake/FollowUpQueue";
-import { Plus, Sparkles, PlayCircle, PauseCircle } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  Sparkles,
+  Calendar,
+  Plus,
+  Inbox,
+  ChevronDown,
+  ExternalLink,
+  ChevronRight,
+  Kanban,
+} from "lucide-react";
 
-export default function IntakeDashboard() {
-  const { currentUser } = useAuth();
-  const [greeting, setGreeting] = useState("Good morning");
+import { InquiryRecord } from "@/types/intake";
+import { ClientRecord } from "@/types/client";
+import { CaregiverRecord } from "@/types/caregiver";
+import { Household } from "@/lib/households/mockData";
+
+import {
+  getIntakeInquiriesFromStorage,
+  saveIntakeInquiriesToStorage,
+  subscribeToIntakeSync,
+} from "@/lib/intake/intakeSync";
+import { getClientsFromStorage } from "@/lib/clients/mockData";
+import { getHouseholdsFromStorage } from "@/lib/households/mockData";
+import { getCaregiversFromStorage } from "@/lib/caregivers/mockData";
+
+import { IntakeKpiRow } from "@/components/intake/dashboard/IntakeKpiRow";
+import { IntakeAttentionQueue } from "@/components/intake/dashboard/IntakeAttentionQueue";
+import { IntakePipelineFunnelCard } from "@/components/intake/dashboard/IntakePipelineFunnelCard";
+import { IntakeAssessmentsCard } from "@/components/intake/dashboard/IntakeAssessmentsCard";
+import { IntakeLiveActivityFeed } from "@/components/intake/dashboard/IntakeLiveActivityFeed";
+import { IntakeAiBriefingDrawer } from "@/components/intake/dashboard/IntakeAiBriefingDrawer";
+
+import { ConvertToOnboardingModal } from "@/components/intake/modals/ConvertToOnboardingModal";
+import { ContactFamilyModal } from "@/components/intake/modals/ContactFamilyModal";
+import { ScheduleAssessmentModal } from "@/components/intake/modals/ScheduleAssessmentModal";
+
+export default function IntakeDashboardPage() {
   const router = useRouter();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
+  // ----------------------------------------------------
+  // Live Synced State from Shared LiliSare Storage
+  // ----------------------------------------------------
+  const [inquiries, setInquiries] = useState<InquiryRecord[]>([]);
+  const [clients, setClients] = useState<ClientRecord[]>([]);
+  const [households, setHouseholds] = useState<Household[]>([]);
+  const [caregivers, setCaregivers] = useState<CaregiverRecord[]>([]);
+  const [lastSyncTime, setLastSyncTime] = useState<string>("Just now");
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+
+  // Modals & AI Briefing Drawer state
+  const [isAiBriefingOpen, setIsAiBriefingOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const toggleAudioBriefing = () => {
-    if (!("speechSynthesis" in window)) {
-      toast.error("Text-to-speech is not supported in this browser.");
-      return;
-    }
+  const [selectedInquiryForConvert, setSelectedInquiryForConvert] = useState<InquiryRecord | null>(null);
+  const [selectedInquiryForContact, setSelectedInquiryForContact] = useState<InquiryRecord | null>(null);
+  const [selectedInquiryForSchedule, setSelectedInquiryForSchedule] = useState<InquiryRecord | null>(null);
 
-    if (isPlayingAudio) {
-      window.speechSynthesis.cancel();
-      setIsPlayingAudio(false);
-      return;
-    }
+  const today = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date());
 
-    const text = `${greeting} James. You have 2 urgent hospital discharges pending S L A breach for Eleanor Ruth Whitfield and Arthur Pendelton. 3 assessments are unassigned for tomorrow.`;
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    utterance.onend = () => setIsPlayingAudio(false);
-    utterance.onerror = () => setIsPlayingAudio(false);
-
-    setIsPlayingAudio(true);
-    window.speechSynthesis.speak(utterance);
-    toast.success("Playing AI audio briefing...");
+  // Initial Load & Synchronisation Subscription
+  const reloadAllSyncedData = () => {
+    setIsSyncing(true);
+    setInquiries(getIntakeInquiriesFromStorage());
+    setClients(getClientsFromStorage());
+    setHouseholds(getHouseholdsFromStorage());
+    setCaregivers(getCaregiversFromStorage());
+    setLastSyncTime(
+      new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+    setTimeout(() => setIsSyncing(false), 250);
   };
 
   useEffect(() => {
-    return () => {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
+    reloadAllSyncedData();
+    const unsubscribe = subscribeToIntakeSync(() => {
+      reloadAllSyncedData();
+    });
+    return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting("Good morning");
-    else if (hour < 17) setGreeting("Good afternoon");
-    else setGreeting("Good evening");
-  }, []);
-
+  // Dropdown outside click handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -69,131 +100,250 @@ export default function IntakeDashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Handle contact log
+  const handleLogCommunication = (inquiryId: string, type: "call" | "email" | "note", note: string) => {
+    const updated = inquiries.map((inq) => {
+      if (inq.id === inquiryId) {
+        return {
+          ...inq,
+          timeline: [
+            {
+              id: `t-${Date.now()}`,
+              type,
+              author: "Intake Coordinator",
+              timestamp: "Just now",
+              title: `Logged ${type.toUpperCase()}`,
+              details: note,
+            },
+            ...(inq.timeline || []),
+          ],
+        };
+      }
+      return inq;
+    });
+    saveIntakeInquiriesToStorage(updated);
+    setInquiries(updated);
+  };
+
+  // Handle schedule assessment
+  const handleConfirmSchedule = (
+    inquiryId: string,
+    details: {
+      scheduledDate: string;
+      scheduledTime: string;
+      assessor: string;
+      type: string;
+      notes: string;
+    }
+  ) => {
+    const updated = inquiries.map((inq) => {
+      if (inq.id === inquiryId) {
+        return {
+          ...inq,
+          assessmentStatus: "Scheduled" as const,
+          assessmentDetails: details,
+          stage: "Needs Discussion" as const,
+          timeline: [
+            {
+              id: `t-${Date.now()}`,
+              type: "assessment" as const,
+              author: "Intake Coordinator",
+              timestamp: "Just now",
+              title: "Clinical Assessment Scheduled",
+              details: `${details.type} with ${details.assessor} on ${details.scheduledDate} at ${details.scheduledTime}`,
+            },
+            ...(inq.timeline || []),
+          ],
+        };
+      }
+      return inq;
+    });
+    saveIntakeInquiriesToStorage(updated);
+    setInquiries(updated);
+  };
+
+  // ----------------------------------------------------
+  // Computed Metrics
+  // ----------------------------------------------------
+  const metrics = useMemo(() => {
+    const urgentInquiries = inquiries.filter(
+      (i) => i.urgency === "Urgent" || i.urgency === "Immediate" || i.source === "Hospital Discharge"
+    );
+    const newLeads = inquiries.filter((i) => i.stage === "New Inquiry" || i.stage === "New Lead");
+    const converted = inquiries.filter((i) => i.stage === "Converted");
+    const onboardingClients = clients.filter((c) => c.status === "Onboarding");
+    const bottleneckHouseholds = households.filter((h) => Boolean(h.triJourneyStatus?.bottleneckMessage));
+    const clearedCaregivers = caregivers.filter(
+      (c) => c.verificationChecklist?.screening === "Cleared"
+    );
+    const caregiverClearedPct = caregivers.length > 0
+      ? Math.round((clearedCaregivers.length / caregivers.length) * 100)
+      : 92;
+
+    return {
+      totalInquiries: inquiries.length,
+      urgentInquiries: urgentInquiries.length,
+      newLeads: newLeads.length,
+      converted: converted.length,
+      totalClients: clients.length,
+      onboardingClients: onboardingClients.length,
+      totalHouseholds: households.length,
+      bottlenecks: bottleneckHouseholds.length,
+      totalCaregivers: caregivers.length,
+      caregiverClearedPct,
+    };
+  }, [inquiries, clients, households, caregivers]);
+
   return (
-    <div className="max-w-full mx-auto space-y-4">
-
-      {/* Header Section with AI Briefing */}
-      <div className="flex flex-col gap-6">
-        {/* AI Briefing Banner */}
-        <div className="w-full bg-gradient-to-r from-brand-teal/10 to-accent-blue/10 border border-brand-teal/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-[0_6px_32px_rgba(0,0,0,0.06)] relative overflow-hidden">
-          {/* Sparkle decorative background */}
-          <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-brand-teal/20 rounded-full blur-3xl"></div>
-
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-teal to-accent-blue flex items-center justify-center shrink-0 shadow-[0_6px_32px_rgba(0,0,0,0.06)] shadow-brand-teal/30 z-10">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex-1 z-10">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                AI Morning Briefing
-                <span className="bg-brand-teal/20 text-brand-teal px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold animate-pulse">Live</span>
-              </h2>
-            </div>
-            <p className="text-xs text-slate-700 font-medium leading-relaxed">
-              {greeting} James. You have <span className="text-red-600 font-semibold bg-red-50 px-1 rounded">2 urgent hospital discharges pending SLA breach</span> (Eleanor Ruth Whitfield & Arthur Pendelton). <span className="text-amber-600 font-bold bg-amber-50 px-1 rounded">3 assessments are unassigned</span> for tomorrow.
-            </p>
-          </div>
-          <button
-            onClick={toggleAudioBriefing}
-            className="shrink-0 flex items-center gap-2 bg-white border border-slate-200 hover:border-brand-teal hover:text-brand-teal text-slate-700 px-4 py-2 rounded-full text-xs font-bold shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all active:scale-95 z-10"
-          >
-            {isPlayingAudio ? (
-              <>
-                <PauseCircle className="w-4 h-4 text-brand-teal animate-pulse" />
-                Stop Audio
-              </>
-            ) : (
-              <>
-                <PlayCircle className="w-4 h-4 text-brand-teal" />
-                Play Audio
-              </>
-            )}
-          </button>
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-14 animate-in fade-in duration-300">
+      {/* 01. Page Header: Greeting • Date • Quick Actions • AI Briefing (Identical layout to Agency Dashboard) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            Good morning, Sarah!
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            {today}
+          </p>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Intake Control Center
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              <span className="font-semibold text-brand-teal">4 new inquiries</span> need first contact, <span className="font-semibold text-accent-blue">8 assessments</span> scheduled today.
-            </p>
-          </div>
-
-          <div className="relative w-full md:w-auto" ref={dropdownRef}>
+        <div className="flex items-center gap-3">
+          {/* New Intake Dropdown */}
+          <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex w-full md:w-auto items-center justify-center gap-2 bg-brand-teal hover:bg-teal-600 active:scale-95 transition-all text-white px-4 py-2.5 rounded-full text-sm font-medium shadow-[0_6px_24px_rgba(14,163,131,0.25)] hover:shadow-lg cursor-pointer"
+              className="inline-flex items-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 active:scale-95 transition-all text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-xs cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              New Intake
+              <Plus className="w-3.5 h-3.5 text-[#3D6B22]" />
+              <span>New Intake</span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
             </button>
-            <AnimatePresence>
-              {isDropdownOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="absolute right-0 md:right-0 mt-2 w-full md:w-48 bg-white border border-slate-200 rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] z-[60] py-1 overflow-hidden origin-top-right"
+
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-1.5 overflow-hidden text-xs">
+                <button
+                  onClick={() => {
+                    router.push("/intake/inquiries/new");
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 font-medium text-slate-700 hover:bg-[#F2F8EE] hover:text-[#3D6B22] transition-colors flex items-center justify-between cursor-pointer"
                 >
-                  <button
-                    onClick={() => {
-                      router.push("/intake/inquiries/new");
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-teal transition-colors"
-                  >
-                    New Inquiry
-                  </button>
-                  <button
-                    onClick={() => {
-                      router.push("/intake/referrals/new");
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-brand-teal transition-colors"
-                  >
-                    New Referral
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <span>New Phone / Web Inquiry</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+                <button
+                  onClick={() => {
+                    router.push("/intake/referrals/new");
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 font-medium text-slate-700 hover:bg-[#F2F8EE] hover:text-[#3D6B22] transition-colors flex items-center justify-between cursor-pointer"
+                >
+                  <span>New Clinical Referral</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+                <div className="my-1 border-t border-slate-100"></div>
+                <button
+                  onClick={() => {
+                    router.push("/referrals");
+                    setIsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3.5 py-2 text-[11px] text-slate-500 hover:bg-slate-50 transition-colors flex items-center justify-between cursor-pointer"
+                >
+                  <span>Agency Admin Referrals</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* AI Briefing Button (Mirrors Agency Dashboard exactly) */}
+          <button
+            onClick={() => setIsAiBriefingOpen(true)}
+            className="flex items-center gap-2 bg-[#1B3414] text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-[#274C1D] transition-colors shadow-sm shadow-[#1B3414]/20 whitespace-nowrap active:scale-95 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-[#93C573]" />
+            AI Briefing
+          </button>
         </div>
       </div>
 
-      {/* Row 1: KPI Strip */}
-      <IntakeKpiStrip />
+      {/* 02. KPI Cards Strip */}
+      <section aria-label="Key Performance Indicators">
+        <IntakeKpiRow metrics={metrics} />
+      </section>
 
-      {/* Row 2 & 3: Main Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      {/* 03. High-Priority Action Queue ("Needs Your Attention") */}
+      <section aria-label="Needs Your Attention">
+        <IntakeAttentionQueue
+          inquiries={inquiries}
+          onContact={(inq) => setSelectedInquiryForContact(inq)}
+          onSchedule={(inq) => setSelectedInquiryForSchedule(inq)}
+          onConvert={(inq) => setSelectedInquiryForConvert(inq)}
+        />
+      </section>
 
-        {/* Left Column (Urgency Queue dominates) */}
-        <div className="lg:col-span-8 flex flex-col gap-4">
-          <div className="h-[400px]">
-            <IntakeUrgencyQueue />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="h-[350px]">
-              <PipelineSnapshot />
-            </div>
-            <div className="h-[350px]">
-              <FollowUpQueue />
-            </div>
-          </div>
-        </div>
+      {/* 04. Pipeline Funnel & Clinical RN Assessments (Balanced 2-Column Split) */}
+      <section
+        aria-label="Intake Pipeline and Clinical RN Assessments"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch"
+      >
+        <IntakePipelineFunnelCard inquiries={inquiries} />
+        <IntakeAssessmentsCard
+          inquiries={inquiries}
+          onScheduleAssessment={(inq) => setSelectedInquiryForSchedule(inq)}
+        />
+      </section>
 
-        {/* Right Column */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          <div className="h-[400px]">
-            <AssessmentBookingWidget />
-          </div>
-        </div>
+      {/* 05. Live Intake Activity Feed (Full-Width Enhanced List UI) */}
+      <section aria-label="Live Intake Activity Feed">
+        <IntakeLiveActivityFeed
+          inquiries={inquiries}
+          lastSyncTime={lastSyncTime}
+          isSyncing={isSyncing}
+          onRefreshSync={reloadAllSyncedData}
+        />
+      </section>
 
-      </div>
+      {/* 06. AI Briefing Slide-over Drawer */}
+      <IntakeAiBriefingDrawer
+        isOpen={isAiBriefingOpen}
+        onClose={() => setIsAiBriefingOpen(false)}
+        inquiries={inquiries}
+        households={households}
+        lastSyncTime={lastSyncTime}
+      />
 
+      {/* 07. Live Synchronized Action Modals */}
+      {selectedInquiryForConvert && (
+        <ConvertToOnboardingModal
+          isOpen={Boolean(selectedInquiryForConvert)}
+          onClose={() => setSelectedInquiryForConvert(null)}
+          inquiry={selectedInquiryForConvert}
+          onConfirmConversion={() => {
+            reloadAllSyncedData();
+            setSelectedInquiryForConvert(null);
+          }}
+        />
+      )}
 
+      {selectedInquiryForContact && (
+        <ContactFamilyModal
+          isOpen={Boolean(selectedInquiryForContact)}
+          onClose={() => setSelectedInquiryForContact(null)}
+          inquiry={selectedInquiryForContact}
+          onLogCommunication={handleLogCommunication}
+        />
+      )}
+
+      {selectedInquiryForSchedule && (
+        <ScheduleAssessmentModal
+          isOpen={Boolean(selectedInquiryForSchedule)}
+          onClose={() => setSelectedInquiryForSchedule(null)}
+          inquiry={selectedInquiryForSchedule}
+          onConfirmSchedule={handleConfirmSchedule}
+        />
+      )}
     </div>
   );
 }

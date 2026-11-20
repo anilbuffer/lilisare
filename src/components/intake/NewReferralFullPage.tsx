@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ContactMethod, ReferralSourceType } from "@/types/intake";
+import { ContactMethod, ReferralSourceType, InquiryRecord } from "@/types/intake";
+import { getIntakeInquiriesFromStorage, saveIntakeInquiriesToStorage } from "@/lib/intake/intakeSync";
 import {
   ArrowLeft,
   Check,
@@ -111,9 +112,99 @@ export function NewReferralFullPage({
     setIsSubmitting(true);
     const randomId = `INQ-${Math.floor(1043 + Math.random() * 50)}`;
 
+    try {
+      const familyLastName = clientName ? clientName.trim().split(" ").pop() : "Family";
+      const newInquiry: InquiryRecord = {
+        id: randomId,
+        familyName: `The ${familyLastName} Family`,
+        stage: "New Inquiry",
+        dateReceived: "Just now",
+        dateReceivedRaw: new Date().toISOString(),
+        source: referralSource,
+        sourceDetail: organization || undefined,
+        branch: branch,
+        urgency: urgency === "Urgent" ? "Urgent" : "Normal",
+        familyInfo: {
+          primaryContact: primaryContact || "Primary Contact",
+          relationship: contactRelationship || "Family Member",
+          phone: phone || "(555) 000-0000",
+          email: email || "contact@family.com",
+          preferredContactMethod: preferredContactMethod,
+          bestTimeToCall: bestTimeToCall,
+          householdLocation: {
+            address: householdAddress || "Pending Address",
+            city: householdCity || "Atlanta",
+            state: "GA",
+            zip: householdZip || "30305",
+            branch: branch,
+          },
+          clientInfo: {
+            name: clientName || "Pending Client Name",
+            age: parseInt(clientAge, 10) || 75,
+            relationship: "Care Recipient",
+            gender: clientGender,
+            primaryLanguage: "English",
+            mobilityNotes: supportNotes,
+          },
+          potentialCaregiver: caregiverName
+            ? {
+                name: caregiverName,
+                relationship: caregiverRelationship || "Family Caregiver",
+                classificationInterest: "W-2",
+                phone: phone,
+              }
+            : undefined,
+        },
+        referralInfo: {
+          source: referralSource,
+          organization: organization || "Direct Intake",
+          caseManager: caseManagerName
+            ? {
+                name: caseManagerName,
+                agency: caseManagerAgency,
+              }
+            : undefined,
+          dateReceived: new Date().toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+          assignedCoordinator: {
+            name: assignedCoordinator,
+            role: "Intake Coordinator",
+          },
+        },
+        careRequirements: {
+          careType: careTypes,
+          supportRequirements: supportNotes || "Assistance with ADLs",
+          preferredLocation: householdCity || "Atlanta",
+          programInterest: programInterest,
+          hoursPerWeek: hoursPerWeek,
+        },
+        documents: [],
+        missingInformation: [],
+        assessmentStatus: "Not Scheduled",
+        timeline: [
+          {
+            id: `t-${Date.now()}`,
+            type: "system",
+            author: assignedCoordinator,
+            timestamp: "Just now",
+            title: "New Intake Referral Recorded",
+            details: `Source: ${referralSource}. Initial triage logged in Intake Coordinator Portal.`,
+          },
+        ],
+      };
+
+      const current = getIntakeInquiriesFromStorage();
+      saveIntakeInquiriesToStorage([newInquiry, ...current]);
+    } catch (err) {
+      console.error("Error saving new inquiry:", err);
+    }
+
     setTimeout(() => {
       setIsSubmitting(false);
-      toast.success(`Referral ${randomId} successfully recorded! Redirecting to pipeline...`);
+      toast.success(`Referral ${randomId} successfully recorded and synced with Agency Admin!`);
       router.push(onSuccessRedirectHref);
     }, 600);
   };

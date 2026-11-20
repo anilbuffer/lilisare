@@ -27,7 +27,7 @@ export function IntakePipelineFunnelCard({ inquiries }: IntakePipelineFunnelCard
   const directCount = inquiries.filter((i) => i.source === "Website" || i.source === "Phone").length;
 
   return (
-    <Card className="p-4 sm:p-5 bg-white border border-slate-200/90 shadow-sm rounded-2xl flex flex-col justify-between h-full">
+    <Card className="p-4 sm:p-5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between h-full">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
@@ -35,14 +35,9 @@ export function IntakePipelineFunnelCard({ inquiries }: IntakePipelineFunnelCard
             <div className="p-2 bg-emerald-50 text-[#3D6B22] rounded-xl">
               <Filter className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900">
-                Intake Pipeline & Conversion
-              </h3>
-              <p className="text-xs text-slate-500">
-                Live volume progression across admission milestones
-              </p>
-            </div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900">
+              Intake Pipeline & Conversion
+            </h3>
           </div>
           <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full">
             {inquiries.length} Inquiries

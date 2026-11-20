@@ -21,7 +21,7 @@ export function IntakeAssessmentsCard({
   );
 
   return (
-    <Card className="p-4 sm:p-5 bg-white border border-slate-200/90 shadow-sm rounded-2xl flex flex-col justify-between h-full">
+    <Card className="p-4 sm:p-5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between h-full">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
@@ -29,14 +29,9 @@ export function IntakeAssessmentsCard({
             <div className="p-2 bg-sky-50 text-sky-700 rounded-xl">
               <Calendar className="w-4 h-4" />
             </div>
-            <div>
-              <h3 className="text-sm sm:text-base font-bold text-slate-900">
-                Clinical RN Assessments
-              </h3>
-              <p className="text-xs text-slate-500">
-                In-home evaluations and functional care readiness
-              </p>
-            </div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900">
+              Clinical RN Assessments
+            </h3>
           </div>
           <span className="text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-full">
             {scheduledList.length} Scheduled

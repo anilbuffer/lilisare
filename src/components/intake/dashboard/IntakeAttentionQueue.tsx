@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -16,6 +17,7 @@ import {
   ChevronDown,
   PhoneCall,
   UserCheck,
+  User,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { InquiryRecord } from "@/types/intake";
@@ -35,6 +37,14 @@ export interface IntakeTaskItem {
   inquiry?: InquiryRecord;
 }
 
+const STAGE_ORDER: Record<IntakeTaskItem["stage"], number> = {
+  Intake: 1,
+  Caregiver: 2,
+  Authorizations: 3,
+  Clinical: 4,
+  Compliance: 5,
+};
+
 interface IntakeAttentionQueueProps {
   inquiries: InquiryRecord[];
   onContact: (inquiry: InquiryRecord) => void;
@@ -53,7 +63,46 @@ export function IntakeAttentionQueue({
   const [filterUser, setFilterUser] = useState<"all" | "my">("all");
   const [sortBy, setSortBy] = useState<SortOption>("priority");
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Dropdown outside click handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    if (isSortOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSortOpen]);
+
+  // Lock body scroll and handle Escape key to provide a rock-solid full page overlay without fluctuation
+  useEffect(() => {
+    if (!isAddModalOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsAddModalOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isAddModalOpen]);
 
   // New task form state
   const [newTitle, setNewTitle] = useState("");
@@ -87,14 +136,14 @@ export function IntakeAttentionQueue({
 
     // Today: New inquiries awaiting first contact
     const newLeads = inquiries.filter((i) => i.stage === "New Inquiry" || i.stage === "New Lead");
-    newLeads.forEach((inq) => {
+    newLeads.forEach((inq, idx) => {
       if (!generated.some((g) => g.inquiry?.id === inq.id)) {
         generated.push({
           id: `inq-today-${inq.id}`,
           title: `Initial Phone Contact: ${inq.familyInfo.primaryContact}`,
           timeline: "Today",
           stage: "Intake",
-          assignee: "Sarah (You)",
+          assignee: idx % 2 === 0 ? "Sarah (You)" : "Sue H.",
           dueText: `${inq.familyName} · ${inq.familyInfo.phone}`,
           isUrgent: false,
           completed: false,
@@ -116,8 +165,8 @@ export function IntakeAttentionQueue({
             : `Book In-Home Clinical RN Assessment: ${inq.familyInfo.clientInfo.name}`,
           timeline: idx === 0 ? "Today" : "Tomorrow",
           stage: "Clinical",
-          assignee: "Sarah (You)",
-          dueText: `${inq.assessmentDetails?.scheduledDate || "Tomorrow"} · ${inq.assessmentDetails?.assessor || "Assessor TBD"}`,
+          assignee: inq.assessmentDetails?.assessor || "Marcus Chen, RN",
+          dueText: `${inq.assessmentDetails?.scheduledDate || "Tomorrow"} · ${inq.assessmentDetails?.assessor || "Marcus Chen, RN"}`,
           isUrgent: inq.urgency === "Urgent",
           completed: false,
           inquiry: inq,
@@ -125,41 +174,39 @@ export function IntakeAttentionQueue({
       }
     });
 
-    // Default additional items if few inquiries
-    if (generated.length < 4) {
-      generated.push(
-        {
-          id: "task-auth-sample",
-          title: "Follow up with DHS Case Manager on waiver authorization",
-          timeline: "Overdue",
-          stage: "Authorizations",
-          assignee: "Sarah (You)",
-          dueText: "Household #108 · Pending 5d",
-          isUrgent: true,
-          completed: false,
-        },
-        {
-          id: "task-cg-sample",
-          title: "Verify family caregiver background screening clearance",
-          timeline: "Today",
-          stage: "Caregiver",
-          assignee: "Sarah (You)",
-          dueText: "Linked to Household Miller",
-          isUrgent: false,
-          completed: false,
-        },
-        {
-          id: "task-comp-sample",
-          title: "Submit Medicaid intake packet for pediatric referral",
-          timeline: "Tomorrow",
-          stage: "Compliance",
-          assignee: "Sue H.",
-          dueText: "Child health services",
-          isUrgent: false,
-          completed: false,
-        }
-      );
-    }
+    // Cross-department operational triage tasks so the intake queue reflects full agency collaboration
+    generated.push(
+      {
+        id: "task-auth-sample",
+        title: "Follow up with DHS Case Manager on waiver authorization",
+        timeline: "Overdue",
+        stage: "Authorizations",
+        assignee: "Dana J.",
+        dueText: "Household #108 · Pending 5d",
+        isUrgent: true,
+        completed: false,
+      },
+      {
+        id: "task-cg-sample",
+        title: "Verify family caregiver background screening clearance",
+        timeline: "Today",
+        stage: "Caregiver",
+        assignee: "Sue H.",
+        dueText: "Linked to Household Miller",
+        isUrgent: false,
+        completed: false,
+      },
+      {
+        id: "task-comp-sample",
+        title: "Submit Medicaid intake packet for pediatric referral",
+        timeline: "Tomorrow",
+        stage: "Compliance",
+        assignee: "Sarah (You)",
+        dueText: "Child health services",
+        isUrgent: false,
+        completed: false,
+      }
+    );
 
     setTasks(generated);
   }, [inquiries]);
@@ -238,10 +285,18 @@ export function IntakeAttentionQueue({
         if (Boolean(a.isUrgent) !== Boolean(b.isUrgent)) {
           return a.isUrgent ? -1 : 1;
         }
-        return 0;
+        return a.title.localeCompare(b.title);
+      }
+      if (sortBy === "stage") {
+        const stageDiff = (STAGE_ORDER[a.stage] || 99) - (STAGE_ORDER[b.stage] || 99);
+        if (stageDiff !== 0) return stageDiff;
+        return a.title.localeCompare(b.title);
       }
       if (sortBy === "title") {
         return a.title.localeCompare(b.title);
+      }
+      if (Boolean(a.isUrgent) !== Boolean(b.isUrgent)) {
+        return a.isUrgent ? -1 : 1;
       }
       return 0;
     });
@@ -285,7 +340,7 @@ export function IntakeAttentionQueue({
           </div>
 
           {/* Sort Dropdown Menu */}
-          <div className="relative">
+          <div className="relative" ref={sortRef}>
             <button
               type="button"
               onClick={() => setIsSortOpen(!isSortOpen)}
@@ -316,7 +371,11 @@ export function IntakeAttentionQueue({
                       setSortBy(opt.key as SortOption);
                       setIsSortOpen(false);
                     }}
-                    className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 flex items-center justify-between cursor-pointer"
+                    className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between cursor-pointer transition-colors ${
+                      sortBy === opt.key
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-semibold"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
                   >
                     <span>{opt.label}</span>
                     {sortBy === opt.key && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
@@ -365,7 +424,7 @@ export function IntakeAttentionQueue({
             <div className="space-y-2.5">
               {overdueList.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-400 italic">
-                  No overdue tasks.
+                  {filterUser === "my" ? "No overdue tasks assigned to you." : "No overdue tasks."}
                 </div>
               ) : (
                 overdueList.map((task) => (
@@ -399,16 +458,22 @@ export function IntakeAttentionQueue({
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
-                            task.stage
-                          )} shrink-0`}
-                        >
-                          {task.stage}
-                        </span>
-                        <span className="text-[11px] text-rose-600 font-medium truncate">
-                          {task.dueText}
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mt-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
+                              task.stage
+                            )} shrink-0`}
+                          >
+                            {task.stage}
+                          </span>
+                          <span className="text-[11px] text-rose-600 font-medium truncate">
+                            {task.dueText}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1 shrink-0 ml-auto bg-slate-100 px-1.5 py-0.5 rounded-md">
+                          <User className="w-2.5 h-2.5 text-slate-400" />
+                          <span>{task.assignee}</span>
                         </span>
                       </div>
 
@@ -469,7 +534,7 @@ export function IntakeAttentionQueue({
             <div className="space-y-2.5">
               {todayList.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-400 italic">
-                  No tasks for today.
+                  {filterUser === "my" ? "No tasks for today assigned to you." : "No tasks for today."}
                 </div>
               ) : (
                 todayList.map((task) => (
@@ -503,16 +568,22 @@ export function IntakeAttentionQueue({
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
-                            task.stage
-                          )} shrink-0`}
-                        >
-                          {task.stage}
-                        </span>
-                        <span className="text-[11px] text-slate-500 font-normal truncate">
-                          {task.dueText}
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mt-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
+                              task.stage
+                            )} shrink-0`}
+                          >
+                            {task.stage}
+                          </span>
+                          <span className="text-[11px] text-slate-500 font-normal truncate">
+                            {task.dueText}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1 shrink-0 ml-auto bg-slate-100 px-1.5 py-0.5 rounded-md">
+                          <User className="w-2.5 h-2.5 text-slate-400" />
+                          <span>{task.assignee}</span>
                         </span>
                       </div>
 
@@ -573,7 +644,7 @@ export function IntakeAttentionQueue({
             <div className="space-y-2.5">
               {tomorrowList.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-400 italic">
-                  No tasks for tomorrow.
+                  {filterUser === "my" ? "No tasks for tomorrow assigned to you." : "No tasks for tomorrow."}
                 </div>
               ) : (
                 tomorrowList.map((task) => (
@@ -607,16 +678,22 @@ export function IntakeAttentionQueue({
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
-                            task.stage
-                          )} shrink-0`}
-                        >
-                          {task.stage}
-                        </span>
-                        <span className="text-[11px] text-slate-500 font-normal truncate">
-                          {task.dueText}
+                      <div className="flex flex-wrap items-center justify-between gap-1.5 mt-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStageBadge(
+                              task.stage
+                            )} shrink-0`}
+                          >
+                            {task.stage}
+                          </span>
+                          <span className="text-[11px] text-slate-500 font-normal truncate">
+                            {task.dueText}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-medium flex items-center gap-1 shrink-0 ml-auto bg-slate-100 px-1.5 py-0.5 rounded-md">
+                          <User className="w-2.5 h-2.5 text-slate-400" />
+                          <span>{task.assignee}</span>
                         </span>
                       </div>
 
@@ -660,12 +737,18 @@ export function IntakeAttentionQueue({
         </div>
       </div>
 
-      {/* Add Task Modal (Mirrors Agency Admin Dashboard task creation modal) */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl sm:rounded-[20px] max-w-md w-full border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden animate-in zoom-in-95 duration-150">
+      {/* Add Task Modal (Full Page Overlay Portaled to document.body) */}
+      {mounted && isAddModalOpen && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150"
+          onClick={() => setIsAddModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-xl bg-white rounded-2xl sm:rounded-[20px] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col my-auto max-h-[90vh] animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
                   <Plus className="w-5 h-5 stroke-[2.5]" />
@@ -685,7 +768,7 @@ export function IntakeAttentionQueue({
               </button>
             </div>
 
-            <form onSubmit={handleCreateTask} className="p-5 sm:p-6 space-y-4 text-xs bg-white">
+            <form onSubmit={handleCreateTask} className="p-5 sm:p-6 space-y-4 text-xs bg-white flex-1 overflow-y-auto custom-scrollbar">
               <div>
                 <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
                   Task Title <span className="text-red-500">*</span>
@@ -718,6 +801,24 @@ export function IntakeAttentionQueue({
 
                 <div>
                   <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
+                    Assignee
+                  </label>
+                  <select
+                    value={newAssignee}
+                    onChange={(e) => setNewAssignee(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
+                  >
+                    <option value="Sarah (You)">Sarah (You)</option>
+                    <option value="Marcus Chen, RN">Marcus Chen, RN</option>
+                    <option value="Dana J.">Dana J. (Authorizations)</option>
+                    <option value="Sue H.">Sue H. (Compliance)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
                     LiliSare Stage
                   </label>
                   <select
@@ -732,19 +833,19 @@ export function IntakeAttentionQueue({
                     <option value="Compliance">Compliance</option>
                   </select>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                  Reference / Due Context
-                </label>
-                <input
-                  type="text"
-                  value={newDueText}
-                  onChange={(e) => setNewDueText(e.target.value)}
-                  placeholder="e.g. Household #108 · Urgent SLA"
-                  className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
-                />
+                <div>
+                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
+                    Reference / Due Context
+                  </label>
+                  <input
+                    type="text"
+                    value={newDueText}
+                    onChange={(e) => setNewDueText(e.target.value)}
+                    placeholder="e.g. Household #108 · Urgent SLA"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center gap-2 pt-1">
@@ -761,7 +862,7 @@ export function IntakeAttentionQueue({
               </div>
 
               {/* Footer */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5 sm:gap-3">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5 sm:gap-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
@@ -778,7 +879,8 @@ export function IntakeAttentionQueue({
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </Card>
   );

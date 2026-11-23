@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -124,6 +125,31 @@ export function NeedsYourAttentionCard() {
   const [sortBy, setSortBy] = useState<SortOption>("priority");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock body scroll and handle Escape key to provide a rock-solid full page overlay without fluctuation
+  useEffect(() => {
+    if (!isAddModalOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsAddModalOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isAddModalOpen]);
 
   // New task form
   const [newTitle, setNewTitle] = useState("");
@@ -545,12 +571,18 @@ export function NeedsYourAttentionCard() {
 
       </div>
 
-      {/* Add Task Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-2xl sm:rounded-[20px] max-w-md w-full border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden animate-in zoom-in-95 duration-150">
+      {/* Add Task Modal (Full Page Overlay Portaled to document.body) */}
+      {mounted && isAddModalOpen && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-150"
+          onClick={() => setIsAddModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-md bg-white rounded-2xl sm:rounded-[20px] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col my-auto max-h-[90vh] animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
                   <Plus className="w-5 h-5 stroke-[2.5]" />
@@ -570,7 +602,7 @@ export function NeedsYourAttentionCard() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateTask} className="p-5 sm:p-6 space-y-4 text-xs bg-white">
+            <form onSubmit={handleCreateTask} className="p-5 sm:p-6 space-y-4 text-xs bg-white flex-1 overflow-y-auto custom-scrollbar">
               <div>
                 <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
                   Task Title <span className="text-red-500">*</span>
@@ -647,7 +679,7 @@ export function NeedsYourAttentionCard() {
               </div>
 
               {/* Footer */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5 sm:gap-3">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5 sm:gap-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
@@ -664,7 +696,8 @@ export function NeedsYourAttentionCard() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </Card>
   );

@@ -235,7 +235,7 @@ export function AdminCaregiverRecruitingView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search applicants by name, role, or skills..."
-              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-full border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
@@ -251,8 +251,8 @@ export function AdminCaregiverRecruitingView() {
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={`px-4 py-2.5 rounded-full bg-white border text-xs sm:text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.03)] ${selectedRole !== "ALL"
-                  ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
-                  : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
+                : "border-slate-200 text-slate-700 hover:bg-slate-50"
                 }`}
             >
               <Filter className="w-4 h-4" />
@@ -284,8 +284,8 @@ export function AdminCaregiverRecruitingView() {
                         setIsFilterOpen(false);
                       }}
                       className={`w-full text-left px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-between ${selectedRole === role
-                          ? "bg-[#E8F2E4] text-[#1E5622] font-bold"
-                          : "text-slate-600 hover:bg-slate-50"
+                        ? "bg-[#E8F2E4] text-[#1E5622] font-bold"
+                        : "text-slate-600 hover:bg-slate-50"
                         }`}
                     >
                       <span>{role === "ALL" ? "All Roles" : role}</span>
@@ -378,10 +378,10 @@ export function AdminCaregiverRecruitingView() {
                       </div>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${app.matchScore >= 90
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : app.matchScore >= 80
-                              ? "bg-teal-50 text-teal-700 border-teal-200"
-                              : "bg-amber-50 text-amber-700 border-amber-200"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : app.matchScore >= 80
+                            ? "bg-teal-50 text-teal-700 border-teal-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
                           }`}
                       >
                         {app.matchScore}% Match
@@ -548,8 +548,8 @@ export function AdminCaregiverRecruitingView() {
                       key={stage}
                       onClick={() => moveStage(selectedApplicant.id, stage)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${selectedApplicant.stage === stage
-                          ? "bg-[#3D6B22] text-white shadow-sm"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        ? "bg-[#3D6B22] text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
                     >
                       {stage}

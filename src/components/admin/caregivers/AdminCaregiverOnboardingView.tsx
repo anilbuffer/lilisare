@@ -276,11 +276,10 @@ export function AdminCaregiverOnboardingView() {
         <button
           type="button"
           onClick={() => setKpiFilter("all")}
-          className={`text-left bg-white rounded-2xl p-5 border transition-all duration-200 shadow-2xs flex items-center justify-between group cursor-pointer ${
-            kpiFilter === "all"
-              ? "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/40"
-              : "border-slate-200 hover:border-blue-300 hover:shadow-md"
-          }`}
+          className={`text-left bg-white rounded-2xl p-5 border transition-all duration-200 shadow-2xs flex items-center justify-between group cursor-pointer ${kpiFilter === "all"
+            ? "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/40"
+            : "border-slate-200 hover:border-blue-300 hover:shadow-md"
+            }`}
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-blue-100/80 flex items-center justify-center text-blue-600 transition-transform group-hover:scale-105">
@@ -308,11 +307,10 @@ export function AdminCaregiverOnboardingView() {
           onClick={() =>
             setKpiFilter(kpiFilter === "completed" ? "all" : "completed")
           }
-          className={`text-left bg-white rounded-2xl p-5 border transition-all duration-200 shadow-2xs flex items-center justify-between group cursor-pointer ${
-            kpiFilter === "completed"
-              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#E8F2E4]/40"
-              : "border-slate-200 hover:border-[#3D6B22]/40 hover:shadow-md"
-          }`}
+          className={`text-left bg-white rounded-2xl p-5 border transition-all duration-200 shadow-2xs flex items-center justify-between group cursor-pointer ${kpiFilter === "completed"
+            ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#E8F2E4]/40"
+            : "border-slate-200 hover:border-[#3D6B22]/40 hover:shadow-md"
+            }`}
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-emerald-100/80 flex items-center justify-center text-emerald-700 transition-transform group-hover:scale-105">
@@ -340,11 +338,10 @@ export function AdminCaregiverOnboardingView() {
           onClick={() =>
             setKpiFilter(kpiFilter === "missing" ? "all" : "missing")
           }
-          className={`text-left bg-white rounded-2xl p-5 border transition-all duration-200 shadow-2xs flex items-center justify-between group cursor-pointer ${
-            kpiFilter === "missing"
-              ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/40"
-              : "border-slate-200 hover:border-rose-300 hover:shadow-md"
-          }`}
+          className={`text-left bg-white rounded-2xl p-5 border transition-all duration-200 shadow-2xs flex items-center justify-between group cursor-pointer ${kpiFilter === "missing"
+            ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/40"
+            : "border-slate-200 hover:border-rose-300 hover:shadow-md"
+            }`}
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-100/80 flex items-center justify-center text-rose-600 transition-transform group-hover:scale-105">
@@ -377,7 +374,7 @@ export function AdminCaregiverOnboardingView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search new hires by name, role, email..."
-              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-full border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
@@ -392,11 +389,10 @@ export function AdminCaregiverOnboardingView() {
           <div className="relative">
             <button
               onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-              className={`px-4 py-2.5 rounded-full bg-white border text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.03)] ${
-                roleFilter !== "ALL"
-                  ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
-                  : "border-slate-200 text-slate-700 hover:bg-slate-50"
-              }`}
+              className={`px-4 py-2.5 rounded-full bg-white border text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.03)] ${roleFilter !== "ALL"
+                ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
+                : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`}
             >
               <Filter className="w-4 h-4" />
               <span>Filter</span>
@@ -424,11 +420,10 @@ export function AdminCaregiverOnboardingView() {
                         setRoleFilter(role);
                         setIsFilterDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-between ${
-                        roleFilter === role
-                          ? "bg-[#E8F2E4] text-[#1E5622] font-bold"
-                          : "text-slate-600 hover:bg-slate-50"
-                      }`}
+                      className={`w-full text-left px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-between ${roleFilter === role
+                        ? "bg-[#E8F2E4] text-[#1E5622] font-bold"
+                        : "text-slate-600 hover:bg-slate-50"
+                        }`}
                     >
                       <span>{role === "ALL" ? "All Disciplines" : role}</span>
                       {roleFilter === role && (
@@ -454,7 +449,7 @@ export function AdminCaregiverOnboardingView() {
       {/* 04. Main Onboarding Table (Matching Image 3) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+          <table className="w-full text-left text-xs whitespace-nowrap">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold">
               <tr>
                 <th className="px-6 py-4">New Hire</th>
@@ -509,13 +504,12 @@ export function AdminCaregiverOnboardingView() {
                     <div className="flex items-center gap-3 max-w-xs">
                       <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            hire.progress === 100
-                              ? "bg-emerald-600"
-                              : hire.progress >= 50
+                          className={`h-full rounded-full transition-all duration-300 ${hire.progress === 100
+                            ? "bg-emerald-600"
+                            : hire.progress >= 50
                               ? "bg-[#3D6B22]"
                               : "bg-amber-500"
-                          }`}
+                            }`}
                           style={{ width: `${hire.progress}%` }}
                         />
                       </div>
@@ -664,17 +658,17 @@ export function AdminCaregiverOnboardingView() {
                       prev.map((h) =>
                         h.id === selectedHire.id
                           ? {
-                              ...h,
-                              documents: {
-                                ...h.documents,
-                                i9: {
-                                  status: "completed",
-                                  fileName: "I-9_Approved.pdf",
-                                  verifiedAt: "Today",
-                                },
+                            ...h,
+                            documents: {
+                              ...h.documents,
+                              i9: {
+                                status: "completed",
+                                fileName: "I-9_Approved.pdf",
+                                verifiedAt: "Today",
                               },
-                              progress: Math.min(100, h.progress + 25),
-                            }
+                            },
+                            progress: Math.min(100, h.progress + 25),
+                          }
                           : h
                       )
                     );
@@ -691,17 +685,17 @@ export function AdminCaregiverOnboardingView() {
                       prev.map((h) =>
                         h.id === selectedHire.id
                           ? {
-                              ...h,
-                              documents: {
-                                ...h.documents,
-                                w4: {
-                                  status: "completed",
-                                  fileName: "W4_Signed.pdf",
-                                  verifiedAt: "Today",
-                                },
+                            ...h,
+                            documents: {
+                              ...h.documents,
+                              w4: {
+                                status: "completed",
+                                fileName: "W4_Signed.pdf",
+                                verifiedAt: "Today",
                               },
-                              progress: Math.min(100, h.progress + 25),
-                            }
+                            },
+                            progress: Math.min(100, h.progress + 25),
+                          }
                           : h
                       )
                     );
@@ -718,17 +712,17 @@ export function AdminCaregiverOnboardingView() {
                       prev.map((h) =>
                         h.id === selectedHire.id
                           ? {
-                              ...h,
-                              documents: {
-                                ...h.documents,
-                                bgc: {
-                                  status: "completed",
-                                  fileName: "BGC_Cleared.pdf",
-                                  verifiedAt: "Today",
-                                },
+                            ...h,
+                            documents: {
+                              ...h.documents,
+                              bgc: {
+                                status: "completed",
+                                fileName: "BGC_Cleared.pdf",
+                                verifiedAt: "Today",
                               },
-                              progress: Math.min(100, h.progress + 25),
-                            }
+                            },
+                            progress: Math.min(100, h.progress + 25),
+                          }
                           : h
                       )
                     );
@@ -745,17 +739,17 @@ export function AdminCaregiverOnboardingView() {
                       prev.map((h) =>
                         h.id === selectedHire.id
                           ? {
-                              ...h,
-                              documents: {
-                                ...h.documents,
-                                cpr: {
-                                  status: "completed",
-                                  fileName: "CPR_Verified.pdf",
-                                  verifiedAt: "Today",
-                                },
+                            ...h,
+                            documents: {
+                              ...h.documents,
+                              cpr: {
+                                status: "completed",
+                                fileName: "CPR_Verified.pdf",
+                                verifiedAt: "Today",
                               },
-                              progress: Math.min(100, h.progress + 25),
-                            }
+                            },
+                            progress: Math.min(100, h.progress + 25),
+                          }
                           : h
                       )
                     );
@@ -945,13 +939,12 @@ function DocPill({
         </span>
       )}
       <span
-        className={`text-[10px] font-bold ${
-          status === "completed"
-            ? "text-emerald-700"
-            : status === "pending"
+        className={`text-[10px] font-bold ${status === "completed"
+          ? "text-emerald-700"
+          : status === "pending"
             ? "text-amber-700"
             : "text-rose-600"
-        }`}
+          }`}
       >
         {label}
       </span>

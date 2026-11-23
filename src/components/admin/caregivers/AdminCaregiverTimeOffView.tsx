@@ -236,7 +236,7 @@ export function AdminCaregiverTimeOffView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search requests..."
-              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-full border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
@@ -251,11 +251,10 @@ export function AdminCaregiverTimeOffView() {
           <div className="relative">
             <button
               onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-              className={`px-4 py-2.5 rounded-full bg-white border text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.03)] ${
-                statusFilter !== "ALL" || typeFilter !== "ALL"
-                  ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
-                  : "border-slate-200 text-slate-700 hover:bg-slate-50"
-              }`}
+              className={`px-4 py-2.5 rounded-full bg-white border text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.03)] ${statusFilter !== "ALL" || typeFilter !== "ALL"
+                ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
+                : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`}
             >
               <Filter className="w-4 h-4" />
               <span>Filter</span>
@@ -286,11 +285,10 @@ export function AdminCaregiverTimeOffView() {
                         setStatusFilter(st);
                         setIsFilterDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-between ${
-                        statusFilter === st
-                          ? "bg-[#E8F2E4] text-[#1E5622] font-bold"
-                          : "text-slate-600 hover:bg-slate-50"
-                      }`}
+                      className={`w-full text-left px-3 py-2 rounded-xl font-medium transition-colors cursor-pointer flex items-center justify-between ${statusFilter === st
+                        ? "bg-[#E8F2E4] text-[#1E5622] font-bold"
+                        : "text-slate-600 hover:bg-slate-50"
+                        }`}
                     >
                       <span>{st === "ALL" ? "All Statuses" : st}</span>
                       {statusFilter === st && (
@@ -316,7 +314,7 @@ export function AdminCaregiverTimeOffView() {
       {/* 04. Time-Off Table (Matching Image 4) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+          <table className="w-full text-left text-xs whitespace-nowrap">
             <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold">
               <tr>
                 <th className="px-6 py-4">Caregiver</th>

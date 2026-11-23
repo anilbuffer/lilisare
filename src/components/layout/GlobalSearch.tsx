@@ -150,7 +150,7 @@ export function GlobalSearch() {
     <>
       {/* TRIGGER (Desktop: Fake Input, Mobile: Icon Button) */}
       <div
-        className="relative flex items-center bg-white border border-border-subtle rounded-full transition-all duration-300 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] cursor-text w-10 h-10 min-[1120px]:w-[480px] min-[1120px]:h-10 group"
+        className="relative flex items-center bg-white border border-border-subtle rounded-xl lg:rounded-2xl transition-all duration-300 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] cursor-text w-10 h-10 min-[1120px]:w-[480px] min-[1120px]:h-10 group"
         onClick={() => setIsOpen(true)}
       >
         <Search className="w-5 h-5 absolute left-2.5 min-[1120px]:left-3 text-slate-400 group-hover:text-brand-teal transition-colors" />

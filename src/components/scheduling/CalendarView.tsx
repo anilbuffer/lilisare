@@ -24,7 +24,7 @@ export function CalendarView({ viewMode, shifts, caregivers, onShiftClick }: Cal
   const conflicts: string[] = [];
   caregivers.forEach(cg => {
     const cgShifts = shifts.filter(s => s.assignedCaregiverId === cg.id && s.status !== "Call-Off" && s.status !== "Unfilled");
-    let totalHours = 0; 
+    let totalHours = 0;
     let hasOverlap = false;
 
     cgShifts.forEach((s1, i) => {
@@ -32,7 +32,7 @@ export function CalendarView({ viewMode, shifts, caregivers, onShiftClick }: Cal
         const start1 = parseISO(s1.startTime);
         const end1 = parseISO(s1.endTime);
         // Mock weekly hours by scaling daily hours
-        totalHours += ((end1.getTime() - start1.getTime()) / (1000 * 60 * 60)) * 5; 
+        totalHours += ((end1.getTime() - start1.getTime()) / (1000 * 60 * 60)) * 5;
 
         cgShifts.forEach((s2, j) => {
           if (i !== j) {
@@ -130,103 +130,103 @@ export function CalendarView({ viewMode, shifts, caregivers, onShiftClick }: Cal
 
       <Card noPadding className="overflow-hidden border border-slate-200">
         <div className="overflow-x-auto [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
-        <div className="min-w-[850px] lg:min-w-[1000px]">
-          {/* Header Row */}
-          <div className="flex border-b border-slate-200 bg-slate-50/90">
-            <div className="w-36 sm:w-60 shrink-0 py-3 px-3 sm:px-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 sticky left-0 z-50 bg-slate-50/95 backdrop-blur-md shadow-[2px_0_10px_rgba(0,0,0,0.03)]">
-              Caregiver
-            </div>
-            <div className="flex-1 relative flex">
-              {columns.map((col, idx) => (
-                <div key={idx} className="flex-1 py-3 text-center text-xs font-semibold text-slate-500 border-r border-slate-100 last:border-r-0">
-                  {viewMode === "Day"
-                    ? (typeof col === "number" ? (col > 12 ? `${col - 12}pm` : col === 12 ? '12pm' : `${col}am`) : col)
-                    : col}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Unfilled Row */}
-          <div className="flex border-b border-slate-200 hover:bg-slate-50/60 transition-colors">
-            <div className="w-36 sm:w-60 shrink-0 py-3.5 px-3 sm:px-4 border-r border-slate-200 flex items-center gap-2.5 sm:gap-3 sticky left-0 z-3 bg-white/95 backdrop-blur-md shadow-[2px_0_10px_rgba(0,0,0,0.03)]">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs shrink-0">
-                !
+          <div className="min-w-[850px] lg:min-w-[1000px]">
+            {/* Header Row */}
+            <div className="flex border-b border-slate-200 bg-slate-50/90">
+              <div className="w-36 sm:w-60 shrink-0 py-3 px-3 sm:px-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 sticky left-0 z-50 bg-slate-50/95 backdrop-blur-md shadow-[2px_0_10px_rgba(0,0,0,0.03)]">
+                Caregiver
               </div>
-              <div className="overflow-hidden w-full">
-                <div className="font-semibold text-red-600 text-xs sm:text-sm truncate">Unfilled Shifts</div>
-                <div className="text-[10px] sm:text-xs text-slate-400 truncate">{unfilledShifts.length} open shift(s)</div>
+              <div className="flex-1 relative flex">
+                {columns.map((col, idx) => (
+                  <div key={idx} className="flex-1 py-3 text-center text-xs font-semibold text-slate-500 border-r border-slate-100 last:border-r-0">
+                    {viewMode === "Day"
+                      ? (typeof col === "number" ? (col > 12 ? `${col - 12}pm` : col === 12 ? '12pm' : `${col}am`) : col)
+                      : col}
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex-1 relative min-h-[56px]">
-              {columns.map((_, idx) => (
-                <div key={idx} className="absolute top-0 bottom-0 border-r border-slate-100" style={{ left: `${(idx) * (100 / columns.length)}%`, width: `${100 / columns.length}%` }} />
-              ))}
-              {/* Shifts */}
-              {unfilledShifts.map((shift) => (
-                <div
-                  key={shift.id}
-                  onClick={() => onShiftClick(shift)}
-                  className={clsx(
-                    "absolute top-1.5 bottom-1.5 rounded-xl border flex flex-col justify-center px-2.5 cursor-pointer shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all overflow-hidden z-3",
-                    getShiftColor(shift.status)
-                  )}
-                  style={getShiftStyle(shift)}
-                >
-                  <div className="text-xs font-semibold truncate">{shift.patientName}</div>
-                  <div className="text-[10px] opacity-80 truncate flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {formatTime(shift.startTime)}-{formatTime(shift.endTime)}
-                  </div>
+
+            {/* Unfilled Row */}
+            <div className="flex border-b border-slate-200 hover:bg-slate-50/60 transition-colors">
+              <div className="w-36 sm:w-60 shrink-0 py-3.5 px-3 sm:px-4 border-r border-slate-200 flex items-center gap-2.5 sm:gap-3 sticky left-0 z-3 bg-white/95 backdrop-blur-md shadow-[2px_0_10px_rgba(0,0,0,0.03)]">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs shrink-0">
+                  !
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Caregiver Rows */}
-          {caregivers.map((caregiver) => {
-            const caregiverShifts = shifts.filter(s => s.assignedCaregiverId === caregiver.id);
-
-            return (
-              <div key={caregiver.id} className="flex border-b border-slate-100 last:border-b-0 hover:bg-slate-50/60 transition-colors group">
-                <div className="w-36 sm:w-60 shrink-0 py-3.5 px-3 sm:px-4 border-r border-slate-200 flex items-center gap-2.5 sm:gap-3 sticky left-0 z-30 bg-white/95 backdrop-blur-md shadow-[2px_0_10px_rgba(0,0,0,0.03)] group-hover:bg-slate-50/95 transition-colors">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-xs uppercase shrink-0">
-                    {caregiver.name.substring(0, 2)}
-                  </div>
-                  <div className="overflow-hidden w-full">
-                    <div className="font-semibold text-slate-800 text-xs sm:text-sm truncate">{caregiver.name}</div>
-                    <div className="text-[10px] sm:text-xs text-slate-400 truncate">{caregiver.credentials.join(" • ")}</div>
-                  </div>
+                <div className="overflow-hidden w-full">
+                  <div className="font-semibold text-red-600 text-xs sm:text-sm truncate">Unfilled Shifts</div>
+                  <div className="text-[10px] sm:text-xs text-slate-400 truncate">{unfilledShifts.length} open shift(s)</div>
                 </div>
-                <div className="flex-1 relative min-h-[56px]">
-                  {columns.map((_, idx) => (
-                    <div key={idx} className="absolute top-0 bottom-0 border-r border-slate-100" style={{ left: `${(idx) * (100 / columns.length)}%`, width: `${100 / columns.length}%` }} />
-                  ))}
-
-                  {caregiverShifts.map((shift) => (
-                    <div
-                      key={shift.id}
-                      onClick={() => onShiftClick(shift)}
-                      className={clsx(
-                        "absolute top-1.5 bottom-1.5 rounded-xl border flex flex-col justify-center px-2.5 cursor-pointer shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all overflow-hidden z-60",
-                        getShiftColor(shift.status)
-                      )}
-                      style={getShiftStyle(shift)}
-                    >
-                      <div className="text-xs font-semibold truncate">{shift.patientName}</div>
-                      <div className="text-[10px] opacity-80 truncate flex items-center gap-1">
-                        <Clock className="w-3 h-3 inline-block" />
-                        {formatTime(shift.startTime)}-{formatTime(shift.endTime)}
-                      </div>
+              </div>
+              <div className="flex-1 relative min-h-[56px]">
+                {columns.map((_, idx) => (
+                  <div key={idx} className="absolute top-0 bottom-0 border-r border-slate-100" style={{ left: `${(idx) * (100 / columns.length)}%`, width: `${100 / columns.length}%` }} />
+                ))}
+                {/* Shifts */}
+                {unfilledShifts.map((shift) => (
+                  <div
+                    key={shift.id}
+                    onClick={() => onShiftClick(shift)}
+                    className={clsx(
+                      "absolute top-1.5 bottom-1.5 rounded-xl border flex flex-col justify-center px-2.5 cursor-pointer shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all overflow-hidden z-3",
+                      getShiftColor(shift.status)
+                    )}
+                    style={getShiftStyle(shift)}
+                  >
+                    <div className="text-xs font-semibold truncate">{shift.patientName}</div>
+                    <div className="text-[10px] opacity-80 truncate flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatTime(shift.startTime)}-{formatTime(shift.endTime)}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
-            );
-          })}
+            </div>
+
+            {/* Caregiver Rows */}
+            {caregivers.map((caregiver) => {
+              const caregiverShifts = shifts.filter(s => s.assignedCaregiverId === caregiver.id);
+
+              return (
+                <div key={caregiver.id} className="flex border-b border-slate-100 last:border-b-0 hover:bg-slate-50/60 transition-colors group">
+                  <div className="w-36 sm:w-60 shrink-0 py-3.5 px-3 sm:px-4 border-r border-slate-200 flex items-center gap-2.5 sm:gap-3 sticky left-0 z-30 bg-white/95 backdrop-blur-md shadow-[2px_0_10px_rgba(0,0,0,0.03)] group-hover:bg-slate-50/95 transition-colors">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                      {caregiver.name.substring(0, 2)}
+                    </div>
+                    <div className="overflow-hidden w-full">
+                      <div className="font-semibold text-slate-800 text-xs truncate">{caregiver.name}</div>
+                      <div className="text-[10px] sm:text-xs text-slate-400 truncate">{caregiver.credentials.join(" • ")}</div>
+                    </div>
+                  </div>
+                  <div className="flex-1 relative min-h-[56px]">
+                    {columns.map((_, idx) => (
+                      <div key={idx} className="absolute top-0 bottom-0 border-r border-slate-100" style={{ left: `${(idx) * (100 / columns.length)}%`, width: `${100 / columns.length}%` }} />
+                    ))}
+
+                    {caregiverShifts.map((shift) => (
+                      <div
+                        key={shift.id}
+                        onClick={() => onShiftClick(shift)}
+                        className={clsx(
+                          "absolute top-1.5 bottom-1.5 rounded-xl border flex flex-col justify-center px-2.5 cursor-pointer shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all overflow-hidden z-60",
+                          getShiftColor(shift.status)
+                        )}
+                        style={getShiftStyle(shift)}
+                      >
+                        <div className="text-xs font-semibold truncate">{shift.patientName}</div>
+                        <div className="text-[10px] opacity-80 truncate flex items-center gap-1">
+                          <Clock className="w-3 h-3 inline-block" />
+                          {formatTime(shift.startTime)}-{formatTime(shift.endTime)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
     </div>
   );
 }

@@ -420,7 +420,7 @@ export function AdminHouseholdDirectory() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search households by name, client, caregiver, or address..."
-              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-full border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
@@ -436,7 +436,7 @@ export function AdminHouseholdDirectory() {
           <div className="relative" ref={filterDropdownRef}>
             <button
               onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 bg-white border rounded-full text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer ${activeFiltersCount > 0
+              className={`inline-flex items-center gap-2 px-4 py-2.5 bg-white border rounded-xl lg:rounded-2xl text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer ${activeFiltersCount > 0
                 ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
                 : "border-slate-200 text-slate-700 hover:bg-slate-50"
                 }`}
@@ -551,7 +551,7 @@ export function AdminHouseholdDirectory() {
         /* ======================== LIST VIEW ======================== */
         <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+            <table className="w-full text-left text-xs whitespace-nowrap">
               <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold">
                 <tr>
                   <th className="px-6 py-4">Household</th>
@@ -593,7 +593,7 @@ export function AdminHouseholdDirectory() {
 
                     {/* Primary Caregiver */}
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-800 text-xs sm:text-sm">
+                      <div className="font-semibold text-slate-800 text-xs">
                         {hh.primaryCaregiver.name}
                       </div>
                     </td>

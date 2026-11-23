@@ -271,3 +271,41 @@ export const SEED_ADMIN_REFERRALS: AdminIntakeReferralItem[] = [
     clientId: "CL-1009",
   },
 ];
+
+const ADMIN_REFERRALS_STORAGE_KEY = "lilisare_admin_referrals_v1";
+
+export function getAdminReferralsFromStorage(): AdminIntakeReferralItem[] {
+  if (typeof window === "undefined") {
+    return SEED_ADMIN_REFERRALS;
+  }
+  try {
+    const raw = localStorage.getItem(ADMIN_REFERRALS_STORAGE_KEY);
+    if (!raw) {
+      localStorage.setItem(ADMIN_REFERRALS_STORAGE_KEY, JSON.stringify(SEED_ADMIN_REFERRALS));
+      return SEED_ADMIN_REFERRALS;
+    }
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+    return SEED_ADMIN_REFERRALS;
+  } catch (err) {
+    console.error("Failed to read admin referrals from localStorage", err);
+    return SEED_ADMIN_REFERRALS;
+  }
+}
+
+export function saveAdminReferralsToStorage(referrals: AdminIntakeReferralItem[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(ADMIN_REFERRALS_STORAGE_KEY, JSON.stringify(referrals));
+  } catch (err) {
+    console.error("Failed to save admin referrals to localStorage", err);
+  }
+}
+
+export function getAdminReferralById(id: string): AdminIntakeReferralItem | null {
+  const all = getAdminReferralsFromStorage();
+  const found = all.find((r) => r.id.toLowerCase() === id.toLowerCase());
+  return found || null;
+}

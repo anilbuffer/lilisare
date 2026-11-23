@@ -258,7 +258,9 @@ export function AdminIntakeReferralsDirectory() {
     );
     toast.success(`${referral.patientName} successfully admitted as Active Client`);
     if (selectedReferral && selectedReferral.id === referral.id) {
-      setSelectedReferral((prev) => (prev ? { ...prev, status: "Enrolled" } : null));
+      setSelectedReferral((prev: AdminIntakeReferralItem | null) =>
+        prev ? { ...prev, status: "Enrolled" as ReferralStatus } : null
+      );
     }
   };
 
@@ -270,9 +272,6 @@ export function AdminIntakeReferralsDirectory() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Intake & Referrals Directory
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-            Executive referral pipeline, clinical triage, and conversion tracking for LiliSare Agency.
-          </p>
         </div>
 
         <button
@@ -289,9 +288,9 @@ export function AdminIntakeReferralsDirectory() {
         {/* Card 1: Total Referrals */}
         <div
           onClick={() => setActiveKpiKey(activeKpiKey === "ALL" ? "ALL" : "ALL")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ALL"
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ALL"
             ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -300,16 +299,8 @@ export function AdminIntakeReferralsDirectory() {
               <FileText className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpiData.total}
-          </div>
-          <div className="flex items-center justify-between text-[11px] font-medium text-slate-500">
-            <span>{items.length} active in directory</span>
-            {activeKpiKey === "ALL" && (
-              <span className="text-[10px] font-bold text-[#3D6B22] bg-[#E8F2E4] px-1.5 py-0.5 rounded border border-[#3D6B22]/20">
-                ACTIVE
-              </span>
-            )}
           </div>
         </div>
 
@@ -321,11 +312,8 @@ export function AdminIntakeReferralsDirectory() {
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpiData.conversionRate}
-          </div>
-          <div className="text-[11px] font-medium text-slate-500 truncate">
-            Referral-to-admission ratio
           </div>
         </div>
 
@@ -334,9 +322,9 @@ export function AdminIntakeReferralsDirectory() {
           onClick={() =>
             setActiveKpiKey(activeKpiKey === "ASSESSMENT" ? "ALL" : "ASSESSMENT")
           }
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ASSESSMENT"
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ASSESSMENT"
             ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -345,11 +333,8 @@ export function AdminIntakeReferralsDirectory() {
               <Stethoscope className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpiData.assessmentCount}
-          </div>
-          <div className="text-[11px] font-medium text-blue-700 truncate">
-            Clinical evaluation pending
           </div>
         </div>
 
@@ -361,11 +346,8 @@ export function AdminIntakeReferralsDirectory() {
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpiData.avgDays}
-          </div>
-          <div className="text-[11px] font-medium text-slate-500 truncate">
-            Average turnaround to care
           </div>
         </div>
 
@@ -374,9 +356,9 @@ export function AdminIntakeReferralsDirectory() {
           onClick={() =>
             setActiveKpiKey(activeKpiKey === "URGENT" ? "ALL" : "URGENT")
           }
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "URGENT"
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "URGENT"
             ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
-            : "border-slate-200 shadow-2xs hover:border-rose-300 hover:shadow-md"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -385,11 +367,8 @@ export function AdminIntakeReferralsDirectory() {
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpiData.urgentCount}
-          </div>
-          <div className="text-[11px] font-medium text-rose-600 truncate">
-            Hospital discharge priority
           </div>
         </div>
       </div>
@@ -405,7 +384,7 @@ export function AdminIntakeReferralsDirectory() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search referrals by patient, ID, diagnosis, or source..."
-              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-full border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
@@ -421,7 +400,7 @@ export function AdminIntakeReferralsDirectory() {
           <div className="relative" ref={filterDropdownRef}>
             <button
               onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 bg-white border rounded-full text-xs sm:text-sm font-semibold transition-all shadow-2xs cursor-pointer ${activeFiltersCount > 0
+              className={`inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-semibold transition-all border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] cursor-pointer ${activeFiltersCount > 0
                 ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
                 : "border-slate-200 text-slate-700 hover:bg-slate-50"
                 }`}
@@ -429,7 +408,7 @@ export function AdminIntakeReferralsDirectory() {
               <Filter className="w-4 h-4" />
               <span>Filters</span>
               {activeFiltersCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-[#3D6B22] text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="w-5 h-5 rounded-xl lg:rounded-2xl bg-[#3D6B22] text-white text-[10px] font-bold flex items-center justify-center">
                   {activeFiltersCount}
                 </span>
               )}
@@ -520,12 +499,12 @@ export function AdminIntakeReferralsDirectory() {
 
         {/* View Switcher (List vs Grid) */}
         <div className="flex items-center gap-2 self-end sm:self-auto">
-          <div className="inline-flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200">
+          <div className="inline-flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
             <button
               type="button"
               onClick={() => setViewMode("list")}
               className={`p-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${viewMode === "list"
-                ? "bg-white text-[#1E5622] shadow-xs font-bold"
+                ? "bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-800"
                 }`}
               title="Table List View"
@@ -537,7 +516,7 @@ export function AdminIntakeReferralsDirectory() {
               type="button"
               onClick={() => setViewMode("grid")}
               className={`p-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${viewMode === "grid"
-                ? "bg-white text-[#1E5622] shadow-xs font-bold"
+                ? "bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-800"
                 }`}
               title="Cards Grid View"
@@ -554,7 +533,7 @@ export function AdminIntakeReferralsDirectory() {
         /* ======================== LIST VIEW ======================== */
         <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+            <table className="w-full text-left text-xs whitespace-nowrap">
               <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold">
                 <tr>
                   <th className="px-6 py-4">Patient</th>
@@ -589,7 +568,7 @@ export function AdminIntakeReferralsDirectory() {
 
                     {/* Program */}
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-800 text-xs sm:text-sm">
+                      <div className="font-semibold text-slate-800 text-xs">
                         {ref.program}
                       </div>
                     </td>

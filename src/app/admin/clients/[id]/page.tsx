@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { INITIAL_CLIENTS } from "@/lib/clients/mockData";
-import { ClientDetailView } from "@/components/clients/ClientDetailView";
+import { AdminClientDetailView } from "@/components/admin/clients/AdminClientDetailView";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -18,13 +18,15 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
         </div>
       }
     >
-      <ClientDetailView clientId={resolvedParams.id} />
+      <AdminClientDetailView clientId={resolvedParams.id} />
     </Suspense>
   );
 }
 
 export function generateStaticParams() {
-  return INITIAL_CLIENTS.map((client) => ({
-    id: client.id,
-  }));
+  const ids = INITIAL_CLIENTS.map((client) => client.id);
+  const lowerIds = ids.map((id) => id.toLowerCase());
+  const upperIds = ids.map((id) => id.toUpperCase());
+  const allIds = Array.from(new Set(["[id]", "default", ...ids, ...lowerIds, ...upperIds]));
+  return allIds.map((id) => ({ id }));
 }

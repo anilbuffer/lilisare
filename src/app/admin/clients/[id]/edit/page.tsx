@@ -24,7 +24,9 @@ export default async function AdminClientEditPage({ params }: PageProps) {
 }
 
 export function generateStaticParams() {
-  return INITIAL_CLIENTS.map((client) => ({
-    id: client.id,
-  }));
+  const ids = INITIAL_CLIENTS.map((client) => client.id);
+  const lowerIds = ids.map((id) => id.toLowerCase());
+  const upperIds = ids.map((id) => id.toUpperCase());
+  const allIds = Array.from(new Set(["[id]", "default", ...ids, ...lowerIds, ...upperIds]));
+  return allIds.map((id) => ({ id }));
 }

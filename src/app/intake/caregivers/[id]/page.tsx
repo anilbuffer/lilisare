@@ -25,7 +25,11 @@ export default async function IntakeCaregiverDetailPage({ params }: PageProps) {
 
 export function generateStaticParams() {
   const initialIds = INITIAL_CAREGIVERS.map((c) => c.id);
+  const lowerInitial = initialIds.map((id) => id.toLowerCase());
+  const upperInitial = initialIds.map((id) => id.toUpperCase());
   const legacyIds = [
+    "[id]",
+    "default",
     "1",
     "2",
     "3",
@@ -45,7 +49,21 @@ export function generateStaticParams() {
     "c-3",
     "cg-dr-1",
     "cg-po-2",
+    "cg-102",
+    "cg-103",
+    "cg-104",
+    "cg-105",
+    "cg-106",
+    "cg-107",
+    "cg-108",
+    "cg-115",
+    "cg-120",
+    "cg-122",
+    "cg-130",
+    "cg-135",
   ];
-  const allIds = Array.from(new Set([...initialIds, ...legacyIds]));
+  const allIds = Array.from(
+    new Set([...initialIds, ...lowerInitial, ...upperInitial, ...legacyIds])
+  );
   return allIds.map((id) => ({ id }));
 }

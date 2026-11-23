@@ -1,7 +1,8 @@
 "use client";
 
-import ClientsPage from "@/app/clients/page";
+import React from "react";
+import { AdminClientDirectory } from "@/components/admin/clients/AdminClientDirectory";
 
 export default function AdminClientsPage() {
-  return <ClientsPage />;
+  return <AdminClientDirectory />;
 }

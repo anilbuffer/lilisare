@@ -236,7 +236,7 @@ export default function EVVMonitoringPage() {
               </div>
 
               {/* Card 2: Top Offenders */}
-              <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between h-full min-h-[300px]">
+              <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between h-full min-h-[300px]">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 mb-0.5">Top Offenders</h3>
                   <p className="text-xs text-slate-500 font-medium mb-4">Caregivers with the most exceptions this period.</p>
@@ -268,7 +268,7 @@ export default function EVVMonitoringPage() {
             className="space-y-4"
           >
             {/* Exceptions Queue Card */}
-            <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
+            <div className="relative bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
               <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   Exceptions Queue

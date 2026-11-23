@@ -109,7 +109,7 @@ export function IntakeAiBriefingDrawer({
         {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-5 text-sm flex-1">
           {/* Audio Player Pill */}
-          <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+          <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-slate-700">Voice Synthesis:</span>
               <span className="text-[11px] text-slate-500">Synced at {lastSyncTime}</span>

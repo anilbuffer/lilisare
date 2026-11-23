@@ -380,7 +380,7 @@ export function CandidateDetailPanel({ candidate, isOpen, onClose, onUpdateCandi
 
             {activeTab === "notes" && (
               <div className="space-y-4">
-                <form onSubmit={handleAddNote} className="space-y-3 bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
+                <form onSubmit={handleAddNote} className="space-y-3 bg-slate-50/80 p-4 rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold text-slate-800 text-xs">Add Interviewer Note</span>
                     <div className="flex items-center gap-1.5 text-xs">
@@ -388,7 +388,7 @@ export function CandidateDetailPanel({ candidate, isOpen, onClose, onUpdateCandi
                       <select
                         value={newNoteRating}
                         onChange={(e) => setNewNoteRating(Number(e.target.value))}
-                        className="bg-white border border-slate-200/80 rounded-full px-3 py-1 font-medium outline-none shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
+                        className="bg-white border border-slate-200 rounded-full px-3 py-1 font-medium outline-none shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
                       >
                         <option value={5}>5 Stars</option>
                         <option value={4}>4 Stars</option>
@@ -401,7 +401,7 @@ export function CandidateDetailPanel({ candidate, isOpen, onClose, onUpdateCandi
                     placeholder="Enter notes on clinical skills, availability, soft skills..."
                     value={newNoteText}
                     onChange={(e) => setNewNoteText(e.target.value)}
-                    className="w-full p-3 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-brand-teal outline-none text-xs bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
+                    className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-teal outline-none text-xs bg-white shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
                   />
                   <div className="text-right">
                     <button type="submit" className="px-4 py-1.5 bg-brand-teal text-white font-semibold rounded-full shadow-brand-teal/20 shadow-[0_4px_24px_rgba(0,0,0,0.04)] active:scale-95">

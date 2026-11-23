@@ -506,14 +506,6 @@ export function OnboardingList({ activeKpiFilter = "all", onSelectKpiFilter }: O
                           {hire.name}
                           <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 text-brand-teal transition-opacity" />
                         </button>
-                        <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
-                          <span>{hire.role}</span>
-                          {hire.lastReminderSent && (
-                            <span className="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                              <Mail className="w-2.5 h-2.5" /> Sent
-                            </span>
-                          )}
-                        </div>
                       </div>
                     </div>
                   </td>

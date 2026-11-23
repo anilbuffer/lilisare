@@ -151,11 +151,10 @@ export function CaregiverContextualDrawer({
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`py-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${
-                  activeTab === tab
+                className={`py-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${activeTab === tab
                     ? "border-[#3D6B22] text-[#3D6B22]"
                     : "border-transparent text-slate-500 hover:text-slate-800"
-                }`}
+                  }`}
               >
                 ({tab})
               </button>
@@ -167,7 +166,7 @@ export function CaregiverContextualDrawer({
             {activeTab === "Profile" && (
               <>
                 {/* 1. Caregiver Information */}
-                <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-3">
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                     Caregiver Information
                   </h4>
@@ -198,7 +197,7 @@ export function CaregiverContextualDrawer({
                 </div>
 
                 {/* 2. Verification Checklist */}
-                <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-3">
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                     Verification Checklist
                   </h4>
@@ -238,7 +237,7 @@ export function CaregiverContextualDrawer({
                 </div>
 
                 {/* 3. Client Assignment */}
-                <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-3">
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                     Client Assignment
                   </h4>
@@ -292,11 +291,10 @@ export function CaregiverContextualDrawer({
                     Credentials & Licenses
                   </h4>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
-                      caregiver.documentsCredentials.overallStatus === "Verified"
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded border ${caregiver.documentsCredentials.overallStatus === "Verified"
                         ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20"
                         : "bg-rose-50 text-rose-700 border-rose-200"
-                    }`}
+                      }`}
                   >
                     {caregiver.documentsCredentials.overallStatus}
                   </span>
@@ -305,7 +303,7 @@ export function CaregiverContextualDrawer({
                 {caregiver.documentsCredentials.items.map((cred) => (
                   <div
                     key={cred.id}
-                    className="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-1.5"
+                    className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1.5"
                   >
                     <div className="flex items-center justify-between">
                       <h5 className="text-xs font-bold text-slate-900">{cred.name}</h5>
@@ -329,7 +327,7 @@ export function CaregiverContextualDrawer({
 
             {activeTab === "Assignments" && (
               <div className="space-y-4">
-                <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-3 text-xs">
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3 text-xs">
                   <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
                     Current Schedule & Capacity
                   </h4>
@@ -386,7 +384,7 @@ export function CaregiverContextualDrawer({
                   caregiver.activityHistory.recentUpdates.map((act) => (
                     <div
                       key={act.id}
-                      className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 text-xs space-y-1"
+                      className="p-3 rounded-xl border border-slate-200 bg-slate-50/50 text-xs space-y-1"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-slate-900">{act.title}</span>

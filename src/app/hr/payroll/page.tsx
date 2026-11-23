@@ -1609,7 +1609,7 @@ export default function HrPayrollPage() {
                 <select
                   value={inquiryCategory}
                   onChange={(e) => setInquiryCategory(e.target.value)}
-                  className="w-full p-3 bg-slate-50 border border-slate-200/80 rounded-xl font-medium focus:ring-2 focus:ring-brand-teal focus:outline-none transition-shadow shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:ring-2 focus:ring-brand-teal focus:outline-none transition-shadow shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                 >
                   <option value="Overtime Rate Adjustment">Overtime Rate Adjustment</option>
                   <option value="EVV Clock Discrepancy">EVV Clock Discrepancy</option>
@@ -1738,7 +1738,7 @@ export default function HrPayrollPage() {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="bg-white rounded-[18px] max-w-2xl w-full shadow-[0_24px_64px_rgba(0,0,0,0.12)] border border-slate-200/80 flex flex-col max-h-[90vh] overflow-hidden"
+            className="bg-white rounded-[18px] max-w-2xl w-full shadow-[0_24px_64px_rgba(0,0,0,0.12)] border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 p-3 sm:p-4 shrink-0 bg-white z-10">
@@ -1827,13 +1827,13 @@ export default function HrPayrollPage() {
                   required
                   value={emailTarget.email}
                   onChange={(e) => setEmailTarget({ ...emailTarget, email: e.target.value })}
-                  className="w-full p-3 bg-slate-50 border border-slate-200/80 rounded-xl font-medium focus:ring-2 focus:ring-brand-teal focus:outline-none transition-shadow shadow-[0_24px_64px_rgba(0,0,0,0.12)]"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:ring-2 focus:ring-brand-teal focus:outline-none transition-shadow shadow-[0_24px_64px_rgba(0,0,0,0.12)]"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block font-semibold text-slate-700">Pay Period Statement</label>
-                <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-700 font-semibold flex flex-col gap-1 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold flex flex-col gap-1 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                   <span className="font-normal">{emailTarget.payPeriod}</span>
                   <span className="text-brand-teal text-sm">Gross Total: ${emailTarget.grossTotal.toFixed(2)}</span>
                 </div>

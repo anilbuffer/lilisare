@@ -217,7 +217,6 @@ export default function SchedulerCaregiversPage() {
                                 {cg.name}
                               </Link>
                             </div>
-                            <div className="text-[10px] text-slate-500">{cg.role}</div>
                           </div>
                         </div>
                       </td>

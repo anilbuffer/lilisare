@@ -125,9 +125,7 @@ export function ClientsTable({
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-500 font-mono">
-                            {client.id} • Age {client.age}
-                          </div>
+
                         </div>
                       </div>
                     </td>
@@ -138,9 +136,7 @@ export function ClientsTable({
                         <span className="font-semibold text-slate-800 text-xs truncate max-w-[170px]">
                           {client.household.name}
                         </span>
-                        <span className="text-[11px] text-slate-500 font-mono">
-                          {client.household.code} • {client.household.city}, {client.household.state}
-                        </span>
+
                       </div>
                     </td>
 
@@ -162,10 +158,7 @@ export function ClientsTable({
                           <span className="font-semibold text-slate-800 text-xs">
                             {client.assignedCareTeam.primaryCaregiver.name}
                           </span>
-                          <span className="text-[11px] text-slate-500">
-                            {client.assignedCareTeam.primaryCaregiver.id} •{" "}
-                            {client.assignedCareTeam.primaryCaregiver.relationship.split("(")[0]}
-                          </span>
+
                         </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600">

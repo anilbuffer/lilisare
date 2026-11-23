@@ -58,7 +58,7 @@ export function AuthorizationsComplianceCard({ metrics: propMetrics }: Authoriza
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch">
       {/* Left: Authorizations Card */}
-      <Card className="p-4 sm:p-6 border border-slate-200 hover:border-[#3D6B22]/50 bg-white rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-5">
+      <Card className="flex flex-col justify-between space-y-5">
         <div>
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
             <div className="flex items-center gap-3 min-w-0">
@@ -139,7 +139,7 @@ export function AuthorizationsComplianceCard({ metrics: propMetrics }: Authoriza
       </Card>
 
       {/* Right: Compliance Card */}
-      <Card className="p-4 sm:p-6 border border-slate-200 hover:border-[#3D6B22]/50 bg-white rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-5">
+      <Card className="flex flex-col justify-between space-y-5">
         <div>
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
             <div className="flex items-center gap-3 min-w-0">

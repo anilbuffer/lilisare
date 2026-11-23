@@ -47,7 +47,11 @@ import { CaregiverRecord, CaregiverType, CaregiverStatus } from "@/types/caregiv
 import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
 import { toast } from "sonner";
 
-function AddCaregiverWizard() {
+function AddCaregiverWizard({
+  baseBackPath = "/caregivers",
+}: {
+  baseBackPath?: string;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathwayParam = searchParams.get("pathway");
@@ -327,17 +331,17 @@ function AddCaregiverWizard() {
       availabilityAssignments: {
         assignedClient: linkedClient
           ? {
-              id: linkedClient.id,
-              name: linkedClient.name,
-              avatarUrl: linkedClient.avatarUrl,
-              householdId: linkedClient.household.id,
-              householdName: linkedClient.household.name,
-              relationship: relationshipToClient,
-              weeklyAuthorizedHours: capacityHours,
-              scheduledWeeklyHours: 0,
-              startDate: "Pending Activation",
-              status: "Pending Setup",
-            }
+            id: linkedClient.id,
+            name: linkedClient.name,
+            avatarUrl: linkedClient.avatarUrl,
+            householdId: linkedClient.household.id,
+            householdName: linkedClient.household.name,
+            relationship: relationshipToClient,
+            weeklyAuthorizedHours: capacityHours,
+            scheduledWeeklyHours: 0,
+            startDate: "Pending Activation",
+            status: "Pending Setup",
+          }
           : undefined,
         weeklyCapacityHours: capacityHours,
         scheduledWeeklyHours: 0,
@@ -396,7 +400,7 @@ function AddCaregiverWizard() {
       {/* Back Button with subtle shadow */}
       <div>
         <Link
-          href="/caregivers"
+          href={baseBackPath}
           className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -445,20 +449,18 @@ function AddCaregiverWizard() {
                   }}
                 >
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                      isDone
-                        ? "bg-[#3D6B22] text-white shadow-sm"
-                        : isCurrent
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone
+                      ? "bg-[#3D6B22] text-white shadow-sm"
+                      : isCurrent
                         ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
                         : "bg-slate-100 text-slate-400 border border-slate-200"
-                    }`}
+                      }`}
                   >
                     {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
                   </div>
                   <span
-                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${
-                      isCurrent ? "text-[#3D6B22]" : "text-slate-500"
-                    }`}
+                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${isCurrent ? "text-[#3D6B22]" : "text-slate-500"
+                      }`}
                   >
                     {s.title}
                   </span>
@@ -492,18 +494,16 @@ function AddCaregiverWizard() {
                 const first = CONVERTABLE_APPLICATIONS[0];
                 if (first) handleSelectApplication(first);
               }}
-              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
-                creationPath === "convert"
-                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
-                  : "border-slate-200 bg-slate-50/50 hover:bg-white"
-              }`}
+              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${creationPath === "convert"
+                ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                }`}
             >
               <div
-                className={`p-2 rounded-xl shrink-0 ${
-                  creationPath === "convert"
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "bg-slate-200 text-slate-600"
-                }`}
+                className={`p-2 rounded-xl shrink-0 ${creationPath === "convert"
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "bg-slate-200 text-slate-600"
+                  }`}
               >
                 <FolderInput className="w-4 h-4" />
               </div>
@@ -527,18 +527,16 @@ function AddCaregiverWizard() {
                 setEmail("");
                 setCaregivingBoundaries("");
               }}
-              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
-                creationPath === "direct"
-                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
-                  : "border-slate-200 bg-slate-50/50 hover:bg-white"
-              }`}
+              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${creationPath === "direct"
+                ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                }`}
             >
               <div
-                className={`p-2 rounded-xl shrink-0 ${
-                  creationPath === "direct"
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "bg-slate-200 text-slate-600"
-                }`}
+                className={`p-2 rounded-xl shrink-0 ${creationPath === "direct"
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "bg-slate-200 text-slate-600"
+                  }`}
               >
                 <UserPlus className="w-4 h-4" />
               </div>
@@ -565,11 +563,10 @@ function AddCaregiverWizard() {
                     key={app.id}
                     type="button"
                     onClick={() => handleSelectApplication(app)}
-                    className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
-                      selectedAppId === app.id
-                        ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs font-semibold ring-1 ring-[#3D6B22]"
-                        : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-                    }`}
+                    className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${selectedAppId === app.id
+                      ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs font-semibold ring-1 ring-[#3D6B22]"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-[10px] text-slate-500 font-bold">{app.id}</span>
@@ -839,11 +836,10 @@ function AddCaregiverWizard() {
                       key={type}
                       type="button"
                       onClick={() => setCaregiverType(type)}
-                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
-                        caregiverType === type
-                          ? "border-[#3D6B22] bg-[#3D6B22]/10 text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.12)]"
-                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
-                      }`}
+                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${caregiverType === type
+                        ? "border-[#3D6B22] bg-[#3D6B22]/10 text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.12)]"
+                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
+                        }`}
                     >
                       <span className="text-xs block font-semibold">{type}</span>
                     </button>
@@ -937,9 +933,8 @@ function AddCaregiverWizard() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
-                        idVerified ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
-                      }`}
+                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${idVerified ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
+                        }`}
                     >
                       {idVerified && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>
@@ -951,9 +946,8 @@ function AddCaregiverWizard() {
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                      idVerified ? "bg-emerald-50 text-[#1E5622] border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"
-                    }`}
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${idVerified ? "bg-emerald-50 text-[#1E5622] border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"
+                      }`}
                   >
                     {idVerified ? "Verified" : "Pending"}
                   </span>
@@ -965,9 +959,8 @@ function AddCaregiverWizard() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
-                        cprVerified ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
-                      }`}
+                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${cprVerified ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
+                        }`}
                     >
                       {cprVerified && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>
@@ -979,9 +972,8 @@ function AddCaregiverWizard() {
                     </div>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                      cprVerified ? "bg-emerald-50 text-[#1E5622] border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"
-                    }`}
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${cprVerified ? "bg-emerald-50 text-[#1E5622] border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"
+                      }`}
                   >
                     {cprVerified ? `Valid until ${cprExpiry}` : "Pending Upload"}
                   </span>
@@ -993,9 +985,8 @@ function AddCaregiverWizard() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
-                        tbTested ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
-                      }`}
+                      className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${tbTested ? "bg-[#3D6B22] text-white border-[#3D6B22]" : "border-slate-300 bg-white"
+                        }`}
                     >
                       {tbTested && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>
@@ -1046,18 +1037,16 @@ function AddCaregiverWizard() {
                       <div
                         key={course}
                         onClick={() => toggleCourse(course)}
-                        className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
-                          isChecked
-                            ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#1E5622] font-semibold ring-1 ring-[#3D6B22]/30 shadow-xs"
-                            : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-50"
-                        }`}
+                        className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${isChecked
+                          ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#1E5622] font-semibold ring-1 ring-[#3D6B22]/30 shadow-xs"
+                          : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-50"
+                          }`}
                       >
                         <span
-                          className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
-                            isChecked
-                              ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
-                              : "border-slate-300 bg-white"
-                          }`}
+                          className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${isChecked
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
+                            : "border-slate-300 bg-white"
+                            }`}
                         >
                           {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                         </span>
@@ -1208,7 +1197,7 @@ function AddCaregiverWizard() {
           {/* Action Navigation */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
-              href={`/caregivers/${createdCaregiver.id}`}
+              href={`${baseBackPath}/${createdCaregiver.id}`}
               className="px-5 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_16px_rgba(61,107,34,0.25)] flex items-center gap-1.5 cursor-pointer"
             >
               <span>View Full Caregiver Profile</span>
@@ -1216,7 +1205,7 @@ function AddCaregiverWizard() {
             </Link>
 
             <Link
-              href="/caregivers"
+              href={baseBackPath}
               className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
             >
               Return to Caregivers Directory
@@ -1228,7 +1217,11 @@ function AddCaregiverWizard() {
   );
 }
 
-export default function AddCaregiverPage() {
+export default function AddCaregiverPage({
+  baseBackPath = "/caregivers",
+}: {
+  baseBackPath?: string;
+}) {
   return (
     <Suspense
       fallback={
@@ -1237,7 +1230,7 @@ export default function AddCaregiverPage() {
         </div>
       }
     >
-      <AddCaregiverWizard />
+      <AddCaregiverWizard baseBackPath={baseBackPath} />
     </Suspense>
   );
 }

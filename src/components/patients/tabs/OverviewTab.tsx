@@ -10,7 +10,7 @@ export function OverviewTab({ patient }: { patient: Patient }) {
       <div className="lg:col-span-2 flex flex-col gap-4">
         {/* Demographics & Insurance */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden">
+          <Card className="flex flex-col h-full">
             <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Users className="w-5 h-5 text-brand-teal" /> Demographics
             </h3>
@@ -46,7 +46,7 @@ export function OverviewTab({ patient }: { patient: Patient }) {
             </div>
           </Card>
 
-          <Card className="bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden">
+          <Card className="flex flex-col h-full">
             <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
               <Shield className="w-5 h-5 text-brand-teal" /> Insurance
             </h3>
@@ -98,7 +98,7 @@ export function OverviewTab({ patient }: { patient: Patient }) {
         </div>
 
         {/* Risk Summary */}
-        <Card className="bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden">
+        <Card className="flex flex-col h-full">
           <h3 className="text-lg font-semibold text-text-primary mb-4">Risk Summary</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
@@ -128,7 +128,7 @@ export function OverviewTab({ patient }: { patient: Patient }) {
       <div className="relative lg:h-full w-full">
         <div className="flex flex-col gap-4 lg:absolute lg:inset-0">
           {/* Care Team */}
-        <Card className="bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden shrink-0">
+        <Card className="flex flex-col h-full shrink-0">
           <h3 className="text-lg font-semibold text-text-primary mb-4">Care Team</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3 group">
@@ -189,7 +189,7 @@ export function OverviewTab({ patient }: { patient: Patient }) {
         </Card>
 
         {/* Recent Activity */}
-        <Card className="bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden flex-1 flex flex-col min-h-0">
+        <Card className="flex flex-col h-full flex-1 flex flex-col min-h-0">
           <h3 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2 shrink-0">
             <Clock className="w-5 h-5 text-brand-teal" /> Recent Activity
           </h3>

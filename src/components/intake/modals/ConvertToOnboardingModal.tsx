@@ -110,7 +110,7 @@ export function ConvertToOnboardingModal({
         {/* Body */}
         <div className="p-5 sm:p-6 space-y-4 text-xs bg-white flex-1 overflow-y-auto custom-scrollbar">
           {/* Inquiry Summary Card */}
-          <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80 flex items-center justify-between">
+          <div className="p-3.5 bg-slate-50/70 rounded-xl border border-slate-200 flex items-center justify-between">
             <div className="min-w-0 pr-2">
               <div className="text-[13px] font-bold text-slate-900 truncate">
                 {inquiry.familyInfo.clientInfo.name}
@@ -136,11 +136,10 @@ export function ConvertToOnboardingModal({
 
             {/* Client Registration Option */}
             <label
-              className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${
-                createClient
+              className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${createClient
                   ? "bg-[#3D6B22]/5 border-[#3D6B22] shadow-2xs"
                   : "bg-white border-slate-200 hover:bg-slate-50"
-              }`}
+                }`}
             >
               <input
                 type="checkbox"
@@ -163,11 +162,10 @@ export function ConvertToOnboardingModal({
 
             {/* Caregiver Registration Option */}
             <label
-              className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${
-                createCaregiver
+              className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${createCaregiver
                   ? "bg-[#3D6B22]/5 border-[#3D6B22] shadow-2xs"
                   : "bg-white border-slate-200 hover:bg-slate-50"
-              }`}
+                }`}
             >
               <input
                 type="checkbox"

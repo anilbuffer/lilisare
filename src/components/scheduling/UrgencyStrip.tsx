@@ -53,7 +53,7 @@ export function UrgencyStrip() {
         return (
           <div
             key={idx}
-            className="bg-white/80 backdrop-blur-xl rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden group flex items-center gap-3"
+            className="bg-white/80 backdrop-blur-xl rounded-2xl p-3.5 sm:p-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.08)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden group flex items-center gap-3"
           >
             <div className={clsx("p-2 sm:p-2.5 rounded-xl border shrink-0 transition-transform duration-300 group-hover:scale-110", kpi.bg, kpi.color)}>
               <Icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />

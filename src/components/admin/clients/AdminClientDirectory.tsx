@@ -404,11 +404,10 @@ export function AdminClientDirectory() {
         {/* Card 1: Total Clients */}
         <div
           onClick={() => handleKpiCardClick("TOTAL")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${
-            activeKpiKey === "TOTAL"
-              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-              : "border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md"
-          }`}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "TOTAL"
+            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            }`}
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs sm:text-sm font-semibold text-slate-700">Total Clients</span>
@@ -416,7 +415,7 @@ export function AdminClientDirectory() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
             {kpis.total}
           </div>
           <div className="flex items-center justify-between text-[11px] font-medium text-slate-500">
@@ -432,11 +431,10 @@ export function AdminClientDirectory() {
         {/* Card 2: Active Care */}
         <div
           onClick={() => handleKpiCardClick("ACTIVE")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${
-            activeKpiKey === "ACTIVE"
-              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-              : "border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md"
-          }`}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ACTIVE"
+            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            }`}
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs sm:text-sm font-semibold text-slate-700">Active Care</span>
@@ -444,7 +442,7 @@ export function AdminClientDirectory() {
               <Heart className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
             {kpis.active}
           </div>
           <div className="text-[11px] font-medium text-slate-500 truncate">
@@ -455,11 +453,10 @@ export function AdminClientDirectory() {
         {/* Card 3: High Risk Alert */}
         <div
           onClick={() => handleKpiCardClick("HIGH_RISK")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${
-            activeKpiKey === "HIGH_RISK"
-              ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
-              : "border-slate-200 shadow-2xs hover:border-rose-300 hover:shadow-md"
-          }`}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HIGH_RISK"
+            ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
+            : "border-slate-200 shadow-2xs hover:border-rose-300 hover:shadow-md"
+            }`}
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs sm:text-sm font-semibold text-slate-700">High Risk Alert</span>
@@ -467,7 +464,7 @@ export function AdminClientDirectory() {
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
             {kpis.highRisk}
           </div>
           <div className="text-[11px] font-medium text-rose-600 truncate">
@@ -478,11 +475,10 @@ export function AdminClientDirectory() {
         {/* Card 4: Hospitalized */}
         <div
           onClick={() => handleKpiCardClick("HOSPITALIZED")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${
-            activeKpiKey === "HOSPITALIZED"
-              ? "border-amber-500 shadow-md ring-2 ring-amber-500/15"
-              : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
-          }`}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HOSPITALIZED"
+            ? "border-amber-500 shadow-md ring-2 ring-amber-500/15"
+            : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
+            }`}
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs sm:text-sm font-semibold text-slate-700">Hospitalized</span>
@@ -490,7 +486,7 @@ export function AdminClientDirectory() {
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
             {kpis.hospitalized}
           </div>
           <div className="text-[11px] font-medium text-amber-700 truncate">
@@ -501,11 +497,10 @@ export function AdminClientDirectory() {
         {/* Card 5: Care Completed */}
         <div
           onClick={() => handleKpiCardClick("COMPLETED")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${
-            activeKpiKey === "COMPLETED"
-              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-              : "border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md"
-          }`}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "COMPLETED"
+            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            }`}
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs sm:text-sm font-semibold text-slate-700">Care Completed</span>
@@ -513,7 +508,7 @@ export function AdminClientDirectory() {
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
             {kpis.completed}
           </div>
           <div className="text-[11px] font-medium text-slate-500 truncate">
@@ -560,19 +555,18 @@ export function AdminClientDirectory() {
               <button
                 type="button"
                 onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
-                  statusFilter !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                }`}
+                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${statusFilter !== "ALL"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
+                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                  }`}
               >
                 <Filter className="w-3.5 h-3.5 text-slate-500" />
                 <span>
                   {statusFilter === "ALL"
                     ? "Status: All"
                     : statusFilter === "High Risk"
-                    ? "Status: High Risk"
-                    : `Status: ${statusFilter}`}
+                      ? "Status: High Risk"
+                      : `Status: ${statusFilter}`}
                 </span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
@@ -597,11 +591,10 @@ export function AdminClientDirectory() {
                         setCurrentPage(1);
                         setIsStatusDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors ${
-                        statusFilter === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
-                      }`}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors ${statusFilter === option.value
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
+                        }`}
                     >
                       <span>{option.label}</span>
                       {statusFilter === option.value && (
@@ -618,11 +611,10 @@ export function AdminClientDirectory() {
               <button
                 type="button"
                 onClick={() => setIsRiskDropdownOpen(!isRiskDropdownOpen)}
-                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all ${
-                  riskFilter !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
+                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all ${riskFilter !== "ALL"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
               >
                 <span>{riskFilter === "ALL" ? "Risk Level" : riskFilter}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
@@ -646,11 +638,10 @@ export function AdminClientDirectory() {
                         setCurrentPage(1);
                         setIsRiskDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors ${
-                        riskFilter === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
-                      }`}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors ${riskFilter === option.value
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
+                        }`}
                     >
                       <span>{option.label}</span>
                       {riskFilter === option.value && (
@@ -674,16 +665,15 @@ export function AdminClientDirectory() {
             )}
 
             {/* View Switcher: List vs Grid Toggle */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
                 title="List View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  viewMode === "list"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "list"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
               >
                 <ListIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">List</span>
@@ -692,11 +682,10 @@ export function AdminClientDirectory() {
                 type="button"
                 onClick={() => setViewMode("grid")}
                 title="Grid View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  viewMode === "grid"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${viewMode === "grid"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
               >
                 <LayoutGrid className="w-4 h-4" />
                 <span className="hidden sm:inline">Grid</span>
@@ -772,9 +761,6 @@ export function AdminClientDirectory() {
                             <div className="font-bold text-sm text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                               {client.name}
                             </div>
-                            <div className="text-xs text-slate-500 font-medium mt-0.5">
-                              {client.age} yrs • {client.gender}
-                            </div>
                           </div>
                         </div>
                       </td>
@@ -782,17 +768,16 @@ export function AdminClientDirectory() {
                       {/* Status */}
                       <td className="py-4 px-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                            client.status === "Active"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : client.status === "Hospitalized"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${client.status === "Active"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : client.status === "Hospitalized"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
                               : client.status === "Care Completed"
-                              ? "bg-rose-50 text-rose-700 border-rose-200"
-                              : client.status === "Discharged"
-                              ? "bg-slate-100 text-slate-600 border-slate-200"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
-                          }`}
+                                ? "bg-rose-50 text-rose-700 border-rose-200"
+                                : client.status === "Discharged"
+                                  ? "bg-slate-100 text-slate-600 border-slate-200"
+                                  : "bg-blue-50 text-blue-700 border-blue-200"
+                            }`}
                         >
                           {client.status}
                         </span>
@@ -801,13 +786,12 @@ export function AdminClientDirectory() {
                       {/* Risk Level */}
                       <td className="py-4 px-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                            client.riskLevel === "High Risk"
-                              ? "bg-rose-50 text-rose-700 border-rose-200"
-                              : client.riskLevel === "Medium Risk"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${client.riskLevel === "High Risk"
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : client.riskLevel === "Medium Risk"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
                               : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          }`}
+                            }`}
                         >
                           {client.riskLevel}
                         </span>
@@ -850,7 +834,7 @@ export function AdminClientDirectory() {
             return (
               <div
                 key={client.id}
-                className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-5 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between relative group"
+                className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between relative group"
               >
                 <div>
                   {/* Card Header: Default Avatar, Name, Age • Gender, 3-Dots Menu */}
@@ -922,17 +906,16 @@ export function AdminClientDirectory() {
                     <div className="flex items-center justify-between py-1 border-b border-slate-100">
                       <span className="text-slate-500 font-medium">Status</span>
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-                          client.status === "Active"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : client.status === "Hospitalized"
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${client.status === "Active"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : client.status === "Hospitalized"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
                             : client.status === "Care Completed"
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
-                            : client.status === "Discharged"
-                            ? "bg-slate-100 text-slate-600 border-slate-200"
-                            : "bg-blue-50 text-blue-700 border-blue-200"
-                        }`}
+                              ? "bg-rose-50 text-rose-700 border-rose-200"
+                              : client.status === "Discharged"
+                                ? "bg-slate-100 text-slate-600 border-slate-200"
+                                : "bg-blue-50 text-blue-700 border-blue-200"
+                          }`}
                       >
                         {client.status}
                       </span>
@@ -942,13 +925,12 @@ export function AdminClientDirectory() {
                     <div className="flex items-center justify-between py-1 border-b border-slate-100">
                       <span className="text-slate-500 font-medium">Risk Level</span>
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-                          client.riskLevel === "High Risk"
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
-                            : client.riskLevel === "Medium Risk"
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${client.riskLevel === "High Risk"
+                          ? "bg-rose-50 text-rose-700 border-rose-200"
+                          : client.riskLevel === "Medium Risk"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
                             : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        }`}
+                          }`}
                       >
                         {client.riskLevel}
                       </span>
@@ -1011,11 +993,10 @@ export function AdminClientDirectory() {
               <button
                 key={pageNum}
                 onClick={() => setCurrentPage(pageNum)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  currentPage === pageNum
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "text-slate-700 hover:bg-slate-100 border border-slate-200"
-                }`}
+                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentPage === pageNum
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "text-slate-700 hover:bg-slate-100 border border-slate-200"
+                  }`}
               >
                 {pageNum}
               </button>

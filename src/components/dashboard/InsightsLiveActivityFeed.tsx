@@ -166,7 +166,7 @@ export function InsightsLiveActivityFeed() {
   };
 
   return (
-    <Card className="p-5 border border-slate-200 hover:border-[#3D6B22]/50 bg-white rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 space-y-4">
+    <Card className="space-y-4">
       {/* Tab Navigation Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-2.5">

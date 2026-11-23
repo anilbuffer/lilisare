@@ -108,10 +108,10 @@ export function AuthorizationDrawer({
                           record.status === "APPROVED"
                             ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                             : record.status === "PENDING" || record.status === "REQUESTED"
-                            ? "bg-amber-50 text-amber-800 border border-amber-200"
-                            : record.status === "DENIED"
-                            ? "bg-rose-50 text-rose-800 border border-rose-200"
-                            : "bg-slate-100 text-slate-700 border border-slate-200"
+                              ? "bg-amber-50 text-amber-800 border border-amber-200"
+                              : record.status === "DENIED"
+                                ? "bg-rose-50 text-rose-800 border border-rose-200"
+                                : "bg-slate-100 text-slate-700 border border-slate-200"
                         )}
                       >
                         {record.status}
@@ -163,7 +163,7 @@ export function AuthorizationDrawer({
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs">
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
                       <span className="text-[10px] text-slate-400 font-semibold uppercase block">Approved</span>
                       <span className="text-lg font-bold text-slate-900 mt-0.5 block">
                         {record.unitsApproved}
@@ -171,7 +171,7 @@ export function AuthorizationDrawer({
                       <span className="text-[10px] text-slate-400">{record.unitMeasure} total</span>
                     </div>
 
-                    <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs">
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
                       <span className="text-[10px] text-slate-400 font-semibold uppercase block">Used to Date</span>
                       <span className="text-lg font-bold text-slate-700 mt-0.5 block">
                         {record.unitsUsed}
@@ -179,7 +179,7 @@ export function AuthorizationDrawer({
                       <span className="text-[10px] text-slate-400">{burnRate}% consumed</span>
                     </div>
 
-                    <div className="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs">
+                    <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
                       <span className="text-[10px] text-slate-400 font-semibold uppercase block">Remaining Units</span>
                       <span
                         className={cn(

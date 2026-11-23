@@ -1,7 +1,7 @@
 "use client";
 
-import HouseholdsPage from "@/app/households/page";
+import { AdminHouseholdDirectory } from "@/components/admin/households/AdminHouseholdDirectory";
 
 export default function AdminHouseholdsPage() {
-  return <HouseholdsPage />;
+  return <AdminHouseholdDirectory />;
 }

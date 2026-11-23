@@ -120,12 +120,12 @@ export function ClientsFilterBar({
         <div className="h-5 w-px bg-slate-200 mx-1 hidden sm:block" />
 
         {/* View Mode Toggle */}
-        <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/80">
+        <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
           <button
             onClick={() => onViewModeChange("table")}
             className={`p-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === "table"
-                ? "bg-white text-slate-900 shadow-xs font-bold"
-                : "text-slate-500 hover:text-slate-800"
+              ? "bg-white text-slate-900 shadow-xs font-bold"
+              : "text-slate-500 hover:text-slate-800"
               }`}
             title="Table View"
             aria-label="Table View"
@@ -135,8 +135,8 @@ export function ClientsFilterBar({
           <button
             onClick={() => onViewModeChange("grid")}
             className={`p-1.5 rounded-lg text-xs font-medium transition-all ${viewMode === "grid"
-                ? "bg-white text-slate-900 shadow-xs font-bold"
-                : "text-slate-500 hover:text-slate-800"
+              ? "bg-white text-slate-900 shadow-xs font-bold"
+              : "text-slate-500 hover:text-slate-800"
               }`}
             title="Card Grid View"
             aria-label="Card Grid View"

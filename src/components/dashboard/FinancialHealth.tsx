@@ -15,7 +15,7 @@ const payerData = [
 
 export function FinancialHealth() {
   return (
-    <Card className="flex flex-col h-full bg-white rounded-2xl p-5 border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+    <Card className="flex flex-col h-full">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-emerald-50 text-[#3D6B22] rounded-xl">
@@ -77,7 +77,7 @@ export function FinancialHealth() {
 
       {/* Unbilled & Denied Claims Strip */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
           <div className="text-[11px] font-medium text-slate-500 mb-0.5">Unbilled Care</div>
           <div className="font-bold text-base text-slate-900">$42,500</div>
         </div>

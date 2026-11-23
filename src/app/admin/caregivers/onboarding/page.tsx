@@ -1,7 +1,7 @@
 "use client";
 
-import OnboardingPage from "@/app/caregivers/onboarding/page";
+import { AdminCaregiverOnboardingView } from "@/components/admin/caregivers/AdminCaregiverOnboardingView";
 
 export default function AdminCaregiverOnboardingPage() {
-  return <OnboardingPage />;
+  return <AdminCaregiverOnboardingView />;
 }

@@ -95,7 +95,7 @@ export function SendReminderModal({ isOpen, onClose, staff, onSend }: SendRemind
       ) : (
         <div className="space-y-4">
           {/* Target Info */}
-          <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-900">{staff.name}</p>
               <p className="text-[11px] text-slate-500">{staff.role} • Caregiver LMS ID: {staff.id}</p>

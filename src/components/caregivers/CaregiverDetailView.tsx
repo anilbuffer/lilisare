@@ -53,6 +53,7 @@ import { CaregiverScheduleShiftModal } from "./modals/CaregiverScheduleShiftModa
 
 interface CaregiverDetailViewProps {
   caregiverId: string;
+  baseBackPath?: string;
 }
 
 const STAGE_SOLID_BG: Record<string, string> = {
@@ -66,7 +67,10 @@ const STAGE_SOLID_BG: Record<string, string> = {
   "Archived": "bg-slate-500",
 };
 
-export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
+export function CaregiverDetailView({
+  caregiverId,
+  baseBackPath = "/caregivers",
+}: CaregiverDetailViewProps) {
   const router = useRouter();
   const [caregiver, setCaregiver] = useState<CaregiverRecord | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -208,8 +212,8 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
         type === "call"
           ? "Phone Contact Logged"
           : type === "email"
-          ? "Email Sent to Caregiver"
-          : "Communication Note Added",
+            ? "Email Sent to Caregiver"
+            : "Communication Note Added",
       description: noteText,
       actor: "HR Coordinator",
       type: "profile" as const,
@@ -290,7 +294,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       {/* Back Navigation Button matching /intake/pipeline */}
       <div>
         <Link
-          href="/caregivers"
+          href={baseBackPath}
           className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -299,7 +303,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       </div>
 
       {/* 01. PatientHeader Style: Hero Identity & Actions Card (Identical to /intake/pipeline/INQ-1042/) */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200/80 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
         <div className="flex items-center gap-4 sm:gap-5 min-w-0 flex-1">
           {/* Avatar Box with Floating Stage Badge */}
           <div className="relative shrink-0">
@@ -353,7 +357,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
 
           {/* Primary CTA: Edit Profile */}
           <Link
-            href={`/caregivers/${caregiver.id}/edit`}
+            href={`${baseBackPath}/${caregiver.id}/edit`}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] hover:shadow-[0_4px_12px_rgba(61,107,34,0.25)] cursor-pointer whitespace-nowrap"
           >
             <span>Edit Profile</span>
@@ -372,11 +376,10 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap rounded-xl flex items-center gap-2 cursor-pointer ${
-                isActive
+              className={`relative px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap rounded-xl flex items-center gap-2 cursor-pointer ${isActive
                   ? "bg-[#3D6B22] text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
-              }`}
+                }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
               <span>{tab.label}</span>
@@ -391,7 +394,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
           {/* Left Column (2 cols): Profile & Assignment Demographics */}
           <div className="lg:col-span-2 space-y-5">
             {/* Personal Profile & Demographics Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <User className="w-4 h-4 text-[#3D6B22]" />
@@ -513,7 +516,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                     <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
                       SSN Masked
                     </span>
@@ -523,7 +526,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                         : caregiver.personalInfo.maskedIdentifiers.ssnMasked}
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                     <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
                       Driver&apos;s License
                     </span>
@@ -531,7 +534,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                       {caregiver.personalInfo.maskedIdentifiers.driversLicenseMasked}
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                     <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
                       TIN / W-9 Status
                     </span>
@@ -544,7 +547,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             </Card>
 
             {/* Care Recipient & Assignment Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Heart className="w-4 h-4 text-[#3D6B22]" />
@@ -597,7 +600,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             </Card>
 
             {/* Quick Coordination Note Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 pb-3 mb-3 border-b border-slate-100">
                 <FileText className="w-4 h-4 text-[#3D6B22]" />
                 Log Staff Coordination Note
@@ -627,7 +630,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
           {/* Right Column (1 col): Household & Compliance & Actions matching INQ-1042 */}
           <div className="space-y-5">
             {/* Recruitment Stage & Direct Contact Card */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] relative z-30">
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] relative z-30">
               <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#3D6B22]" />
@@ -667,11 +670,10 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                             <button
                               key={stg.id}
                               onClick={() => handleStageChange(stg.id)}
-                              className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${
-                                currentStage === stg.id
+                              className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${currentStage === stg.id
                                   ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
                                   : "text-slate-800"
-                              }`}
+                                }`}
                             >
                               <span className="flex items-center gap-2">
                                 <span className={`w-1.5 h-1.5 rounded-full ${stg.badge.dot}`} />
@@ -702,7 +704,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             </div>
 
             {/* Linked Household Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Home className="w-4 h-4 text-[#3D6B22]" />
@@ -755,7 +757,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             </Card>
 
             {/* Workforce Compliance Readiness Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#3D6B22]" />
@@ -799,7 +801,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             </Card>
 
             {/* Emergency Contact Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Phone className="w-4 h-4 text-rose-500" />
@@ -836,7 +838,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       {/* Tab 02: Household & Assignments */}
       {activeTab === "household" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-in fade-in duration-200">
-          <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+          <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#1E5622] flex items-center justify-center font-bold text-sm">
@@ -877,7 +879,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
               </div>
               <div className="pt-2 border-t border-slate-100">
                 <span className="text-slate-500 block mb-1">Caregiving Scope & Boundaries:</span>
-                <p className="text-slate-700 italic bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                <p className="text-slate-700 italic bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                   {caregiver.relationship.caregivingBoundaries ||
                     "Assigned authorized in-home hours and respite support."}
                 </p>
@@ -885,7 +887,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
             </div>
           </Card>
 
-          <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+          <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-sm">
@@ -942,7 +944,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
 
       {/* Tab 03: Credentials & Screening */}
       {activeTab === "credentials" && (
-        <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 animate-in fade-in duration-200">
+        <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 animate-in fade-in duration-200">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -975,11 +977,10 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
                 </div>
 
                 <span
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
-                    cred.status === "Verified"
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${cred.status === "Verified"
                       ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                       : "bg-amber-50 text-amber-800 border-amber-200"
-                  }`}
+                    }`}
                 >
                   {cred.status}
                 </span>
@@ -991,7 +992,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
 
       {/* Tab 04: EVV & Visit History */}
       {activeTab === "evv" && (
-        <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 animate-in fade-in duration-200">
+        <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 animate-in fade-in duration-200">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
@@ -1038,7 +1039,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
       {activeTab === "timeline" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-1">
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
               <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 pb-2.5 border-b border-slate-100">
                 <FileText className="w-4 h-4 text-[#3D6B22]" />
                 Log Caregiver Note
@@ -1064,7 +1065,7 @@ export function CaregiverDetailView({ caregiverId }: CaregiverDetailViewProps) {
           </div>
 
           <div className="lg:col-span-2">
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
               <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2 pb-2.5 border-b border-slate-100">
                 <Clock className="w-4 h-4 text-[#3D6B22]" />
                 Caregiver Workforce History & Activity

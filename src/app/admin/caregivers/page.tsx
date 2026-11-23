@@ -1,7 +1,8 @@
 "use client";
 
-import CaregiversPage from "@/app/caregivers/page";
+import React from "react";
+import { AdminCaregiverDirectory } from "@/components/admin/caregivers/AdminCaregiverDirectory";
 
 export default function AdminCaregiversPage() {
-  return <CaregiversPage />;
+  return <AdminCaregiverDirectory />;
 }

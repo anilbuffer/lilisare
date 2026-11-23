@@ -104,7 +104,7 @@ export function TimeOffTable() {
                       <div className="font-semibold text-slate-900 group-hover:text-brand-teal transition-colors">
                         {req.name}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">{req.submittedAt}</div>
+
                     </div>
                   </div>
                 </td>
@@ -114,8 +114,7 @@ export function TimeOffTable() {
                   </Badge>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-slate-700 font-medium">{req.startDate}</div>
-                  <div className="text-xs text-slate-500">to {req.endDate}</div>
+                  <div className="text-slate-700 font-medium">{req.startDate} - {req.endDate}</div>
                 </td>
                 <td className="px-6 py-4 text-slate-600 max-w-[200px] truncate" title={req.reason}>
                   {req.reason}

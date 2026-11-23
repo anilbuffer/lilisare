@@ -45,7 +45,7 @@ export function CourseCard({
   return (
     <div
       onClick={onAction}
-      className="bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden hover:shadow-xl hover:border-brand-teal/50 hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer"
+      className="bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden hover:shadow-xl hover:border-brand-teal/50 hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer"
     >
       {/* Thumbnail */}
       <div className={`h-36 ${thumbnailColor} relative flex items-center justify-center overflow-hidden`}>
@@ -99,11 +99,10 @@ export function CourseCard({
               e.stopPropagation();
               onAction?.();
             }}
-            className={`w-full py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer shadow-sm ${
-              progress && progress > 0
+            className={`w-full py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer shadow-sm ${progress && progress > 0
                 ? "bg-brand-teal text-white hover:bg-[#0c8a6f]"
                 : "bg-slate-900 text-white hover:bg-slate-800"
-            }`}
+              }`}
           >
             {actionLabel}
           </button>

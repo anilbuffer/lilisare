@@ -94,7 +94,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
             className="group block focus:outline-none"
           >
             <Card
-              className={`p-3 sm:p-4 h-full bg-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 border border-slate-200 ${kpi.borderHover} flex flex-col justify-between`}
+              className="h-full flex flex-col justify-between"
             >
               <div className="flex items-center justify-between gap-1 mb-2 sm:mb-3">
                 <span className="text-[11px] sm:text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">

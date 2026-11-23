@@ -225,7 +225,7 @@ export function AddCandidateModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 15 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="bg-white rounded-2xl max-w-6xl w-full shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-200/80 relative max-h-[92vh] flex flex-col overflow-hidden"
+          className="bg-white rounded-2xl max-w-6xl w-full shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-200 relative max-h-[92vh] flex flex-col overflow-hidden"
         >
           {/* Top Modal Title Bar */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/70 shrink-0">

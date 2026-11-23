@@ -95,7 +95,7 @@ export function IntakeLiveActivityFeed({
   }, [inquiries]);
 
   return (
-    <Card className="p-4 sm:p-5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+    <Card>
       {/* Clean Minimal Header */}
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2">

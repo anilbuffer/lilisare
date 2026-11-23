@@ -66,7 +66,7 @@ export function AgencyProfile() {
                 <p className="text-xs text-slate-500">Official brand identity, community purpose, and core statements.</p>
               </div>
             </div>
-            <div className="p-2 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-center">
+            <div className="p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center">
               <img src="/main-logo.svg" alt="LiliSare Logo" className="h-8 w-auto object-contain" />
             </div>
           </div>

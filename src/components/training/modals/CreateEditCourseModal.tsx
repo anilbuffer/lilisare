@@ -201,7 +201,7 @@ export function CreateEditCourseModal({
         </div>
 
         {/* Required Toggle */}
-        <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
           <div>
             <span className="text-xs font-bold text-slate-900 block">Mandatory Compliance Course</span>
             <span className="text-[11px] text-slate-500">Automatically assign to new hire onboarding rosters</span>

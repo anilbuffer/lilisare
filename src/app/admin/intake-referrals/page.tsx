@@ -1,7 +1,7 @@
 "use client";
 
-import PipelinePage from "@/app/intake/pipeline/page";
+import { AdminIntakeReferralsDirectory } from "@/components/admin/intake-referrals/AdminIntakeReferralsDirectory";
 
 export default function AdminIntakeReferralsPage() {
-  return <PipelinePage />;
+  return <AdminIntakeReferralsDirectory />;
 }

@@ -677,7 +677,7 @@ export function CaregiverManagementWorkspace({
                               draggable
                               onDragStart={(e) => handleDragStart(e, cg.id)}
                               onClick={() => router.push(detailsHref)}
-                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
+                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
                                 }`}
                             >
                               <div>
@@ -778,7 +778,7 @@ export function CaregiverManagementWorkspace({
           </div>
         ) : (
           /* LIST VIEW strictly matching /intake/pipeline */
-          <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden">
+          <div className="bg-slate-50/50 border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-100/70 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">

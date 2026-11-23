@@ -80,7 +80,7 @@ export function HouseholdScheduleVisitModal({
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           {/* Household Context */}
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs">
+          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs">
             <div>
               <span className="text-slate-400 block text-[11px]">Care Recipient & Caregiver</span>
               <span className="font-bold text-slate-800 mt-0.5 block">

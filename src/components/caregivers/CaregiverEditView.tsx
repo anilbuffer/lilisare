@@ -23,9 +23,13 @@ import { toast } from "sonner";
 
 interface CaregiverEditViewProps {
   caregiverId: string;
+  baseBackPath?: string;
 }
 
-export function CaregiverEditView({ caregiverId }: CaregiverEditViewProps) {
+export function CaregiverEditView({
+  caregiverId,
+  baseBackPath = "/caregivers",
+}: CaregiverEditViewProps) {
   const router = useRouter();
   const [caregiver, setCaregiver] = useState<CaregiverRecord | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -138,7 +142,7 @@ export function CaregiverEditView({ caregiverId }: CaregiverEditViewProps) {
 
     saveCaregiversToStorage(all);
     toast.success(`Caregiver ${updated.id} (${updated.name}) saved successfully`);
-    router.push(`/caregivers/${updated.id}`);
+    router.push(`${baseBackPath}/${updated.id}`);
   };
 
   if (!isMounted || !caregiver) {
@@ -156,7 +160,7 @@ export function CaregiverEditView({ caregiverId }: CaregiverEditViewProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Link
-            href={`/caregivers/${caregiver.id}`}
+            href={`${baseBackPath}/${caregiver.id}`}
             className="flex items-center gap-1.5 font-semibold text-slate-700 hover:text-[#3D6B22] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

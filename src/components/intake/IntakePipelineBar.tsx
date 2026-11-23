@@ -90,7 +90,7 @@ export function IntakePipelineBar({
   return (
     <section
       aria-label="Inquiry Pipeline"
-      className="bg-white border border-slate-200/80 rounded-xl lg:rounded-2xl p-4 sm:p-5 shadow-xs"
+      className="bg-white border border-slate-200 rounded-xl lg:rounded-2xl p-4 sm:p-5 shadow-xs"
     >
       {/* Header matching dashboardPage section headers */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5 pb-2.5 border-b border-slate-100">

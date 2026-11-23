@@ -97,7 +97,7 @@ export function RequiredTraining() {
           {activeRules.map((rule, idx) => (
             <div
               key={idx}
-              className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2 hover:bg-white hover:border-brand-teal/40 transition-all shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
+              className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 hover:bg-white hover:border-brand-teal/40 transition-all shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
             >
               <div className="flex justify-between items-start">
                 <span className="font-extrabold text-slate-900 text-xs">{rule.role}</span>

@@ -407,8 +407,8 @@ export function InquiryManagementWorkspace({
                         setIsStageDropdownOpen(false);
                       }}
                       className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${!currentStage
-                          ? "bg-slate-50 font-bold text-slate-900"
-                          : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-slate-50 font-bold text-slate-900"
+                        : "text-slate-700 hover:bg-slate-50"
                         }`}
                     >
                       <div className="flex items-center gap-2">
@@ -438,8 +438,8 @@ export function InquiryManagementWorkspace({
                             setIsStageDropdownOpen(false);
                           }}
                           className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
-                              ? "bg-slate-50 font-bold text-slate-900"
-                              : "text-slate-700 hover:bg-slate-50"
+                            ? "bg-slate-50 font-bold text-slate-900"
+                            : "text-slate-700 hover:bg-slate-50"
                             }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
@@ -468,8 +468,8 @@ export function InquiryManagementWorkspace({
                 type="button"
                 onClick={() => setViewMode("kanban")}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
-                    ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-[#3D6B22] shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
                 title="Kanban Board View (7 Columns)"
               >
@@ -480,8 +480,8 @@ export function InquiryManagementWorkspace({
                 type="button"
                 onClick={() => setViewMode("list")}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
-                    ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-[#3D6B22] shadow-xs"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
                 title="List View"
               >
@@ -511,10 +511,10 @@ export function InquiryManagementWorkspace({
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, col.id)}
                     className={`w-[290px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${isDragOver
-                        ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
-                        : isFilteredStage
-                          ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
-                          : "bg-[#F8FAF9] border-slate-200/80"
+                      ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
+                      : isFilteredStage
+                        ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
+                        : "bg-[#F8FAF9] border-slate-200/80"
                       }`}
                   >
                     {/* Column Lane Header */}
@@ -554,7 +554,7 @@ export function InquiryManagementWorkspace({
                               draggable
                               onDragStart={(e) => handleDragStart(e, inquiry.id)}
                               onClick={() => router.push(getDetailsHref(inquiry.id))}
-                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
+                              className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
                                 }`}
                             >
                               <div>
@@ -661,7 +661,7 @@ export function InquiryManagementWorkspace({
           </div>
         ) : (
           /* LIST VIEW */
-          <div className="bg-slate-50/50 border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden">
+          <div className="bg-slate-50/50 border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-100/70 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">

@@ -113,7 +113,7 @@ export function CaregiverOvertime() {
   const currentOtCost = (currentOtHours * 37.5).toFixed(2); // 1.5x average wage premium
 
   return (
-    <Card className="flex flex-col w-full bg-white rounded-2xl p-6 border border-slate-200 hover:border-[#3D6B22]/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 space-y-6">
+    <Card className="flex flex-col w-full space-y-6">
       {/* 01. Full-Row Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
@@ -162,7 +162,7 @@ export function CaregiverOvertime() {
 
       {/* 02. Four-Metric KPI Bar across full width */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 bg-slate-50/90 rounded-xl border border-slate-200/80">
+        <div className="p-4 bg-slate-50/90 rounded-xl border border-slate-200">
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
             <span>Total OT Hours</span>
             <Clock className="w-4 h-4 text-slate-400" />
@@ -212,11 +212,10 @@ export function CaregiverOvertime() {
               {otList.map((caregiver) => (
                 <div
                   key={caregiver.id}
-                  className={`p-3.5 rounded-xl border transition-all ${
-                    caregiver.reassigned
+                  className={`p-3.5 rounded-xl border transition-all ${caregiver.reassigned
                       ? "bg-slate-50/60 border-slate-200 opacity-60"
                       : "bg-rose-50/50 border-rose-200/80 hover:border-rose-300"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
@@ -283,7 +282,7 @@ export function CaregiverOvertime() {
               {WATCHLIST_CAREGIVERS.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-xl flex items-center justify-between text-xs"
+                  className="p-3.5 bg-slate-50/80 border border-slate-200 rounded-xl flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar fallback={item.initials} name={item.name} size="sm" />

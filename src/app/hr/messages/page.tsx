@@ -31,7 +31,7 @@ export default function HrMessagesPage() {
       </div>
 
       {/* Main Communications Layout Area */}
-      <div className="flex-1 min-h-0 bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200/80 shadow-[0_6px_32px_rgba(0,0,0,0.04)] overflow-hidden">
+      <div className="flex-1 min-h-0 bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)] overflow-hidden">
         <CommunicationsLayout initialCategory="Staff & Caregivers" />
       </div>
     </motion.div>

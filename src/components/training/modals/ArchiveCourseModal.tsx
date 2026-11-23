@@ -65,7 +65,7 @@ export function ArchiveCourseModal({
           </div>
         </div>
 
-        <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs space-y-1">
+        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
           <p className="font-bold text-slate-800">{course.title}</p>
           <p className="text-slate-500">{course.category} • {course.assignedCount} Active Enrollments</p>
         </div>

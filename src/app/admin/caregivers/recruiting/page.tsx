@@ -1,7 +1,7 @@
 "use client";
 
-import RecruitingPage from "@/app/caregivers/recruiting/page";
+import { AdminCaregiverRecruitingView } from "@/components/admin/caregivers/AdminCaregiverRecruitingView";
 
 export default function AdminCaregiverRecruitingPage() {
-  return <RecruitingPage />;
+  return <AdminCaregiverRecruitingView />;
 }

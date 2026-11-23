@@ -24,7 +24,7 @@ export default function HrTrainingPage() {
       className="w-full max-w-7xl mx-auto space-y-6"
     >
       {/* Header & Navigation Bar */}
-      <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.04)] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-brand-teal/10 border border-brand-teal/20 text-brand-teal flex items-center justify-center shadow-[0_4px_24px_rgba(0,0,0,0.04)] shrink-0">
@@ -45,7 +45,7 @@ export default function HrTrainingPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex bg-slate-100/90 p-1.5 gap-1 rounded-2xl relative self-start lg:self-auto border border-slate-200/80 w-full sm:w-auto overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex bg-slate-100/90 p-1.5 gap-1 rounded-2xl relative self-start lg:self-auto border border-slate-200 w-full sm:w-auto overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -56,7 +56,7 @@ export default function HrTrainingPage() {
               {view === tab.id && (
                 <motion.div
                   layoutId="hr-training-tab-indicator"
-                  className="absolute inset-0 bg-white rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.06)] border border-slate-200/80"
+                  className="absolute inset-0 bg-white rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.06)] border border-slate-200"
                   initial={false}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
@@ -71,7 +71,7 @@ export default function HrTrainingPage() {
 
       {/* Top Quick Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
-        <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-brand-teal/40 transition-all flex items-center gap-4 group">
+        <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-brand-teal/40 transition-all flex items-center gap-4 group">
           <div className="w-10 h-10 rounded-xl bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold border border-brand-teal/20 shrink-0 group-hover:scale-105 transition-transform">
             <BookOpen className="w-5 h-5" />
           </div>
@@ -81,7 +81,7 @@ export default function HrTrainingPage() {
           </div>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-emerald-300 transition-all flex items-center gap-4 group">
+        <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-emerald-300 transition-all flex items-center gap-4 group">
           <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold border border-emerald-200 shrink-0 group-hover:scale-105 transition-transform">
             <CheckCircle2 className="w-5 h-5" />
           </div>
@@ -91,7 +91,7 @@ export default function HrTrainingPage() {
           </div>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-blue-300 transition-all flex items-center gap-4 group">
+        <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-blue-300 transition-all flex items-center gap-4 group">
           <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold border border-blue-200 shrink-0 group-hover:scale-105 transition-transform">
             <Award className="w-5 h-5" />
           </div>

@@ -115,7 +115,7 @@ export default function IntakeClientsPage() {
           <div className="relative" ref={dateRef}>
             <button
               onClick={() => setIsDateOpen(!isDateOpen)}
-              className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer"
             >
               <Calendar className="w-3.5 h-3.5 text-slate-500" />
               <span>{dateOptions.find((d) => d.id === selectedDateRange)?.label}</span>

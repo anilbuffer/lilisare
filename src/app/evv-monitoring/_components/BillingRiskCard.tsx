@@ -16,7 +16,7 @@ export function BillingRiskCard({ totalRisk, likelyDenied, needsReview }: Billin
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
-      className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all duration-200 relative overflow-hidden h-full flex flex-col justify-between"
+      className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 relative overflow-hidden h-full flex flex-col justify-between"
     >
       {/* Background Icon */}
       <ShieldAlert className="absolute -right-6 -bottom-6 w-32 h-32 text-red-100/40 pointer-events-none" />

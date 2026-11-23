@@ -47,7 +47,7 @@ export function QuizAnalyticsModal({ isOpen, onClose }: QuizAnalyticsModalProps)
         {/* KPI Strip */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {quizMetrics.map((m, idx) => (
-            <div key={idx} className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
+            <div key={idx} className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">{m.title}</span>
               <span className={`text-2xl font-extrabold ${m.color}`}>{m.value}</span>
               <span className="text-[10px] font-medium text-slate-400 block">{m.change}</span>
@@ -67,7 +67,7 @@ export function QuizAnalyticsModal({ isOpen, onClose }: QuizAnalyticsModalProps)
 
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
             {questionBreakdown.map((item, idx) => (
-              <div key={idx} className="p-3 bg-white border border-slate-200/80 rounded-xl space-y-2 hover:border-slate-300 transition-all text-xs">
+              <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl space-y-2 hover:border-slate-300 transition-all text-xs">
                 <div className="flex justify-between items-start gap-3">
                   <div>
                     <span className="text-[10px] font-bold text-brand-teal uppercase bg-brand-teal/10 px-2 py-0.5 rounded-full inline-block mb-1">

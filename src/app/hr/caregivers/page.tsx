@@ -488,11 +488,11 @@ export default function HrCaregiversRosterPage() {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200/80 bg-slate-50/80 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
-                  <th className="py-3.5 px-5">Caregiver Personnel</th>
-                  <th className="py-3.5 px-4">Role & Class</th>
+                  <th className="py-3.5 px-5">Caregiver</th>
+                  <th className="py-3.5 px-4">Role</th>
                   <th className="py-3.5 px-4">Employment Status</th>
                   <th className="py-3.5 px-4">Compliance & Certs</th>
-                  <th className="py-3.5 px-5 text-right">Actions & File</th>
+                  <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -525,33 +525,13 @@ export default function HrCaregiversRosterPage() {
                               <span>{cg.name}</span>
                               <ExternalLink className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                             </Link>
-                            <div className="flex items-center gap-2 text-[11px] text-slate-400 font-regular mt-0.5">
-                              <a href={`mailto:${cg.email}`} className="hover:text-slate-600 transition-colors">
-                                {cg.email}
-                              </a>
-                              <span>•</span>
-                              <span>{cg.phone}</span>
-                            </div>
                           </div>
                         </div>
                       </td>
 
-                      {/* Role & ID */}
+                      {/* Role */}
                       <td className="py-3.5 px-4 font-semibold text-slate-700">
                         <div className="font-bold text-slate-800">{cg.role}</div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[10px] text-slate-400 uppercase font-mono font-semibold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                            {cg.id}
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-semibold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
-                            {cg.employmentType || "W2"}
-                          </span>
-                          {cg.payRate && (
-                            <span className="text-[10px] text-emerald-700 font-semibold">
-                              ${cg.payRate.toFixed(2)}/hr
-                            </span>
-                          )}
-                        </div>
                       </td>
 
                       {/* Employment Status Pill */}
@@ -637,14 +617,14 @@ export default function HrCaregiversRosterPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => setQuickViewCaregiver(cg)}
-                            className="p-1.5 text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all active:scale-95 border border-slate-200/80 cursor-pointer shadow-[0_4px_24px_rgba(0,0,0,0.06)]"
+                            className="p-1.5 text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all active:scale-95 border border-slate-200 cursor-pointer shadow-[0_4px_24px_rgba(0,0,0,0.06)]"
                             title="Quick View Summary"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setSelectedCaregiverForStatus(cg)}
-                            className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all active:scale-95 border border-slate-200/80 cursor-pointer shadow-[0_4px_24px_rgba(0,0,0,0.06)]"
+                            className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all active:scale-95 border border-slate-200 cursor-pointer shadow-[0_4px_24px_rgba(0,0,0,0.06)]"
                           >
                             Change Status
                           </button>
@@ -726,7 +706,7 @@ export default function HrCaregiversRosterPage() {
                 </div>
 
                 {/* Key Details Grid */}
-                <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
                   <div>
                     <span className="text-[10px] font-semibold text-slate-400 uppercase block">Phone</span>
                     <span className="font-medium text-slate-800">{quickViewCaregiver.phone}</span>

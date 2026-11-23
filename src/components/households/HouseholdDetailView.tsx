@@ -299,7 +299,7 @@ export function HouseholdDetailView({
           {/* Left Column (2 cols): Residence & Three Connected Journeys */}
           <div className="lg:col-span-2 space-y-5">
             {/* Household Demographics & Residence */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Home className="w-4 h-4 text-[#3D6B22]" />
@@ -375,7 +375,7 @@ export function HouseholdDetailView({
             </Card>
 
             {/* Three Connected Journeys Tracker (RULES.md #L96) */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#3D6B22]" />
@@ -387,7 +387,7 @@ export function HouseholdDetailView({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                 {/* 1. Client Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">1. Client Care</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
@@ -409,7 +409,7 @@ export function HouseholdDetailView({
                 </div>
 
                 {/* 2. Caregiver Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">2. Caregiver Workforce</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
@@ -431,7 +431,7 @@ export function HouseholdDetailView({
                 </div>
 
                 {/* 3. Agency Operations Journey */}
-                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-2">
+                <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">3. Agency Ops</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/70">
@@ -458,7 +458,7 @@ export function HouseholdDetailView({
           {/* Right Column (1 col): Case Manager Card & Quick Action Card */}
           <div className="space-y-5">
             {/* Case Manager Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-[#3D6B22]" />
@@ -500,7 +500,7 @@ export function HouseholdDetailView({
             </Card>
 
             {/* Quick Action Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
               <div className="pb-3 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#3D6B22]" />

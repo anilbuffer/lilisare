@@ -269,7 +269,7 @@ export default function PatientsPage() {
       </div>
 
       {/* Responsive Filter & Search Toolbar */}
-      <div className="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3">
+      <div className="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Search Input - Expands fully on mobile */}
           <div className="relative flex-1 min-w-0">
@@ -564,9 +564,6 @@ export default function PatientsPage() {
                             <div>
                               <div className="font-semibold text-slate-900 group-hover:text-brand-teal transition-colors flex items-center gap-2 whitespace-nowrap">
                                 {patient.name}
-                              </div>
-                              <div className="text-slate-500 text-xs mt-0.5 font-medium whitespace-nowrap">
-                                {patient.age} yrs • {patient.demographics.gender}
                               </div>
                             </div>
                           </div>

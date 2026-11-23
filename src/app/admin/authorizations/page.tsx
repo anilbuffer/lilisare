@@ -306,7 +306,7 @@ export default function AdminAuthorizationsPage() {
       {/* ----------------------------------------------------------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Total Active Approvals */}
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md transition-all duration-200 overflow-hidden p-4 sm:p-5">
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Approved & Active
@@ -331,7 +331,7 @@ export default function AdminAuthorizationsPage() {
         </div>
 
         {/* Metric 2: Remaining Approved Units */}
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md transition-all duration-200 overflow-hidden p-4 sm:p-5">
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Remaining Units
@@ -355,7 +355,7 @@ export default function AdminAuthorizationsPage() {
         </div>
 
         {/* Metric 3: Pending & Requested */}
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md transition-all duration-200 overflow-hidden p-4 sm:p-5">
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Pending Payer Decision
@@ -378,7 +378,7 @@ export default function AdminAuthorizationsPage() {
         </div>
 
         {/* Metric 4: Expiring & Exhausted Alerts */}
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md transition-all duration-200 overflow-hidden p-4 sm:p-5">
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Renewal & Risk Queue
@@ -532,14 +532,14 @@ export default function AdminAuthorizationsPage() {
       {/* ----------------------------------------------------------------- */}
       {/* 06. Patient-Centric Authorizations Table */}
       {/* ----------------------------------------------------------------- */}
-      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs hover:border-[#3D6B22]/50 hover:shadow-md transition-all duration-200 overflow-hidden">
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4">Patient & Category</th>
-                <th className="py-3 px-4">Payer & Auth Reference #</th>
-                <th className="py-3 px-4">Service & Code</th>
+                <th className="py-3 px-4">Patient</th>
+                <th className="py-3 px-4">Payer</th>
+                <th className="py-3 px-4">Service</th>
                 <th className="py-3 px-4">Approved / Used</th>
                 <th className="py-3 px-4">Remaining Units</th>
                 <th className="py-3 px-4">Effective Term</th>
@@ -579,46 +579,21 @@ export default function AdminAuthorizationsPage() {
                             <span className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors block">
                               {record.clientName}
                             </span>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span
-                                className={cn(
-                                  "px-1.5 py-0.2 rounded text-[10px] font-bold",
-                                  isSkilled
-                                    ? "bg-purple-50 text-purple-700"
-                                    : "bg-blue-50 text-blue-700"
-                                )}
-                              >
-                                {isSkilled ? "Skilled Health" : "Non-Medical"}
-                              </span>
-                              <span className="text-[11px] text-slate-400">&bull; {record.householdName}</span>
-                            </div>
                           </div>
                         </div>
                       </td>
 
-                      {/* 2. Payer & Auth Ref # */}
+                      {/* 2. Payer */}
                       <td className="py-3.5 px-4">
                         <span className="font-semibold text-slate-800 block text-xs">
                           {record.payer}
                         </span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-bold">
-                            {record.id}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 block mt-0.5 truncate max-w-[150px]">
-                          Policy: {record.insurancePolicyId}
-                        </span>
                       </td>
 
-                      {/* 3. Service & Code */}
+                      {/* 3. Service */}
                       <td className="py-3.5 px-4">
                         <span className="font-semibold text-slate-800 block">
                           {record.serviceName}
-                        </span>
-                        <span className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#3D6B22] bg-[#3D6B22]/10 px-1.5 py-0.5 rounded mt-0.5">
-                          {record.serviceCode}
-                          {record.modifier ? `-${record.modifier}` : ""}
                         </span>
                       </td>
 

@@ -302,7 +302,7 @@ export function InquiryDetailsPage({
       </div>
 
       {/* 01. PatientHeader Style: Hero Identity & Actions Card */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200/80 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
         <div className="flex items-center gap-4 sm:gap-5 min-w-0 flex-1">
           {/* Avatar Box with Floating Stage Badge */}
           <div className="relative shrink-0">
@@ -404,7 +404,7 @@ export function InquiryDetailsPage({
           {/* Left Column (2 cols): Family & Loved One Demographics */}
           <div className="lg:col-span-2 space-y-5">
             {/* Family & Contact Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Users className="w-4 h-4 text-[#3D6B22]" />
@@ -466,7 +466,7 @@ export function InquiryDetailsPage({
             </Card>
 
             {/* Loved One Demographics & Care Profile Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Heart className="w-4 h-4 text-rose-500" />
@@ -553,17 +553,16 @@ export function InquiryDetailsPage({
           {/* Right Column (1 col): Potential Caregiver & Assigned Coordinator */}
           <div className="space-y-5">
             {/* Potential Family Caregiver Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
               <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <HeartHandshakeIcon className="w-4 h-4 text-[#3D6B22]" />
                   In-Home Family Caregiver
                 </h3>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                  inquiry.familyInfo.potentialCaregiver?.name
+                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${inquiry.familyInfo.potentialCaregiver?.name
                     ? "bg-emerald-50 text-[#1E5622] border border-emerald-200/70"
                     : "bg-slate-100 text-slate-600 border border-slate-200/70"
-                }`}>
+                  }`}>
                   {inquiry.familyInfo.potentialCaregiver?.name ? "Family Caregiver" : "Agency Staff Match"}
                 </span>
               </div>
@@ -600,7 +599,7 @@ export function InquiryDetailsPage({
             </Card>
 
             {/* Coordination & Intake Summary Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
               <div className="pb-3 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-slate-600" />
@@ -716,7 +715,7 @@ export function InquiryDetailsPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-2 space-y-5">
             {/* Service & Schedule Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
               <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#3D6B22]" />
                 Authorized Hours & Schedule Preference
@@ -750,7 +749,7 @@ export function InquiryDetailsPage({
             </Card>
 
             {/* Clinical & Support Narrative */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
               <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <Stethoscope className="w-4 h-4 text-sky-700" />
                 Support Requirements & Clinical Context
@@ -763,7 +762,7 @@ export function InquiryDetailsPage({
 
           <div className="space-y-5">
             {/* Preferred Location Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3 text-xs">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3 text-xs">
               <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#3D6B22]" />
                 Service Delivery Location
@@ -782,7 +781,7 @@ export function InquiryDetailsPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-2 space-y-5">
             {/* Document Checklist Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
                 <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-[#3D6B22]" />
@@ -831,7 +830,7 @@ export function InquiryDetailsPage({
 
           <div className="space-y-5">
             {/* Payer & Case Manager Card */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 text-xs">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4 text-xs">
               <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-[#3D6B22]" />
                 Payer & Case Manager
@@ -857,7 +856,7 @@ export function InquiryDetailsPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
           <div className="lg:col-span-2 space-y-5">
             {/* Log Note Form */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-3">
               <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <Send className="w-4 h-4 text-[#3D6B22]" />
                 Log Coordinator Call / Follow-up Note
@@ -883,7 +882,7 @@ export function InquiryDetailsPage({
             </Card>
 
             {/* Timeline Feed */}
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] space-y-4">
               <h3 className="text-sm font-semibold text-slate-900 pb-2.5 border-b border-slate-100 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-slate-600" />
                 Inquiry Activity & Communication Log
@@ -892,7 +891,7 @@ export function InquiryDetailsPage({
                 {inquiry.timeline.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60 text-xs flex items-start gap-3"
+                    className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 text-xs flex items-start gap-3"
                   >
                     <div className="w-7 h-7 rounded-lg bg-emerald-100 text-[#1E5622] flex items-center justify-center shrink-0 mt-0.5">
                       <Clock className="w-3.5 h-3.5" />
@@ -912,7 +911,7 @@ export function InquiryDetailsPage({
           </div>
 
           <div className="space-y-5">
-            <Card className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-xs space-y-2">
+            <Card className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-xs space-y-2">
               <span className="font-semibold text-slate-800 block">Audit & Compliance</span>
               <p className="text-slate-500 leading-relaxed">
                 All phone notes, status shifts, and coordinator assignments are cryptographically signed and stored under HIPAA audit logging regulations.

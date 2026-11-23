@@ -23,7 +23,7 @@ export function KpiCard({ title, value, subtitle, trend, trendValue, icon, hero 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className={clsx(
-        "bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 relative flex flex-col justify-between h-[135px]",
+        "bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 relative flex flex-col justify-between h-[135px]",
         className
       )}
     >

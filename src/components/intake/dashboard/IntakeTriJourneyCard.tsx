@@ -14,7 +14,7 @@ export function IntakeTriJourneyCard({ households }: IntakeTriJourneyCardProps) 
   const bottleneckCount = households.filter((h) => Boolean(h.triJourneyStatus?.bottleneckMessage)).length;
 
   return (
-    <Card className="p-4 sm:p-5 bg-white border border-slate-200/90 shadow-sm rounded-2xl flex flex-col justify-between h-full">
+    <Card className="flex flex-col justify-between h-full">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">

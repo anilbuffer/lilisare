@@ -97,25 +97,24 @@ export function CaregiverProfileModal({
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-center">
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Compliance</span>
             <span className={`text-xl font-extrabold ${staff.complianceScore >= 80 ? "text-brand-teal" : staff.complianceScore >= 60 ? "text-amber-600" : "text-rose-600"}`}>
               {staff.complianceScore}%
             </span>
           </div>
 
-          <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-center">
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Courses Done</span>
             <span className="text-xl font-extrabold text-slate-900">
               {staff.coursesCompleted}/{staff.coursesTotal}
             </span>
           </div>
 
-          <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-center">
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-center">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Status</span>
-            <span className={`text-xs font-bold px-2 py-0.5 inline-block rounded-full mt-1 ${
-              staff.status === "On track" ? "bg-emerald-100 text-emerald-800" : staff.status === "At risk" ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"
-            }`}>
+            <span className={`text-xs font-bold px-2 py-0.5 inline-block rounded-full mt-1 ${staff.status === "On track" ? "bg-emerald-100 text-emerald-800" : staff.status === "At risk" ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"
+              }`}>
               {staff.status}
             </span>
           </div>
@@ -125,17 +124,15 @@ export function CaregiverProfileModal({
         <div className="flex border-b border-slate-200 gap-6 text-xs font-bold">
           <button
             onClick={() => setActiveTab("courses")}
-            className={`pb-2 border-b-2 transition-all cursor-pointer ${
-              activeTab === "courses" ? "border-brand-teal text-brand-teal" : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
+            className={`pb-2 border-b-2 transition-all cursor-pointer ${activeTab === "courses" ? "border-brand-teal text-brand-teal" : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
           >
             Assigned Courses ({mockAssigned.length})
           </button>
           <button
             onClick={() => setActiveTab("certs")}
-            className={`pb-2 border-b-2 transition-all cursor-pointer ${
-              activeTab === "certs" ? "border-brand-teal text-brand-teal" : "border-transparent text-slate-500 hover:text-slate-800"
-            }`}
+            className={`pb-2 border-b-2 transition-all cursor-pointer ${activeTab === "certs" ? "border-brand-teal text-brand-teal" : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
           >
             Active Certifications ({mockCerts.length})
           </button>
@@ -145,15 +142,14 @@ export function CaregiverProfileModal({
         {activeTab === "courses" ? (
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {mockAssigned.map((item, idx) => (
-              <div key={idx} className="p-3 border border-slate-200/80 rounded-xl bg-white flex items-center justify-between text-xs hover:border-slate-300 transition-all">
+              <div key={idx} className="p-3 border border-slate-200 rounded-xl bg-white flex items-center justify-between text-xs hover:border-slate-300 transition-all">
                 <div className="space-y-0.5">
                   <p className="font-semibold text-slate-900">{item.title}</p>
                   <p className="text-[11px] text-slate-500">{item.category} • {item.date}</p>
                 </div>
                 <div className="text-right">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full block mb-1 ${
-                    item.status === "Completed" ? "bg-emerald-100 text-emerald-800" : item.status === "Overdue" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"
-                  }`}>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full block mb-1 ${item.status === "Completed" ? "bg-emerald-100 text-emerald-800" : item.status === "Overdue" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"
+                    }`}>
                     {item.status}
                   </span>
                   <span className="text-[11px] font-semibold text-slate-600">Score: {item.score}</span>
@@ -164,7 +160,7 @@ export function CaregiverProfileModal({
         ) : (
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {mockCerts.map((cert, idx) => (
-              <div key={idx} className="p-3 border border-slate-200/80 rounded-xl bg-white flex items-center justify-between text-xs">
+              <div key={idx} className="p-3 border border-slate-200 rounded-xl bg-white flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2.5">
                   <Award className="w-4 h-4 text-brand-teal" />
                   <div>

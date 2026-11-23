@@ -28,7 +28,11 @@ import { Household, getHouseholdsFromStorage, saveHouseholdsToStorage } from "@/
 import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
 import { LILISARE_SERVICES } from "@/lib/services";
 
-export default function NewHouseholdPage() {
+interface NewHouseholdPageProps {
+  baseBackPath?: string;
+}
+
+export default function NewHouseholdPage({ baseBackPath = "/households" }: NewHouseholdPageProps) {
   const router = useRouter();
   const [step, setStep] = useState<number>(1);
 
@@ -230,7 +234,7 @@ export default function NewHouseholdPage() {
       saveHouseholdsToStorage([newHousehold, ...existing]);
       setIsSubmitting(false);
       toast.success(`Household ${householdCode} (${householdName}) registered successfully!`);
-      router.push(`/households/${householdId}`);
+      router.push(`${baseBackPath}/${householdId}`);
     }, 600);
   };
 
@@ -239,7 +243,7 @@ export default function NewHouseholdPage() {
       {/* Back Button with subtle shadow */}
       <div>
         <Link
-          href="/households"
+          href={baseBackPath}
           className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />

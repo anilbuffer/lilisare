@@ -71,7 +71,7 @@ export function SurveyResultsModal({ isOpen, onClose, survey }: SurveyResultsMod
 
           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
             {mockFeedback.map((fb, idx) => (
-              <div key={idx} className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1 text-xs">
+              <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-slate-900">{fb.caregiver}</span>
                   <span className="text-[10px] text-slate-400">{fb.date}</span>

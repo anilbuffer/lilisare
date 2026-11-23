@@ -115,7 +115,7 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch">
       {/* Left Column: Onboarding Funnel (Caregiver Progression) */}
-      <Card className="p-5 border border-slate-200 hover:border-[#3D6B22]/50 bg-white rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-3">
+      <Card className="flex flex-col justify-between space-y-3">
         <div>
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2.5">
@@ -171,7 +171,7 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
       </Card>
 
       {/* Right Column: Intake Pipeline (Family Progression) */}
-      <Card className="p-5 border border-slate-200 hover:border-[#3D6B22]/50 bg-white rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between space-y-3">
+      <Card className="flex flex-col justify-between space-y-3">
         <div>
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2.5">

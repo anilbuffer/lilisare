@@ -206,7 +206,7 @@ export default function PatientsPage() {
       </div>
 
       {/* Responsive Filter & Search Toolbar */}
-      <div className="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3">
+      <div className="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Search Input - Expands fully on mobile */}
           <div className="relative flex-1 min-w-0">
@@ -365,9 +365,6 @@ export default function PatientsPage() {
                               <div className="font-medium text-slate-900 group-hover:text-brand-teal transition-colors flex items-center gap-2">
                                 {patient.name}
                               </div>
-                              <div className="text-slate-500 text-xs mt-0.5">
-                                {patient.age} yrs • {patient.demographics.gender}
-                              </div>
                             </div>
                           </div>
                         </td>
@@ -505,7 +502,7 @@ export default function PatientsPage() {
                   transition={{ duration: 0.25, delay: index * 0.04 }}
                 >
                   <Link href={`/clinical/patients/${patient.id}`} className="block h-full group">
-                    <Card className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:-translate-y-1 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)] hover:border-brand-teal/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between h-full">
+                    <Card className="flex flex-col justify-between h-full">
                       <div>
                         {/* Top Row: Avatar & Name */}
                         <div className="flex items-start justify-between gap-3 mb-4">

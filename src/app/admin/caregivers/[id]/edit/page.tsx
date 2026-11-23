@@ -18,7 +18,7 @@ export default async function AdminCaregiverEditPage({ params }: PageProps) {
         </div>
       }
     >
-      <CaregiverEditView caregiverId={resolvedParams.id} />
+      <CaregiverEditView caregiverId={resolvedParams.id} baseBackPath="/admin/caregivers" />
     </Suspense>
   );
 }

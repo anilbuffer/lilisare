@@ -1,7 +1,7 @@
 "use client";
 
-import TimeOffPage from "@/app/caregivers/time-off/page";
+import { AdminCaregiverTimeOffView } from "@/components/admin/caregivers/AdminCaregiverTimeOffView";
 
 export default function AdminCaregiverTimeOffPage() {
-  return <TimeOffPage />;
+  return <AdminCaregiverTimeOffView />;
 }

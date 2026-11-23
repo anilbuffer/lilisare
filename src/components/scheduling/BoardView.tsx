@@ -56,7 +56,7 @@ function BoardColumn({ id, title, dotColor, count, shifts, onShiftClick }: Board
       <Card
         ref={setNodeRef}
         className={clsx(
-          "flex-1 p-3 min-h-[480px] transition-all duration-200 border border-slate-200/80 shadow-[0_6px_32px_rgba(0,0,0,0.04)]",
+          "flex-1 p-3 min-h-[480px] transition-all duration-200 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.04)]",
           isOver ? "bg-teal-50/40 border-brand-teal ring-2 ring-brand-teal/20" : ""
         )}
       >

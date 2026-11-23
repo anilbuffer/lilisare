@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
-import { CaregiverDetailView } from "@/components/caregivers/CaregiverDetailView";
+import { AdminCaregiverDetailView } from "@/components/admin/caregivers/AdminCaregiverDetailView";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -18,7 +18,7 @@ export default async function AdminCaregiverDetailPage({ params }: PageProps) {
         </div>
       }
     >
-      <CaregiverDetailView caregiverId={resolvedParams.id} />
+      <AdminCaregiverDetailView caregiverId={resolvedParams.id} />
     </Suspense>
   );
 }

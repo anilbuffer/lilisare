@@ -462,7 +462,7 @@ export function ManageTraining() {
         </section>
 
         {/* Quiz & Assessments */}
-        <section className="bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+        <section className="bg-white backdrop-blur-xl rounded-2xl p-4 border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.03)] flex flex-col justify-between">
           <div>
             <div className="mb-4">
               <h3 className="text-base font-extrabold text-slate-900">Quiz & Assessments</h3>
@@ -498,7 +498,7 @@ export function ManageTraining() {
       </div>
 
       {/* Row 5: Course Library Catalog */}
-      <section className="bg-white backdrop-blur-xl rounded-2xl border border-slate-200/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)] overflow-hidden">
+      <section className="bg-white backdrop-blur-xl rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-extrabold text-slate-900">Course Library Catalog</h3>

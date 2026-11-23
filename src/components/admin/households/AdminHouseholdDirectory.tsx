@@ -293,9 +293,6 @@ export function AdminHouseholdDirectory() {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Households Hub
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-            Integrated Three-Journey management (Client, Caregiver, Agency Operations) across LiliSare households.
-          </p>
         </div>
 
         <button
@@ -685,7 +682,7 @@ export function AdminHouseholdDirectory() {
             <div
               key={hh.id}
               onClick={() => router.push(`/admin/households/${hh.id}`)}
-              className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between cursor-pointer group"
+              className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between cursor-pointer group"
             >
               {/* Card Top */}
               <div className="p-4 sm:p-5 space-y-3.5">

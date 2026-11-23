@@ -290,7 +290,7 @@ export function CaregiverDetailView({
     .toUpperCase();
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-4 pb-16 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-4 pb-16 animate-in fade-in duration-300">
       {/* Back Navigation Button matching /intake/pipeline */}
       <div>
         <Link
@@ -377,8 +377,8 @@ export function CaregiverDetailView({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`relative px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap rounded-xl flex items-center gap-2 cursor-pointer ${isActive
-                  ? "bg-[#3D6B22] text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                ? "bg-[#3D6B22] text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                 }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
@@ -671,8 +671,8 @@ export function CaregiverDetailView({
                               key={stg.id}
                               onClick={() => handleStageChange(stg.id)}
                               className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${currentStage === stg.id
-                                  ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
-                                  : "text-slate-800"
+                                ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
+                                : "text-slate-800"
                                 }`}
                             >
                               <span className="flex items-center gap-2">
@@ -978,8 +978,8 @@ export function CaregiverDetailView({
 
                 <span
                   className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${cred.status === "Verified"
-                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                      : "bg-amber-50 text-amber-800 border-amber-200"
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                    : "bg-amber-50 text-amber-800 border-amber-200"
                     }`}
                 >
                   {cred.status}

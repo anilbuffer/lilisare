@@ -36,6 +36,8 @@ import {
   SEED_ADMIN_REFERRALS,
   ReferralPriority,
   ReferralStatus,
+  getAdminReferralsFromStorage,
+  saveAdminReferralsToStorage,
 } from "@/lib/intake-referrals/adminIntakeReferralsData";
 
 function getInitials(name: string): string {
@@ -61,18 +63,26 @@ export function AdminIntakeReferralsDirectory() {
     "ALL" | "ASSESSMENT" | "URGENT" | "READY" | "ENROLLED"
   >("ALL");
 
-  // Filter Dropdown state
-  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
-  const filterDropdownRef = useRef<HTMLDivElement>(null);
+  // Filter Dropdowns state
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const statusDropdownRef = useRef<HTMLDivElement>(null);
+
+  const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
+  const priorityDropdownRef = useRef<HTMLDivElement>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 6;
 
-  // Selected Referral for Drawer/Modal
-  const [selectedReferral, setSelectedReferral] =
-    useState<AdminIntakeReferralItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Synchronize with local storage on mount
+  useEffect(() => {
+    const stored = getAdminReferralsFromStorage();
+    if (stored && stored.length > 0) {
+      setItems(stored);
+    }
+  }, []);
 
   // New Referral Form State
   const [formName, setFormName] = useState("");
@@ -86,14 +96,20 @@ export function AdminIntakeReferralsDirectory() {
   const [formPriority, setFormPriority] = useState<ReferralPriority>("Urgent");
   const [formServices, setFormServices] = useState("Skilled Nursing, Home Health Aide");
 
-  // Close filter dropdown on outside click
+  // Close filter dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        filterDropdownRef.current &&
-        !filterDropdownRef.current.contains(event.target as Node)
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target as Node)
       ) {
-        setIsFilterDropdownOpen(false);
+        setIsStatusDropdownOpen(false);
+      }
+      if (
+        priorityDropdownRef.current &&
+        !priorityDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsPriorityDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -184,6 +200,13 @@ export function AdminIntakeReferralsDirectory() {
     return filteredReferrals.slice(start, start + pageSize);
   }, [filteredReferrals, currentPage, pageSize]);
 
+  const hasActiveFilters =
+    statusFilter !== "ALL" ||
+    priorityFilter !== "ALL" ||
+    programFilter !== "ALL" ||
+    activeKpiKey !== "ALL" ||
+    searchQuery.trim().length > 0;
+
   const activeFiltersCount =
     (statusFilter !== "ALL" ? 1 : 0) +
     (priorityFilter !== "ALL" ? 1 : 0) +
@@ -237,7 +260,9 @@ export function AdminIntakeReferralsDirectory() {
       estimatedHoursPerWeek: 25,
     };
 
-    setItems((prev) => [newRef, ...prev]);
+    const updated = [newRef, ...items];
+    setItems(updated);
+    saveAdminReferralsToStorage(updated);
     toast.success(`Referral ${newRef.id} for ${newRef.patientName} created successfully`);
     setIsAddModalOpen(false);
 
@@ -249,19 +274,14 @@ export function AdminIntakeReferralsDirectory() {
   };
 
   const handleConvertToClient = (referral: AdminIntakeReferralItem) => {
-    setItems((prev) =>
-      prev.map((r) =>
-        r.id === referral.id
-          ? { ...r, status: "Enrolled" }
-          : r
-      )
+    const updated = items.map((r) =>
+      r.id === referral.id
+        ? { ...r, status: "Enrolled" as ReferralStatus }
+        : r
     );
+    setItems(updated);
+    saveAdminReferralsToStorage(updated);
     toast.success(`${referral.patientName} successfully admitted as Active Client`);
-    if (selectedReferral && selectedReferral.id === referral.id) {
-      setSelectedReferral((prev: AdminIntakeReferralItem | null) =>
-        prev ? { ...prev, status: "Enrolled" as ReferralStatus } : null
-      );
-    }
   };
 
   return (
@@ -373,157 +393,182 @@ export function AdminIntakeReferralsDirectory() {
         </div>
       </div>
 
-      {/* 03. Search & Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-        <div className="flex flex-1 items-center gap-3 max-w-2xl">
+      {/* 03. Search, Dropdown Filters & View Switcher (Single Unified Card) */}
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-3 sm:p-3.5 shadow-2xs">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search referrals by patient, ID, diagnosis, or source..."
-              className="w-full pl-10 pr-9 py-2.5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Search by client name, diagnosis, ID, or risk status..."
+              className="w-full pl-10 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentPage(1);
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                Clear
               </button>
             )}
           </div>
 
-          {/* Filter Dropdown */}
-          <div className="relative" ref={filterDropdownRef}>
-            <button
-              onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl lg:rounded-2xl text-xs sm:text-sm font-semibold transition-all border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)] cursor-pointer ${activeFiltersCount > 0
-                ? "border-[#3D6B22] text-[#1E5622] bg-[#E8F2E4]"
-                : "border-slate-200 text-slate-700 hover:bg-slate-50"
+          {/* Controls: Status Dropdown Filter, Risk Dropdown Filter, View Toggle */}
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {/* Status Dropdown Filter */}
+            <div className="relative" ref={statusDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  statusFilter !== "ALL"
+                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                 }`}
-            >
-              <Filter className="w-4 h-4" />
-              <span>Filters</span>
-              {activeFiltersCount > 0 && (
-                <span className="w-5 h-5 rounded-xl lg:rounded-2xl bg-[#3D6B22] text-white text-[10px] font-bold flex items-center justify-center">
-                  {activeFiltersCount}
+              >
+                <Filter className="w-3.5 h-3.5 text-slate-500" />
+                <span>
+                  {statusFilter === "ALL"
+                    ? "Status: All"
+                    : `Status: ${statusFilter}`}
                 </span>
-              )}
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
 
-            {isFilterDropdownOpen && (
-              <div className="absolute left-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-30 animate-in fade-in zoom-in-95 duration-150 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <span className="text-xs font-bold text-slate-900">Filter Referrals</span>
-                  {activeFiltersCount > 0 && (
+              {isStatusDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Filter by Status
+                  </div>
+                  {[
+                    { label: "All Statuses", value: "ALL" },
+                    { label: "New Referral", value: "New Referral" },
+                    { label: "Clinical Assessment", value: "Clinical Assessment" },
+                    { label: "Documents & Auth", value: "Documents & Auth" },
+                    { label: "Ready for Staffing", value: "Ready for Staffing" },
+                    { label: "Enrolled", value: "Enrolled" },
+                  ].map((option) => (
                     <button
-                      onClick={handleResetFilters}
-                      className="text-[11px] text-[#3D6B22] font-semibold hover:underline"
+                      key={option.value}
+                      onClick={() => {
+                        setStatusFilter(option.value);
+                        setCurrentPage(1);
+                        setIsStatusDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${
+                        statusFilter === option.value
+                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }`}
                     >
-                      Reset All
+                      <span>{option.label}</span>
+                      {statusFilter === option.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#3D6B22]" />
+                      )}
                     </button>
-                  )}
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Status Filter */}
-                <div>
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Pipeline Stage
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-[#3D6B22]"
-                  >
-                    <option value="ALL">All Stages</option>
-                    <option value="New Referral">New Referral</option>
-                    <option value="Clinical Assessment">Clinical Assessment</option>
-                    <option value="Documents & Auth">Documents & Auth</option>
-                    <option value="Ready for Staffing">Ready for Staffing</option>
-                    <option value="Enrolled">Enrolled</option>
-                  </select>
-                </div>
+            {/* Risk Level / Priority Dropdown Filter */}
+            <div className="relative" ref={priorityDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsPriorityDropdownOpen(!isPriorityDropdownOpen)}
+                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+                  priorityFilter !== "ALL"
+                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                <span>{priorityFilter === "ALL" ? "Risk Level" : priorityFilter}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
 
-                {/* Priority Filter */}
-                <div>
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Priority Tier
-                  </label>
-                  <select
-                    value={priorityFilter}
-                    onChange={(e) => setPriorityFilter(e.target.value)}
-                    className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-[#3D6B22]"
-                  >
-                    <option value="ALL">All Priorities</option>
-                    <option value="Urgent">Urgent</option>
-                    <option value="High">High</option>
-                    <option value="Standard">Standard</option>
-                  </select>
+              {isPriorityDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Risk Level
+                  </div>
+                  {[
+                    { label: "All Risk Levels", value: "ALL" },
+                    { label: "Urgent", value: "Urgent" },
+                    { label: "High", value: "High" },
+                    { label: "Standard", value: "Standard" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setPriorityFilter(option.value);
+                        setCurrentPage(1);
+                        setIsPriorityDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${
+                        priorityFilter === option.value
+                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <span>{option.label}</span>
+                      {priorityFilter === option.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#3D6B22]" />
+                      )}
+                    </button>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Program Filter */}
-                <div>
-                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Care Program
-                  </label>
-                  <select
-                    value={programFilter}
-                    onChange={(e) => setProgramFilter(e.target.value)}
-                    className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-[#3D6B22]"
-                  >
-                    <option value="ALL">All Programs</option>
-                    <option value="Medicaid">Medicaid Waiver (CHC)</option>
-                    <option value="VA">VA Community Care</option>
-                    <option value="Private">Private Pay</option>
-                    <option value="Pediatric">Pediatric Special Care</option>
-                  </select>
-                </div>
-              </div>
+            {/* Reset Filter Button if active */}
+            {hasActiveFilters && (
+              <button
+                onClick={handleResetFilters}
+                title="Reset all filters"
+                className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 cursor-pointer"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
             )}
-          </div>
 
-          {activeFiltersCount > 0 && (
-            <button
-              onClick={handleResetFilters}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset</span>
-            </button>
-          )}
-        </div>
-
-        {/* View Switcher (List vs Grid) */}
-        <div className="flex items-center gap-2 self-end sm:self-auto">
-          <div className="inline-flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-            <button
-              type="button"
-              onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${viewMode === "list"
-                ? "bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] shadow-xs font-bold"
-                : "text-slate-500 hover:text-slate-800"
+            {/* View Switcher: List vs Grid Toggle */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                title="List View"
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  viewMode === "list"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
-              title="Table List View"
-            >
-              <ListIcon className="w-4 h-4" />
-              <span className="hidden md:inline">List</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${viewMode === "grid"
-                ? "bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] shadow-xs font-bold"
-                : "text-slate-500 hover:text-slate-800"
+              >
+                <ListIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                title="Grid View"
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
-              title="Cards Grid View"
-            >
-              <LayoutGrid className="w-4 h-4" />
-              <span className="hidden md:inline">Grid</span>
-            </button>
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -537,11 +582,9 @@ export function AdminIntakeReferralsDirectory() {
               <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold">
                 <tr>
                   <th className="px-6 py-4">Patient</th>
-                  <th className="px-6 py-4">Program</th>
                   <th className="px-6 py-4">Requested Services</th>
                   <th className="px-6 py-4">Priority</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Coordinator</th>
                   <th className="px-6 py-4 text-right">Action</th>
                 </tr>
               </thead>
@@ -549,7 +592,7 @@ export function AdminIntakeReferralsDirectory() {
                 {paginatedReferrals.map((ref) => (
                   <tr
                     key={ref.id}
-                    onClick={() => setSelectedReferral(ref)}
+                    onClick={() => router.push(`/admin/intake-referrals/${ref.id}`)}
                     className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
                   >
                     {/* Patient info */}
@@ -563,13 +606,6 @@ export function AdminIntakeReferralsDirectory() {
                             {ref.patientName}
                           </div>
                         </div>
-                      </div>
-                    </td>
-
-                    {/* Program */}
-                    <td className="px-6 py-4">
-                      <div className="font-semibold text-slate-800 text-xs">
-                        {ref.program}
                       </div>
                     </td>
 
@@ -622,27 +658,22 @@ export function AdminIntakeReferralsDirectory() {
                       </span>
                     </td>
 
-                    {/* Coordinator */}
-                    <td className="px-6 py-4 text-xs font-semibold text-slate-700">
-                      <div>{ref.assignedCoordinator}</div>
-                    </td>
-
                     {/* Action */}
                     <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => setSelectedReferral(ref)}
+                      <Link
+                        href={`/admin/intake-referrals/${ref.id}`}
                         className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#E8F2E4] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#1E5622] rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                       >
                         <span>Review</span>
                         <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}
 
                 {paginatedReferrals.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
                       <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                       <p className="font-semibold text-slate-600 text-sm">
                         No intake referrals found
@@ -663,8 +694,8 @@ export function AdminIntakeReferralsDirectory() {
           {paginatedReferrals.map((ref) => (
             <div
               key={ref.id}
-              onClick={() => setSelectedReferral(ref)}
-              className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between cursor-pointer group"
+              onClick={() => router.push(`/admin/intake-referrals/${ref.id}`)}
+              className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between cursor-pointer group"
             >
               {/* Card Top */}
               <div className="p-4 sm:p-5 space-y-3.5">
@@ -798,149 +829,7 @@ export function AdminIntakeReferralsDirectory() {
         </div>
       </div>
 
-      {/* 06. Selected Referral Review Drawer / Modal */}
-      {selectedReferral && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-            {/* Header */}
-            <div className="border-b border-slate-100 p-4 sm:p-5 flex items-center justify-between bg-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-black flex items-center justify-center">
-                  {getInitials(selectedReferral.patientName)}
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                    {selectedReferral.patientName}
-                  </h3>
-                  <div className="text-xs text-slate-500 font-medium">
-                    {selectedReferral.id} • {selectedReferral.age}yo {selectedReferral.gender}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedReferral(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs sm:text-sm">
-              {/* Snapshot strip */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-                <div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Stage</div>
-                  <div className="font-bold text-slate-900 mt-0.5">{selectedReferral.status}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Priority</div>
-                  <div className="font-bold text-rose-700 mt-0.5">{selectedReferral.priority}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Target Hours</div>
-                  <div className="font-bold text-slate-900 mt-0.5">
-                    {selectedReferral.estimatedHoursPerWeek} hrs/week
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase">Insurance</div>
-                  <div className="font-bold text-emerald-700 mt-0.5 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>Verified</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Clinical Triage Notes */}
-              <div>
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Clinical Triage Notes
-                </h4>
-                <div className="p-3.5 bg-white rounded-xl border border-slate-200/90 text-slate-700 leading-relaxed font-medium">
-                  {selectedReferral.triageNotes}
-                </div>
-              </div>
-
-              {/* Patient Contact & Referral Source */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                  <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Contact Info</span>
-                  </div>
-                  <div className="text-slate-600">{selectedReferral.phone}</div>
-                  <div className="text-slate-600 truncate">{selectedReferral.email}</div>
-                  <div className="text-slate-500 text-xs">
-                    {selectedReferral.address}, {selectedReferral.city} {selectedReferral.zip}
-                  </div>
-                </div>
-
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
-                  <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Referral Source</span>
-                  </div>
-                  <div className="text-slate-800 font-semibold">{selectedReferral.referralSource}</div>
-                  <div className="text-slate-500 text-xs">
-                    Contact: {selectedReferral.referralSourceContact || "Hospital Discharge Planner"}
-                  </div>
-                  <div className="text-slate-500 text-xs">
-                    Payer: {selectedReferral.payerName}
-                  </div>
-                </div>
-              </div>
-
-              {/* Linked Records if converted */}
-              {selectedReferral.clientId && (
-                <div className="p-3.5 bg-[#E8F2E4]/40 border border-[#3D6B22]/20 rounded-xl flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#3D6B22]" />
-                    <span className="text-xs font-bold text-[#1E5622]">
-                      Connected Client Profile: {selectedReferral.clientId}
-                    </span>
-                  </div>
-                  <Link
-                    href={`/admin/clients/${selectedReferral.clientId}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:underline"
-                  >
-                    <span>View Client Profile</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="border-t border-slate-100 p-4 sm:p-5 flex items-center justify-between bg-slate-50/50">
-              <button
-                onClick={() => setSelectedReferral(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl"
-              >
-                Close
-              </button>
-
-              <div className="flex items-center gap-2">
-                {selectedReferral.status !== "Enrolled" ? (
-                  <button
-                    onClick={() => handleConvertToClient(selectedReferral)}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Admit as Active Client</span>
-                  </button>
-                ) : (
-                  <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200">
-                    Client Enrolled
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 07. Add New Referral Modal */}
+      {/* 06. Add New Referral Modal */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden flex flex-col">

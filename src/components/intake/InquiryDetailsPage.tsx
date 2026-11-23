@@ -289,7 +289,7 @@ export function InquiryDetailsPage({
     .toUpperCase();
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-4 pb-16 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-4 pb-16 animate-in fade-in duration-300">
       {/* Back Navigation Button */}
       <div>
         <Link
@@ -560,8 +560,8 @@ export function InquiryDetailsPage({
                   In-Home Family Caregiver
                 </h3>
                 <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${inquiry.familyInfo.potentialCaregiver?.name
-                    ? "bg-emerald-50 text-[#1E5622] border border-emerald-200/70"
-                    : "bg-slate-100 text-slate-600 border border-slate-200/70"
+                  ? "bg-emerald-50 text-[#1E5622] border border-emerald-200/70"
+                  : "bg-slate-100 text-slate-600 border border-slate-200/70"
                   }`}>
                   {inquiry.familyInfo.potentialCaregiver?.name ? "Family Caregiver" : "Agency Staff Match"}
                 </span>

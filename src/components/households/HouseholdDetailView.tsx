@@ -272,7 +272,7 @@ export function HouseholdDetailView({
       </div>
 
       {/* 02. Floating Pill Navigation Bar (Identical to /intake/pipeline/INQ-1042/) */}
-      <div className="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-1 overflow-x-auto">
+      <div className="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex items-center gap-1 overflow-x-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;

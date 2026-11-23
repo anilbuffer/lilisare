@@ -377,7 +377,7 @@ export function AdminClientDirectory() {
   const hasActiveFilters = searchQuery !== "" || statusFilter !== "ALL" || riskFilter !== "ALL";
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-16 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-16 animate-in fade-in duration-300">
       {/* =========================================================================
           1. PAGE HEADER (Matches Reference 1)
          ========================================================================= */}
@@ -415,16 +415,8 @@ export function AdminClientDirectory() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpis.total}
-          </div>
-          <div className="flex items-center justify-between text-[11px] font-medium text-slate-500">
-            <span>{filteredClients.length} loaded in view</span>
-            {activeKpiKey === "TOTAL" && (
-              <span className="text-[10px] font-bold text-[#3D6B22] bg-[#3D6B22]/10 px-1.5 py-0.5 rounded border border-[#3D6B22]/20">
-                ACTIVE FILTER
-              </span>
-            )}
           </div>
         </div>
 
@@ -432,8 +424,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("ACTIVE")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ACTIVE"
-            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+              : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -442,11 +434,8 @@ export function AdminClientDirectory() {
               <Heart className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpis.active}
-          </div>
-          <div className="text-[11px] font-medium text-slate-500 truncate">
-            On active service, not discharged.
           </div>
         </div>
 
@@ -454,8 +443,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("HIGH_RISK")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HIGH_RISK"
-            ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
-            : "border-slate-200 shadow-2xs hover:border-rose-300 hover:shadow-md"
+              ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
+              : "border-slate-200 shadow-2xs hover:border-rose-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -464,11 +453,8 @@ export function AdminClientDirectory() {
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpis.highRisk}
-          </div>
-          <div className="text-[11px] font-medium text-rose-600 truncate">
-            Requires priority monitoring
           </div>
         </div>
 
@@ -476,8 +462,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("HOSPITALIZED")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HOSPITALIZED"
-            ? "border-amber-500 shadow-md ring-2 ring-amber-500/15"
-            : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
+              ? "border-amber-500 shadow-md ring-2 ring-amber-500/15"
+              : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -486,11 +472,8 @@ export function AdminClientDirectory() {
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpis.hospitalized}
-          </div>
-          <div className="text-[11px] font-medium text-amber-700 truncate">
-            Inpatient / Temp Hold
           </div>
         </div>
 
@@ -498,8 +481,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("COMPLETED")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "COMPLETED"
-            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+              : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -508,11 +491,8 @@ export function AdminClientDirectory() {
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {kpis.completed}
-          </div>
-          <div className="text-[11px] font-medium text-slate-500 truncate">
-            No longer on active service
           </div>
         </div>
       </div>
@@ -724,16 +704,16 @@ export function AdminClientDirectory() {
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
                   <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Client Details
+                    Client
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Primary Diagnosis
                   </th>
                   <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Risk Level
-                  </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Primary Diagnosis
                   </th>
                   <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
                     Actions
@@ -750,7 +730,7 @@ export function AdminClientDirectory() {
                       className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
                       onClick={() => router.push(`/admin/clients/${client.id}`)}
                     >
-                      {/* Client Details: Default Avatar + Name + Age • Gender */}
+                      {/* Client */}
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
                           {/* Default Avatar (Initial Badge) */}
@@ -763,6 +743,13 @@ export function AdminClientDirectory() {
                             </div>
                           </div>
                         </div>
+                      </td>
+
+                      {/* Primary Diagnosis */}
+                      <td className="py-4 px-4 sm:px-6">
+                        <p className="text-xs sm:text-sm text-slate-700 font-medium max-w-xs md:max-w-md truncate">
+                          {client.primaryDiagnosis}
+                        </p>
                       </td>
 
                       {/* Status */}
@@ -797,22 +784,15 @@ export function AdminClientDirectory() {
                         </span>
                       </td>
 
-                      {/* Primary Diagnosis */}
-                      <td className="py-4 px-4 sm:px-6">
-                        <p className="text-xs sm:text-sm text-slate-700 font-medium max-w-xs md:max-w-md truncate">
-                          {client.primaryDiagnosis}
-                        </p>
-                      </td>
-
                       {/* Actions */}
                       <td className="py-4 px-4 sm:px-6 text-right">
                         <Link
                           href={`/admin/clients/${client.id}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] hover:underline"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                         >
                           <span>View Profile</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                         </Link>
                       </td>
                     </tr>

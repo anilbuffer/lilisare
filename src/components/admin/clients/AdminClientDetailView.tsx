@@ -241,7 +241,7 @@ export function AdminClientDetailView({ clientId }: AdminClientDetailViewProps) 
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-4 pb-16 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-4 pb-16 animate-in fade-in duration-300">
       {/* =========================================================================
           BACK NAVIGATION (Matching /intake/pipeline/INQ-1042/ exactly)
          ========================================================================= */}
@@ -268,10 +268,10 @@ export function AdminClientDetailView({ clientId }: AdminClientDetailViewProps) 
             <div className="absolute -bottom-1 -right-1">
               <span
                 className={`border-2 border-white shadow-xs font-bold text-white whitespace-nowrap px-2 py-0.5 text-[10px] rounded-full tracking-wide ${client.status === "Active"
-                    ? "bg-[#3D6B22]"
-                    : (client.status as string) === "Hospitalized"
-                      ? "bg-amber-500"
-                      : "bg-slate-500"
+                  ? "bg-[#3D6B22]"
+                  : (client.status as string) === "Hospitalized"
+                    ? "bg-amber-500"
+                    : "bg-slate-500"
                   }`}
               >
                 {client.status}
@@ -367,8 +367,8 @@ export function AdminClientDetailView({ clientId }: AdminClientDetailViewProps) 
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`relative px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap rounded-xl cursor-pointer ${isActive
-                  ? "bg-[#EAF5E9] text-[#2B5E1A] border border-[#3D6B22]/20 shadow-2xs"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                ? "bg-[#EAF5E9] text-[#2B5E1A] border border-[#3D6B22]/20 shadow-2xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
             >
               {tab.label}
@@ -1084,8 +1084,8 @@ export function AdminClientDetailView({ clientId }: AdminClientDetailViewProps) 
                 <div className="flex items-center gap-3">
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${doc.status === "Verified"
-                        ? "bg-emerald-50 text-[#1E5622] border-emerald-200"
-                        : "bg-amber-50 text-amber-700 border-amber-200"
+                      ? "bg-emerald-50 text-[#1E5622] border-emerald-200"
+                      : "bg-amber-50 text-amber-700 border-amber-200"
                       }`}
                   >
                     {doc.status}

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { InquiryRecord, ContactMethod, ReferralSourceType } from "@/types/intake";
+import { LILISARE_SERVICES } from "@/lib/services";
 import {
   X,
   Check,
@@ -57,8 +58,8 @@ export function NewReferralDrawer({
   const [organization, setOrganization] = useState("");
   const [caseManagerName, setCaseManagerName] = useState("");
   const [caseManagerAgency, setCaseManagerAgency] = useState("");
-  const [programInterest, setProgramInterest] = useState("Medicaid Waiver (CCSP / SOURCE)");
-  const [careTypes, setCareTypes] = useState<string[]>(["Personal Care & Hygiene", "Meal Preparation"]);
+  const [programInterest, setProgramInterest] = useState("IHSS (In-Home Support Services)");
+  const [careTypes, setCareTypes] = useState<string[]>(["Family Caregiver", "IHSS (In-Home Support Services)"]);
   const [hoursPerWeek, setHoursPerWeek] = useState<number>(20);
   const [supportNotes, setSupportNotes] = useState("");
 
@@ -136,10 +137,10 @@ export function NewReferralDrawer({
         },
         potentialCaregiver: caregiverName
           ? {
-              name: caregiverName,
-              relationship: caregiverRelationship || "Family Member",
-              classificationInterest: "W-2",
-            }
+            name: caregiverName,
+            relationship: caregiverRelationship || "Family Member",
+            classificationInterest: "W-2",
+          }
           : undefined,
       },
       referralInfo: {
@@ -147,9 +148,9 @@ export function NewReferralDrawer({
         organization: organization || "Direct Intake",
         caseManager: caseManagerName
           ? {
-              name: caseManagerName,
-              agency: caseManagerAgency || organization,
-            }
+            name: caseManagerName,
+            agency: caseManagerAgency || organization,
+          }
           : undefined,
         dateReceived: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
         assignedCoordinator: {
@@ -240,20 +241,18 @@ export function NewReferralDrawer({
               return (
                 <div key={s.num} className="flex flex-col items-center text-center">
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                      isDone
-                        ? "bg-[#3D6B22] text-white"
-                        : isCurrent
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone
+                      ? "bg-[#3D6B22] text-white"
+                      : isCurrent
                         ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/15"
                         : "bg-[#F7F9F8] text-[#74877C] border border-[#D5DFDA]"
-                    }`}
+                      }`}
                   >
                     {isDone ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : s.num}
                   </div>
                   <span
-                    className={`text-[10px] mt-1 font-medium truncate max-w-full ${
-                      isCurrent ? "text-[#3D6B22] font-bold" : "text-[#74877C]"
-                    }`}
+                    className={`text-[10px] mt-1 font-medium truncate max-w-full ${isCurrent ? "text-[#3D6B22] font-bold" : "text-[#74877C]"
+                      }`}
                   >
                     {s.title}
                   </span>
@@ -349,11 +348,10 @@ export function NewReferralDrawer({
                         key={method}
                         type="button"
                         onClick={() => setPreferredContactMethod(method)}
-                        className={`py-2 text-xs font-medium rounded-xl border text-center transition-all ${
-                          preferredContactMethod === method
-                            ? "bg-[#3D6B22] text-white border-[#3D6B22]"
-                            : "bg-[#F7F9F8] text-[#4A5D52] border-[#D5DFDA] hover:bg-[#FFFFFF]"
-                        }`}
+                        className={`py-2 text-xs font-medium rounded-xl border text-center transition-all ${preferredContactMethod === method
+                          ? "bg-[#3D6B22] text-white border-[#3D6B22]"
+                          : "bg-[#F7F9F8] text-[#4A5D52] border-[#D5DFDA] hover:bg-[#FFFFFF]"
+                          }`}
                       >
                         {method}
                       </button>
@@ -568,41 +566,44 @@ export function NewReferralDrawer({
                     onChange={(e) => setProgramInterest(e.target.value)}
                     className="w-full px-3 py-2 text-xs bg-[#FFFFFF] border border-[#D5DFDA] rounded-xl text-[#111C16]"
                   >
-                    <option value="Medicaid Waiver (CCSP / SOURCE)">Medicaid Waiver (CCSP / SOURCE)</option>
-                    <option value="Structured Family Caregiving (SFC)">Structured Family Caregiving (SFC)</option>
-                    <option value="Private Pay">Private Pay</option>
-                    <option value="VA Community Care Network (CCN)">VA Community Care Network (CCN)</option>
-                    <option value="Long-Term Care Insurance">Long-Term Care Insurance</option>
-                    <option value="Georgia GAPP (Pediatric)">Georgia GAPP (Pediatric)</option>
+                    {LILISARE_SERVICES.map((svc) => (
+                      <option key={svc.id} value={svc.name}>
+                        {svc.order}. {svc.name} ({svc.code})
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-semibold text-[#111C16] block mb-1.5">
-                    Requested Care Types
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "Personal Care & Hygiene",
-                      "Mobility Standby & Transfers",
-                      "Meal Preparation",
-                      "Medication Reminders",
-                      "Companionship & Respite",
-                      "RN Health Oversight",
-                    ].map((ct) => {
-                      const isSelected = careTypes.includes(ct);
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-[#111C16]">
+                      Requested Care Services ({careTypes.length})
+                    </label>
+                    {careTypes.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCareTypes([])}
+                        className="text-[11px] text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-1 border border-slate-100 rounded-xl bg-slate-50/50">
+                    {LILISARE_SERVICES.map((svc) => {
+                      const isSelected = careTypes.includes(svc.name);
                       return (
                         <button
-                          key={ct}
+                          key={svc.id}
                           type="button"
-                          onClick={() => handleToggleCareType(ct)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                            isSelected
-                              ? "bg-[#3D6B22] text-white border-[#3D6B22]"
-                              : "bg-[#F7F9F8] text-[#4A5D52] border-[#D5DFDA] hover:bg-[#FFFFFF]"
-                          }`}
+                          onClick={() => handleToggleCareType(svc.name)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${isSelected
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22]"
+                            : "bg-[#F7F9F8] text-[#4A5D52] border-[#D5DFDA] hover:bg-[#FFFFFF]"
+                            }`}
                         >
-                          {ct}
+                          <span className="text-[10px] opacity-70 mr-1">{svc.order}.</span>
+                          {svc.name}
                         </button>
                       );
                     })}

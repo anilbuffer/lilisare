@@ -1,6 +1,10 @@
+"use client";
+
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { UserPlus, User, Calendar, Activity, Phone, MapPin, Building, AlertCircle, Shield, Hash } from "lucide-react";
+import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
+import { toast } from "sonner";
 
 interface NewPatientModalProps {
   isOpen: boolean;
@@ -9,6 +13,32 @@ interface NewPatientModalProps {
 
 export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
+  const [diagnosis, setDiagnosis] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [referralSource, setReferralSource] = useState("");
+  const [priority, setPriority] = useState("routine");
+  const [insurance, setInsurance] = useState("");
+  const [policyId, setPolicyId] = useState("");
+
+  const handleVoiceDictate = () => {
+    setFirstName("Arthur");
+    setLastName("Reynolds");
+    setDob("1948-06-15");
+    setGender("male");
+    setDiagnosis("Post-operative recovery & Mobility impairment");
+    setPhone("(541) 555-1234");
+    setAddress("742 Evergreen Terrace, Springfield, OR 97477");
+    setReferralSource("hospital");
+    setPriority("urgent");
+    setInsurance("Oregon Health Plan (OHP Medicaid)");
+    setPolicyId("MED-994821");
+    toast.success("AI Voice dictation transcribed and mapped to patient intake fields!");
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +46,7 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
+      toast.success(`Patient ${firstName} ${lastName} created successfully!`);
       onClose();
     }, 800);
   };
@@ -37,7 +68,7 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
           >
             Cancel
           </button>
@@ -61,7 +92,15 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
         </>
       }
     >
-      <form id="new-patient-form" onSubmit={handleSubmit} className="p-1">
+      <form id="new-patient-form" onSubmit={handleSubmit} className="p-1 space-y-4">
+        {/* AI Voice Dictation Banner */}
+        <VoiceDictationBanner
+          title="AI Voice Dictation"
+          subtitle="Speak naturally to auto-fill patient intake and insurance details"
+          buttonLabel="Dictate Patient"
+          onDictate={handleVoiceDictate}
+        />
+
         <div className="space-y-4">
           {/* Personal Details Section */}
           <div>
@@ -79,8 +118,10 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                   <input
                     type="text"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all placeholder:text-slate-400"
-                    placeholder="e.g. John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all placeholder:text-slate-400"
+                    placeholder="e.g. Arthur"
                   />
                 </div>
               </div>
@@ -93,8 +134,10 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                   <input
                     type="text"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all placeholder:text-slate-400"
-                    placeholder="e.g. Doe"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all placeholder:text-slate-400"
+                    placeholder="e.g. Reynolds"
                   />
                 </div>
               </div>
@@ -106,13 +149,19 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                   </div>
                   <input
                     type="date"
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all text-slate-600"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all text-slate-600"
                   />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[13px] font-medium text-slate-700">Gender</label>
-                <select className="w-full px-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all text-slate-600">
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all text-slate-600"
+                >
                   <option value="">Select gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
@@ -138,7 +187,9 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                     </div>
                     <input
                       type="text"
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all placeholder:text-slate-400"
+                      value={diagnosis}
+                      onChange={(e) => setDiagnosis(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all placeholder:text-slate-400"
                       placeholder="e.g. Type 2 Diabetes"
                     />
                   </div>
@@ -151,7 +202,9 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                     </div>
                     <input
                       type="tel"
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all placeholder:text-slate-400"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all placeholder:text-slate-400"
                       placeholder="(555) 123-4567"
                     />
                   </div>
@@ -165,7 +218,9 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                   </div>
                   <textarea
                     rows={2}
-                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all resize-none placeholder:text-slate-400"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all resize-none placeholder:text-slate-400"
                     placeholder="Street address, city, state, zip"
                   />
                 </div>
@@ -187,7 +242,11 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Building className="h-4 w-4 text-slate-400" />
                     </div>
-                    <select className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all text-slate-600 appearance-none">
+                    <select
+                      value={referralSource}
+                      onChange={(e) => setReferralSource(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all text-slate-600 appearance-none"
+                    >
                       <option value="">Select source...</option>
                       <option value="hospital">Hospital Discharge</option>
                       <option value="pcp">Primary Care Physician</option>
@@ -203,7 +262,11 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <AlertCircle className="h-4 w-4 text-slate-400" />
                     </div>
-                    <select className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all text-slate-600 appearance-none">
+                    <select
+                      value={priority}
+                      onChange={(e) => setPriority(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all text-slate-600 appearance-none"
+                    >
                       <option value="routine">Routine</option>
                       <option value="urgent">Urgent</option>
                       <option value="expedited">Expedited (Same Day)</option>
@@ -220,7 +283,9 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                     </div>
                     <input
                       type="text"
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all placeholder:text-slate-400"
+                      value={insurance}
+                      onChange={(e) => setInsurance(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all placeholder:text-slate-400"
                       placeholder="e.g. Medicare, BlueCross"
                     />
                   </div>
@@ -233,7 +298,9 @@ export function NewPatientModal({ isOpen, onClose }: NewPatientModalProps) {
                     </div>
                     <input
                       type="text"
-                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all placeholder:text-slate-400"
+                      value={policyId}
+                      onChange={(e) => setPolicyId(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all placeholder:text-slate-400"
                       placeholder="e.g. ABC123456789"
                     />
                   </div>

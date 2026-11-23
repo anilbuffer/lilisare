@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Calendar, Clock, User, FileText, CheckCircle2 } from "lucide-react";
 import { mockPatients } from "@/lib/patients/mockData";
+import { LILISARE_SERVICES } from "@/lib/services";
 
 interface ScheduleShiftModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export function ScheduleShiftModal({
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [startTime, setStartTime] = useState("09:00 AM");
   const [endTime, setEndTime] = useState("05:00 PM");
-  const [shiftType, setShiftType] = useState("Personal Care & Companionship");
+  const [shiftType, setShiftType] = useState("Family Caregiver");
   const [notes, setNotes] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,7 +61,7 @@ export function ScheduleShiftModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
           >
             Cancel
           </button>
@@ -143,11 +144,11 @@ export function ScheduleShiftModal({
             onChange={(e) => setShiftType(e.target.value)}
             className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal bg-white"
           >
-            <option value="Personal Care & Companionship">Personal Care & Companionship</option>
-            <option value="Skilled Nursing Visit">Skilled Nursing Visit</option>
-            <option value="Dementia / Memory Care">Dementia / Memory Care</option>
-            <option value="Respite Care">Respite Care</option>
-            <option value="Medication Administration">Medication Administration</option>
+            {LILISARE_SERVICES.map((svc) => (
+              <option key={svc.id} value={svc.name}>
+                {svc.order}. {svc.name}
+              </option>
+            ))}
           </select>
         </div>
 

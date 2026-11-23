@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Upload, FileText } from "lucide-react";
+import { LILISARE_SERVICES } from "@/lib/services";
 
 interface NewClaimModalProps {
   isOpen: boolean;
@@ -79,11 +80,12 @@ export function NewClaimModal({ isOpen, onClose }: NewClaimModalProps) {
               required
               className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
             >
-              <option value="">Select payer...</option>
-              <option value="medicaid">Georgia Medicaid (CCSP / SOURCE)</option>
-              <option value="medicare">Medicare Advantage</option>
-              <option value="va">VA Community Care Network</option>
-              <option value="private">Private Insurance</option>
+              <option value="">Select payer program...</option>
+              {LILISARE_SERVICES.map((svc) => (
+                <option key={svc.id} value={svc.name}>
+                  {svc.order}. {svc.name} ({svc.code})
+                </option>
+              ))}
             </select>
           </div>
         </div>

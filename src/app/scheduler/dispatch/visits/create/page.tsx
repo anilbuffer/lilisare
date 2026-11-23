@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/Card";
-import { ArrowLeft, User, MapPin, Clock, Calendar, CheckCircle2, ChevronRight, Save, Navigation, FileText, AlertCircle } from "lucide-react";
+import { ArrowLeft, User, MapPin, Clock, Calendar, CheckCircle2, ChevronRight, Save, Navigation, FileText, AlertCircle, Stethoscope } from "lucide-react";
+import { LILISARE_SERVICES } from "@/lib/services";
 import Link from "next/link";
 import clsx from "clsx";
 
@@ -11,6 +12,7 @@ export default function CreateVisitPage() {
   const [address, setAddress] = useState("");
   const [time, setTime] = useState("");
   const [caregiverId, setCaregiverId] = useState("");
+  const [serviceLine, setServiceLine] = useState("Family Caregiver");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,7 +30,7 @@ export default function CreateVisitPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <Link 
+          <Link
             href="/scheduler/dispatch/visits"
             className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 hover:text-brand-teal transition-colors mb-2"
           >
@@ -104,7 +106,7 @@ export default function CreateVisitPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700">Assign Caregiver</label>
                 <div className="relative">
@@ -118,6 +120,27 @@ export default function CreateVisitPage() {
                     <option value="c1">Elena Rostova (c1)</option>
                     <option value="c2">David Miller (c2)</option>
                     <option value="c3">Maria Alvarez (c3)</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                    <ChevronRight className="w-4 h-4 text-slate-400 rotate-90" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700">LiliSare Service Line</label>
+                <div className="relative">
+                  <Stethoscope className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <select
+                    value={serviceLine}
+                    onChange={(e) => setServiceLine(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all bg-slate-50/50 focus:bg-white appearance-none cursor-pointer"
+                  >
+                    {LILISARE_SERVICES.map((svc) => (
+                      <option key={svc.id} value={svc.name}>
+                        {svc.order}. {svc.name} ({svc.code})
+                      </option>
+                    ))}
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                     <ChevronRight className="w-4 h-4 text-slate-400 rotate-90" />
@@ -151,7 +174,7 @@ export default function CreateVisitPage() {
               <MapPin className="w-5 h-5 text-rose-500" />
               Location
             </h2>
-            
+
             <div className="space-y-4 relative z-10">
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700">Service Address</label>
@@ -164,7 +187,7 @@ export default function CreateVisitPage() {
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all bg-white"
                 />
               </div>
-              
+
               <div className="h-48 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden relative group cursor-pointer">
                 <div className="absolute inset-0 bg-[url('https://maps.wikimedia.org/osm-intl/13/1310/3166.png')] bg-cover bg-center opacity-70 group-hover:opacity-100 transition-opacity"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent"></div>
@@ -200,7 +223,7 @@ export default function CreateVisitPage() {
                 <span>Caregiver assigned</span>
               </li>
             </ul>
-            
+
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || !patientName || !time || !address}

@@ -18,7 +18,7 @@ export interface Household {
   state: string;
   zip: string;
   phone: string;
-  program: "Medicaid Waiver" | "Pediatric In-Home" | "Senior Community Care" | "Private Duty";
+  program: string;
   caseManager: {
     name: string;
     agency: string;
@@ -52,7 +52,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "OR",
     zip: "97477",
     phone: "(541) 555-0199",
-    program: "Pediatric In-Home",
+    program: "CES Waiver (Children’s Extensive Support)",
     caseManager: {
       name: "Dana Jenkins, MSW",
       agency: "State Dept of Human Services",
@@ -98,7 +98,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "IA",
     zip: "50613",
     phone: "(319) 555-3820",
-    program: "Senior Community Care",
+    program: "EBD Waiver (Elderly, Blind, and Disabled)",
     caseManager: {
       name: "Sarah Jenkins, RN",
       agency: "ElderBridge Care Network",
@@ -145,7 +145,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "IA",
     zip: "50309",
     phone: "(515) 555-7741",
-    program: "Medicaid Waiver",
+    program: "IHSS (In-Home Support Services)",
     caseManager: {
       name: "Robert Martinez",
       agency: "Metro Care Management",
@@ -192,7 +192,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "IA",
     zip: "50010",
     phone: "(515) 555-2311",
-    program: "Medicaid Waiver",
+    program: "Family Caregiver",
     caseManager: {
       name: "Dana Jenkins, MSW",
       agency: "State Dept of Human Services",
@@ -238,7 +238,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "GA",
     zip: "30327",
     phone: "(404) 555-8392",
-    program: "Medicaid Waiver",
+    program: "DD Waiver (Developmental Disabilities)",
     caseManager: {
       name: "Marcus Vance, LCSW",
       agency: "Georgia Community Care Services",
@@ -285,7 +285,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "GA",
     zip: "31401",
     phone: "(912) 555-4421",
-    program: "Pediatric In-Home",
+    program: "CHCBS Waiver (Children’s Home and Community-Based Services)",
     caseManager: {
       name: "Patricia Wong, RN",
       agency: "Coastal Care Coordination",
@@ -331,7 +331,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "GA",
     zip: "30030",
     phone: "(404) 555-1984",
-    program: "Medicaid Waiver",
+    program: "SLS Waiver (Supported Living Services)",
     caseManager: {
       name: "Elena Morales-Gomez",
       agency: "DeKalb County Community Network",
@@ -378,7 +378,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "GA",
     zip: "30022",
     phone: "(770) 555-6321",
-    program: "Pediatric In-Home",
+    program: "CHRP Waiver (Children’s Habilitation Residential Program)",
     caseManager: {
       name: "Dana Jenkins, MSW",
       agency: "State Dept of Human Services",
@@ -424,7 +424,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "GA",
     zip: "30096",
     phone: "(678) 555-7210",
-    program: "Pediatric In-Home",
+    program: "CNA (Certified Nurse Aide)",
     caseManager: {
       name: "Patricia Wong, RN",
       agency: "Gwinnett County Child Services",
@@ -471,7 +471,7 @@ export const MOCK_HOUSEHOLDS: Household[] = [
     state: "GA",
     zip: "30338",
     phone: "(770) 555-8822",
-    program: "Senior Community Care",
+    program: "Host Home",
     caseManager: {
       name: "Sarah Jenkins, RN",
       agency: "North Atlanta Senior Services",

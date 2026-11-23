@@ -36,6 +36,7 @@ import {
   getHouseholdsFromStorage,
   saveHouseholdsToStorage,
 } from "@/lib/households/mockData";
+import { LILISARE_SERVICES } from "@/lib/services";
 import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 import { toast } from "sonner";
 
@@ -399,8 +400,8 @@ export default function HouseholdsPage() {
                       setIsDateOpen(false);
                     }}
                     className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedDateRange === opt.id
-                        ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
+                      ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
+                      : "text-slate-700 hover:bg-slate-50"
                       }`}
                   >
                     <span>{opt.label}</span>
@@ -469,8 +470,8 @@ export default function HouseholdsPage() {
               type="button"
               onClick={() => setSelectedTab(selectedTab === kpi.id ? "ALL" : kpi.id)}
               className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-2xl p-4 sm:p-5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${isSelected
-                  ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
-                  : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
+                ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-gradient-to-b from-[#F2F8EE]/70 via-white to-white shadow-[0_8px_30px_rgba(61,107,34,0.12)] -translate-y-0.5"
+                : "border-slate-200/90 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:border-[#3D6B22]/60"
                 }`}
             >
               {/* Top row: Label & Animated Icon Container */}
@@ -528,10 +529,12 @@ export default function HouseholdsPage() {
                   onChange={(e) => setSelectedProgram(e.target.value)}
                   className="text-xs font-medium bg-slate-50/70 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all cursor-pointer"
                 >
-                  <option value="all">All Care Programs</option>
-                  <option value="Pediatric In-Home">Pediatric In-Home</option>
-                  <option value="Medicaid Waiver">Medicaid Waiver</option>
-                  <option value="Senior Community Care">Senior Community Care</option>
+                  <option value="all">All Care Programs ({LILISARE_SERVICES.length})</option>
+                  {LILISARE_SERVICES.map((svc) => (
+                    <option key={svc.id} value={svc.name}>
+                      {svc.order}. {svc.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -592,8 +595,8 @@ export default function HouseholdsPage() {
                           setIsStageDropdownOpen(false);
                         }}
                         className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${selectedTab === "ALL"
-                            ? "bg-slate-50 font-bold text-slate-900"
-                            : "text-slate-700 hover:bg-slate-50"
+                          ? "bg-slate-50 font-bold text-slate-900"
+                          : "text-slate-700 hover:bg-slate-50"
                           }`}
                       >
                         <span>All Stages</span>
@@ -617,8 +620,8 @@ export default function HouseholdsPage() {
                               setIsStageDropdownOpen(false);
                             }}
                             className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
-                                ? "bg-slate-50 font-bold text-slate-900"
-                                : "text-slate-700 hover:bg-slate-50"
+                              ? "bg-slate-50 font-bold text-slate-900"
+                              : "text-slate-700 hover:bg-slate-50"
                               }`}
                           >
                             <span className="flex items-center gap-2">
@@ -642,8 +645,8 @@ export default function HouseholdsPage() {
                   type="button"
                   onClick={() => setViewMode("kanban")}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
-                      ? "bg-white text-[#3D6B22] shadow-xs"
-                      : "text-slate-500 hover:text-slate-900"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
                     }`}
                   title="Kanban Board View"
                 >
@@ -654,8 +657,8 @@ export default function HouseholdsPage() {
                   type="button"
                   onClick={() => setViewMode("list")}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
-                      ? "bg-white text-[#3D6B22] shadow-xs"
-                      : "text-slate-500 hover:text-slate-900"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
                     }`}
                   title="List View"
                 >
@@ -697,10 +700,10 @@ export default function HouseholdsPage() {
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => handleDrop(e, col.id)}
                       className={`w-[275px] shrink-0 flex flex-col rounded-2xl border transition-all duration-300 ${isDragOver
-                          ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
-                          : isFilteredStage
-                            ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
-                            : "bg-[#F8FAF9] border-slate-200/80"
+                        ? "bg-emerald-50/70 border-[#3D6B22] ring-2 ring-[#3D6B22]/30 shadow-md"
+                        : isFilteredStage
+                          ? "bg-[#EEF4F0] border-[#3D6B22]/60 ring-1 ring-[#3D6B22]/20"
+                          : "bg-[#F8FAF9] border-slate-200/80"
                         }`}
                     >
                       {/* Lane Header */}

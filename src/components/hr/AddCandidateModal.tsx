@@ -24,6 +24,8 @@ import {
   UserCheck
 } from "lucide-react";
 import { Candidate, CandidateSource, CandidateStage } from "@/types/hr";
+import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
+import { toast } from "sonner";
 
 interface AddCandidateModalProps {
   isOpen: boolean;
@@ -102,6 +104,24 @@ export function AddCandidateModal({
 
   const handleQuickPreset = (exp: number) => {
     setExperienceYears(exp);
+  };
+
+  const handleVoiceDictate = () => {
+    setName("Brianna Jenkins");
+    setEmail("brianna.jenkins@example.com");
+    setPhone("(541) 555-0812");
+    setLocation("Springfield, OR");
+    setPositionApplied("Certified Nursing Assistant (CNA)");
+    setAvailability("Full-Time (Days & Weekends)");
+    setExperienceYears(4);
+    setDesiredPay("$24.50/hr");
+    setLicenseType("CNA");
+    setLicenseNumber("CNA-88492");
+    setCprCertified(true);
+    setTbStatus("Negative");
+    setHasDriverLicense(true);
+
+    toast.success("AI Voice dictation transcribed and mapped to candidate profile fields!");
   };
 
   const handleAddQuickNoteTag = (tag: string) => {
@@ -401,6 +421,13 @@ export function AddCandidateModal({
               </div>
 
               <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between space-y-4">
+                {/* AI Voice Dictation Action Banner */}
+                <VoiceDictationBanner
+                  title="AI Voice Dictation"
+                  subtitle="Speak naturally to auto-fill caregiver recruitment & credential details"
+                  buttonLabel="Dictate Candidate"
+                  onDictate={handleVoiceDictate}
+                />
                 {/* TAB 1: PERSONAL DETAILS */}
                 {activeTab === "personal" && (
                   <motion.div
@@ -846,7 +873,7 @@ export function AddCandidateModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      className="px-4 py-2 text-slate-600 font-semibold bg-slate-100 hover:bg-slate-200/60 rounded-xl transition-colors text-xs"
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
                     >
                       Cancel
                     </button>

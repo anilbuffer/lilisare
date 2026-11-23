@@ -39,6 +39,8 @@ import {
 } from "@/lib/clients/mockData";
 import { MOCK_HOUSEHOLDS } from "@/lib/households/mockData";
 import { ClientRecord, CareArrangementType, ClientStatus } from "@/types/client";
+import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
+import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
 
 export default function AddClientPage() {
@@ -84,7 +86,7 @@ export default function AddClientPage() {
 
   // Step 3: Care Requirements & Services
   const [careType, setCareType] = useState<CareArrangementType>("Family Care");
-  const [program, setProgram] = useState("Pediatric In-Home Care (Medicaid EPSDT Waiver)");
+  const [program, setProgram] = useState("IHSS (In-Home Support Services)");
   const [authorizedHours, setAuthorizedHours] = useState(40);
   const [schedulePreference, setSchedulePreference] = useState("Monday – Friday, 8:00 AM – 4:00 PM");
   const [specialInstructions, setSpecialInstructions] = useState(
@@ -153,6 +155,37 @@ export default function AddClientPage() {
     } else {
       setSelectedCareNeeds([...selectedCareNeeds, need]);
     }
+  };
+
+  const handleVoiceDictate = () => {
+    setClientName("Arthur Reynolds");
+    setPreferredName("Artie");
+    setDob("1948-06-15");
+    setGender("Male");
+    setPrimaryLanguage("English");
+    setContactName("Mary Reynolds");
+    setContactRelationship("Daughter & Legal Guardian");
+    setContactPhone("(541) 555-1234");
+    setContactEmail("mary.reynolds@example.com");
+    setAddress("742 Evergreen Terrace");
+    setCity("Springfield");
+    setState("OR");
+    setZip("97477");
+    setEmergencyName("David Miller");
+    setEmergencyRel("Son-in-law");
+    setEmergencyPhone("(541) 555-0211");
+    setHouseholdChoice("new");
+    setNewHouseholdName("Reynolds Household");
+    setCaregiverName("Mary Reynolds");
+    setCaregiverPhone("(541) 555-1234");
+    setFamilyCaregiverRel("Daughter (Family Paid Caregiver)");
+    setPayerName("Oregon Health Plan (OHP Medicaid)");
+    setCaseManagerName("Dana Jenkins, MSW");
+    setAuthorizedHours(30);
+    setSpecialInstructions(
+      "Client requires standby assistance with ambulation and reminders for medication schedule."
+    );
+    toast.success("AI Voice dictation transcribed and mapped to client registration fields!");
   };
 
   const handleNextStep = () => {
@@ -409,21 +442,27 @@ export default function AddClientPage() {
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300">
-      {/* 01. Top Header Card: Aligned completely with /intake/pipeline/new/ */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+    <div className="w-full max-w-4xl mx-auto space-y-5 pb-24 animate-in fade-in duration-200">
+      {/* Back Button with subtle shadow */}
+      <div>
+        <Link
+          href="/clients"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Clients Workspace</span>
+        </Link>
+      </div>
+
+      {/* 01. Top Header Card */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Link
-                href="/clients"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#3D6B22] transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Back to Clients Workspace
-              </Link>
-              <span className="text-slate-300">•</span>
-              <span className="text-xs font-semibold text-[#3D6B22] bg-[#3D6B22]/10 px-2.5 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/80">
+                New Client Registration
+              </span>
+              <span className="text-xs text-slate-400">
                 Step {currentStep} of 4: {steps.find((s) => s.num === currentStep)?.title}
               </span>
             </div>
@@ -598,6 +637,16 @@ export default function AddClientPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* AI Voice Dictation Action Banner */}
+      {currentStep < 5 && (
+        <VoiceDictationBanner
+          title="AI Voice Dictation"
+          subtitle="Speak naturally to auto-fill client demographics, family contact, and care plan details"
+          buttonLabel="Dictate Client"
+          onDictate={handleVoiceDictate}
+        />
       )}
 
       {/* 03. Main Guided Form Card */}
@@ -1223,21 +1272,11 @@ export default function AddClientPage() {
                       onChange={(e) => setProgram(e.target.value)}
                       className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none cursor-pointer"
                     >
-                      <option value="Pediatric In-Home Care (Medicaid EPSDT Waiver)">
-                        Pediatric In-Home Care (Medicaid EPSDT Waiver)
-                      </option>
-                      <option value="Medicaid K-Plan / DD In-Home Attendant Support">
-                        Medicaid K-Plan / DD In-Home Attendant Support
-                      </option>
-                      <option value="Senior Community Care / OHP Waiver">
-                        Senior Community Care / OHP Waiver
-                      </option>
-                      <option value="Medicaid Elderly Waiver (Live-In Personal Care)">
-                        Medicaid Elderly Waiver (Live-In Personal Care)
-                      </option>
-                      <option value="Private Duty / Family Respite">
-                        Private Duty / Family Respite
-                      </option>
+                      {LILISARE_SERVICES.map((svc) => (
+                        <option key={svc.id} value={svc.name}>
+                          {svc.order}. {svc.name} ({svc.code})
+                        </option>
+                      ))}
                     </select>
                     <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
                       <ChevronDown className="w-4 h-4" />
@@ -1530,7 +1569,7 @@ export default function AddClientPage() {
             ) : (
               <Link
                 href="/clients"
-                className="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
               >
                 Cancel
               </Link>

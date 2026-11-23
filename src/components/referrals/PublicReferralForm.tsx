@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { AlertCircle, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { LILISARE_SERVICES } from "@/lib/services";
 
 interface PublicReferralFormProps {
   onSubmitSuccess: (referenceNumber: string) => void;
@@ -97,8 +98,19 @@ export function PublicReferralForm({ onSubmitSuccess }: PublicReferralFormProps)
               <input required id="patientContact" type="text" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-shadow" placeholder="Wife (Mary): (555) 987-6543" />
             </div>
             <div className="space-y-1.5 md:col-span-2">
+              <label htmlFor="serviceRequested" className="text-sm font-medium text-slate-700">LiliSare Service Line Requested *</label>
+              <select required id="serviceRequested" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#3D6B22] focus:border-[#3D6B22] outline-none transition-shadow bg-white text-slate-800">
+                <option value="">Select a service line or waiver...</option>
+                {LILISARE_SERVICES.map((svc) => (
+                  <option key={svc.id} value={svc.name}>
+                    {svc.order}. {svc.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
               <label htmlFor="reason" className="text-sm font-medium text-slate-700">Reason for Referral / Care Needs *</label>
-              <textarea required id="reason" rows={3} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-shadow resize-none" placeholder="Requires post-op wound care and assistance with ADLs..." />
+              <textarea required id="reason" rows={3} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-shadow resize-none" placeholder="Requires assistance with daily care needs, medical oversight, or waiver support..." />
             </div>
             <div className="space-y-1.5 md:col-span-2">
               <label htmlFor="paymentSource" className="text-sm font-medium text-slate-700">Known Payment Source (Optional)</label>
@@ -130,7 +142,7 @@ export function PublicReferralForm({ onSubmitSuccess }: PublicReferralFormProps)
         <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-xs text-slate-500 max-w-sm">
             <p className="flex items-center gap-1.5 font-medium mb-1">
-              <ShieldCheck className="w-4 h-4 text-teal-600" /> 
+              <ShieldCheck className="w-4 h-4 text-teal-600" />
               Secure & Encrypted
             </p>
             This information is submitted securely for the sole purpose of evaluating care eligibility.

@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Upload, X, UserPlus } from "lucide-react";
+import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
+import { toast } from "sonner";
 
 interface AddCaregiverModalProps {
   isOpen: boolean;
@@ -11,8 +13,21 @@ interface AddCaregiverModalProps {
 
 export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [currentSkill, setCurrentSkill] = useState("");
+
+  const handleVoiceDictate = () => {
+    setFullName("Brianna Jenkins");
+    setRole("sfc");
+    setEmail("brianna.jenkins@example.com");
+    setPhone("(541) 555-0812");
+    setSkills(["ADL Support", "Medication Reminder", "CPR Certified", "Patient Transfers"]);
+    toast.success("AI Voice dictation transcribed and mapped to caregiver form fields!");
+  };
 
   const handleAddSkill = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && currentSkill.trim()) {
@@ -34,6 +49,7 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
+      toast.success(`Caregiver ${fullName} registered successfully!`);
       onClose();
     }, 800);
   };
@@ -55,7 +71,7 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
           >
             Cancel
           </button>
@@ -71,6 +87,14 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
       }
     >
       <form id="add-caregiver-form" onSubmit={handleSubmit} className="space-y-4">
+        {/* AI Voice Dictation Action Banner */}
+        <VoiceDictationBanner
+          title="AI Voice Dictation"
+          subtitle="Speak naturally to auto-fill caregiver profile, role, and qualifications"
+          buttonLabel="Dictate Caregiver"
+          onDictate={handleVoiceDictate}
+        />
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
@@ -79,8 +103,10 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
             <input
               type="text"
               required
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
-              placeholder="e.g. Sarah Connor"
+              placeholder="e.g. Brianna Jenkins"
             />
           </div>
           <div>
@@ -89,15 +115,17 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
             </label>
             <select
               required
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
             >
               <option value="">Select role...</option>
+              <option value="sfc">Family Caregiver (SFC)</option>
               <option value="hha">Home Health Aide (HHA)</option>
               <option value="pca">Personal Care Aide (PCA)</option>
               <option value="cna">Certified Nursing Assistant (CNA)</option>
               <option value="rn">Registered Nurse (RN)</option>
               <option value="lpn">Licensed Practical Nurse (LPN)</option>
-              <option value="sfc">Family Caregiver (SFC)</option>
             </select>
           </div>
         </div>
@@ -107,16 +135,20 @@ export function AddCaregiverModal({ isOpen, onClose }: AddCaregiverModalProps) {
             <label className="text-[13px] font-medium text-slate-700 block mb-1.5">Email Address</label>
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
-              placeholder="sarah@example.com"
+              placeholder="brianna.jenkins@example.com"
             />
           </div>
           <div>
             <label className="text-[13px] font-medium text-slate-700 block mb-1.5">Phone Number</label>
             <input
               type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
-              placeholder="(555) 123-4567"
+              placeholder="(541) 555-0812"
             />
           </div>
         </div>

@@ -34,6 +34,7 @@ import { INITIAL_INQUIRIES } from "@/lib/intake/mockIntakeData";
 import { INITIAL_CLIENTS, saveClientsToStorage } from "@/lib/clients/mockData";
 import { MOCK_HOUSEHOLDS, saveHouseholdsToStorage } from "@/lib/households/mockData";
 import { INITIAL_CAREGIVERS, saveCaregiversToStorage } from "@/lib/caregivers/mockData";
+import { LILISARE_SERVICES } from "@/lib/services";
 
 type SettingsTab = "rules" | "profile";
 
@@ -52,7 +53,7 @@ export default function IntakeSettingsPage() {
   const [autoFlagHighAcuity, setAutoFlagHighAcuity] = useState(true);
 
   const [defaultAssessmentDuration, setDefaultAssessmentDuration] = useState("60");
-  const [defaultPayerProgram, setDefaultPayerProgram] = useState("Georgia Medicaid Waiver (CCSP / SOURCE)");
+  const [defaultPayerProgram, setDefaultPayerProgram] = useState("IHSS (In-Home Support Services)");
   const [defaultCaregiverClassification, setDefaultCaregiverClassification] = useState<"W-2" | "1099">("W-2");
   const [requirePhysicianOrder, setRequirePhysicianOrder] = useState(true);
 
@@ -203,26 +204,23 @@ export default function IntakeSettingsPage() {
                   key={t.id}
                   type="button"
                   onClick={() => setActiveTab(t.id)}
-                  className={`p-3.5 rounded-xl border text-left transition-all flex items-center gap-3 cursor-pointer ${
-                    isActive
-                      ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs"
-                      : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/70"
-                  }`}
+                  className={`p-3.5 rounded-xl border text-left transition-all flex items-center gap-3 cursor-pointer ${isActive
+                    ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs"
+                    : "border-slate-200 bg-slate-50/50 hover:bg-slate-100/70"
+                    }`}
                 >
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all shrink-0 ${
-                      isActive
-                        ? "bg-[#3D6B22] text-white shadow-xs"
-                        : "bg-slate-200/80 text-slate-600"
-                    }`}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all shrink-0 ${isActive
+                      ? "bg-[#3D6B22] text-white shadow-xs"
+                      : "bg-slate-200/80 text-slate-600"
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
                     <div
-                      className={`text-xs font-bold truncate ${
-                        isActive ? "text-[#3D6B22]" : "text-slate-800"
-                      }`}
+                      className={`text-xs font-bold truncate ${isActive ? "text-[#3D6B22]" : "text-slate-800"
+                        }`}
                     >
                       {t.title}
                     </div>
@@ -426,18 +424,11 @@ export default function IntakeSettingsPage() {
                     onChange={(e) => setDefaultPayerProgram(e.target.value)}
                     className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
                   >
-                    <option value="Georgia Medicaid Waiver (CCSP / SOURCE)">
-                      Georgia Medicaid Waiver (CCSP / SOURCE)
-                    </option>
-                    <option value="Pediatric In-Home (EPSDT)">
-                      Pediatric In-Home (EPSDT)
-                    </option>
-                    <option value="Private Duty / Self-Pay">
-                      Private Duty / Self-Pay
-                    </option>
-                    <option value="Veterans Care Coordination">
-                      Veterans Care Coordination (VA)
-                    </option>
+                    {LILISARE_SERVICES.map((svc) => (
+                      <option key={svc.id} value={svc.name}>
+                        {svc.order}. {svc.name} ({svc.code})
+                      </option>
+                    ))}
                   </select>
                   <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
                     <ChevronDown className="w-4 h-4" />

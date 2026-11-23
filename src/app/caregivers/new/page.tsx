@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Users,
@@ -44,42 +44,80 @@ import {
 } from "@/lib/caregivers/mockData";
 import { INITIAL_CLIENTS } from "@/lib/clients/mockData";
 import { CaregiverRecord, CaregiverType, CaregiverStatus } from "@/types/caregiver";
+import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
 import { toast } from "sonner";
 
-export default function AddCaregiverPage() {
+function AddCaregiverWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathwayParam = searchParams.get("pathway");
 
   // Wizard Step: 1, 2, 3, 4, 5, 6 (6 = Complete)
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [creationPath, setCreationPath] = useState<"direct" | "convert">("convert");
-  const [selectedAppId, setSelectedAppId] = useState<string>("APP-301");
+  const [creationPath, setCreationPath] = useState<"direct" | "convert">(
+    pathwayParam === "direct" ? "direct" : "convert"
+  );
+  const [selectedAppId, setSelectedAppId] = useState<string>(
+    pathwayParam === "direct" ? "" : "APP-301"
+  );
 
   // Step 1: Personal Information
-  const [fullName, setFullName] = useState("Brianna Jenkins");
-  const [preferredName, setPreferredName] = useState("Brianna");
-  const [dob, setDob] = useState("1992-04-18");
+  const isDirectInit = pathwayParam === "direct";
+  const [fullName, setFullName] = useState(isDirectInit ? "" : "Brianna Jenkins");
+  const [preferredName, setPreferredName] = useState(isDirectInit ? "" : "Brianna");
+  const [dob, setDob] = useState(isDirectInit ? "" : "1992-04-18");
   const [gender, setGender] = useState("Female");
   const [languages, setLanguages] = useState("English");
-  const [phone, setPhone] = useState("(541) 555-0812");
-  const [email, setEmail] = useState("brianna.jenkins@example.com");
-  const [street, setStreet] = useState("742 Evergreen Terrace");
-  const [city, setCity] = useState("Springfield");
+  const [phone, setPhone] = useState(isDirectInit ? "" : "(541) 555-0812");
+  const [email, setEmail] = useState(isDirectInit ? "" : "brianna.jenkins@example.com");
+  const [street, setStreet] = useState(isDirectInit ? "" : "742 Evergreen Terrace");
+  const [city, setCity] = useState(isDirectInit ? "" : "Springfield");
   const [state, setState] = useState("OR");
-  const [zip, setZip] = useState("97477");
-  const [emergencyName, setEmergencyName] = useState("David Miller");
-  const [emergencyRel, setEmergencyRel] = useState("Brother-in-law");
-  const [emergencyPhone, setEmergencyPhone] = useState("(541) 555-0211");
+  const [zip, setZip] = useState(isDirectInit ? "" : "97477");
+  const [emergencyName, setEmergencyName] = useState(isDirectInit ? "" : "David Miller");
+  const [emergencyRel, setEmergencyRel] = useState(isDirectInit ? "" : "Brother-in-law");
+  const [emergencyPhone, setEmergencyPhone] = useState(isDirectInit ? "" : "(541) 555-0211");
 
   // Step 2: Caregiver Type & Relationship
   const [caregiverType, setCaregiverType] = useState<CaregiverType>("Family Caregiver");
-  const [relationshipToClient, setRelationshipToClient] = useState("Sister & Secondary Guardian");
-  const [selectedClientId, setSelectedClientId] = useState("CL-1001");
+  const [relationshipToClient, setRelationshipToClient] = useState(
+    isDirectInit ? "" : "Sister & Secondary Guardian"
+  );
+  const [selectedClientId, setSelectedClientId] = useState(isDirectInit ? "" : "CL-1001");
   const [branch, setBranch] = useState("Mountain Lane");
   const [classification, setClassification] = useState<"W-2" | "1099" | "Family Paid Exempt">("W-2");
   const [capacityHours, setCapacityHours] = useState(25);
   const [caregivingBoundaries, setCaregivingBoundaries] = useState(
-    "Relief respite and after-school personal care support for Leo Miller."
+    isDirectInit ? "" : "Relief respite and after-school personal care support for Leo Miller."
   );
+
+  // Sync pathway when query parameter changes
+  useEffect(() => {
+    if (pathwayParam === "direct") {
+      setCreationPath("direct");
+      setSelectedAppId("");
+      setFullName("");
+      setPreferredName("");
+      setDob("");
+      setPhone("");
+      setEmail("");
+      setStreet("");
+      setCity("");
+      setZip("");
+      setEmergencyName("");
+      setEmergencyRel("");
+      setEmergencyPhone("");
+      setRelationshipToClient("");
+      setSelectedClientId("");
+      setCaregivingBoundaries("");
+    } else if (pathwayParam === "convert") {
+      setCreationPath("convert");
+      const first = CONVERTABLE_APPLICATIONS[0];
+      if (first) {
+        handleSelectApplication(first);
+      }
+    }
+  }, [pathwayParam]);
 
   // Step 3: Documents & Credentials
   const [idVerified, setIdVerified] = useState(true);
@@ -130,6 +168,32 @@ export default function AddCaregiverPage() {
     } else {
       setTrainingCoursesSelected([...trainingCoursesSelected, course]);
     }
+  };
+
+  const handleVoiceDictate = () => {
+    setFullName("Brianna Jenkins");
+    setPreferredName("Brianna");
+    setDob("1992-04-18");
+    setGender("Female");
+    setLanguages("English, Spanish");
+    setPhone("(541) 555-0812");
+    setEmail("brianna.jenkins@example.com");
+    setStreet("742 Evergreen Terrace");
+    setCity("Springfield");
+    setState("OR");
+    setZip("97477");
+    setEmergencyName("David Miller");
+    setEmergencyRel("Brother-in-law");
+    setEmergencyPhone("(541) 555-0211");
+    setCaregiverType("Family Caregiver");
+    setRelationshipToClient("Sister & Secondary Guardian");
+    setSelectedClientId("CL-1001");
+    setClassification("W-2");
+    setCapacityHours(25);
+    setCaregivingBoundaries(
+      "Relief respite and after-school personal care support for Leo Miller."
+    );
+    toast.success("AI Voice dictation transcribed and mapped to caregiver registration fields!");
   };
 
   const handleNext = () => {
@@ -301,7 +365,10 @@ export default function AddCaregiverPage() {
             timestamp: new Date().toISOString(),
             relativeTime: "Just now",
             title: "Caregiver registered",
-            description: `${newId} registered under ${caregiverType} classification`,
+            description:
+              creationPath === "convert" && selectedAppId
+                ? `${newId} converted from candidate application ${selectedAppId} (${caregiverType})`
+                : `${newId} registered via Direct Administrative Entry (${caregiverType})`,
             actor: onboardingCoordinator,
             type: "profile",
           },
@@ -325,21 +392,27 @@ export default function AddCaregiverPage() {
   ];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 pb-24 animate-in fade-in duration-300">
-      {/* 01. Top Header Card: Aligned completely with /intake/pipeline/new/ */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+    <div className="w-full max-w-4xl mx-auto space-y-5 pb-24 animate-in fade-in duration-200">
+      {/* Back Button with subtle shadow */}
+      <div>
+        <Link
+          href="/caregivers"
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Caregivers Directory</span>
+        </Link>
+      </div>
+
+      {/* Header Banner - Matching /households/new/ Card Style */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-7 shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Link
-                href="/caregivers"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#3D6B22] transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Back to Caregivers Directory
-              </Link>
-              <span className="text-slate-300">•</span>
-              <span className="text-xs font-semibold text-[#3D6B22] bg-[#3D6B22]/10 px-2.5 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200/80">
+                Caregiver Registration
+              </span>
+              <span className="text-xs text-slate-400">
                 Step {currentStep} of 5: {stepLabels.find((s) => s.num === currentStep)?.title}
               </span>
             </div>
@@ -516,9 +589,19 @@ export default function AddCaregiverPage() {
         </div>
       )}
 
+      {/* AI Voice Dictation Action Banner */}
+      {currentStep < 6 && (
+        <VoiceDictationBanner
+          title="AI Voice Dictation"
+          subtitle="Speak naturally to auto-populate caregiver credentials, contact, and workforce profile"
+          buttonLabel="Dictate Caregiver"
+          onDictate={handleVoiceDictate}
+        />
+      )}
+
       {/* 03. Main Guided Form Card */}
       {currentStep < 6 && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-6 overflow-hidden">
           {/* STEP 1: Personal Details */}
           {currentStep === 1 && (
             <div className="space-y-5 animate-in fade-in duration-200">
@@ -668,7 +751,7 @@ export default function AddCaregiverPage() {
                   </div>
                 </div>
 
-                <div className="sm:col-span-2 space-y-1.5">
+                <div className="sm:col-span-3 space-y-1.5">
                   <label className="text-[13px] font-medium text-slate-700">Street Address</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -678,36 +761,48 @@ export default function AddCaregiverPage() {
                       type="text"
                       value={street}
                       onChange={(e) => setStreet(e.target.value)}
-                      placeholder="742 Evergreen Terrace"
+                      placeholder="e.g. 742 Evergreen Terrace, Apt 4B"
                       className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[13px] font-medium text-slate-700">City / State / Zip</label>
-                  <div className="flex gap-2">
+                  <label className="text-[13px] font-medium text-slate-700">City</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Building2 className="h-4 w-4" />
+                    </div>
                     <input
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="Springfield"
-                      className="flex-1 px-3 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                    />
-                    <input
-                      type="text"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      className="w-14 px-2 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-center font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
-                    />
-                    <input
-                      type="text"
-                      value={zip}
-                      onChange={(e) => setZip(e.target.value)}
-                      placeholder="97477"
-                      className="w-20 px-2.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">State</label>
+                  <input
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    placeholder="OR"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-center"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[13px] font-medium text-slate-700">ZIP Code</label>
+                  <input
+                    type="text"
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value)}
+                    placeholder="97477"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400"
+                  />
                 </div>
               </div>
             </div>
@@ -1038,7 +1133,7 @@ export default function AddCaregiverPage() {
             ) : (
               <Link
                 href="/caregivers"
-                className="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
               >
                 Cancel
               </Link>
@@ -1130,5 +1225,19 @@ export default function AddCaregiverPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AddCaregiverPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full max-w-4xl mx-auto py-12 text-center text-slate-400">
+          Loading Caregiver Registration Wizard...
+        </div>
+      }
+    >
+      <AddCaregiverWizard />
+    </Suspense>
   );
 }

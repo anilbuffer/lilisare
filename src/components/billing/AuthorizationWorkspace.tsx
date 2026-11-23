@@ -5,6 +5,7 @@ import { Search, Plus, ShieldCheck, Filter, MoreVertical, Calendar, Activity, Ch
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx } from "clsx";
 import { Modal } from "@/components/ui/Modal";
+import { LILISARE_SERVICES } from "@/lib/services";
 
 interface AuthorizationRecord {
   id: string;
@@ -20,11 +21,11 @@ interface AuthorizationRecord {
 }
 
 const mockRecords: AuthorizationRecord[] = [
-  { id: "AUTH-992140", clientName: "Mary Smith", payer: "Medicaid", serviceType: "Personal Care", billingCodes: ["T1019"], startDate: "2026-01-01", endDate: "2026-08-15", unitsAuthorized: 480, unitsConsumed: 450, status: "EXPIRING" },
-  { id: "AUTH-110294", clientName: "Robert Chen", payer: "BlueCross", serviceType: "Physical Therapy", billingCodes: ["97110", "97140"], startDate: "2026-05-01", endDate: "2026-08-05", unitsAuthorized: 120, unitsConsumed: 110, status: "EXPIRING" },
-  { id: "AUTH-774129", clientName: "James Wilson", payer: "Medicaid", serviceType: "Respite", billingCodes: ["S5150"], startDate: "2026-02-01", endDate: "2026-12-31", unitsAuthorized: 600, unitsConsumed: 200, status: "ACTIVE" },
-  { id: "AUTH-441290", clientName: "Eleanor Ruth Whitfield", payer: "Medicare Part A & B", serviceType: "Personal Care", billingCodes: ["G0299", "T1019"], startDate: "2026-07-01", endDate: "2026-12-31", unitsAuthorized: 80, unitsConsumed: 72, status: "ACTIVE" },
-  { id: "AUTH-552199", clientName: "Sarah Jenkins", payer: "Medicare", serviceType: "Home Health Aide", billingCodes: ["G0156"], startDate: "2026-08-01", endDate: "2026-10-31", unitsAuthorized: 300, unitsConsumed: 0, status: "PENDING" },
+  { id: "AUTH-992140", clientName: "Mary Smith", payer: "Colorado Medicaid", serviceType: "IHSS (In-Home Support Services)", billingCodes: ["S5130"], startDate: "2026-01-01", endDate: "2026-08-15", unitsAuthorized: 480, unitsConsumed: 450, status: "EXPIRING" },
+  { id: "AUTH-110294", clientName: "Robert Chen", payer: "Colorado Medicaid", serviceType: "Family Caregiver", billingCodes: ["S5125"], startDate: "2026-05-01", endDate: "2026-08-05", unitsAuthorized: 120, unitsConsumed: 110, status: "EXPIRING" },
+  { id: "AUTH-774129", clientName: "James Wilson", payer: "CES Waiver", serviceType: "CES Waiver (Children’s Extensive Support)", billingCodes: ["CES-WVR"], startDate: "2026-02-01", endDate: "2026-12-31", unitsAuthorized: 600, unitsConsumed: 200, status: "ACTIVE" },
+  { id: "AUTH-441290", clientName: "Eleanor Ruth Whitfield", payer: "Colorado Medicaid", serviceType: "CNA (Certified Nurse Aide)", billingCodes: ["T1019"], startDate: "2026-07-01", endDate: "2026-12-31", unitsAuthorized: 80, unitsConsumed: 72, status: "ACTIVE" },
+  { id: "AUTH-552199", clientName: "Sarah Jenkins", payer: "SLS Waiver", serviceType: "SLS Waiver (Supported Living Services)", billingCodes: ["SLS-WVR"], startDate: "2026-08-01", endDate: "2026-10-31", unitsAuthorized: 300, unitsConsumed: 0, status: "PENDING" },
 ];
 
 export function AuthorizationWorkspace() {
@@ -203,8 +204,14 @@ export function AuthorizationWorkspace() {
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-700">Service Type</label>
-            <input type="text" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50" placeholder="e.g. Physical Therapy" />
+            <label className="text-sm font-medium text-slate-700">LiliSare Service Line</label>
+            <select className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/50 cursor-pointer">
+              {LILISARE_SERVICES.map((svc) => (
+                <option key={svc.id} value={svc.name}>
+                  {svc.order}. {svc.name} ({svc.code})
+                </option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">

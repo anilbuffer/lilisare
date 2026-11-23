@@ -254,3 +254,38 @@ body {
 }
 
 
+
+
+/* Global Outline + Soft Shadow Buttons (Cancel, Back, Secondary) */
+.btn-secondary-standard,
+.btn-cancel-standard,
+.btn-back-standard {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.06);
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-secondary-standard:hover,
+.btn-cancel-standard:hover,
+.btn-back-standard:hover {
+  background-color: #F8FAFC;
+  color: #0F172A;
+  border-color: #CBD5E1;
+}
+
+.btn-secondary-standard:active,
+.btn-cancel-standard:active,
+.btn-back-standard:active {
+  transform: scale(0.98);
+}

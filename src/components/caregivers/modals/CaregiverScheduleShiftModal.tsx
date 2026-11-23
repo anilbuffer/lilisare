@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { CaregiverRecord } from "@/types/caregiver";
 import { X, Calendar, Clock, User, FileText, CheckCircle2 } from "lucide-react";
 import { INITIAL_CLIENTS } from "@/lib/clients/mockData";
+import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
 
 interface CaregiverScheduleShiftModalProps {
@@ -35,7 +36,7 @@ export function CaregiverScheduleShiftModal({
   const [date, setDate] = useState("2026-11-22");
   const [startTime, setStartTime] = useState("08:00 AM");
   const [endTime, setEndTime] = useState("04:00 PM");
-  const [shiftType, setShiftType] = useState("ADL Personal Care & Standby Supervision");
+  const [shiftType, setShiftType] = useState("Family Caregiver");
   const [notes, setNotes] = useState("Regular scheduled shift. Verify EVV GPS clock-in at client household.");
 
   if (!isOpen) return null;
@@ -161,10 +162,11 @@ export function CaregiverScheduleShiftModal({
               onChange={(e) => setShiftType(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
             >
-              <option value="ADL Personal Care & Standby Supervision">ADL Personal Care & Standby Supervision</option>
-              <option value="Structured Family Caregiving Daily Care (SFC)">Structured Family Caregiving Daily Care (SFC)</option>
-              <option value="Companionship & Meal Preparation">Companionship & Meal Preparation</option>
-              <option value="Respite Care Services">Respite Care Services</option>
+              {LILISARE_SERVICES.map((svc) => (
+                <option key={svc.id} value={svc.name}>
+                  {svc.order}. {svc.name}
+                </option>
+              ))}
             </select>
           </div>
 

@@ -157,7 +157,7 @@ export default function IntakeCaregiversPage() {
             {isAddMenuOpen && (
               <div className="absolute right-0 mt-1.5 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-30 animate-fadeIn text-xs">
                 <Link
-                  href="/caregivers/new"
+                  href="/caregivers/new?pathway=direct"
                   onClick={() => setIsAddMenuOpen(false)}
                   className="block px-3.5 py-2.5 text-left hover:bg-slate-50 transition-colors"
                 >
@@ -173,7 +173,7 @@ export default function IntakeCaregiversPage() {
                 <div className="h-px bg-slate-100 my-1" />
 
                 <Link
-                  href="/caregivers/new"
+                  href="/caregivers/new?pathway=convert"
                   onClick={() => setIsAddMenuOpen(false)}
                   className="block px-3.5 py-2.5 text-left hover:bg-slate-50 transition-colors"
                 >

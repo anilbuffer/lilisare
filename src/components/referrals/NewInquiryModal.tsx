@@ -164,7 +164,7 @@ export function NewInquiryModal({ isOpen, onClose, onSubmit }: NewInquiryModalPr
           <button
             type="button"
             onClick={() => setConfirmAction('cancel')}
-            className="px-6 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
           >
             Cancel
           </button>

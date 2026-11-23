@@ -27,6 +27,7 @@ import {
 } from "@/lib/clients/mockData";
 import { MOCK_HOUSEHOLDS } from "@/lib/households/mockData";
 import { ClientRecord, CareArrangementType, ClientStatus } from "@/types/client";
+import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
 
 interface ClientEditViewProps {
@@ -148,14 +149,14 @@ export function ClientEditView({ clientId }: ClientEditViewProps) {
         ...client.assignedCareTeam,
         primaryCaregiver: primaryCaregiverName
           ? {
-              id: client.assignedCareTeam.primaryCaregiver?.id || "CG-NEW",
-              name: primaryCaregiverName,
-              relationship: primaryCaregiverRel,
-              classification: client.assignedCareTeam.primaryCaregiver?.classification || "W-2",
-              status: client.assignedCareTeam.primaryCaregiver?.status || "Active",
-              phone: primaryCaregiverPhone || contactPhone,
-              email: client.assignedCareTeam.primaryCaregiver?.email || contactEmail,
-            }
+            id: client.assignedCareTeam.primaryCaregiver?.id || "CG-NEW",
+            name: primaryCaregiverName,
+            relationship: primaryCaregiverRel,
+            classification: client.assignedCareTeam.primaryCaregiver?.classification || "W-2",
+            status: client.assignedCareTeam.primaryCaregiver?.status || "Active",
+            phone: primaryCaregiverPhone || contactPhone,
+            email: client.assignedCareTeam.primaryCaregiver?.email || contactEmail,
+          }
           : null,
       },
       authorization: {
@@ -376,13 +377,21 @@ export function ClientEditView({ clientId }: ClientEditViewProps) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">Care Program</label>
-              <input
-                type="text"
+              <label className="text-xs font-bold text-slate-700 block mb-1">Care Program / Service Line</label>
+              <select
                 value={program}
                 onChange={(e) => setProgram(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
-              />
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 cursor-pointer"
+              >
+                {program && !LILISARE_SERVICES.some((s) => s.name === program) && (
+                  <option value={program}>{program} (Current)</option>
+                )}
+                {LILISARE_SERVICES.map((svc) => (
+                  <option key={svc.id} value={svc.name}>
+                    {svc.order}. {svc.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

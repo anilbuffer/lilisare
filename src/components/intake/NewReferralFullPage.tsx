@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ContactMethod, ReferralSourceType, InquiryRecord } from "@/types/intake";
 import { getIntakeInquiriesFromStorage, saveIntakeInquiriesToStorage } from "@/lib/intake/intakeSync";
+import { LILISARE_SERVICES } from "@/lib/services";
+import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
 import {
   ArrowLeft,
   Check,
@@ -63,10 +65,10 @@ export function NewReferralFullPage({
   const [organization, setOrganization] = useState("");
   const [caseManagerName, setCaseManagerName] = useState("");
   const [caseManagerAgency, setCaseManagerAgency] = useState("");
-  const [programInterest, setProgramInterest] = useState("Medicaid Waiver (CCSP / SOURCE)");
+  const [programInterest, setProgramInterest] = useState("IHSS (In-Home Support Services)");
   const [careTypes, setCareTypes] = useState<string[]>([
-    "Personal Care & Hygiene",
-    "Meal Preparation",
+    "Family Caregiver",
+    "IHSS (In-Home Support Services)",
   ]);
   const [hoursPerWeek, setHoursPerWeek] = useState<number>(20);
   const [supportNotes, setSupportNotes] = useState("");
@@ -82,6 +84,35 @@ export function NewReferralFullPage({
     } else {
       setCareTypes([...careTypes, type]);
     }
+  };
+
+  const handleVoiceDictate = () => {
+    setPrimaryContact("Mary Reynolds");
+    setContactRelationship("Daughter & Legal Guardian");
+    setPhone("(312) 555-1234");
+    setEmail("mary.reynolds@email.com");
+    setPreferredContactMethod("Phone");
+    setBestTimeToCall("Mornings (9am - 12pm)");
+
+    setClientName("Arthur Reynolds");
+    setClientAge("78");
+    setClientGender("Male");
+    setHouseholdAddress("789 South Street");
+    setHouseholdCity("Springfield");
+    setHouseholdZip("97477");
+    setCaregiverName("Mary Reynolds");
+    setCaregiverRelationship("Daughter (Family Paid Caregiver)");
+
+    setReferralSource("Hospital Discharge");
+    setOrganization("Springfield Regional Medical Center");
+    setCaseManagerName("Dr. Alan Grant");
+    setCaseManagerAgency("State Dept of Human Services");
+    setProgramInterest("IHSS (In-Home Support Services)");
+    setSupportNotes(
+      "Patient is being discharged post-op following hip replacement. Family daughter Mary is willing to provide primary daily ADL assistance and in-home support under IHSS program."
+    );
+
+    toast.success("AI Voice dictation transcribed and mapped to intake referral fields!");
   };
 
   const handleNextStep = () => {
@@ -148,11 +179,11 @@ export function NewReferralFullPage({
           },
           potentialCaregiver: caregiverName
             ? {
-                name: caregiverName,
-                relationship: caregiverRelationship || "Family Caregiver",
-                classificationInterest: "W-2",
-                phone: phone,
-              }
+              name: caregiverName,
+              relationship: caregiverRelationship || "Family Caregiver",
+              classificationInterest: "W-2",
+              phone: phone,
+            }
             : undefined,
         },
         referralInfo: {
@@ -160,9 +191,9 @@ export function NewReferralFullPage({
           organization: organization || "Direct Intake",
           caseManager: caseManagerName
             ? {
-                name: caseManagerName,
-                agency: caseManagerAgency,
-              }
+              name: caseManagerName,
+              agency: caseManagerAgency,
+            }
             : undefined,
           dateReceived: new Date().toLocaleDateString("en-US", {
             month: "short",
@@ -263,10 +294,10 @@ export function NewReferralFullPage({
                 <div key={s.num} className="flex flex-col items-center text-center">
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone
-                        ? "bg-[#3D6B22] text-white shadow-sm"
-                        : isCurrent
-                          ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
-                          : "bg-slate-100 text-slate-400 border border-slate-200"
+                      ? "bg-[#3D6B22] text-white shadow-sm"
+                      : isCurrent
+                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                        : "bg-slate-100 text-slate-400 border border-slate-200"
                       }`}
                   >
                     {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
@@ -283,6 +314,14 @@ export function NewReferralFullPage({
           </div>
         </div>
       </div>
+
+      {/* AI Voice Dictation Action Banner */}
+      <VoiceDictationBanner
+        title="AI Voice Dictation"
+        subtitle="Speak naturally to log the patient inquiry and auto-populate intake referral details"
+        buttonLabel="Dictate Inquiry"
+        onDictate={handleVoiceDictate}
+      />
 
       {/* Main Guided Form Card */}
       <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-6">
@@ -395,8 +434,8 @@ export function NewReferralFullPage({
                       type="button"
                       onClick={() => setPreferredContactMethod(method)}
                       className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${preferredContactMethod === method
-                          ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                        ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                         }`}
                     >
                       {method}
@@ -681,12 +720,11 @@ export function NewReferralFullPage({
                     onChange={(e) => setProgramInterest(e.target.value)}
                     className="w-full pl-10 pr-8 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 appearance-none"
                   >
-                    <option value="Medicaid Waiver (CCSP / SOURCE)">Medicaid Waiver (CCSP / SOURCE)</option>
-                    <option value="Structured Family Caregiving (SFC)">Structured Family Caregiving (SFC)</option>
-                    <option value="Private Pay">Private Pay</option>
-                    <option value="VA Community Care Network (CCN)">VA Community Care Network (CCN)</option>
-                    <option value="Long-Term Care Insurance">Long-Term Care Insurance</option>
-                    <option value="Georgia GAPP (Pediatric)">Georgia GAPP (Pediatric)</option>
+                    {LILISARE_SERVICES.map((svc) => (
+                      <option key={svc.id} value={svc.name}>
+                        {svc.order}. {svc.name} ({svc.code})
+                      </option>
+                    ))}
                   </select>
                   <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-400">
                     <ChevronDown className="w-4 h-4" />
@@ -695,30 +733,35 @@ export function NewReferralFullPage({
               </div>
 
               <div className="sm:col-span-2 space-y-2">
-                <label className="text-[13px] font-medium text-slate-700">
-                  Requested Care Services
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    "Personal Care & Hygiene",
-                    "Mobility Standby & Transfers",
-                    "Meal Preparation",
-                    "Medication Reminders",
-                    "Companionship & Respite",
-                    "RN Health Oversight",
-                  ].map((ct) => {
-                    const isSelected = careTypes.includes(ct);
+                <div className="flex items-center justify-between">
+                  <label className="text-[13px] font-medium text-slate-700">
+                    Requested LiliSare Services ({careTypes.length} selected)
+                  </label>
+                  {careTypes.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setCareTypes([])}
+                      className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto p-1 border border-slate-100 rounded-xl bg-slate-50/30">
+                  {LILISARE_SERVICES.map((svc) => {
+                    const isSelected = careTypes.includes(svc.name);
                     return (
                       <button
-                        key={ct}
+                        key={svc.id}
                         type="button"
-                        onClick={() => handleToggleCareType(ct)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${isSelected
-                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                        onClick={() => handleToggleCareType(svc.name)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${isSelected
+                          ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                          : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                       >
-                        {ct}
+                        <span className="text-[10px] font-mono opacity-70 mr-1.5">{svc.order}.</span>
+                        {svc.name}
                       </button>
                     );
                   })}
@@ -889,7 +932,7 @@ export function NewReferralFullPage({
           ) : (
             <Link
               href={backHref}
-              className="px-4 py-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
             >
               Cancel
             </Link>

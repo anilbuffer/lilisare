@@ -92,7 +92,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 92,
     },
     carePlan: {
-      program: "Pediatric In-Home Care (Medicaid EPSDT Waiver)",
+      program: "CES Waiver (Children’s Extensive Support)",
       approvedServices: [
         "Personal Care / ADL Support",
         "Sensory Regulation & Behavioral Coaching",
@@ -320,7 +320,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 84,
     },
     carePlan: {
-      program: "Medicaid Elderly Waiver (Live-In Personal Care)",
+      program: "EBD Waiver (Elderly, Blind, and Disabled)",
       approvedServices: [
         "Mobility & Transfer Assistance",
         "Medication Reminders",
@@ -495,7 +495,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 68,
     },
     carePlan: {
-      program: "Medicaid K-Plan / DD In-Home Attendant Support",
+      program: "DD Waiver (Developmental Disabilities)",
       approvedServices: [
         "Community Inclusion & Skill Building",
         "Sensory Support & Regulation",
@@ -652,7 +652,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 52,
     },
     carePlan: {
-      program: "Pediatric In-Home Respite & Family Friend Support",
+      program: "CHCBS Waiver (Children’s Home and Community-Based Services)",
       approvedServices: [
         "In-Home Respite Care",
         "Assisted Mobility Support",
@@ -828,7 +828,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 90,
     },
     carePlan: {
-      program: "Medicaid K-Plan / Adult Family Support",
+      program: "IHSS (In-Home Support Services)",
       approvedServices: [
         "Daily Living & Personal Care Assistance",
         "Community Access & Vocational Support",
@@ -983,7 +983,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 60,
     },
     carePlan: {
-      program: "Medicaid Waiver Pediatric Home Support",
+      program: "CHRP Waiver (Children’s Habilitation Residential Program)",
       approvedServices: ["ADL Supervision", "Sensory Therapy Support", "Meal Management"],
       authorizedWeeklyHours: 30,
       scheduledWeeklyHours: 0,
@@ -1142,7 +1142,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 88,
     },
     carePlan: {
-      program: "Senior Community Care / OHP Waiver",
+      program: "Family Caregiver",
       approvedServices: ["ADL Support", "Bathing & Shower Assistance", "Nutritional Support"],
       authorizedWeeklyHours: 20,
       scheduledWeeklyHours: 0,
@@ -1283,7 +1283,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 70,
     },
     carePlan: {
-      program: "Pediatric In-Home Waiver Support",
+      program: "SLS Waiver (Supported Living Services)",
       approvedServices: [
         "In-Home Personal Care & Sensory Assistance",
         "Fine Motor & Daily Living Skill Support",
@@ -1424,7 +1424,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 100,
     },
     carePlan: {
-      program: "Medicaid Personal Care Waiver",
+      program: "CNA (Certified Nurse Aide)",
       approvedServices: ["Attendant Support", "Mobility Assistance"],
       authorizedWeeklyHours: 20,
       scheduledWeeklyHours: 0,
@@ -1572,7 +1572,7 @@ export const CONVERTABLE_INQUIRIES: ConvertableInquiry[] = [
     city: "Atlanta",
     state: "GA",
     zip: "30305",
-    programRequested: "Medicaid Elderly & Disabled Waiver",
+    programRequested: "EBD Waiver (Elderly, Blind, and Disabled)",
     careNeeds: ["Standby shower assistance", "Mobility supervision with walker", "Meal preparation"],
     potentialCaregiver: {
       name: "Clara Jenkins",
@@ -1596,7 +1596,7 @@ export const CONVERTABLE_INQUIRIES: ConvertableInquiry[] = [
     city: "Portland",
     state: "OR",
     zip: "97229",
-    programRequested: "Medicaid EPSDT Pediatric Waiver",
+    programRequested: "CES Waiver (Children’s Extensive Support)",
     careNeeds: ["Sensory therapy support", "Fine motor assistance", "Visual schedule guidance"],
     potentialCaregiver: {
       name: "Megan Sullivan",
@@ -1620,7 +1620,7 @@ export const CONVERTABLE_INQUIRIES: ConvertableInquiry[] = [
     city: "Eugene",
     state: "OR",
     zip: "97401",
-    programRequested: "State Adult Foster & In-Home Attendant Waiver",
+    programRequested: "IHSS (In-Home Support Services)",
     careNeeds: ["Post-stroke transfer assistance", "Medication prompting", "Nutritional support"],
     potentialCaregiver: {
       name: "Patricia Robinson",

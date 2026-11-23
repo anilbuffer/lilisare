@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { mockOrganization, mockTeamMembers } from "@/lib/partner/mockData";
 import { Send, CheckCircle2, Building2, User, Phone, Mail, AlertTriangle, FileText } from "lucide-react";
+import { LILISARE_SERVICES } from "@/lib/services";
 import clsx from "clsx";
 
 export function PartnerReferralForm() {
@@ -122,14 +123,14 @@ export function PartnerReferralForm() {
             <h3 className="text-sm font-semibold text-slate-800 mb-2">3. Care Needs & Urgency</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Primary Reason for Referral *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">LiliSare Service Line Requested *</label>
                 <select required className="w-full rounded-xl border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] focus:border-brand-teal focus:ring-brand-teal text-sm py-2 px-3 border outline-none transition-colors bg-white text-slate-700">
-                  <option value="">Select primary need...</option>
-                  <option value="post-op">Post-operative Care</option>
-                  <option value="dementia">Memory/Dementia Care</option>
-                  <option value="adl">Daily Living Assistance (ADLs)</option>
-                  <option value="companionship">Companionship</option>
-                  <option value="other">Other (Please specify below)</option>
+                  <option value="">Select a service line or waiver program...</option>
+                  {LILISARE_SERVICES.map((svc) => (
+                    <option key={svc.id} value={svc.name}>
+                      {svc.order}. {svc.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 

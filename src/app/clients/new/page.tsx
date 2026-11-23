@@ -43,7 +43,11 @@ import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
 import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
 
-export default function AddClientPage() {
+interface AddClientPageProps {
+  baseBackPath?: string;
+}
+
+export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPageProps = {}) {
   const router = useRouter();
 
   // Wizard Step: 1, 2, 3, 4, 5 (5 = Success)
@@ -446,7 +450,7 @@ export default function AddClientPage() {
       {/* Back Button with subtle shadow */}
       <div>
         <Link
-          href="/clients"
+          href={baseBackPath}
           className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -1568,7 +1572,7 @@ export default function AddClientPage() {
               </button>
             ) : (
               <Link
-                href="/clients"
+                href={baseBackPath}
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
               >
                 Cancel
@@ -1650,7 +1654,7 @@ export default function AddClientPage() {
           {/* Action Navigation */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
-              href={`/clients/${createdClient.id}`}
+              href={`${baseBackPath}/${createdClient.id}`}
               className="px-5 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white rounded-xl text-xs font-bold transition-all shadow-[0_4px_16px_rgba(61,107,34,0.25)] flex items-center gap-1.5 cursor-pointer"
             >
               <span>View Full Client Profile</span>
@@ -1658,7 +1662,7 @@ export default function AddClientPage() {
             </Link>
 
             <Link
-              href="/clients"
+              href={baseBackPath}
               className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
             >
               Return to Clients Workspace

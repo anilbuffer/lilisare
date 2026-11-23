@@ -18,7 +18,7 @@ export default async function IntakeClientDetailPage({ params }: PageProps) {
         </div>
       }
     >
-      <ClientDetailView clientId={resolvedParams.id} />
+      <ClientDetailView clientId={resolvedParams.id} baseBackPath="/intake/clients" />
     </Suspense>
   );
 }

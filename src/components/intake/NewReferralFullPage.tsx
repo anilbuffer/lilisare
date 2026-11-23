@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ContactMethod, ReferralSourceType, InquiryRecord } from "@/types/intake";
 import { getIntakeInquiriesFromStorage, saveIntakeInquiriesToStorage } from "@/lib/intake/intakeSync";
+import {
+  AdminIntakeReferralItem,
+  getAdminReferralsFromStorage,
+  saveAdminReferralsToStorage,
+} from "@/lib/intake-referrals/adminIntakeReferralsData";
 import { LILISARE_SERVICES } from "@/lib/services";
 import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
 import {
@@ -229,6 +234,43 @@ export function NewReferralFullPage({
 
       const current = getIntakeInquiriesFromStorage();
       saveIntakeInquiriesToStorage([newInquiry, ...current]);
+
+      // Synchronize seamlessly with Agency Admin Intake Referrals Directory
+      const adminRefId = randomId.replace("INQ-", "REF-2026-");
+      const newAdminRef: AdminIntakeReferralItem = {
+        id: adminRefId,
+        patientName: clientName || "Pending Client Name",
+        age: parseInt(clientAge, 10) || 75,
+        gender: clientGender || "Female",
+        phone: phone || "(555) 000-0000",
+        email: email || "referral@example.com",
+        address: householdAddress || "100 LiliSare Care Way",
+        city: householdCity || "Atlanta",
+        zip: householdZip || "30301",
+        referralSource: referralSource,
+        referralSourceContact: primaryContact,
+        program: programInterest,
+        requestedServices: careTypes.length > 0 ? careTypes : ["Personal Care Assistance"],
+        priority: urgency === "Urgent" ? "Urgent" : "Standard",
+        status: "New Referral",
+        receivedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        daysInPipeline: 0,
+        primaryDiagnosis: supportNotes || "Chronic Care Management",
+        triageNotes: `Triage notes: ${supportNotes || "Initial intake referral logged."}`,
+        assignedCoordinator: assignedCoordinator || "Dana Jenkins, MSW",
+        insuranceVerified: false,
+        payerName: programInterest.includes("Medicaid")
+          ? "State Medicaid DHS"
+          : programInterest.includes("VA")
+            ? "Veterans Affairs"
+            : "Private Pay",
+        targetStartDate: "Within 7 Days",
+        estimatedHoursPerWeek: hoursPerWeek,
+        householdCode: `HH-${randomId.replace("INQ-", "")}`,
+        clientId: `CL-${randomId.replace("INQ-", "")}`,
+      };
+      const currentAdminRefs = getAdminReferralsFromStorage();
+      saveAdminReferralsToStorage([newAdminRef, ...currentAdminRefs]);
     } catch (err) {
       console.error("Error saving new inquiry:", err);
     }

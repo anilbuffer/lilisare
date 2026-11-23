@@ -1121,7 +1121,7 @@ function AddCaregiverWizard({
               </button>
             ) : (
               <Link
-                href="/caregivers"
+                href={baseBackPath}
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
               >
                 Cancel

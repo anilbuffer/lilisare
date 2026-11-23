@@ -18,15 +18,13 @@ export default async function IntakeCaregiverDetailPage({ params }: PageProps) {
         </div>
       }
     >
-      <CaregiverDetailView caregiverId={resolvedParams.id} />
+      <CaregiverDetailView caregiverId={resolvedParams.id} baseBackPath="/intake/caregivers" />
     </Suspense>
   );
 }
 
 export function generateStaticParams() {
   const initialIds = INITIAL_CAREGIVERS.map((c) => c.id);
-  const lowerInitial = initialIds.map((id) => id.toLowerCase());
-  const upperInitial = initialIds.map((id) => id.toUpperCase());
   const legacyIds = [
     "[id]",
     "default",
@@ -62,8 +60,9 @@ export function generateStaticParams() {
     "cg-130",
     "cg-135",
   ];
-  const allIds = Array.from(
-    new Set([...initialIds, ...lowerInitial, ...upperInitial, ...legacyIds])
-  );
-  return allIds.map((id) => ({ id }));
+  const map = new Map<string, string>();
+  [...initialIds, ...legacyIds].forEach((id) => {
+    map.set(id.toLowerCase(), id);
+  });
+  return Array.from(map.values()).map((id) => ({ id }));
 }

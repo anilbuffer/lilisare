@@ -43,6 +43,7 @@ import { ClientScheduleVisitModal } from "./modals/ClientScheduleVisitModal";
 
 interface ClientDetailViewProps {
   clientId: string;
+  baseBackPath?: string;
 }
 
 const formatShortProgram = (program?: string): string => {
@@ -55,7 +56,7 @@ const formatShortProgram = (program?: string): string => {
   return program.split("(")[0].trim() || program;
 };
 
-export function ClientDetailView({ clientId }: ClientDetailViewProps) {
+export function ClientDetailView({ clientId, baseBackPath = "/clients" }: ClientDetailViewProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -284,7 +285,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
       {/* Back Navigation Button */}
       <div>
         <Link
-          href="/clients"
+          href={baseBackPath}
           className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -345,7 +346,7 @@ export function ClientDetailView({ clientId }: ClientDetailViewProps) {
 
           {/* Edit Client Primary CTA */}
           <Link
-            href={`/clients/${client.id}/edit`}
+            href={`${baseBackPath}/${client.id}/edit`}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer whitespace-nowrap"
           >
             <Edit3 className="w-3.5 h-3.5 text-white" />

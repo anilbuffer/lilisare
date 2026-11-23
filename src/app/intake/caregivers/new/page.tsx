@@ -3,5 +3,5 @@
 import AddCaregiverPage from "@/app/caregivers/new/page";
 
 export default function IntakeAddCaregiverPage() {
-  return <AddCaregiverPage />;
+  return <AddCaregiverPage baseBackPath="/intake/caregivers" />;
 }

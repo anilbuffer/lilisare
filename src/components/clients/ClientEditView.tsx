@@ -32,9 +32,10 @@ import { toast } from "sonner";
 
 interface ClientEditViewProps {
   clientId: string;
+  baseBackPath?: string;
 }
 
-export function ClientEditView({ clientId }: ClientEditViewProps) {
+export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEditViewProps) {
   const router = useRouter();
   const [client, setClient] = useState<ClientRecord | null>(null);
 
@@ -109,7 +110,7 @@ export function ClientEditView({ clientId }: ClientEditViewProps) {
         <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
         <h2 className="text-xl font-bold text-slate-800">Client Record Not Found</h2>
         <Link
-          href="/clients"
+          href={baseBackPath}
           className="inline-flex items-center gap-1.5 mt-4 text-xs font-bold text-[#3D6B22] hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -188,7 +189,7 @@ export function ClientEditView({ clientId }: ClientEditViewProps) {
     }
 
     toast.success(`Client ${updated.name} updated successfully!`);
-    router.push(`/clients/${client.id}`);
+    router.push(`${baseBackPath}/${client.id}`);
   };
 
   return (
@@ -197,7 +198,7 @@ export function ClientEditView({ clientId }: ClientEditViewProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
           <Link
-            href={`/clients/${client.id}`}
+            href={`${baseBackPath}/${client.id}`}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#3D6B22] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -525,7 +526,7 @@ export function ClientEditView({ clientId }: ClientEditViewProps) {
         {/* Action Save Bar */}
         <div className="flex items-center justify-between pt-4">
           <Link
-            href={`/clients/${client.id}`}
+            href={`${baseBackPath}/${client.id}`}
             className="px-4 py-2.5 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
           >
             Cancel Changes

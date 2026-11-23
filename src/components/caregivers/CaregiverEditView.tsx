@@ -384,7 +384,7 @@ export function CaregiverEditView({
           {/* Actions */}
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
             <Link
-              href={`/caregivers/${caregiver.id}`}
+              href={`${baseBackPath}/${caregiver.id}`}
               className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-bold transition-all"
             >
               Cancel

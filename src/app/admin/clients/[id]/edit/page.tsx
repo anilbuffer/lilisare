@@ -18,15 +18,13 @@ export default async function AdminClientEditPage({ params }: PageProps) {
         </div>
       }
     >
-      <ClientEditView clientId={resolvedParams.id} />
+      <ClientEditView clientId={resolvedParams.id} baseBackPath="/admin/clients" />
     </Suspense>
   );
 }
 
 export function generateStaticParams() {
   const ids = INITIAL_CLIENTS.map((client) => client.id);
-  const lowerIds = ids.map((id) => id.toLowerCase());
-  const upperIds = ids.map((id) => id.toUpperCase());
-  const allIds = Array.from(new Set(["[id]", "default", ...ids, ...lowerIds, ...upperIds]));
+  const allIds = Array.from(new Set(["[id]", "default", ...ids]));
   return allIds.map((id) => ({ id }));
 }

@@ -43,7 +43,7 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
     if (pathname.startsWith("/intake/caregivers")) return "Intake Caregivers";
     if (pathname.startsWith("/intake/households")) return "Intake Households";
     if (pathname.startsWith("/intake/settings")) return "Intake Settings";
-    if (pathname.startsWith("/intake/dashboard") || pathname === "/intake") return "Intake Dashboard";
+    if (pathname.startsWith("/intake/dashboard") || pathname === "/intake") return "Intake Coordinator Dashboard";
 
     // HR Portal Routes
     if (pathname.startsWith("/hr/recruiting")) return "HR Recruiting & Onboarding";

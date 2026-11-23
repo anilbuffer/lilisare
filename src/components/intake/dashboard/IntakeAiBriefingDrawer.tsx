@@ -187,7 +187,7 @@ export function IntakeAiBriefingDrawer({
                   : "All household tracks are progressing without blocking bottlenecks."}
               </p>
               <Link
-                href="/households"
+                href="/intake/households"
                 onClick={onClose}
                 className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 hover:text-amber-950 pt-1"
               >

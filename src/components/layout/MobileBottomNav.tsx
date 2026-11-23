@@ -36,13 +36,13 @@ export function MobileBottomNav() {
   };
 
   const getNavItems = () => {
-    if (currentUser?.role === "INTAKE_COORDINATOR") {
+    if (currentUser?.role === "INTAKE_COORDINATOR" || pathname.startsWith("/intake")) {
       return [
         { name: "Home", href: "/intake/dashboard", icon: LayoutDashboard, pattern: ["/intake/dashboard"] },
-        { name: "Referrals", href: "/intake/referrals", icon: Receipt, pattern: ["/intake/referrals"] },
-        { name: "Patients", href: "/intake/patients", icon: HeartHandshake, pattern: ["/intake/patients"] },
+        { name: "Pipeline", href: "/intake/pipeline", icon: Receipt, pattern: ["/intake/pipeline", "/intake/referrals", "/intake/inquiries"] },
+        { name: "Clients", href: "/intake/clients", icon: Users, pattern: ["/intake/clients", "/intake/patients"] },
+        { name: "Caregivers", href: "/intake/caregivers", icon: HeartHandshake, pattern: ["/intake/caregivers"] },
         { name: "Reports", href: "/intake/reports", icon: BarChart3, pattern: ["/intake/reports"] },
-        { name: "Settings", href: "/intake/settings", icon: Settings, pattern: ["/intake/settings"] },
       ];
     }
     if (currentUser?.role === "CLINICAL_SUPERVISOR_RN") {

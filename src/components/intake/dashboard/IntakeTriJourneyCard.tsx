@@ -120,7 +120,7 @@ export function IntakeTriJourneyCard({ households }: IntakeTriJourneyCardProps) 
       {/* Footer Link */}
       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end">
         <Link
-          href="/households"
+          href="/intake/households"
           className="text-xs font-bold text-[#3D6B22] hover:underline inline-flex items-center gap-1"
         >
           <span>Manage Family Households</span>

@@ -196,15 +196,17 @@ export default function IntakeDashboardPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 pb-14 animate-in fade-in duration-300">
-      {/* 01. Page Header: Greeting • Date • Quick Actions • AI Briefing (Identical layout to Agency Dashboard) */}
+      {/* 01. Page Header: Greeting • Date • Quick Actions • AI Briefing (Dedicated to Intake Coordinator Role) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Good morning, Sarah!
-          </h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Good morning, Sarah!
+            </h1>
+          </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            {today}
+            <span>{today}</span>
           </p>
         </div>
 
@@ -245,13 +247,13 @@ export default function IntakeDashboardPage() {
                 <div className="my-1 border-t border-slate-100"></div>
                 <button
                   onClick={() => {
-                    router.push("/referrals");
+                    router.push("/intake/referrals");
                     setIsDropdownOpen(false);
                   }}
                   className="w-full text-left px-3.5 py-2 text-[11px] text-slate-500 hover:bg-slate-50 transition-colors flex items-center justify-between cursor-pointer"
                 >
-                  <span>Agency Admin Referrals</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                  <span>View All Intake Referrals</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                 </button>
               </div>
             )}

@@ -184,6 +184,7 @@ const getNavGroups = (role?: string): NavGroup[] => {
           { name: "Caregivers", icon: HeartHandshake, id: "caregivers" },
           { name: "Households", icon: Home, id: "households" },
           { name: "Reports", icon: BarChart3, id: "reports" },
+          { name: "Settings", icon: Settings, id: "settings" },
         ],
       },
     ];
@@ -339,14 +340,30 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(cachedExpandedGroups);
 
   const safeUser = currentUser;
-  const navGroups = useMemo(() => getNavGroups(safeUser?.role), [safeUser?.role]);
+
+  // Derive effective role from active URL prefix so role-dedicated portals (e.g. /intake/...) always render the correct portal sidebar
+  const effectiveRole = useMemo(() => {
+    if (pathname.startsWith("/intake")) return "INTAKE_COORDINATOR";
+    if (pathname.startsWith("/hr")) return "HR";
+    if (pathname.startsWith("/scheduler")) return "SCHEDULER";
+    if (pathname.startsWith("/billing")) return "BILLING_FINANCE_STAFF";
+    if (pathname.startsWith("/clinical")) return "CLINICAL_SUPERVISOR_RN";
+    if (pathname.startsWith("/compliance")) return "QA_COMPLIANCE_OFFICER";
+    if (pathname.startsWith("/field-supervisor")) return "FIELD_SUPERVISOR";
+    if (pathname.startsWith("/caregiver")) return "CAREGIVER";
+    if (pathname.startsWith("/portal")) return "CLIENT";
+    if (pathname.startsWith("/admin")) return "ADMIN";
+    return safeUser?.role || "ADMIN";
+  }, [pathname, safeUser?.role]);
+
+  const navGroups = useMemo(() => getNavGroups(effectiveRole), [effectiveRole]);
 
   const activeItem = useMemo(() => {
     if (!pathname) return "dashboard";
     const path = pathname.replace(/\/$/, "") || "/";
     const isPath = (target: string) => path === target || path.startsWith(`${target}/`);
 
-    const role = safeUser?.role;
+    const role = effectiveRole;
 
     // 1. Role-specific portal & dedicated workspaces
     if (role === "CLIENT" || role === "FAMILY") {
@@ -547,7 +564,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   };
 
   const getItemHref = (id: string) => {
-    const role = safeUser?.role;
+    const role = effectiveRole;
 
     // 1. Role-specific URL namespaces
     if (role === "ADMIN" || !role) {
@@ -710,25 +727,25 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         >
           <Link
             href={
-              safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY"
+              effectiveRole === "CLIENT" || effectiveRole === "FAMILY"
                 ? "/portal"
-                : safeUser?.role === "CAREGIVER"
+                : effectiveRole === "CAREGIVER"
                 ? "/caregiver"
-                : safeUser?.role === "HR"
+                : effectiveRole === "HR"
                 ? "/hr/dashboard"
-                : safeUser?.role === "SCHEDULER"
+                : effectiveRole === "SCHEDULER"
                 ? "/scheduler"
-                : safeUser?.role === "QA_COMPLIANCE_OFFICER"
+                : effectiveRole === "QA_COMPLIANCE_OFFICER"
                 ? "/compliance"
-                : safeUser?.role === "INTAKE_COORDINATOR"
+                : effectiveRole === "INTAKE_COORDINATOR"
                 ? "/intake/dashboard"
-                : safeUser?.role === "BILLING_FINANCE_STAFF"
+                : effectiveRole === "BILLING_FINANCE_STAFF"
                 ? "/billing"
-                : safeUser?.role === "CLINICAL_SUPERVISOR_RN"
+                : effectiveRole === "CLINICAL_SUPERVISOR_RN"
                 ? "/clinical"
-                : safeUser?.role === "FIELD_SUPERVISOR"
+                : effectiveRole === "FIELD_SUPERVISOR"
                 ? "/field-supervisor"
-                : safeUser?.role === "TRAINER"
+                : effectiveRole === "TRAINER"
                 ? "/training-admin"
                 : "/admin/dashboard"
             }
@@ -961,22 +978,34 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               <>
                 <div className="flex-1 overflow-hidden">
                   <div className="text-sm font-medium text-white truncate">
-                    {safeUser?.name || "Agency Executive"}
+                    {effectiveRole === "INTAKE_COORDINATOR"
+                      ? (safeUser?.role === "INTAKE_COORDINATOR" ? safeUser?.name : "Sarah Jenkins")
+                      : (safeUser?.name || "Agency Executive")}
                   </div>
                   <div className="text-xs text-slate-400 truncate">
-                    {safeUser?.role === "CLIENT"
+                    {effectiveRole === "INTAKE_COORDINATOR"
+                      ? "Intake Coordinator"
+                      : effectiveRole === "CLIENT"
                       ? "Patient"
-                      : safeUser?.role === "FAMILY"
+                      : effectiveRole === "FAMILY"
                       ? "Family Member"
-                      : safeUser?.role === "CAREGIVER"
+                      : effectiveRole === "CAREGIVER"
                       ? "Caregiver (Field Staff)"
-                      : safeUser?.role === "SCHEDULER"
+                      : effectiveRole === "SCHEDULER"
                       ? "Scheduler / Dispatcher"
-                      : safeUser?.role === "HR"
+                      : effectiveRole === "HR"
                       ? "HR Recruiter"
-                      : safeUser?.role === "TRAINER"
+                      : effectiveRole === "TRAINER"
                       ? "Trainer / LMS Admin"
-                      : safeUser?.role || "ADMIN"}
+                      : effectiveRole === "BILLING_FINANCE_STAFF"
+                      ? "Billing & Finance"
+                      : effectiveRole === "CLINICAL_SUPERVISOR_RN"
+                      ? "Clinical Supervisor RN"
+                      : effectiveRole === "QA_COMPLIANCE_OFFICER"
+                      ? "QA & Compliance"
+                      : effectiveRole === "FIELD_SUPERVISOR"
+                      ? "Field Supervisor"
+                      : "Agency Administrator"}
                   </div>
                 </div>
                 <ChevronDown
@@ -1006,17 +1035,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 <div className="flex flex-col gap-1">
                   <Link
                     href={
-                      safeUser?.role === "QA_COMPLIANCE_OFFICER"
-                        ? "/compliance/settings"
-                        : safeUser?.role === "INTAKE_COORDINATOR"
+                      effectiveRole === "INTAKE_COORDINATOR"
                         ? "/intake/settings"
-                        : safeUser?.role === "BILLING_FINANCE_STAFF"
+                        : effectiveRole === "QA_COMPLIANCE_OFFICER"
+                        ? "/compliance/settings"
+                        : effectiveRole === "BILLING_FINANCE_STAFF"
                         ? "/billing/settings"
-                        : safeUser?.role === "CLINICAL_SUPERVISOR_RN"
+                        : effectiveRole === "CLINICAL_SUPERVISOR_RN"
                         ? "/clinical/settings"
-                        : safeUser?.role === "FIELD_SUPERVISOR"
+                        : effectiveRole === "FIELD_SUPERVISOR"
                         ? "/field-supervisor/settings"
-                        : safeUser?.role === "TRAINER"
+                        : effectiveRole === "TRAINER"
                         ? "/training-admin/settings"
                         : "/settings"
                     }

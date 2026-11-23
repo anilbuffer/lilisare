@@ -157,7 +157,7 @@ export default function IntakeClientsPage() {
             {isAddMenuOpen && (
               <div className="absolute right-0 mt-1.5 w-56 bg-white border border-slate-200 rounded-xl shadow-xl p-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
                 <Link
-                  href="/clients/new"
+                  href="/intake/clients/new"
                   onClick={() => setIsAddMenuOpen(false)}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-left"
                 >

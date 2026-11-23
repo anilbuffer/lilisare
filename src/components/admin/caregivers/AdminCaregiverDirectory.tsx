@@ -105,8 +105,10 @@ export function AdminCaregiverDirectory() {
   const [activeKpiFilter, setActiveKpiFilter] = useState<"ALL" | "ACTIVE" | "ONBOARDING" | "HIGH_RATING" | "COMPLIANCE_GAP">("ALL");
 
   // Dropdown states
-  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
-  const filterDropdownRef = useRef<HTMLDivElement>(null);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const statusDropdownRef = useRef<HTMLDivElement>(null);
+  const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -204,14 +206,20 @@ export function AdminCaregiverDirectory() {
     return () => unsubscribe();
   }, []);
 
-  // Handle outside click for filter dropdown
+  // Handle outside click for filter dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        filterDropdownRef.current &&
-        !filterDropdownRef.current.contains(event.target as Node)
+        statusDropdownRef.current &&
+        !statusDropdownRef.current.contains(event.target as Node)
       ) {
-        setIsFilterDropdownOpen(false);
+        setIsStatusDropdownOpen(false);
+      }
+      if (
+        roleDropdownRef.current &&
+        !roleDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsRoleDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -302,6 +310,13 @@ export function AdminCaregiverDirectory() {
     (complianceFilter !== "ALL" ? 1 : 0) +
     (activeKpiFilter !== "ALL" ? 1 : 0);
 
+  const hasActiveFilters =
+    searchQuery !== "" ||
+    statusFilter !== "ALL" ||
+    roleFilter !== "ALL" ||
+    complianceFilter !== "ALL" ||
+    activeKpiFilter !== "ALL";
+
   const handleResetFilters = () => {
     setSearchQuery("");
     setStatusFilter("ALL");
@@ -312,42 +327,39 @@ export function AdminCaregiverDirectory() {
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
-      {/* 01. Top Tab Navigation Bar (Matching Reference Screenshot) */}
-      <AdminCaregiverTopTabs activeTab="roster" />
-
-      {/* 02. Header & Action CTA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* 01. Header & Actions Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Roster Details
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Caregivers Directory
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-            {activeCount} active caregivers in roster.
-          </p>
         </div>
 
         {/* Primary Action Button */}
         <div className="flex items-center gap-3">
           <Link
             href="/admin/caregivers/new"
-            className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#1B3414] hover:bg-[#274C1D] rounded-xl shadow-md shadow-[#1B3414]/20 transition-all active:scale-95 cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0 self-start sm:self-auto"
           >
-            <Plus className="w-4 h-4 text-[#93C573]" />
-            <span>Add Caregiver</span>
+            <Plus className="w-4 h-4" />
+            <span>New Caregiver</span>
           </Link>
         </div>
       </div>
 
-      {/* 03. 5 Executive KPI Metric Cards (Matching Reference Screenshot) */}
+      {/* 02. Navigation Tabs */}
+      <AdminCaregiverTopTabs activeTab="roster" />
+
+      {/* 03. 5 Executive KPI Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        {/* KPI 1: Active Caregivers */}
+        {/* Card 1: Active Caregivers */}
         <button
           type="button"
           onClick={() =>
             setActiveKpiFilter((prev) => (prev === "ACTIVE" ? "ALL" : "ACTIVE"))
           }
           className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ACTIVE"
-              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 shadow-sm"
+              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
               : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
@@ -367,7 +379,7 @@ export function AdminCaregiverDirectory() {
           </p>
         </button>
 
-        {/* KPI 2: Onboarding */}
+        {/* Card 2: Onboarding */}
         <button
           type="button"
           onClick={() =>
@@ -394,7 +406,7 @@ export function AdminCaregiverDirectory() {
           </p>
         </button>
 
-        {/* KPI 3: Avg. Rating */}
+        {/* Card 3: Avg. Rating */}
         <button
           type="button"
           onClick={() =>
@@ -421,7 +433,7 @@ export function AdminCaregiverDirectory() {
           </p>
         </button>
 
-        {/* KPI 4: Compliance Rate */}
+        {/* Card 4: Compliance Rate */}
         <button
           type="button"
           onClick={() =>
@@ -450,7 +462,7 @@ export function AdminCaregiverDirectory() {
           </p>
         </button>
 
-        {/* KPI 5: Open Availability Gaps */}
+        {/* Card 5: Open Availability Gaps */}
         <div className="text-left bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs p-4 sm:p-4.5 transition-all duration-200 overflow-hidden col-span-2 sm:col-span-1">
           <div className="flex items-start justify-between gap-2">
             <div>
@@ -467,162 +479,180 @@ export function AdminCaregiverDirectory() {
         </div>
       </div>
 
-      {/* 04. Search, Filter Bar & List/Grid View Switcher */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Search & Filter Dropdown */}
-        <div className="flex items-center gap-2.5 flex-1 max-w-xl">
+      {/* 04. Search, Dropdown Filters & View Switcher (Contained in One Card matching Clients Directory) */}
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-3.5 sm:p-4 shadow-2xs">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search caregivers by name or role..."
-              className="w-full pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Search by caregiver name, role, ID, or status..."
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-md"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentPage(1);
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" />
+                Clear
               </button>
             )}
           </div>
 
-          {/* Filters Button & Menu */}
-          <div className="relative" ref={filterDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-              className={`inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border transition-all cursor-pointer ${activeFiltersCount > 0
-                  ? "bg-[#E8F2E4] text-[#1E5622] border-[#3D6B22]/30"
-                  : "bg-white text-slate-700 hover:bg-slate-50 border-slate-200 shadow-2xs"
-                }`}
-            >
-              <Filter className="w-3.5 h-3.5 text-slate-500" />
-              <span>Filters</span>
-              {activeFiltersCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-[#1B3414] text-white text-[11px] font-bold flex items-center justify-center">
-                  {activeFiltersCount}
+          {/* Controls: Status Dropdown Filter, Role Dropdown Filter, View Toggle */}
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {/* Status Dropdown Filter */}
+            <div className="relative" ref={statusDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${statusFilter !== "ALL"
+                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                  }`}
+              >
+                <Filter className="w-3.5 h-3.5 text-slate-500" />
+                <span>
+                  {statusFilter === "ALL"
+                    ? "Status: All"
+                    : `Status: ${statusFilter}`}
                 </span>
-              )}
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
 
-            {/* Filter Menu Popover */}
-            {isFilterDropdownOpen && (
-              <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-40 animate-in fade-in zoom-in-95 duration-100 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Filter Caregivers
-                  </span>
-                  {activeFiltersCount > 0 && (
+              {isStatusDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Filter by Status
+                  </div>
+                  {[
+                    { label: "All Statuses", value: "ALL" },
+                    { label: "Active", value: "Active" },
+                    { label: "Onboarding", value: "Onboarding" },
+                    { label: "On Hold", value: "On Hold" },
+                    { label: "Inactive", value: "Inactive" },
+                  ].map((option) => (
                     <button
+                      key={option.value}
                       type="button"
-                      onClick={handleResetFilters}
-                      className="text-xs font-semibold text-[#3D6B22] hover:underline cursor-pointer flex items-center gap-1"
+                      onClick={() => {
+                        setStatusFilter(option.value);
+                        setCurrentPage(1);
+                        setIsStatusDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${statusFilter === option.value
+                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                          : "text-slate-700 hover:bg-slate-50"
+                        }`}
                     >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>Reset</span>
+                      <span>{option.label}</span>
+                      {statusFilter === option.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#3D6B22]" />
+                      )}
                     </button>
-                  )}
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Status Filter */}
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                    Caregiver Status
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#3D6B22]"
-                  >
-                    <option value="ALL">All Statuses</option>
-                    <option value="Active">Active</option>
-                    <option value="Onboarding">Onboarding</option>
-                    <option value="On Hold">On Hold</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
+            {/* Role Dropdown Filter */}
+            <div className="relative" ref={roleDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${roleFilter !== "ALL"
+                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+              >
+                <span>{roleFilter === "ALL" ? "Role: All" : roleFilter}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
 
-                {/* Clinical Role Filter */}
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                    Clinical Credential / Role
-                  </label>
-                  <select
-                    value={roleFilter}
-                    onChange={(e) => setRoleFilter(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#3D6B22]"
-                  >
-                    <option value="ALL">All Roles</option>
-                    <option value="RN">Registered Nurse (RN)</option>
-                    <option value="CNA">Certified Nursing Assistant (CNA)</option>
-                    <option value="HHA">Home Health Aide (HHA)</option>
-                    <option value="PT">Physical Therapist (PT)</option>
-                  </select>
+              {isRoleDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Clinical Role
+                  </div>
+                  {[
+                    { label: "All Roles", value: "ALL" },
+                    { label: "Registered Nurse (RN)", value: "RN" },
+                    { label: "Certified Nursing (CNA)", value: "CNA" },
+                    { label: "Home Health Aide (HHA)", value: "HHA" },
+                    { label: "Physical Therapist (PT)", value: "PT" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setRoleFilter(option.value);
+                        setCurrentPage(1);
+                        setIsRoleDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${roleFilter === option.value
+                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                          : "text-slate-700 hover:bg-slate-50"
+                        }`}
+                    >
+                      <span>{option.label}</span>
+                      {roleFilter === option.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#3D6B22]" />
+                      )}
+                    </button>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {/* Compliance Tier Filter */}
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                    Compliance Tier
-                  </label>
-                  <select
-                    value={complianceFilter}
-                    onChange={(e) => setComplianceFilter(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#3D6B22]"
-                  >
-                    <option value="ALL">All Tiers</option>
-                    <option value="100">100% Fully Compliant</option>
-                    <option value="70_99">70% – 99% Near Compliance</option>
-                    <option value="BELOW_70">&lt; 70% Action Required</option>
-                  </select>
-                </div>
-
-                <div className="pt-2 border-t border-slate-100 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setIsFilterDropdownOpen(false)}
-                    className="px-3.5 py-1.5 bg-[#1B3414] text-white text-xs font-bold rounded-lg hover:bg-[#274C1D]"
-                  >
-                    Apply Filters
-                  </button>
-                </div>
-              </div>
+            {/* Reset Filter Button if active */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                title="Reset all filters"
+                className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 cursor-pointer"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
             )}
-          </div>
-        </div>
 
-        {/* View Switcher: List vs Grid */}
-        <div className="flex items-center justify-end gap-2">
-          <div className="p-1 bg-white border border-slate-200 rounded-xl shadow-2xs flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              title="Grid View"
-              className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "grid"
-                  ? "bg-[#E8F2E4] text-[#1E5622] shadow-2xs font-bold"
-                  : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
-                }`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("list")}
-              title="List View"
-              className={`p-2 rounded-lg transition-all cursor-pointer ${viewMode === "list"
-                  ? "bg-[#E8F2E4] text-[#1E5622] shadow-2xs font-bold"
-                  : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
-                }`}
-            >
-              <ListIcon className="w-4 h-4" />
-            </button>
+            {/* View Switcher: List vs Grid Toggle */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                title="List View"
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "list"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
+                    : "text-slate-500 hover:text-slate-900"
+                  }`}
+              >
+                <ListIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                title="Grid View"
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
+                    ? "bg-white text-slate-900 shadow-2xs font-bold"
+                    : "text-slate-500 hover:text-slate-900"
+                  }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -649,7 +679,7 @@ export function AdminCaregiverDirectory() {
               <button
                 type="button"
                 onClick={() => setStatusFilter("ALL")}
-                className="hover:text-[#1B3414] cursor-pointer"
+                className="hover:text-[#3D6B22] cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -661,7 +691,7 @@ export function AdminCaregiverDirectory() {
               <button
                 type="button"
                 onClick={() => setRoleFilter("ALL")}
-                className="hover:text-[#1B3414] cursor-pointer"
+                className="hover:text-[#3D6B22] cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -673,7 +703,7 @@ export function AdminCaregiverDirectory() {
               <button
                 type="button"
                 onClick={() => setComplianceFilter("ALL")}
-                className="hover:text-[#1B3414] cursor-pointer"
+                className="hover:text-[#3D6B22] cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -685,7 +715,7 @@ export function AdminCaregiverDirectory() {
               <button
                 type="button"
                 onClick={() => setActiveKpiFilter("ALL")}
-                className="hover:text-[#1B3414] cursor-pointer"
+                className="hover:text-[#3D6B22] cursor-pointer"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -728,23 +758,21 @@ export function AdminCaregiverDirectory() {
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="py-3.5 px-4 sm:px-6">Caregiver</th>
+                  <th className="py-3.5 px-4">Role</th>
                   <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 text-center">Rating</th>
-                  <th className="py-3.5 px-4 text-center">Compliance</th>
                   <th className="py-3.5 px-4 text-center">Patients</th>
                   <th className="py-3.5 px-4 text-center">Last Active</th>
                   <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
+              <tbody className="divide-y divide-slate-100 text-xs">
                 {paginatedCaregivers.map((cg) => {
-                  const complianceStyle = getComplianceStyle(cg.complianceRate);
                   return (
                     <tr
                       key={cg.id}
                       className="hover:bg-slate-50/70 transition-colors group"
                     >
-                      {/* Caregiver Name & Role */}
+                      {/* Caregiver Name */}
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs flex items-center justify-center shrink-0">
@@ -761,6 +789,11 @@ export function AdminCaregiverDirectory() {
                         </div>
                       </td>
 
+                      {/* Role */}
+                      <td className="py-4 px-4 font-medium text-slate-700">
+                        {cg.role}
+                      </td>
+
                       {/* Status */}
                       <td className="py-4 px-4 text-center">
                         <span
@@ -769,23 +802,6 @@ export function AdminCaregiverDirectory() {
                           )}`}
                         >
                           {cg.status}
-                        </span>
-                      </td>
-
-                      {/* Rating */}
-                      <td className="py-4 px-4 text-center">
-                        <div className="inline-flex items-center gap-1 font-semibold text-slate-800">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                          <span>{cg.rating.toFixed(1)}</span>
-                        </div>
-                      </td>
-
-                      {/* Compliance */}
-                      <td className="py-4 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${complianceStyle.pillBg}`}
-                        >
-                          {complianceStyle.label}
                         </span>
                       </td>
 
@@ -799,13 +815,14 @@ export function AdminCaregiverDirectory() {
                         {cg.lastActive}
                       </td>
 
-                      {/* Actions */}
+                      {/* Actions (Outline Style) */}
                       <td className="py-4 px-4 sm:px-6 text-right">
                         <Link
                           href={`/admin/caregivers/${cg.id}`}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:text-[#274C1D] hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                         >
-                          <span>View</span>
+                          <span>View Profile</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                         </Link>
                       </td>
                     </tr>
@@ -819,7 +836,6 @@ export function AdminCaregiverDirectory() {
         /* ================= GRID VIEW (CARDS) ================= */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
           {paginatedCaregivers.map((cg) => {
-            const complianceStyle = getComplianceStyle(cg.complianceRate);
             return (
               <div
                 key={cg.id}
@@ -854,26 +870,18 @@ export function AdminCaregiverDirectory() {
                   </div>
 
                   {/* Micro Metrics Strip */}
-                  <div className="grid grid-cols-3 gap-2 mt-4 pt-3.5 border-t border-slate-100 text-center">
-                    <div className="bg-slate-50/70 rounded-xl p-2 border border-slate-100">
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Rating</p>
-                      <p className="text-xs font-bold text-slate-800 mt-0.5 flex items-center justify-center gap-1">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                        <span>{cg.rating.toFixed(1)}</span>
-                      </p>
-                    </div>
-
-                    <div className="bg-slate-50/70 rounded-xl p-2 border border-slate-100">
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Compliance</p>
-                      <p className="text-xs font-bold text-slate-800 mt-0.5">
-                        {cg.complianceRate}%
-                      </p>
-                    </div>
-
+                  <div className="grid grid-cols-2 gap-2 mt-4 pt-3.5 border-t border-slate-100 text-center">
                     <div className="bg-slate-50/70 rounded-xl p-2 border border-slate-100">
                       <p className="text-[10px] uppercase font-bold text-slate-400">Patients</p>
                       <p className="text-xs font-bold text-slate-800 mt-0.5">
                         {cg.activePatients} Active
+                      </p>
+                    </div>
+
+                    <div className="bg-slate-50/70 rounded-xl p-2 border border-slate-100">
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Branch</p>
+                      <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">
+                        {cg.branch || "North Metro"}
                       </p>
                     </div>
                   </div>
@@ -885,26 +893,20 @@ export function AdminCaregiverDirectory() {
                       <span className="font-semibold text-slate-700">{cg.lastActive}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">Branch:</span>
-                      <span className="font-semibold text-slate-700">{cg.branch || "North Metro"}</span>
+                      <span className="text-slate-400 font-medium">Email:</span>
+                      <span className="font-semibold text-slate-700 truncate max-w-[180px]">{cg.email}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Footer Action */}
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${complianceStyle.pillBg}`}
-                  >
-                    {complianceStyle.label}
-                  </span>
-
+                {/* Footer Action (Outline Style Button) */}
+                <div className="mt-5 pt-3 border-t border-slate-100">
                   <Link
                     href={`/admin/caregivers/${cg.id}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3D6B22] hover:text-[#274C1D] group-hover:translate-x-0.5 transition-transform cursor-pointer"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                   >
                     <span>View Profile</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                   </Link>
                 </div>
               </div>

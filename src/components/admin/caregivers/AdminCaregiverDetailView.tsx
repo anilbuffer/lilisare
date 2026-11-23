@@ -195,6 +195,19 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
                 <span>{profile.rating.toFixed(1)} Rating</span>
               </span>
               <span>•</span>
+              <span
+                className={`inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-[11px] border ${
+                  profile.complianceRate >= 90
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : profile.complianceRate >= 70
+                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : "bg-rose-50 text-rose-700 border-rose-200"
+                }`}
+              >
+                <ShieldCheck className="w-3 h-3" />
+                <span>{profile.complianceRate}% Compliant</span>
+              </span>
+              <span>•</span>
               <span>{profile.tenure}</span>
               <span>•</span>
               <span className="font-semibold text-slate-600">{profile.branch}</span>

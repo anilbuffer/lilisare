@@ -222,10 +222,27 @@ export function AdminCaregiverRecruitingView() {
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
-      {/* 01. Top Tab Navigation Bar (Matching Reference Screenshot) */}
+      {/* 01. Header & Actions Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Recruiting Pipeline
+          </h1>
+        </div>
+
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" />
+          <span>New Applicant</span>
+        </button>
+      </div>
+
+      {/* 02. Top Tab Navigation Bar */}
       <AdminCaregiverTopTabs activeTab="recruiting" />
 
-      {/* 02. Search & Controls Bar (Matching Reference Screenshot) */}
+      {/* 03. Search & Controls Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-1 items-center gap-3 max-w-2xl">
           <div className="relative flex-1">
@@ -299,17 +316,9 @@ export function AdminCaregiverRecruitingView() {
             )}
           </div>
         </div>
-
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-full shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Applicant</span>
-        </button>
       </div>
 
-      {/* 03. Kanban Board Columns (Matching Reference Screenshot) */}
+      {/* 04. Kanban Board Columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4 items-start">
         {STAGES.map((stage) => {
           const stageApplicants = filteredApplicants.filter(

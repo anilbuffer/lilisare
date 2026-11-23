@@ -175,10 +175,27 @@ export function AdminCaregiverTimeOffView() {
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
-      {/* 01. Top Tab Navigation Bar (Matching Reference Screenshot) */}
+      {/* 01. Header & Actions Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Availability & Time-Off
+          </h1>
+        </div>
+
+        <button
+          onClick={() => setIsNewRequestModalOpen(true)}
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" />
+          <span>New Request</span>
+        </button>
+      </div>
+
+      {/* 02. Top Tab Navigation Bar */}
       <AdminCaregiverTopTabs activeTab="time-off" />
 
-      {/* 02. KPI Cards (Matching Image 4) */}
+      {/* 03. KPI Cards (Matching Image 4) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Pending Requests */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs flex items-center gap-4">

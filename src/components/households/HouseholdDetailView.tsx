@@ -243,6 +243,14 @@ export function HouseholdDetailView({
               <span>
                 Caregiver: <strong className="text-slate-900 font-semibold">{household.primaryCaregiver.name}</strong>
               </span>
+              <span className="text-slate-300">·</span>
+              <span>
+                Program: <strong className="text-slate-900 font-semibold">{household.program}</strong>
+              </span>
+              <span className="text-slate-300">·</span>
+              <span>
+                Weekly Hours: <strong className="text-slate-900 font-semibold">{household.scheduledHoursPerWeek} / {household.authorizedHoursPerWeek} hrs/wk</strong>
+              </span>
             </div>
           </div>
         </div>
@@ -643,13 +651,17 @@ export function HouseholdDetailView({
               <ShieldCheck className="w-4.5 h-4.5 text-[#3D6B22]" />
               Service Authorization Parameters
             </h3>
-            <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
               <div>
-                <span className="text-slate-500 block">Authorized Hours</span>
+                <span className="text-slate-500 block">Care Program</span>
+                <span className="font-bold text-slate-900 text-sm mt-0.5 block">{household.program}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Authorized Weekly Hours</span>
                 <span className="font-extrabold text-slate-900 text-lg mt-0.5 block">{household.authorizedHoursPerWeek} hrs/wk</span>
               </div>
               <div>
-                <span className="text-slate-500 block">Scheduled Active Hours</span>
+                <span className="text-slate-500 block">Scheduled Weekly Hours</span>
                 <span className="font-extrabold text-slate-900 text-lg mt-0.5 block">{household.scheduledHoursPerWeek} hrs/wk</span>
               </div>
               <div>
@@ -659,6 +671,12 @@ export function HouseholdDetailView({
               <div>
                 <span className="text-slate-500 block">Current Status</span>
                 <span className="font-bold text-emerald-700 mt-0.5 block">{household.authStatus}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block">Fulfillment Rate</span>
+                <span className="font-bold text-[#3D6B22] mt-0.5 block">
+                  {Math.round((household.scheduledHoursPerWeek / household.authorizedHoursPerWeek) * 100)}% Fulfilled
+                </span>
               </div>
             </div>
           </Card>

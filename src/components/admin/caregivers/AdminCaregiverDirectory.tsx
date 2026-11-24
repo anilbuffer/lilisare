@@ -30,15 +30,22 @@ import {
   Stethoscope,
   X,
   ExternalLink,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  User,
 } from "lucide-react";
 import { CaregiverRecord } from "@/types/caregiver";
-import { getCaregiversFromStorage } from "@/lib/caregivers/mockData";
+import { getCaregiversFromStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
 import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 import {
   SEED_ADMIN_CAREGIVERS,
   AdminCaregiverItem,
 } from "@/lib/caregivers/adminCaregiversData";
 import { AdminCaregiverTopTabs } from "./AdminCaregiverTopTabs";
+import { CaregiverContactModal } from "@/components/caregivers/modals/CaregiverContactModal";
+import { CaregiverScheduleShiftModal } from "@/components/caregivers/modals/CaregiverScheduleShiftModal";
+import { toast } from "sonner";
 
 export type { AdminCaregiverItem };
 
@@ -48,28 +55,6 @@ function getInitials(name: string): string {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
   return name.substring(0, 2).toUpperCase();
-}
-
-function getComplianceStyle(rate: number) {
-  if (rate >= 90) {
-    return {
-      pillBg: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      dotBg: "bg-emerald-500",
-      label: `${rate}% Compliant`,
-    };
-  }
-  if (rate >= 70) {
-    return {
-      pillBg: "bg-amber-50 text-amber-700 border-amber-200",
-      dotBg: "bg-amber-500",
-      label: `${rate}% Compliant`,
-    };
-  }
-  return {
-    pillBg: "bg-rose-50 text-rose-700 border-rose-200",
-    dotBg: "bg-rose-500",
-    label: `${rate}% Compliant`,
-  };
 }
 
 function getStatusStyle(status: string) {
@@ -97,12 +82,18 @@ export function AdminCaregiverDirectory() {
   const [items, setItems] = useState<AdminCaregiverItem[]>(SEED_ADMIN_CAREGIVERS);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Sorting
+  const [sortField, setSortField] = useState<"name" | "id">("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
   const [complianceFilter, setComplianceFilter] = useState<string>("ALL");
-  const [activeKpiFilter, setActiveKpiFilter] = useState<"ALL" | "ACTIVE" | "ONBOARDING" | "HIGH_RATING" | "COMPLIANCE_GAP">("ALL");
+  const [activeKpiFilter, setActiveKpiFilter] = useState<
+    "ALL" | "ACTIVE" | "ONBOARDING" | "HIGH_RATING" | "COMPLIANCE_GAP"
+  >("ALL");
 
   // Dropdown states
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
@@ -114,6 +105,11 @@ export function AdminCaregiverDirectory() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
+  // Modals
+  const [selectedCaregiver, setSelectedCaregiver] = useState<CaregiverRecord | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
   // Sync with storage on mount
   useEffect(() => {
     setIsLoaded(true);
@@ -121,7 +117,9 @@ export function AdminCaregiverDirectory() {
       const stored = getCaregiversFromStorage();
       if (Array.isArray(stored) && stored.length > 0) {
         const mappedFromStorage: AdminCaregiverItem[] = stored.map((cg) => {
-          const seedMatch = SEED_ADMIN_CAREGIVERS.find((s) => s.id === cg.id);
+          const seedMatch = SEED_ADMIN_CAREGIVERS.find(
+            (s) => s.id === cg.id || s.numericId === cg.id
+          );
           const role =
             seedMatch?.role ||
             (cg.type === "Family Caregiver"
@@ -150,25 +148,44 @@ export function AdminCaregiverDirectory() {
             mappedStatus = "Inactive";
           }
 
+          const nameParts = cg.name.trim().split(" ");
+          const sortName =
+            seedMatch?.sortName ||
+            (nameParts.length > 1
+              ? `${nameParts[nameParts.length - 1]}, ${nameParts.slice(0, -1).join(" ")}`
+              : cg.name);
+
           return {
             id: cg.id,
+            numericId: seedMatch?.numericId || cg.id.replace(/\D/g, "") || "101",
             name: cg.name,
+            sortName,
             role,
             status: mappedStatus,
+            extStatus: seedMatch?.extStatus || "Active",
+            administrator: seedMatch?.administrator || "Mackenzie Bertelsman",
+            gender: seedMatch?.gender || cg.personalInfo?.gender || "—",
+            classes: seedMatch?.classes || [role],
+            homePhone: seedMatch?.homePhone || cg.personalInfo?.secondaryPhone || "555-555-5555 (h)",
+            mobilePhone: seedMatch?.mobilePhone || cg.personalInfo?.phone || "555-555-5555 (m)",
             rating,
             complianceRate,
             activePatients,
             lastActive: seedMatch?.lastActive || "Today",
             phone: cg.personalInfo?.phone || "(541) 555-0199",
-            email: cg.personalInfo?.email || "caregiver@lilisare.health",
-            branch: cg.branch || "North Metro",
+            email: cg.personalInfo?.email || seedMatch?.email || "caregiver@lilisare.health",
+            location:
+              seedMatch?.location ||
+              `${cg.personalInfo?.address?.street || "5525 Clovercrest Dr."}, ${cg.personalInfo?.address?.city || "Brentwood"}, ${cg.personalInfo?.address?.state || "TN"}`,
+            age: seedMatch?.age || 38,
+            branch: cg.branch || "Brentwood Hub",
             classification: cg.employmentClassification || "W-2",
           };
         });
 
-        // Ensure seed reference caregivers are retained
+        // Ensure all seed reference caregivers from Image 2 are present
         const missingSeeds = SEED_ADMIN_CAREGIVERS.filter(
-          (s) => !mappedFromStorage.some((m) => m.id === s.id)
+          (s) => !mappedFromStorage.some((m) => m.id === s.id || m.numericId === s.numericId)
         );
         setItems([...mappedFromStorage, ...missingSeeds]);
       } else {
@@ -184,20 +201,37 @@ export function AdminCaregiverDirectory() {
         setItems((prev) => {
           const newOnes = freshStored.filter((f) => !prev.some((p) => p.id === f.id));
           if (newOnes.length === 0) return prev;
-          const mappedNew: AdminCaregiverItem[] = newOnes.map((cg) => ({
-            id: cg.id,
-            name: cg.name,
-            role: cg.type || "Caregiver",
-            status: "Active",
-            rating: 4.8,
-            complianceRate: 95,
-            activePatients: cg.assignmentStatus === "Assigned" ? 1 : 0,
-            lastActive: "Today",
-            phone: cg.personalInfo?.phone || "(541) 555-0199",
-            email: cg.personalInfo?.email || "caregiver@lilisare.health",
-            branch: cg.branch || "North Metro",
-            classification: cg.employmentClassification || "W-2",
-          }));
+          const mappedNew: AdminCaregiverItem[] = newOnes.map((cg) => {
+            const nameParts = cg.name.trim().split(" ");
+            const sortName =
+              nameParts.length > 1
+                ? `${nameParts[nameParts.length - 1]}, ${nameParts.slice(0, -1).join(" ")}`
+                : cg.name;
+            return {
+              id: cg.id,
+              numericId: cg.id.replace(/\D/g, "") || "101",
+              name: cg.name,
+              sortName,
+              role: cg.type || "Caregiver",
+              status: "Active",
+              extStatus: "Active",
+              administrator: "Mackenzie Bertelsman",
+              gender: cg.personalInfo?.gender || "—",
+              classes: [cg.type || "Certified Nurse Aide"],
+              homePhone: "555-555-5555 (h)",
+              mobilePhone: cg.personalInfo?.phone || "555-555-5555 (m)",
+              rating: 4.8,
+              complianceRate: 95,
+              activePatients: cg.assignmentStatus === "Assigned" ? 1 : 0,
+              lastActive: "Today",
+              phone: cg.personalInfo?.phone || "(541) 555-0199",
+              email: cg.personalInfo?.email || "caregiver@lilisare.health",
+              location: "5525 Clovercrest Dr. , Brentwood, TN, 37027",
+              age: 35,
+              branch: cg.branch || "Brentwood Hub",
+              classification: cg.employmentClassification || "W-2",
+            };
+          });
           return [...mappedNew, ...prev];
         });
       }
@@ -237,27 +271,29 @@ export function AdminCaregiverDirectory() {
     const sum = items.reduce((acc, curr) => acc + curr.rating, 0);
     return (sum / items.length).toFixed(1);
   }, [items]);
-  const avgCompliance = useMemo(() => {
-    if (items.length === 0) return 92;
-    const sum = items.reduce((acc, curr) => acc + curr.complianceRate, 0);
-    return Math.round(sum / items.length);
-  }, [items]);
-  const expiringOrGapsCount = useMemo(
-    () => items.filter((i) => i.complianceRate < 80).length + 10,
-    [items]
-  );
 
   // Filter & Search Logic
   const filteredCaregivers = useMemo(() => {
-    return items.filter((cg) => {
+    const list = items.filter((cg) => {
       // Search match
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
         const matchesName = cg.name.toLowerCase().includes(query);
+        const matchesSortName = (cg.sortName || "").toLowerCase().includes(query);
         const matchesRole = cg.role.toLowerCase().includes(query);
         const matchesId = cg.id.toLowerCase().includes(query);
+        const matchesNumId = (cg.numericId || "").includes(query);
         const matchesEmail = cg.email.toLowerCase().includes(query);
-        if (!matchesName && !matchesRole && !matchesId && !matchesEmail) {
+        const matchesAdmin = (cg.administrator || "").toLowerCase().includes(query);
+        if (
+          !matchesName &&
+          !matchesSortName &&
+          !matchesRole &&
+          !matchesId &&
+          !matchesNumId &&
+          !matchesEmail &&
+          !matchesAdmin
+        ) {
           return false;
         }
       }
@@ -275,27 +311,55 @@ export function AdminCaregiverDirectory() {
 
       // Role filter
       if (roleFilter !== "ALL") {
-        if (roleFilter === "RN" && !cg.role.includes("RN") && !cg.role.includes("Registered Nurse")) return false;
-        if (roleFilter === "CNA" && !cg.role.includes("CNA") && !cg.role.includes("Certified Nursing")) return false;
-        if (roleFilter === "HHA" && !cg.role.includes("HHA") && !cg.role.includes("Home Health Aide")) return false;
-        if (roleFilter === "PT" && !cg.role.includes("PT") && !cg.role.includes("Physical Therapist")) return false;
+        if (roleFilter === "RN" && !cg.role.includes("RN") && !cg.role.includes("Registered Nurse"))
+          return false;
+        if (roleFilter === "CNA" && !cg.role.includes("CNA") && !cg.role.includes("Certified Nurs"))
+          return false;
+        if (roleFilter === "HHA" && !cg.role.includes("HHA") && !cg.role.includes("Home Health"))
+          return false;
+        if (roleFilter === "HM" && !cg.role.includes("Homemaker")) return false;
       }
 
       // Compliance filter
       if (complianceFilter !== "ALL") {
         if (complianceFilter === "100" && cg.complianceRate !== 100) return false;
-        if (complianceFilter === "70_99" && (cg.complianceRate < 70 || cg.complianceRate >= 100)) return false;
+        if (complianceFilter === "70_99" && (cg.complianceRate < 70 || cg.complianceRate >= 100))
+          return false;
         if (complianceFilter === "BELOW_70" && cg.complianceRate >= 70) return false;
       }
 
       return true;
     });
-  }, [items, searchQuery, activeKpiFilter, statusFilter, roleFilter, complianceFilter]);
+
+    // Sort list
+    return list.sort((a, b) => {
+      if (sortField === "name") {
+        const nameA = a.sortName || a.name;
+        const nameB = b.sortName || b.name;
+        return sortDirection === "asc"
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA);
+      } else {
+        const idA = parseInt(a.numericId || a.id.replace(/\D/g, "") || "0", 10);
+        const idB = parseInt(b.numericId || b.id.replace(/\D/g, "") || "0", 10);
+        return sortDirection === "asc" ? idA - idB : idB - idA;
+      }
+    });
+  }, [
+    items,
+    searchQuery,
+    activeKpiFilter,
+    statusFilter,
+    roleFilter,
+    complianceFilter,
+    sortField,
+    sortDirection,
+  ]);
 
   // Reset to page 1 whenever filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter, roleFilter, complianceFilter, activeKpiFilter]);
+  }, [searchQuery, statusFilter, roleFilter, complianceFilter, activeKpiFilter, sortDirection]);
 
   // Pagination calculation
   const totalPages = Math.ceil(filteredCaregivers.length / pageSize) || 1;
@@ -325,6 +389,36 @@ export function AdminCaregiverDirectory() {
     setActiveKpiFilter("ALL");
   };
 
+  // Helper to open modals with a synthetic CaregiverRecord
+  const getRecordForModal = (cg: AdminCaregiverItem): CaregiverRecord => {
+    const rawAll = getCaregiversFromStorage();
+    const existing = rawAll.find((c) => c.id === cg.id);
+    if (existing) return existing;
+
+    const base = INITIAL_CAREGIVERS[0];
+    return {
+      ...base,
+      id: cg.id,
+      name: cg.name,
+      status: cg.status,
+      personalInfo: {
+        ...base.personalInfo,
+        phone: cg.phone || "(541) 555-0199",
+        email: cg.email || "caregiver@lilisare.health",
+      },
+    };
+  };
+
+  const handleOpenContact = (cg: AdminCaregiverItem) => {
+    setSelectedCaregiver(getRecordForModal(cg));
+    setIsContactModalOpen(true);
+  };
+
+  const handleOpenSchedule = (cg: AdminCaregiverItem) => {
+    setSelectedCaregiver(getRecordForModal(cg));
+    setIsScheduleModalOpen(true);
+  };
+
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Header & Actions Bar */}
@@ -333,6 +427,9 @@ export function AdminCaregiverDirectory() {
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             Caregivers Directory
           </h1>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Enterprise roster management, real-time EVV compliance, and clinical staffing
+          </p>
         </div>
 
         {/* Primary Action Button */}
@@ -350,31 +447,29 @@ export function AdminCaregiverDirectory() {
       {/* 02. Navigation Tabs */}
       <AdminCaregiverTopTabs activeTab="roster" />
 
-      {/* 03. 5 Executive KPI Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+      {/* 03. 4 Executive KPI Metric Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Card 1: Active Caregivers */}
         <button
           type="button"
-          onClick={() =>
-            setActiveKpiFilter((prev) => (prev === "ACTIVE" ? "ALL" : "ACTIVE"))
-          }
+          onClick={() => setActiveKpiFilter((prev) => (prev === "ACTIVE" ? "ALL" : "ACTIVE"))}
           className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ACTIVE"
-              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-              : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Active Caregivers</p>
               <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-                {activeCount || 84}
+                {activeCount || 18}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-[11px] sm:text-xs font-semibold text-emerald-600 mt-2 flex items-center gap-1">
+          <p className="text-[11px] font-semibold text-emerald-600 mt-2 flex items-center gap-1">
             + 2 this week
           </p>
         </button>
@@ -386,23 +481,23 @@ export function AdminCaregiverDirectory() {
             setActiveKpiFilter((prev) => (prev === "ONBOARDING" ? "ALL" : "ONBOARDING"))
           }
           className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ONBOARDING"
-              ? "border-purple-600 ring-2 ring-purple-600/20 shadow-sm"
-              : "border-slate-200 shadow-2xs hover:border-purple-300 hover:shadow-md"
+            ? "border-purple-600 ring-2 ring-purple-600/20 shadow-md"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Onboarding</p>
               <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-                {onboardingCount || 5}
+                {onboardingCount || 1}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
               <UserPlus className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-2">
-            3 pending background check
+          <p className="text-[11px] font-medium text-slate-500 mt-2">
+            1 pending background check
           </p>
         </button>
 
@@ -413,128 +508,79 @@ export function AdminCaregiverDirectory() {
             setActiveKpiFilter((prev) => (prev === "HIGH_RATING" ? "ALL" : "HIGH_RATING"))
           }
           className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "HIGH_RATING"
-              ? "border-amber-500 ring-2 ring-amber-500/20 shadow-sm"
-              : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
+            ? "border-amber-500 ring-2 ring-amber-500/20 shadow-md"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Avg. Rating</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-                {avgRating}
-              </p>
+              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{avgRating}</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200/80 text-amber-500 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center shrink-0">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             </div>
           </div>
-          <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-2">
-            Based on 1.2k reviews
-          </p>
+          <p className="text-[11px] font-medium text-slate-500 mt-2">Based on client EVV reviews</p>
         </button>
 
-        {/* Card 4: Compliance Rate */}
+        {/* Card 4: EVV Compliance */}
         <button
           type="button"
           onClick={() =>
-            setActiveKpiFilter((prev) =>
-              prev === "COMPLIANCE_GAP" ? "ALL" : "COMPLIANCE_GAP"
-            )
+            setActiveKpiFilter((prev) => (prev === "COMPLIANCE_GAP" ? "ALL" : "COMPLIANCE_GAP"))
           }
           className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "COMPLIANCE_GAP"
-              ? "border-rose-500 ring-2 ring-rose-500/20 shadow-sm"
-              : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            ? "border-rose-500 ring-2 ring-rose-500/20 shadow-md"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Compliance Rate</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
-                {avgCompliance}%
-              </p>
+              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">98%</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-[11px] sm:text-xs font-semibold text-amber-600 mt-2">
-            14 expiring credentials
-          </p>
+          <p className="text-[11px] font-medium text-emerald-600 mt-2">Exceeds state standards</p>
         </button>
-
-        {/* Card 5: Open Availability Gaps */}
-        <div className="text-left bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs p-4 sm:p-4.5 transition-all duration-200 overflow-hidden col-span-2 sm:col-span-1">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="text-xs font-semibold text-slate-500">Open Availability Gaps</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">12</p>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-rose-50 border border-rose-200/80 text-rose-500 flex items-center justify-center shrink-0">
-              <Calendar className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-2">
-            Week of July 15-21
-          </p>
-        </div>
       </div>
 
-      {/* 04. Search, Dropdown Filters & View Switcher (Contained in One Card matching Clients Directory) */}
-      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-3.5 sm:p-4 shadow-2xs">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          {/* Search Input */}
+      {/* 04. Search & Filter Bar */}
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-4 shadow-2xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Search Box */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search by caregiver name, role, ID, or status..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by ID, name, class, administrator, or email..."
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setCurrentPage(1);
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
-              >
-                Clear
-              </button>
-            )}
           </div>
 
-          {/* Controls: Status Dropdown Filter, Role Dropdown Filter, View Toggle */}
-          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          {/* Filter Dropdowns & View Toggle */}
+          <div className="flex items-center gap-2 flex-wrap">
             {/* Status Dropdown Filter */}
             <div className="relative" ref={statusDropdownRef}>
               <button
                 type="button"
                 onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${statusFilter !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${statusFilter !== "ALL"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
               >
-                <Filter className="w-3.5 h-3.5 text-slate-500" />
-                <span>
-                  {statusFilter === "ALL"
-                    ? "Status: All"
-                    : `Status: ${statusFilter}`}
-                </span>
+                <span>{statusFilter === "ALL" ? "Status: All" : statusFilter}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               {isStatusDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Filter by Status
-                  </div>
+                <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
                   {[
                     { label: "All Statuses", value: "ALL" },
                     { label: "Active", value: "Active" },
@@ -551,8 +597,8 @@ export function AdminCaregiverDirectory() {
                         setIsStatusDropdownOpen(false);
                       }}
                       className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${statusFilter === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
                         }`}
                     >
                       <span>{option.label}</span>
@@ -570,26 +616,36 @@ export function AdminCaregiverDirectory() {
               <button
                 type="button"
                 onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${roleFilter !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${roleFilter !== "ALL"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
               >
-                <span>{roleFilter === "ALL" ? "Role: All" : roleFilter}</span>
+                <span>
+                  {roleFilter === "ALL"
+                    ? "Role: All"
+                    : roleFilter === "RN"
+                      ? "Registered Nurse"
+                      : roleFilter === "CNA"
+                        ? "Certified Nurse Aide"
+                        : roleFilter === "HHA"
+                          ? "Home Health Aide"
+                          : "Homemaker"}
+                </span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               {isRoleDropdownOpen && (
                 <div className="absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Clinical Role
+                    Clinical Class
                   </div>
                   {[
                     { label: "All Roles", value: "ALL" },
                     { label: "Registered Nurse (RN)", value: "RN" },
-                    { label: "Certified Nursing (CNA)", value: "CNA" },
+                    { label: "Certified Nurse Aide (CNA)", value: "CNA" },
                     { label: "Home Health Aide (HHA)", value: "HHA" },
-                    { label: "Physical Therapist (PT)", value: "PT" },
+                    { label: "Homemaker", value: "HM" },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -600,8 +656,8 @@ export function AdminCaregiverDirectory() {
                         setIsRoleDropdownOpen(false);
                       }}
                       className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${roleFilter === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
                         }`}
                     >
                       <span>{option.label}</span>
@@ -620,7 +676,7 @@ export function AdminCaregiverDirectory() {
                 type="button"
                 onClick={handleResetFilters}
                 title="Reset all filters"
-                className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 cursor-pointer"
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -632,9 +688,9 @@ export function AdminCaregiverDirectory() {
                 type="button"
                 onClick={() => setViewMode("list")}
                 title="List View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "list"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
+                className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "list"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
               >
                 <ListIcon className="w-4 h-4" />
@@ -644,9 +700,9 @@ export function AdminCaregiverDirectory() {
                 type="button"
                 onClick={() => setViewMode("grid")}
                 title="Grid View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
+                className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -657,81 +713,7 @@ export function AdminCaregiverDirectory() {
         </div>
       </div>
 
-      {/* Active Filter Pill Bar */}
-      {(activeFiltersCount > 0 || searchQuery) && (
-        <div className="flex items-center gap-2 flex-wrap text-xs">
-          <span className="text-slate-500 font-medium">Active filters:</span>
-          {searchQuery && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-              Query: &quot;{searchQuery}&quot;
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="hover:text-slate-900 cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-          {statusFilter !== "ALL" && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20">
-              Status: {statusFilter}
-              <button
-                type="button"
-                onClick={() => setStatusFilter("ALL")}
-                className="hover:text-[#3D6B22] cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-          {roleFilter !== "ALL" && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20">
-              Role: {roleFilter}
-              <button
-                type="button"
-                onClick={() => setRoleFilter("ALL")}
-                className="hover:text-[#3D6B22] cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-          {complianceFilter !== "ALL" && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20">
-              Compliance: {complianceFilter}
-              <button
-                type="button"
-                onClick={() => setComplianceFilter("ALL")}
-                className="hover:text-[#3D6B22] cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-          {activeKpiFilter !== "ALL" && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20">
-              KPI: {activeKpiFilter}
-              <button
-                type="button"
-                onClick={() => setActiveKpiFilter("ALL")}
-                className="hover:text-[#3D6B22] cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={handleResetFilters}
-            className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline ml-1 cursor-pointer"
-          >
-            Clear all
-          </button>
-        </div>
-      )}
-
-      {/* 05. Main Caregiver Views: List vs Grid */}
+      {/* 05. Main Caregivers Table - 12 Columns matching Reference Image 2 */}
       {paginatedCaregivers.length === 0 ? (
         <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs p-12 text-center">
           <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
@@ -751,74 +733,116 @@ export function AdminCaregiverDirectory() {
           </button>
         </div>
       ) : viewMode === "list" ? (
-        /* ================= LIST VIEW (TABLE) ================= */
+        /* ================= LIST VIEW (MATCHING LILISARE BRAND QUALITY /ADMIN/CLIENTS/) ================= */
         <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4 sm:px-6">Caregiver</th>
-                  <th className="py-3.5 px-4">Role</th>
-                  <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 text-center">Patients</th>
-                  <th className="py-3.5 px-4 text-center">Last Active</th>
-                  <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Caregiver
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Role / Class
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">
+                    Compliance
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">
+                    Phone
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                    Actions
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
+              <tbody className="divide-y divide-slate-100">
                 {paginatedCaregivers.map((cg) => {
+                  const initials = getInitials(cg.name);
+                  // Clean single phone: mobile or primary without the "(h)" or "(m)" tags
+                  const singlePhone =
+                    cg.mobilePhone?.replace(/\s*\([a-z]\)/gi, "").trim() ||
+                    cg.phone?.replace(/\s*\([a-z]\)/gi, "").trim() ||
+                    cg.homePhone?.replace(/\s*\([a-z]\)/gi, "").trim() ||
+                    "—";
+
+                  const roleDisplay =
+                    cg.classes && cg.classes.length > 0
+                      ? cg.classes.join(" • ")
+                      : cg.role || "Caregiver";
+
                   return (
                     <tr
                       key={cg.id}
-                      className="hover:bg-slate-50/70 transition-colors group"
+                      className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
+                      onClick={() => router.push(`/admin/caregivers/${cg.id}`)}
                     >
-                      {/* Caregiver Name */}
+                      {/* Caregiver Name & Avatar */}
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs flex items-center justify-center shrink-0">
-                            {getInitials(cg.name)}
+                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0 shadow-2xs">
+                            {initials}
                           </div>
                           <div>
-                            <Link
-                              href={`/admin/caregivers/${cg.id}`}
-                              className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors hover:underline"
-                            >
+                            <div className="font-bold text-sm text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                               {cg.name}
-                            </Link>
+                            </div>
                           </div>
                         </div>
                       </td>
 
-                      {/* Role */}
-                      <td className="py-4 px-4 font-medium text-slate-700">
-                        {cg.role}
+                      {/* Role / Class */}
+                      <td className="py-4 px-4 sm:px-6">
+                        <p className="text-xs sm:text-sm text-slate-700 font-medium max-w-xs md:max-w-md truncate">
+                          {roleDisplay}
+                        </p>
                       </td>
 
                       {/* Status */}
-                      <td className="py-4 px-4 text-center">
+                      <td className="py-4 px-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getStatusStyle(
-                            cg.status
-                          )}`}
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cg.status === "Active"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : cg.status === "Onboarding"
+                                ? "bg-purple-50 text-purple-700 border-purple-200"
+                                : cg.status === "On Hold"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                                  : "bg-slate-100 text-slate-600 border-slate-200"
+                            }`}
                         >
                           {cg.status}
                         </span>
                       </td>
 
-                      {/* Patients */}
-                      <td className="py-4 px-4 text-center font-medium text-slate-700">
-                        {cg.activePatients} Active
+                      {/* Compliance */}
+                      <td className="py-4 px-4 sm:px-6 hidden sm:table-cell">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${(cg.complianceRate ?? 100) >= 90
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : (cg.complianceRate ?? 100) >= 75
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-rose-50 text-rose-700 border-rose-200"
+                            }`}
+                        >
+                          {(cg.complianceRate ?? 100)}% Compliant
+                        </span>
                       </td>
 
-                      {/* Last Active */}
-                      <td className="py-4 px-4 text-center text-slate-600 font-medium">
-                        {cg.lastActive}
+                      {/* Phone - Single Clean Phone (Hidden on mobile for responsiveness) */}
+                      <td className="py-4 px-4 sm:px-6 hidden md:table-cell">
+                        <span className="text-xs sm:text-sm text-slate-600 font-mono">
+                          {singlePhone}
+                        </span>
                       </td>
 
-                      {/* Actions (Outline Style) */}
+                      {/* Actions */}
                       <td className="py-4 px-4 sm:px-6 text-right">
                         <Link
                           href={`/admin/caregivers/${cg.id}`}
+                          onClick={(e) => e.stopPropagation()}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                         >
                           <span>View Profile</span>
@@ -836,28 +860,31 @@ export function AdminCaregiverDirectory() {
         /* ================= GRID VIEW (CARDS) ================= */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5">
           {paginatedCaregivers.map((cg) => {
+            const displayId = cg.numericId || cg.id.replace(/\D/g, "") || "101";
             return (
               <div
                 key={cg.id}
                 className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group"
               >
                 <div>
-                  {/* Card Header: Avatar, Name, Role & Status */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs sm:text-sm flex items-center justify-center shrink-0">
                         {getInitials(cg.name)}
                       </div>
                       <div>
-                        <Link
-                          href={`/admin/caregivers/${cg.id}`}
-                          className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-sm hover:underline block"
-                        >
-                          {cg.name}
-                        </Link>
-                        <p className="text-xs text-slate-500 font-medium">
-                          {cg.role}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <Link
+                            href={`/admin/caregivers/${cg.id}`}
+                            className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors text-sm hover:underline"
+                          >
+                            {cg.name}
+                          </Link>
+                          <span className="text-[10px] font-semibold text-slate-400">
+                            #{displayId}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium">{cg.role}</p>
                       </div>
                     </div>
                     <span
@@ -869,45 +896,65 @@ export function AdminCaregiverDirectory() {
                     </span>
                   </div>
 
-                  {/* Micro Metrics Strip */}
                   <div className="grid grid-cols-2 gap-2 mt-4 pt-3.5 border-t border-slate-100 text-center">
                     <div className="bg-slate-50/70 rounded-xl p-2 border border-slate-100">
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Patients</p>
-                      <p className="text-xs font-bold text-slate-800 mt-0.5">
-                        {cg.activePatients} Active
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Supervisor</p>
+                      <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">
+                        {cg.administrator || "Mackenzie B."}
                       </p>
                     </div>
 
                     <div className="bg-slate-50/70 rounded-xl p-2 border border-slate-100">
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Branch</p>
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Location</p>
                       <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">
-                        {cg.branch || "North Metro"}
+                        Brentwood, TN
                       </p>
                     </div>
                   </div>
 
-                  {/* Metadata / Contact */}
-                  <div className="mt-4 space-y-1.5 text-xs text-slate-600">
+                  <div className="mt-4 space-y-1 text-xs text-slate-600">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400 font-medium">Last Active:</span>
-                      <span className="font-semibold text-slate-700">{cg.lastActive}</span>
+                      <span className="text-slate-400 font-medium">Phone:</span>
+                      <span className="font-semibold text-slate-700 font-mono">
+                        {cg.mobilePhone || cg.phone}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400 font-medium">Email:</span>
-                      <span className="font-semibold text-slate-700 truncate max-w-[180px]">{cg.email}</span>
+                      <span className="font-semibold text-slate-700 truncate max-w-[180px]">
+                        {cg.email}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Footer Action (Outline Style Button) */}
-                <div className="mt-5 pt-3 border-t border-slate-100">
+                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                   <Link
                     href={`/admin/caregivers/${cg.id}`}
-                    className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                   >
                     <span>View Profile</span>
                     <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                   </Link>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenSchedule(cg)}
+                      className="p-2 rounded-xl text-slate-400 hover:text-[#3D6B22] hover:bg-emerald-50 border border-slate-200 transition-colors cursor-pointer"
+                      title="Schedule shift"
+                    >
+                      <Calendar className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenContact(cg)}
+                      className="p-2 rounded-xl text-slate-400 hover:text-[#3D6B22] hover:bg-emerald-50 border border-slate-200 transition-colors cursor-pointer"
+                      title="Contact caregiver"
+                    >
+                      <Mail className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -950,6 +997,28 @@ export function AdminCaregiverDirectory() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Action Modals */}
+      {selectedCaregiver && (
+        <>
+          <CaregiverContactModal
+            isOpen={isContactModalOpen}
+            onClose={() => setIsContactModalOpen(false)}
+            caregiver={selectedCaregiver}
+            onLogCommunication={(_id, type, note) => {
+              toast.success(`Logged ${type.toUpperCase()} for ${selectedCaregiver.name}`);
+            }}
+          />
+          <CaregiverScheduleShiftModal
+            isOpen={isScheduleModalOpen}
+            onClose={() => setIsScheduleModalOpen(false)}
+            caregiver={selectedCaregiver}
+            onScheduleShift={(_id, shift) => {
+              toast.success(`Scheduled ${shift.type || "shift"} with ${shift.clientName}`);
+            }}
+          />
+        </>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import { INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
+import { SEED_ADMIN_CAREGIVERS } from "@/lib/caregivers/adminCaregiversData";
 import { CaregiverEditView } from "@/components/caregivers/CaregiverEditView";
 
 interface PageProps {
@@ -24,10 +25,13 @@ export default async function AdminCaregiverEditPage({ params }: PageProps) {
 }
 
 export function generateStaticParams() {
-  const initialIds = INITIAL_CAREGIVERS.map((c) => c.id);
+  const caregiverIds = [
+    ...INITIAL_CAREGIVERS.map((c) => c.id),
+    ...SEED_ADMIN_CAREGIVERS.map((c) => c.id),
+    ...SEED_ADMIN_CAREGIVERS.map((c) => c.numericId || ""),
+  ].filter(Boolean);
+
   const legacyIds = [
-    "[id]",
-    "default",
     "1",
     "2",
     "3",
@@ -40,6 +44,13 @@ export function generateStaticParams() {
     "cg-6",
     "cg-7",
     "cg-8",
+    "cg-001",
+    "pt-001",
+    "c-1",
+    "c-2",
+    "c-3",
+    "cg-dr-1",
+    "cg-po-2",
     "cg-102",
     "cg-103",
     "cg-104",
@@ -52,10 +63,38 @@ export function generateStaticParams() {
     "cg-122",
     "cg-130",
     "cg-135",
+    "232",
+    "36",
+    "19",
+    "462",
+    "76",
+    "67",
+    "32",
+    "123",
+    "100",
+    "197",
+    "255",
+    "14",
+    "60",
+    "52",
+    "249",
+    "50",
+    "99",
+    "127",
   ];
-  const map = new Map<string, string>();
-  [...initialIds, ...legacyIds].forEach((id) => {
-    map.set(id.toLowerCase(), id);
-  });
-  return Array.from(map.values()).map((id) => ({ id }));
+
+  const allIds = Array.from(
+    new Set([
+      "[id]",
+      "default",
+      ...caregiverIds,
+      ...caregiverIds.map((id) => id.toLowerCase()),
+      ...caregiverIds.map((id) => id.toUpperCase()),
+      ...legacyIds,
+      ...legacyIds.map((id) => id.toLowerCase()),
+      ...legacyIds.map((id) => id.toUpperCase()),
+    ])
+  );
+
+  return allIds.map((id) => ({ id }));
 }

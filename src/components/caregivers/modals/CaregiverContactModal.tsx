@@ -39,7 +39,7 @@ export function CaregiverContactModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
-      <div className="w-full max-w-lg relative bg-white rounded-2xl sm:rounded-[20px] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-2xl relative bg-white rounded-2xl sm:rounded-[20px] border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
@@ -93,33 +93,30 @@ export function CaregiverContactModal({
               <button
                 type="button"
                 onClick={() => setCommType("call")}
-                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                  commType === "call"
+                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${commType === "call"
                     ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                     : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                  }`}
               >
                 Phone Call
               </button>
               <button
                 type="button"
                 onClick={() => setCommType("email")}
-                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                  commType === "email"
+                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${commType === "email"
                     ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                     : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                  }`}
               >
                 Email
               </button>
               <button
                 type="button"
                 onClick={() => setCommType("note")}
-                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                  commType === "note"
+                className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${commType === "note"
                     ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                     : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
+                  }`}
               >
                 Internal Note
               </button>

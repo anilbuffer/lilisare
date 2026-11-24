@@ -101,7 +101,7 @@ export default function AuditLogsPage() {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={() => alert("Audit log export generated (CSV, SHA-256 signed).")}
           className="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm"
         >
@@ -165,7 +165,7 @@ export default function AuditLogsPage() {
             <tbody className="divide-y divide-slate-100">
               {filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-4 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                  <td className="py-3 px-4  text-[11px] text-slate-600 whitespace-nowrap">
                     {log.timestamp}
                   </td>
                   <td className="py-3 px-4">
@@ -183,7 +183,7 @@ export default function AuditLogsPage() {
                   <td className="py-3 px-4 text-slate-600 max-w-xs truncate" title={log.details}>
                     {log.details}
                   </td>
-                  <td className="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                  <td className="py-3 px-4  text-[11px] text-slate-500 whitespace-nowrap">
                     {log.ipAddress}
                   </td>
                   <td className="py-3 px-4">

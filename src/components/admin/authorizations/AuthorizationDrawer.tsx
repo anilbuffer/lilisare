@@ -122,7 +122,7 @@ export function AuthorizationDrawer({
                       {record.clientName}
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
-                      <span>Auth Ref: <strong className="text-slate-700 font-mono">{record.id}</strong></span>
+                      <span>Auth Ref: <strong className="text-slate-700 ">{record.id}</strong></span>
                       <span>&bull;</span>
                       <span>Household: <strong className="text-slate-700">{record.householdName}</strong></span>
                     </p>
@@ -273,14 +273,14 @@ export function AuthorizationDrawer({
 
                     <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs">
                       <span className="text-[10px] text-slate-400 uppercase font-semibold block">Insurance Policy ID</span>
-                      <span className="font-mono font-bold text-slate-800 text-xs mt-0.5 block">{record.insurancePolicyId}</span>
+                      <span className=" font-bold text-slate-800 text-xs mt-0.5 block">{record.insurancePolicyId}</span>
                       <span className="text-[11px] text-slate-500">Verified Member Plan</span>
                     </div>
 
                     <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs">
                       <span className="text-[10px] text-slate-400 uppercase font-semibold block">Service Procedure</span>
                       <span className="font-bold text-slate-900 text-xs mt-0.5 block">{record.serviceName}</span>
-                      <span className="font-mono text-[#3D6B22] font-semibold text-[11px]">
+                      <span className=" text-[#3D6B22] font-semibold text-[11px]">
                         HCPCS: {record.serviceCode}{record.modifier ? `-${record.modifier}` : ""}
                       </span>
                     </div>

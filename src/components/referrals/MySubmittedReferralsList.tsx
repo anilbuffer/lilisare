@@ -92,7 +92,7 @@ export function MySubmittedReferralsList({ email }: MySubmittedReferralsListProp
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-slate-900">{referral.patientName}</span>
-                        <span className="text-xs text-slate-500 font-mono mt-0.5">{referral.id}</span>
+                        <span className="text-xs text-slate-500  mt-0.5">{referral.id}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">

@@ -56,7 +56,7 @@ export default function EditVisitPage() {
             <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
               Edit Visit
             </h1>
-            <span className="text-xs font-mono text-slate-400 bg-slate-100 px-2 py-1 rounded-lg">
+            <span className="text-xs  text-slate-400 bg-slate-100 px-2 py-1 rounded-lg">
               {visit.id}
             </span>
           </div>

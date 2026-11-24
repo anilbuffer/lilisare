@@ -132,7 +132,7 @@ export function CaregiverPointsTab({ profile }: CaregiverPointsTabProps) {
                 </div>
               </div>
 
-              <span className="font-mono font-bold text-sm text-[#1E5622] px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 shrink-0">
+              <span className=" font-bold text-sm text-[#1E5622] px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 shrink-0">
                 +{item.points} pts
               </span>
             </div>

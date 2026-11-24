@@ -141,7 +141,7 @@ export default function CaregiverProfilePage() {
                       <Avatar src={c.image} name={c.name} size="md" className="rounded-xl" />
                       <div>
                         <h4 className="font-bold text-sm text-gray-900">{c.name}</h4>
-                        <span className="text-xs text-gray-500 font-mono">{c.mrn}</span>
+                        <span className="text-xs text-gray-500 ">{c.mrn}</span>
                       </div>
                     </div>
                     <span className="text-xs bg-white text-gray-700 font-medium px-2.5 py-1 rounded-full border border-slate-200">

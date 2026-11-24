@@ -75,7 +75,7 @@ export default function CourseViewerClient() {
       {/* Main Viewer Area */}
       <main className="flex-1 overflow-hidden flex items-center justify-center p-6">
         <div className="w-full max-w-5xl h-[80vh] bg-[#f0ede5] rounded-xl shadow-sm border border-gray-200 flex flex-col overflow-hidden relative">
-          
+
           {/* Header of the Slide */}
           <div className="px-12 pt-12 pb-8 shrink-0">
             <div className="text-xs font-bold text-brand-teal uppercase tracking-widest mb-3">
@@ -85,14 +85,14 @@ export default function CourseViewerClient() {
               {course.title}
             </h1>
             <p className="text-gray-600 text-lg max-w-3xl leading-relaxed">
-              {currentPage === TOTAL_PAGES 
-                ? "Knowledge Check & Certification" 
+              {currentPage === TOTAL_PAGES
+                ? "Knowledge Check & Certification"
                 : course.description}
             </p>
           </div>
 
           <div className="flex-1 flex px-12 pb-12 overflow-hidden gap-12">
-            
+
             {/* Timeline Indicator (Left) */}
             <div className="w-8 flex flex-col items-center py-4 relative shrink-0">
               <div className="absolute top-0 bottom-0 w-px bg-gray-300 left-1/2 -translate-x-1/2" />
@@ -101,7 +101,7 @@ export default function CourseViewerClient() {
                 const isActive = currentPage === pageNum;
                 const isPast = currentPage > pageNum;
                 return (
-                  <div 
+                  <div
                     key={i}
                     className="relative z-10 flex-1 flex flex-col items-center"
                     style={{ justifyContent: i === 0 ? "flex-start" : i === TOTAL_PAGES - 1 ? "flex-end" : "center" }}
@@ -154,13 +154,13 @@ export default function CourseViewerClient() {
                           <p className="text-sm text-gray-800">Maintain accurate and timely documentation.</p>
                         </div>
                       </div>
-                      
+
                       <div className="mt-12 bg-slate-900 rounded-xl p-6 text-white flex items-center justify-between shadow-lg">
                         <div>
                           <h4 className="font-bold text-lg mb-1">Mandatory Policy 2026</h4>
                           <p className="text-sm text-slate-300">Consistent application of these rules is required for all staff.</p>
                         </div>
-                        <div className="text-sm font-mono text-brand-teal bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+                        <div className="text-sm  text-brand-teal bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
                           REF: POL-2026-HQ
                         </div>
                       </div>
@@ -170,14 +170,14 @@ export default function CourseViewerClient() {
                   {currentPage === 2 && (
                     <div className="space-y-6 h-full flex flex-col justify-center pb-12">
                       <div className="h-56 bg-slate-900 rounded-xl relative flex items-center justify-center border border-gray-800 shadow-xl overflow-hidden">
-                        <img 
-                          src={course.thumbnail} 
-                          alt="Video Cover" 
+                        <img
+                          src={course.thumbnail}
+                          alt="Video Cover"
                           className="w-full h-full object-cover opacity-40"
                         />
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-white space-y-3">
                           <div className="w-16 h-16 rounded-full bg-brand-teal/90 flex items-center justify-center pl-1 shadow-lg hover:bg-brand-teal cursor-pointer transition-all">
-                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                           </div>
                           <span className="text-xs font-bold bg-slate-900/80 px-4 py-1.5 rounded-full border border-white/20">
                             Watch Required Video ({course.durationMinutes} mins)
@@ -205,11 +205,10 @@ export default function CourseViewerClient() {
                             type="button"
                             disabled={isCompleted}
                             onClick={() => setQuizAnswer(idx)}
-                            className={`w-full text-left p-4 rounded-xl border-2 font-medium transition-all ${
-                              quizAnswer === idx || (isCompleted && idx === 0)
+                            className={`w-full text-left p-4 rounded-xl border-2 font-medium transition-all ${quizAnswer === idx || (isCompleted && idx === 0)
                                 ? "bg-brand-teal/10 border-brand-teal text-brand-teal font-bold"
                                 : "bg-white/50 border-gray-200 text-gray-700 hover:bg-white"
-                            } ${isCompleted ? "opacity-70 cursor-default" : "cursor-pointer"}`}
+                              } ${isCompleted ? "opacity-70 cursor-default" : "cursor-pointer"}`}
                           >
                             {opt}
                           </button>
@@ -217,12 +216,12 @@ export default function CourseViewerClient() {
                       </div>
 
                       {isCompleted && (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           className="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl text-sm font-bold text-emerald-900 flex items-center gap-2 mt-6"
                         >
-                          <CheckCircle2 className="w-5 h-5 text-emerald-600" /> 
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                           Course Completed! Redirecting back to training center...
                         </motion.div>
                       )}
@@ -232,7 +231,7 @@ export default function CourseViewerClient() {
               </AnimatePresence>
             </div>
           </div>
-          
+
           {/* Internal Footer branding (Optional from design) */}
           <div className="absolute bottom-6 left-12 right-12 flex justify-between items-center text-[9px] font-bold tracking-widest text-gray-400 uppercase">
             <span>LiliSare, Inc. • Training Standards</span>

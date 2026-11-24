@@ -318,11 +318,10 @@ export function ClientProfileTab({
               type="button"
               onClick={() => handleStartEdit("all")}
               disabled={!canEdit}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer ${
-                canEdit
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer ${canEdit
                   ? "text-white bg-[#3D6B22] hover:bg-[#345C1D] shadow-[#3D6B22]/20 active:scale-95"
                   : "text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed"
-              }`}
+                }`}
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>Edit Profile</span>
@@ -465,7 +464,7 @@ export function ClientProfileTab({
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-[13px] font-medium text-slate-500">Social Security Number</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-mono font-bold text-slate-900 tracking-wider">
+                    <span className="text-sm  font-bold text-slate-900 tracking-wider">
                       {showSSN ? formData.ssn : `***-**-${formData.ssn.slice(-4)}`}
                     </span>
                     <button
@@ -617,7 +616,7 @@ export function ClientProfileTab({
                       type="text"
                       value={formData.ssn}
                       onChange={(e) => setFormData({ ...formData, ssn: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 focus:bg-white"
+                      className="w-full px-3.5 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm  text-slate-800 focus:bg-white"
                     />
                   </div>
                 </div>
@@ -716,7 +715,7 @@ export function ClientProfileTab({
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-[13px] font-medium text-slate-500">Medicaid Number</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-mono font-bold text-slate-900">{formData.medicaidNumber}</span>
+                    <span className="text-sm  font-bold text-slate-900">{formData.medicaidNumber}</span>
                     <Shield className="w-3.5 h-3.5 text-[#3D6B22]" />
                   </div>
                 </div>
@@ -735,7 +734,7 @@ export function ClientProfileTab({
 
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-[13px] font-medium text-slate-500">Invoicing ID</span>
-                  <span className="text-sm font-mono font-bold text-slate-900">{formData.invoicingId}</span>
+                  <span className="text-sm  font-bold text-slate-900">{formData.invoicingId}</span>
                 </div>
               </div>
             ) : (
@@ -878,7 +877,7 @@ export function ClientProfileTab({
                       type="text"
                       value={formData.medicaidNumber}
                       onChange={(e) => setFormData({ ...formData, medicaidNumber: e.target.value })}
-                      className="w-full px-3 py-1.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white font-mono"
+                      className="w-full px-3 py-1.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white "
                     />
                   </div>
                 </div>
@@ -904,7 +903,7 @@ export function ClientProfileTab({
                       type="text"
                       value={formData.invoicingId}
                       onChange={(e) => setFormData({ ...formData, invoicingId: e.target.value })}
-                      className="w-full px-3 py-1.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white font-mono"
+                      className="w-full px-3 py-1.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white "
                     />
                   </div>
                 </div>
@@ -972,7 +971,7 @@ export function ClientProfileTab({
 
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-[13px] font-medium text-slate-500">Postal Zip Code</span>
-                  <span className="text-sm font-mono font-bold text-slate-900">{formData.resZip}</span>
+                  <span className="text-sm  font-bold text-slate-900">{formData.resZip}</span>
                 </div>
 
                 <div className="pt-2 flex justify-end">
@@ -1063,7 +1062,7 @@ export function ClientProfileTab({
                       type="text"
                       value={formData.resZip}
                       onChange={(e) => setFormData({ ...formData, resZip: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white font-mono text-slate-800"
+                      className="w-full px-3.5 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white  text-slate-800"
                     />
                   </div>
                 </div>
@@ -1239,7 +1238,7 @@ export function ClientProfileTab({
                       disabled={formData.sameAsResidential}
                       value={formData.billZip}
                       onChange={(e) => setFormData({ ...formData, billZip: e.target.value })}
-                      className="w-full px-3.5 py-2 bg-slate-50/50 disabled:bg-slate-100 disabled:text-slate-400 border border-slate-200 rounded-xl text-sm focus:bg-white font-mono text-slate-800"
+                      className="w-full px-3.5 py-2 bg-slate-50/50 disabled:bg-slate-100 disabled:text-slate-400 border border-slate-200 rounded-xl text-sm focus:bg-white  text-slate-800"
                     />
                   </div>
                 </div>

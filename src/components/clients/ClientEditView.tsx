@@ -212,7 +212,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
           </p>
         </div>
 
-        <span className="text-xs font-mono font-bold bg-[#E3F1D9] text-[#1E5622] px-3 py-1 rounded-full border border-[#1E5622]/20 self-start sm:self-auto">
+        <span className="text-xs  font-bold bg-[#E3F1D9] text-[#1E5622] px-3 py-1 rounded-full border border-[#1E5622]/20 self-start sm:self-auto">
           {client.id} • {client.household.name}
         </span>
       </div>
@@ -224,7 +224,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               1. Client Demographics & Status
             </h2>
-            <span className="text-xs text-slate-400 font-mono">RECORD CORE</span>
+            <span className="text-xs text-slate-400 ">RECORD CORE</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -307,7 +307,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               2. Primary Family Contact & Guardian
             </h2>
-            <span className="text-xs text-slate-400 font-mono">GUARDIANSHIP</span>
+            <span className="text-xs text-slate-400 ">GUARDIANSHIP</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -359,7 +359,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               3. Care Arrangement & Program Services
             </h2>
-            <span className="text-xs text-slate-400 font-mono">CARE SCOPE</span>
+            <span className="text-xs text-slate-400 ">CARE SCOPE</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -443,7 +443,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               4. Assigned Primary Caregiver
             </h2>
-            <span className="text-xs text-slate-400 font-mono">STAFFING</span>
+            <span className="text-xs text-slate-400 ">STAFFING</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -487,7 +487,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               5. Service Authorization & Payer
             </h2>
-            <span className="text-xs text-slate-400 font-mono">AUTHORIZATION</span>
+            <span className="text-xs text-slate-400 ">AUTHORIZATION</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -497,7 +497,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
                 type="text"
                 value={authNumber}
                 onChange={(e) => setAuthNumber(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-mono"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 "
               />
             </div>
 

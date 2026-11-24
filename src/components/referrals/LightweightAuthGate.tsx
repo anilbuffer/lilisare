@@ -16,7 +16,7 @@ export function LightweightAuthGate({ onAuthenticated }: LightweightAuthGateProp
   const handleRequestPasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    
+
     setIsSubmitting(true);
     // Mock sending email
     setTimeout(() => {
@@ -28,7 +28,7 @@ export function LightweightAuthGate({ onAuthenticated }: LightweightAuthGateProp
   const handleVerifyPasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (passcode.length < 6) return;
-    
+
     setIsSubmitting(true);
     // Mock verification
     setTimeout(() => {
@@ -103,7 +103,7 @@ export function LightweightAuthGate({ onAuthenticated }: LightweightAuthGateProp
                   maxLength={6}
                   value={passcode}
                   onChange={(e) => setPasscode(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-3 py-3 text-center text-2xl font-mono tracking-[0.5em] border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow uppercase"
+                  className="w-full px-3 py-3 text-center text-2xl  tracking-[0.5em] border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow uppercase"
                   placeholder="------"
                   autoComplete="one-time-code"
                 />

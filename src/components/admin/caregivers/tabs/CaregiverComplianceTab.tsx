@@ -146,11 +146,10 @@ export function CaregiverComplianceTab({ profile }: CaregiverComplianceTabProps)
                   <span className="text-sm font-bold text-slate-900">{item.title}</span>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                    item.isExpiring
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${item.isExpiring
                       ? "bg-amber-50 text-amber-700 border-amber-200"
                       : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  }`}
+                    }`}
                 >
                   {item.isExpiring ? (
                     <Clock className="w-3 h-3 text-amber-500" />
@@ -181,9 +180,8 @@ export function CaregiverComplianceTab({ profile }: CaregiverComplianceTabProps)
             <div className="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs">
               <span className="text-slate-400 font-medium">Expires / Renewal:</span>
               <span
-                className={`font-semibold ${
-                  item.isExpiring ? "text-amber-700 font-mono" : "text-slate-800 font-mono"
-                }`}
+                className={`font-semibold ${item.isExpiring ? "text-amber-700 " : "text-slate-800 "
+                  }`}
               >
                 {item.expires}
               </span>

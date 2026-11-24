@@ -127,7 +127,7 @@ export function CaregiverContextualDrawer({
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  <span className="font-mono font-bold text-[#3D6B22]">{caregiver.id}</span>
+                  <span className=" font-bold text-[#3D6B22]">{caregiver.id}</span>
                   {" · "}
                   <span>{caregiver.type}</span>
                 </p>
@@ -152,8 +152,8 @@ export function CaregiverContextualDrawer({
                 type="button"
                 onClick={() => setActiveTab(tab)}
                 className={`py-3 px-3 text-xs font-semibold border-b-2 transition-all cursor-pointer ${activeTab === tab
-                    ? "border-[#3D6B22] text-[#3D6B22]"
-                    : "border-transparent text-slate-500 hover:text-slate-800"
+                  ? "border-[#3D6B22] text-[#3D6B22]"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
                   }`}
               >
                 ({tab})
@@ -173,7 +173,7 @@ export function CaregiverContextualDrawer({
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
                       <span className="text-slate-400 block text-[11px]">Caregiver ID</span>
-                      <span className="font-mono font-bold text-slate-800">{caregiver.id}</span>
+                      <span className=" font-bold text-slate-800">{caregiver.id}</span>
                     </div>
                     <div>
                       <span className="text-slate-400 block text-[11px]">Caregiver type</span>
@@ -247,7 +247,7 @@ export function CaregiverContextualDrawer({
                         <span className="text-slate-600">Assigned client</span>
                         <Link
                           href={`/clients/${assignedClient.id}`}
-                          className="font-mono font-bold text-[#3D6B22] hover:underline flex items-center gap-1"
+                          className=" font-bold text-[#3D6B22] hover:underline flex items-center gap-1"
                         >
                           <span>{assignedClient.id} ({assignedClient.name})</span>
                           <ExternalLink className="w-3 h-3" />
@@ -292,8 +292,8 @@ export function CaregiverContextualDrawer({
                   </h4>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded border ${caregiver.documentsCredentials.overallStatus === "Verified"
-                        ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20"
-                        : "bg-rose-50 text-rose-700 border-rose-200"
+                      ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20"
+                      : "bg-rose-50 text-rose-700 border-rose-200"
                       }`}
                   >
                     {caregiver.documentsCredentials.overallStatus}

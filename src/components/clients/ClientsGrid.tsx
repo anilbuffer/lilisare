@@ -77,8 +77,8 @@ export function ClientsGrid({
             key={client.id}
             onClick={() => onSelectClient(client)}
             className={`p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between border ${isSelected
-                ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#F2F8EE]/30"
-                : "border-[#D5DFDA] bg-white hover:border-[#93C573] hover:shadow-md"
+              ? "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 bg-[#F2F8EE]/30"
+              : "border-[#D5DFDA] bg-white hover:border-[#93C573] hover:shadow-md"
               }`}
           >
             <div>
@@ -107,7 +107,7 @@ export function ClientsGrid({
                         </span>
                       )}
                     </div>
-                    <span className="text-xs font-mono text-slate-500">
+                    <span className="text-xs  text-slate-500">
                       {client.id} • Age {client.age}
                     </span>
                   </div>
@@ -168,32 +168,32 @@ export function ClientsGrid({
                     <span
                       title={`Profile: ${client.readiness.clientProfile}`}
                       className={`w-2 h-2 rounded-full ${client.readiness.clientProfile === "Complete"
-                          ? "bg-emerald-500"
-                          : "bg-amber-500"
+                        ? "bg-emerald-500"
+                        : "bg-amber-500"
                         }`}
                     />
                     <span
                       title={`Care: ${client.readiness.careArrangement}`}
                       className={`w-2 h-2 rounded-full ${client.readiness.careArrangement === "Complete"
-                          ? "bg-emerald-500"
-                          : "bg-amber-500"
+                        ? "bg-emerald-500"
+                        : "bg-amber-500"
                         }`}
                     />
                     <span
                       title={`Docs: ${client.readiness.documents}`}
                       className={`w-2 h-2 rounded-full ${client.readiness.documents === "Verified"
-                          ? "bg-emerald-500"
-                          : "bg-amber-500"
+                        ? "bg-emerald-500"
+                        : "bg-amber-500"
                         }`}
                     />
                     <span
                       title={`Auth: ${client.readiness.authorization}`}
                       className={`w-2 h-2 rounded-full ${client.readiness.authorization === "Verified"
-                          ? "bg-emerald-500"
-                          : "bg-amber-500"
+                        ? "bg-emerald-500"
+                        : "bg-amber-500"
                         }`}
                     />
-                    <span className="text-[10px] font-mono font-bold text-slate-700 ml-1">
+                    <span className="text-[10px]  font-bold text-slate-700 ml-1">
                       {client.readiness.overallScore ?? 85}%
                     </span>
                   </div>

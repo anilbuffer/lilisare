@@ -298,11 +298,10 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                 key={view}
                 type="button"
                 onClick={() => setSelectedView(view)}
-                className={`px-3 py-1 font-bold rounded-lg capitalize transition-all cursor-pointer ${
-                  selectedView === view
+                className={`px-3 py-1 font-bold rounded-lg capitalize transition-all cursor-pointer ${selectedView === view
                     ? "bg-white text-slate-900 shadow-sm shadow-slate-900/5 font-extrabold"
                     : "text-slate-600 hover:text-slate-900"
-                }`}
+                  }`}
                 aria-pressed={selectedView === view}
               >
                 {view}
@@ -372,11 +371,10 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                 key={status}
                 type="button"
                 onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  filterStatus === status
+                className={`px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${filterStatus === status
                     ? "bg-[#3D6B22] text-white shadow-2xs font-bold"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
-                }`}
+                  }`}
               >
                 {status}
               </button>
@@ -396,27 +394,24 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                   key={day.key}
                   type="button"
                   onClick={() => setCurrentDate(day.date)}
-                  className={`p-2 sm:p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${
-                    day.isSelected
+                  className={`p-2 sm:p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${day.isSelected
                       ? "bg-emerald-50/70 border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/30"
                       : "bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/80 hover:border-slate-300"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
-                      day.isSelected ? "text-[#3D6B22]" : "text-slate-500"
-                    }`}
+                    className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${day.isSelected ? "text-[#3D6B22]" : "text-slate-500"
+                      }`}
                   >
                     {day.dayName}
                   </span>
                   <span
-                    className={`text-sm sm:text-lg font-extrabold ${
-                      day.isSelected
+                    className={`text-sm sm:text-lg font-extrabold ${day.isSelected
                         ? "text-[#3D6B22]"
                         : day.isToday
-                        ? "text-slate-900 underline decoration-[#3D6B22] decoration-2 underline-offset-4"
-                        : "text-slate-800"
-                    }`}
+                          ? "text-slate-900 underline decoration-[#3D6B22] decoration-2 underline-offset-4"
+                          : "text-slate-800"
+                      }`}
                   >
                     {day.dayNumber}
                   </span>
@@ -474,25 +469,23 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                     setCurrentDate(cell.date);
                     setSelectedView("day");
                   }}
-                  className={`min-h-[70px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border transition-all text-left flex flex-col justify-between cursor-pointer ${
-                    cell.isSelected
+                  className={`min-h-[70px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border transition-all text-left flex flex-col justify-between cursor-pointer ${cell.isSelected
                       ? "bg-emerald-50/70 border-[#3D6B22] ring-1 ring-[#3D6B22]/30 shadow-xs"
                       : cell.isCurrentMonth
-                      ? "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300"
-                      : "bg-slate-50/50 border-slate-100 text-slate-300"
-                  }`}
+                        ? "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                        : "bg-slate-50/50 border-slate-100 text-slate-300"
+                    }`}
                 >
                   <div className="flex items-center justify-between w-full">
                     <span
-                      className={`text-xs sm:text-sm font-bold ${
-                        cell.isSelected
+                      className={`text-xs sm:text-sm font-bold ${cell.isSelected
                           ? "text-[#3D6B22] font-extrabold"
                           : cell.isToday
-                          ? "w-6 h-6 rounded-full bg-[#3D6B22] text-white flex items-center justify-center font-bold"
-                          : cell.isCurrentMonth
-                          ? "text-slate-800"
-                          : "text-slate-400"
-                      }`}
+                            ? "w-6 h-6 rounded-full bg-[#3D6B22] text-white flex items-center justify-center font-bold"
+                            : cell.isCurrentMonth
+                              ? "text-slate-800"
+                              : "text-slate-400"
+                        }`}
                     >
                       {cell.dayNumber}
                     </span>
@@ -575,23 +568,21 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
               return (
                 <div
                   key={visit.id}
-                  className={`p-4 sm:p-4.5 rounded-xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                    isInProgress
+                  className={`p-4 sm:p-4.5 rounded-xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${isInProgress
                       ? "bg-emerald-50/50 border-[#3D6B22]/30 shadow-xs ring-1 ring-[#3D6B22]/20"
                       : isCompleted
-                      ? "bg-slate-50/70 border-slate-200 hover:bg-slate-50"
-                      : "bg-blue-50/40 border-blue-200/80 hover:bg-blue-50/60"
-                  }`}
+                        ? "bg-slate-50/70 border-slate-200 hover:bg-slate-50"
+                        : "bg-blue-50/40 border-blue-200/80 hover:bg-blue-50/60"
+                    }`}
                 >
                   <div className="flex items-start gap-3.5">
                     <div
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs ${
-                        isInProgress
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs ${isInProgress
                           ? "bg-[#3D6B22] text-white"
                           : isCompleted
-                          ? "bg-slate-200 text-slate-700"
-                          : "bg-blue-100 text-blue-800 border border-blue-200"
-                      }`}
+                            ? "bg-slate-200 text-slate-700"
+                            : "bg-blue-100 text-blue-800 border border-blue-200"
+                        }`}
                     >
                       <Clock className="w-5 h-5" />
                     </div>
@@ -602,13 +593,12 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                           {visit.title}
                         </h4>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            isInProgress
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isInProgress
                               ? "bg-emerald-600 text-white animate-pulse"
                               : isCompleted
-                              ? "bg-slate-200 text-slate-700"
-                              : "bg-blue-100 text-blue-700 border border-blue-200"
-                          }`}
+                                ? "bg-slate-200 text-slate-700"
+                                : "bg-blue-100 text-blue-700 border border-blue-200"
+                            }`}
                         >
                           {visit.status}
                         </span>
@@ -632,7 +622,7 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                           <strong className="text-slate-900">{visit.caregiverName}</strong>
                         </span>
                         <span className="text-slate-300">•</span>
-                        <span className="font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-semibold">
+                        <span className=" text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-semibold">
                           {visit.serviceType}
                         </span>
                       </div>
@@ -700,7 +690,7 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">
                   Clock-in Coordinates
                 </span>
-                <span className="font-mono font-bold text-slate-800">
+                <span className=" font-bold text-slate-800">
                   44.0462° N, 123.0220° W
                 </span>
               </div>
@@ -724,7 +714,7 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">
                   Service Billing Code
                 </span>
-                <span className="font-mono font-bold text-slate-800">
+                <span className=" font-bold text-slate-800">
                   {telemetryVisit.serviceType}
                 </span>
               </div>

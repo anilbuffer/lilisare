@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
 import { SEED_ADMIN_CAREGIVERS } from "@/lib/caregivers/adminCaregiversData";
-import { CaregiverEditView } from "@/components/caregivers/CaregiverEditView";
+import { AdminCaregiverDetailView } from "@/components/admin/caregivers/AdminCaregiverDetailView";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -13,13 +13,13 @@ export default async function AdminCaregiverEditPage({ params }: PageProps) {
   return (
     <Suspense
       fallback={
-        <div className="w-full max-w-4xl mx-auto py-16 text-center text-slate-500">
+        <div className="w-full max-w-7xl mx-auto py-16 text-center text-slate-500">
           <div className="w-8 h-8 rounded-full border-2 border-[#3D6B22] border-t-transparent animate-spin mx-auto mb-2" />
           <p className="font-semibold text-xs text-slate-600">Loading Caregiver Editor...</p>
         </div>
       }
     >
-      <CaregiverEditView caregiverId={resolvedParams.id} baseBackPath="/admin/caregivers" />
+      <AdminCaregiverDetailView caregiverId={resolvedParams.id} initialEditMode={true} />
     </Suspense>
   );
 }

@@ -132,7 +132,7 @@ export function ClientIncidentsTab({ client, onUpdateClient }: ClientIncidentsTa
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <span className="font-mono font-bold text-xs bg-slate-200/80 text-slate-800 px-2 py-0.5 rounded">
+                  <span className=" font-bold text-xs bg-slate-200/80 text-slate-800 px-2 py-0.5 rounded">
                     {inc.id}
                   </span>
                   <h4 className="text-sm font-bold text-slate-900">

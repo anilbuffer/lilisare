@@ -400,7 +400,7 @@ export function EndVisitModal({
                       onTouchMove={draw}
                       className="w-full h-44 rounded-xl cursor-crosshair touch-none bg-gray-50/50"
                     />
-                    <span className="absolute bottom-3 left-4 text-[11px] text-gray-400 font-mono pointer-events-none">
+                    <span className="absolute bottom-3 left-4 text-[11px] text-gray-400  pointer-events-none">
                       Sign here using mouse, trackpad, or touchscreen
                     </span>
                   </div>
@@ -458,7 +458,7 @@ export function EndVisitModal({
               <div className="p-4 bg-gray-50 border border-slate-200 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-600 font-medium">Auto-Calculated Distance:</span>
-                  <span className="font-mono font-bold text-gray-900">{visit.travelDistanceMiles || 4.2} miles</span>
+                  <span className=" font-bold text-gray-900">{visit.travelDistanceMiles || 4.2} miles</span>
                 </div>
 
                 <div>
@@ -492,7 +492,7 @@ export function EndVisitModal({
               </p>
 
               <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-medium max-w-md mx-auto text-left space-y-1">
-                <div>• Clock-out Timestamp: <strong className="font-mono">Today, 12:30:14 PM</strong></div>
+                <div>• Clock-out Timestamp: <strong className="">Today, 12:30:14 PM</strong></div>
                 <div>• EVV Sync Status: <strong className="text-brand-teal">Immediate Online Upload</strong></div>
                 <div>• Recorded Mileage: <strong>{mileage} miles</strong></div>
               </div>

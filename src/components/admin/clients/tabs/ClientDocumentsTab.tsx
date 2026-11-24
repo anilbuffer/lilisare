@@ -241,7 +241,7 @@ HIPAA Compliance Standard: 45 CFR Part 164 Subpart C
           maxWidth="2xl"
           footer={
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
-              <span className="text-[11px] text-slate-500 font-mono">
+              <span className="text-[11px] text-slate-500 ">
                 SHA-256: 8F2A90...E17B
               </span>
               <div className="flex items-center gap-3 self-end sm:self-auto">
@@ -283,7 +283,7 @@ HIPAA Compliance Standard: 45 CFR Part 164 Subpart C
             </div>
 
             {/* Document Paper Preview */}
-            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs font-mono text-xs text-slate-700 leading-relaxed space-y-3">
+            <div className="p-6 rounded-xl border border-slate-200 bg-white shadow-xs  text-xs text-slate-700 leading-relaxed space-y-3">
               <div className="text-center font-bold pb-2 border-b border-slate-100">
                 STATE HEALTH SERVICES • CLIENT COMPLIANCE RECORD
               </div>

@@ -805,12 +805,12 @@ export function AdminCaregiverDirectory() {
                       <td className="py-4 px-4 sm:px-6">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cg.status === "Active"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : cg.status === "Onboarding"
-                                ? "bg-purple-50 text-purple-700 border-purple-200"
-                                : cg.status === "On Hold"
-                                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                                  : "bg-slate-100 text-slate-600 border-slate-200"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : cg.status === "Onboarding"
+                              ? "bg-purple-50 text-purple-700 border-purple-200"
+                              : cg.status === "On Hold"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-slate-100 text-slate-600 border-slate-200"
                             }`}
                         >
                           {cg.status}
@@ -821,10 +821,10 @@ export function AdminCaregiverDirectory() {
                       <td className="py-4 px-4 sm:px-6 hidden sm:table-cell">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${(cg.complianceRate ?? 100) >= 90
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : (cg.complianceRate ?? 100) >= 75
-                                ? "bg-amber-50 text-amber-700 border-amber-200"
-                                : "bg-rose-50 text-rose-700 border-rose-200"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : (cg.complianceRate ?? 100) >= 75
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-rose-50 text-rose-700 border-rose-200"
                             }`}
                         >
                           {(cg.complianceRate ?? 100)}% Compliant
@@ -833,7 +833,7 @@ export function AdminCaregiverDirectory() {
 
                       {/* Phone - Single Clean Phone (Hidden on mobile for responsiveness) */}
                       <td className="py-4 px-4 sm:px-6 hidden md:table-cell">
-                        <span className="text-xs sm:text-sm text-slate-600 font-mono">
+                        <span className="text-xs sm:text-sm text-slate-600 ">
                           {singlePhone}
                         </span>
                       </td>
@@ -915,7 +915,7 @@ export function AdminCaregiverDirectory() {
                   <div className="mt-4 space-y-1 text-xs text-slate-600">
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400 font-medium">Phone:</span>
-                      <span className="font-semibold text-slate-700 font-mono">
+                      <span className="font-semibold text-slate-700 ">
                         {cg.mobilePhone || cg.phone}
                       </span>
                     </div>

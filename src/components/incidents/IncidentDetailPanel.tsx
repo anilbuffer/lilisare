@@ -81,7 +81,7 @@ export function IncidentDetailPanel({ incident, onClose }: IncidentDetailPanelPr
             </div>
             <h2 className="text-lg font-semibold text-slate-800 mb-1">{incident.type}</h2>
             <div className="text-xs text-slate-500 flex items-center gap-2">
-               <span>ID: {incident.id}</span>
+              <span>ID: {incident.id}</span>
               <span>•</span>
               <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {incident.location}</span>
             </div>
@@ -245,7 +245,7 @@ export function IncidentDetailPanel({ incident, onClose }: IncidentDetailPanelPr
                       </div>
                       <div>
                         <div className="text-xs font-medium text-slate-500 mb-1">Confirmation Number</div>
-                        <div className="text-sm font-mono bg-white px-2 py-1 rounded border border-slate-200 inline-block">{incident.regulatoryReport.confirmationNumber}</div>
+                        <div className="text-sm  bg-white px-2 py-1 rounded border border-slate-200 inline-block">{incident.regulatoryReport.confirmationNumber}</div>
                       </div>
                     </>
                   )}

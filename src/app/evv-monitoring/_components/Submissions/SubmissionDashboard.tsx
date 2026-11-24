@@ -182,7 +182,7 @@ export function SubmissionDashboard() {
               </button>
             </div>
             <div className="p-4 sm:p-6 bg-slate-900 overflow-y-auto flex-1">
-              <pre className="text-xs sm:text-sm text-emerald-400 font-mono overflow-x-auto whitespace-pre">
+              <pre className="text-xs sm:text-sm text-emerald-400  overflow-x-auto whitespace-pre">
                 {`{
   "batchId": "${selectedJsonSub}",
   "status": "Accepted",

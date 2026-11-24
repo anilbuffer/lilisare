@@ -70,7 +70,7 @@ export function DocumentViewerModal({
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row justify-between gap-3 text-xs">
           <div>
             <div className="text-slate-500 font-medium">Document ID</div>
-            <div className="text-slate-800 font-bold font-mono">DOC-2026-88931</div>
+            <div className="text-slate-800 font-bold ">DOC-2026-88931</div>
           </div>
           <div>
             <div className="text-slate-500 font-medium">Category</div>
@@ -120,7 +120,7 @@ export function DocumentViewerModal({
             </div>
             <div className="text-right">
               <div className="text-[10px] text-slate-400 font-semibold uppercase">Agency Verification Code</div>
-              <div className="text-xs font-mono font-bold text-slate-600">HLC-CERT-9921</div>
+              <div className="text-xs  font-bold text-slate-600">HLC-CERT-9921</div>
             </div>
           </div>
         </div>

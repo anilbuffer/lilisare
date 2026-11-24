@@ -90,7 +90,7 @@ export function CertificateViewerModal({
             </div>
             <div>
               <div className="text-slate-500">Verification ID</div>
-              <div className="font-mono font-bold text-slate-700">CERT-{Math.floor(100000 + Math.random() * 900000)}</div>
+              <div className=" font-bold text-slate-700">CERT-{Math.floor(100000 + Math.random() * 900000)}</div>
             </div>
           </div>
         </div>

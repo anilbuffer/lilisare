@@ -122,18 +122,17 @@ export function ClientCareNotesTab({
                       {note.caregiverName}
                     </div>
                     <div className="text-xs text-slate-500 font-medium mt-0.5">
-                      {note.visitDate} • <span className="font-mono text-slate-600">{note.service}</span>
+                      {note.visitDate} • <span className=" text-slate-600">{note.service}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      note.supervisorApproval === "Approved"
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${note.supervisorApproval === "Approved"
                         ? "bg-emerald-50 text-[#3D6B22] border border-emerald-200"
                         : "bg-amber-50 text-amber-700 border border-amber-200"
-                    }`}
+                      }`}
                   >
                     {note.supervisorApproval}
                   </span>

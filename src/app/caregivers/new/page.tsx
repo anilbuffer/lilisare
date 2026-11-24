@@ -569,7 +569,7 @@ function AddCaregiverWizard({
                       }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-slate-500 font-bold">{app.id}</span>
+                      <span className=" text-[10px] text-slate-500 font-bold">{app.id}</span>
                       <span className="text-[10px] font-bold text-[#1E5622] bg-[#E3F1D9] px-2 py-0.5 rounded-full">
                         {app.caregiverType}
                       </span>
@@ -1167,7 +1167,7 @@ function AddCaregiverWizard({
             </h2>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
               Generated unique Caregiver ID{" "}
-              <strong className="font-mono text-slate-900">{createdCaregiver.id}</strong> under{" "}
+              <strong className=" text-slate-900">{createdCaregiver.id}</strong> under{" "}
               <strong className="text-slate-900">{createdCaregiver.type}</strong> classification.
             </p>
           </div>

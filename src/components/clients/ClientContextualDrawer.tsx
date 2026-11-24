@@ -147,7 +147,7 @@ export function ClientContextualDrawer({
                     {client.status}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 font-mono mt-0.5">
+                <p className="text-xs text-slate-500  mt-0.5">
                   ID: {client.id} • Age {client.age}
                 </p>
               </div>
@@ -191,7 +191,7 @@ export function ClientContextualDrawer({
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <span className="text-slate-500 block">Client ID</span>
-                  <span className="font-mono font-bold text-slate-900">{client.id}</span>
+                  <span className=" font-bold text-slate-900">{client.id}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block">Service status</span>
@@ -252,7 +252,7 @@ export function ClientContextualDrawer({
                     )}
                   </div>
                   {client.assignedCareTeam.primaryCaregiver && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 rounded text-slate-700">
+                    <span className="text-[10px]  px-2 py-0.5 bg-slate-100 rounded text-slate-700">
                       {client.assignedCareTeam.primaryCaregiver.id}
                     </span>
                   )}
@@ -272,7 +272,7 @@ export function ClientContextualDrawer({
                       {client.assignedCareTeam.familyContact.relationship}
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 rounded text-slate-700">
+                  <span className="text-[10px]  px-2 py-0.5 bg-slate-100 rounded text-slate-700">
                     {client.assignedCareTeam.familyContact.id}
                   </span>
                 </div>

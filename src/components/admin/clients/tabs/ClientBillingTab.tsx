@@ -150,7 +150,7 @@ export function ClientBillingTab({
             <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
               Prior Authorization #
             </span>
-            <span className="font-mono text-xs sm:text-sm font-bold text-slate-900">
+            <span className=" text-xs sm:text-sm font-bold text-slate-900">
               {auth.authNumber}
             </span>
           </div>
@@ -162,7 +162,7 @@ export function ClientBillingTab({
             <span className="font-bold text-slate-800">
               Service Unit Burn Rate ({burnPercent}%)
             </span>
-            <span className="text-slate-600 font-semibold font-mono">
+            <span className="text-slate-600 font-semibold ">
               {auth.unitsUsed} Used / {auth.totalUnitsApproved} Approved Units
             </span>
           </div>
@@ -239,7 +239,7 @@ export function ClientBillingTab({
                 required
                 value={authForm.authNumber}
                 onChange={(e) => setAuthForm({ ...authForm, authNumber: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800  focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
               />
             </div>
 

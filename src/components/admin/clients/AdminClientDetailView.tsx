@@ -404,7 +404,7 @@ export function AdminClientDetailView({
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                 {client.name}
               </h1>
-              <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg text-xs border border-slate-200/80">
+              <span className=" font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg text-xs border border-slate-200/80">
                 {client.id}
               </span>
             </div>

@@ -21,9 +21,9 @@ export function ReferralConfirmation({ referenceNumber }: ReferralConfirmationPr
           <CheckCircle2 className="w-16 h-16 text-teal-600" />
         </div>
       </div>
-      
+
       <h1 className="text-3xl font-bold text-slate-900 mb-4">Referral Received</h1>
-      
+
       <p className="text-slate-600 text-lg max-w-lg mx-auto mb-8">
         Thank you. The referral has been securely submitted to LiliSare and is now in our intake pipeline. We will contact the patient or family shortly.
       </p>
@@ -33,10 +33,10 @@ export function ReferralConfirmation({ referenceNumber }: ReferralConfirmationPr
           Reference Number
         </p>
         <div className="flex items-center gap-3">
-          <span className="text-3xl font-mono font-bold text-slate-800 tracking-wider">
+          <span className="text-3xl  font-bold text-slate-800 tracking-wider">
             {referenceNumber}
           </span>
-          <button 
+          <button
             onClick={handleCopy}
             className="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
             title="Copy reference number"
@@ -60,8 +60,8 @@ export function ReferralConfirmation({ referenceNumber }: ReferralConfirmationPr
             <p className="text-sm text-blue-800 mb-4">
               Get a secure link by email to check the status of your submitted referrals without creating an account.
             </p>
-            <Link 
-              href="/refer/status" 
+            <Link
+              href="/refer/status"
               className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 bg-blue-100/50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors"
             >
               Check Status Portal
@@ -70,9 +70,9 @@ export function ReferralConfirmation({ referenceNumber }: ReferralConfirmationPr
           </div>
         </div>
       </div>
-      
+
       <div className="mt-8">
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors"
         >

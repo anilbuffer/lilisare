@@ -630,7 +630,7 @@ export function InquiryDetailsPage({
               <div className="pt-3 border-t border-slate-100 space-y-2.5 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Inquiry ID</span>
-                  <span className="font-mono text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/70">
+                  <span className=" text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/70">
                     {inquiry.id}
                   </span>
                 </div>

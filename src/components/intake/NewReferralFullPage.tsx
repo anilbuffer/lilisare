@@ -802,7 +802,7 @@ export function NewReferralFullPage({
                           : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                       >
-                        <span className="text-[10px] font-mono opacity-70 mr-1.5">{svc.order}.</span>
+                        <span className="text-[10px]  opacity-70 mr-1.5">{svc.order}.</span>
                         {svc.name}
                       </button>
                     );

@@ -337,7 +337,7 @@ export default function CaregiverSettingsPage() {
                         maxLength={4}
                         value={quickPin}
                         onChange={(e) => setQuickPin(e.target.value)}
-                        className="w-24 text-center px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-gray-900 tracking-widest"
+                        className="w-24 text-center px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs  font-bold text-gray-900 tracking-widest"
                       />
                     </div>
                   </div>

@@ -37,11 +37,10 @@ export function EvidenceViewerModal({ isOpen, onClose, record }: EvidenceViewerM
       headerAction={
         <div className="flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-              isVerified
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${isVerified
                 ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                 : "bg-amber-50 text-amber-800 border border-amber-200"
-            }`}
+              }`}
           >
             {isVerified ? (
               <>
@@ -98,9 +97,9 @@ export function EvidenceViewerModal({ isOpen, onClose, record }: EvidenceViewerM
                 {doc.name}
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Official Authorization Reference: <span className="font-semibold text-slate-700 font-mono">{record.id}</span>
+                Official Authorization Reference: <span className="font-semibold text-slate-700 ">{record.id}</span>
                 <span className="mx-2">&bull;</span>
-                Member Policy ID: <span className="font-mono text-slate-600">{record.insurancePolicyId}</span>
+                Member Policy ID: <span className=" text-slate-600">{record.insurancePolicyId}</span>
               </p>
             </div>
             <div className="bg-white border border-slate-200 rounded-lg p-2.5 text-right shadow-2xs min-w-[140px]">
@@ -120,7 +119,7 @@ export function EvidenceViewerModal({ isOpen, onClose, record }: EvidenceViewerM
             <div>
               <span className="text-slate-400 block text-[11px] font-medium">Approved Service</span>
               <span className="font-bold text-slate-800">{record.serviceName}</span>
-              <span className="font-mono text-[#3D6B22] font-semibold block text-[11px]">HCPCS: {record.serviceCode}{record.modifier ? `-${record.modifier}` : ""}</span>
+              <span className=" text-[#3D6B22] font-semibold block text-[11px]">HCPCS: {record.serviceCode}{record.modifier ? `-${record.modifier}` : ""}</span>
             </div>
             <div>
               <span className="text-slate-400 block text-[11px] font-medium">Approved Units</span>
@@ -147,10 +146,10 @@ export function EvidenceViewerModal({ isOpen, onClose, record }: EvidenceViewerM
 
           <div className="bg-slate-50/70 border border-slate-200/70 rounded-lg p-3 text-xs text-slate-700 leading-relaxed">
             <p className="font-medium">
-              &quot;I hereby certify that I have conducted the required clinical and functional level of care review for 
-              <strong className="text-slate-900"> {record.clientName} </strong> under {record.payer} guidelines. 
-              Services under code <strong className="text-slate-900">{record.serviceCode}</strong> are authorized for a total volume of 
-              <strong className="text-slate-900"> {record.unitsApproved} {record.unitMeasure}</strong>. Caregiver participation is approved subject to 
+              &quot;I hereby certify that I have conducted the required clinical and functional level of care review for
+              <strong className="text-slate-900"> {record.clientName} </strong> under {record.payer} guidelines.
+              Services under code <strong className="text-slate-900">{record.serviceCode}</strong> are authorized for a total volume of
+              <strong className="text-slate-900"> {record.unitsApproved} {record.unitMeasure}</strong>. Caregiver participation is approved subject to
               applicable Colorado Medicaid / payer onboarding and clinical supervision standards.&quot;
             </p>
           </div>

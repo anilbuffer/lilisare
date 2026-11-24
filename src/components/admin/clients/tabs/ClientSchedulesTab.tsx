@@ -145,11 +145,11 @@ export function ClientSchedulesTab({ client, onOpenScheduleVisit }: ClientSchedu
                     {item.startTime} – {item.endTime}
                   </td>
                   <td className="py-4 text-slate-600 font-medium">
-                    <span className="bg-slate-100 px-2 py-0.5 rounded font-mono font-semibold text-slate-700">
+                    <span className="bg-slate-100 px-2 py-0.5 rounded  font-semibold text-slate-700">
                       {item.hours} hrs
                     </span>
                   </td>
-                  <td className="py-4 font-mono font-semibold text-slate-600">
+                  <td className="py-4  font-semibold text-slate-600">
                     {item.serviceCode}
                   </td>
                   <td className="py-4 font-semibold text-[#3D6B22]">

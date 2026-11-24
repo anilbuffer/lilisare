@@ -45,11 +45,11 @@ export function AgencyProfile() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">National Provider Identifier (NPI)</label>
-              <input type="text" defaultValue="1234567890" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal text-sm font-mono transition-colors" />
+              <input type="text" defaultValue="1234567890" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal text-sm  transition-colors" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Tax ID / EIN</label>
-              <input type="password" defaultValue="12-3456789" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal text-sm font-mono transition-colors" />
+              <input type="password" defaultValue="12-3456789" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal text-sm  transition-colors" />
             </div>
           </div>
         </Card>

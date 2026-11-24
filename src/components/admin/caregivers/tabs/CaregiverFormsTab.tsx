@@ -150,13 +150,13 @@ export function CaregiverFormsTab({ profile }: CaregiverFormsTabProps) {
                     </div>
                   </td>
                   <td className="py-4 px-4 text-slate-600 font-medium">{form.type}</td>
-                  <td className="py-4 px-4 text-slate-600 font-mono">{form.dateSigned}</td>
+                  <td className="py-4 px-4 text-slate-600 ">{form.dateSigned}</td>
                   <td className="py-4 px-4 text-slate-800 font-semibold">{form.signedBy}</td>
                   <td className="py-4 px-4 text-center">
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${form.status === "Completed"
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : "bg-amber-50 text-amber-700 border-amber-200"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
                         }`}
                     >
                       {form.status === "Completed" ? (
@@ -211,7 +211,7 @@ export function CaregiverFormsTab({ profile }: CaregiverFormsTabProps) {
               <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Document Identifier:</span>
-                  <span className="font-mono font-bold text-slate-800">{selectedForm.id}</span>
+                  <span className=" font-bold text-slate-800">{selectedForm.id}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Sign Date:</span>
@@ -286,8 +286,8 @@ export function CaregiverFormsTab({ profile }: CaregiverFormsTabProps) {
                 <label
                   key={i}
                   className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer ${selectedTemplateIndex === i
-                      ? "bg-emerald-50/60 border-emerald-300 text-slate-900"
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    ? "bg-emerald-50/60 border-emerald-300 text-slate-900"
+                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                     }`}
                 >
                   <input

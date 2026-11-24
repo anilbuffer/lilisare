@@ -122,7 +122,7 @@ export function ShiftCard({ shift, onClick }: ShiftCardProps) {
                 </span>
               </div>
             )}
-            <span className="text-[10px] font-mono text-slate-400">
+            <span className="text-[10px]  text-slate-400">
               {shift.shiftNumber}
             </span>
           </div>

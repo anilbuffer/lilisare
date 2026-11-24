@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { CaregiverRecord, CaregiverType, CaregiverStatus } from "@/types/caregiver";
 import { getCaregiversFromStorage, saveCaregiversToStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
+import { getAdminCaregiverProfileById } from "@/lib/caregivers/adminCaregiversData";
 import { toast } from "sonner";
 
 interface CaregiverEditViewProps {
@@ -55,9 +56,133 @@ export function CaregiverEditView({
   useEffect(() => {
     setIsMounted(true);
     const all = getCaregiversFromStorage();
-    let found = all.find((c) => c.id.toLowerCase() === caregiverId.toLowerCase());
+    let found = all.find(
+      (c) =>
+        c.id.toLowerCase() === caregiverId.toLowerCase() ||
+        (c.id.replace(/\D/g, "") && c.id.replace(/\D/g, "") === caregiverId.replace(/\D/g, ""))
+    );
     if (!found) {
-      found = INITIAL_CAREGIVERS.find((c) => c.id.toLowerCase() === caregiverId.toLowerCase()) || INITIAL_CAREGIVERS[0];
+      found = INITIAL_CAREGIVERS.find(
+        (c) =>
+          c.id.toLowerCase() === caregiverId.toLowerCase() ||
+          (c.id.replace(/\D/g, "") && c.id.replace(/\D/g, "") === caregiverId.replace(/\D/g, ""))
+      );
+    }
+    if (!found) {
+      const adminProfile = getAdminCaregiverProfileById(caregiverId);
+      if (adminProfile) {
+        found = {
+          id: adminProfile.id,
+          name: adminProfile.name,
+          type: adminProfile.role.includes("Live-In")
+            ? "Live-In Caregiver"
+            : adminProfile.role.includes("Family")
+              ? "Family Caregiver"
+              : "Family Caregiver",
+          status: adminProfile.status,
+          branch: adminProfile.branch,
+          hireDate: adminProfile.hireDate,
+          employmentClassification: adminProfile.classification || "W-2",
+          verificationChecklist: {
+            identity: "Verified",
+            screening: "Cleared",
+            cprFirstAid: adminProfile.cprStatus === "Valid" ? "Verified" : "Missing",
+            training: "Complete",
+          },
+          assignmentStatus: adminProfile.activePatients > 0 ? "Assigned" : "Unassigned",
+          personalInfo: {
+            preferredName: adminProfile.name.split(" ")[0],
+            dob: "1988-05-12",
+            gender: adminProfile.gender || "Female",
+            languages: adminProfile.languages || ["English"],
+            phone: adminProfile.phone,
+            email: adminProfile.email,
+            address: {
+              street: adminProfile.location || "123 Main St",
+              city: "Brentwood",
+              state: "TN",
+              zip: "37027",
+            },
+            emergencyContact: {
+              name: adminProfile.emergencyContact?.split("(")[0]?.trim() || "Primary Contact",
+              relationship: adminProfile.emergencyContactRelationship || "Family",
+              phone: adminProfile.emergencyContactPhone || adminProfile.phone,
+            },
+            preferredCommunication: "Phone",
+            maskedIdentifiers: {
+              ssnMasked: "***-**-4491",
+              driversLicenseMasked: "DL-***-219",
+              taxIdMasked: "TIN-***-712",
+            },
+          },
+          relationship: {
+            caregiverType: "Family Caregiver",
+            relationshipToClient: "Primary Caregiver",
+            linkedHousehold: {
+              id: "HH-101",
+              code: "HH-101",
+              name: `${adminProfile.name.split(" ").slice(-1)[0]} Household`,
+              address: adminProfile.location || "123 Main St",
+              phone: adminProfile.phone,
+            },
+            relationshipVerificationStatus: "Verified",
+            householdPermissions: ["Full Access"],
+            caregivingBoundaries: "Family in-home care delivery",
+          },
+          documentsCredentials: {
+            overallStatus: "Verified",
+            cprExpiryDate: adminProfile.cprExpires || "2027-11-30",
+            tbTestExpiryDate: adminProfile.tbExpires || "2027-11-30",
+            items: [],
+          },
+          screeningTraining: {
+            backgroundCheck: {
+              status: adminProfile.backgroundCheckStatus === "Cleared" ? "Cleared" : "In Review",
+              referenceNumber: "BGC-9821",
+              provider: "Sterling Healthcare",
+              renewalDate: "2027-11-20",
+            },
+            screenings: [],
+            trainingCourses: [],
+            overallTrainingStatus: "Complete",
+            trainingHoursCompleted: 16,
+            trainingHoursRequired: 16,
+            screeningReviewDecisions: [],
+          },
+          availabilityAssignments: {
+            weeklyCapacityHours: 40,
+            scheduledWeeklyHours: 35,
+            availabilitySchedule: [],
+            assignmentHistory: [],
+            assignedClient: adminProfile.assignedPatientsList?.[0]
+              ? {
+                id: adminProfile.assignedPatientsList[0].id,
+                name: adminProfile.assignedPatientsList[0].name,
+                householdId: "HH-101",
+                householdName: "Assigned Household",
+                relationship: adminProfile.assignedPatientsList[0].relationship || "Client",
+                weeklyAuthorizedHours: 25,
+                scheduledWeeklyHours: 25,
+                startDate: "2026-01-01",
+                status: "Active",
+              }
+              : undefined,
+          },
+          evvVisitHistory: {
+            overallComplianceRate: adminProfile.complianceRate || 98,
+            totalVisitsCompleted: 42,
+            gpsVerificationRate: 99,
+            missedClockOutCount: 0,
+            isRestrictedEVV: false,
+            recentVisits: [],
+          },
+          activityHistory: {
+            recentUpdates: [],
+          },
+        };
+      } else {
+        found = INITIAL_CAREGIVERS[0];
+      }
     }
     if (found) {
       setCaregiver(found);
@@ -167,7 +292,7 @@ export function CaregiverEditView({
             <span>Cancel & Return</span>
           </Link>
           <span className="text-slate-300">/</span>
-          <span className="font-mono font-bold text-slate-800">{caregiver.id}</span>
+          <span className=" font-bold text-slate-800">{caregiver.id}</span>
           <span className="text-slate-300">/</span>
           <span className="text-slate-600 font-medium">Edit Profile</span>
         </div>

@@ -401,7 +401,7 @@ export function CaregiverDetailView({
                   Caregiver Personal Profile & Contact
                 </h3>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                  <span className=" text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
                     {caregiver.id}
                   </span>
                   <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md">
@@ -520,7 +520,7 @@ export function CaregiverDetailView({
                     <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
                       SSN Masked
                     </span>
-                    <span className="font-mono text-xs text-slate-800 font-bold">
+                    <span className=" text-xs text-slate-800 font-bold">
                       {showMaskedSsn
                         ? "123-45-6789"
                         : caregiver.personalInfo.maskedIdentifiers.ssnMasked}
@@ -530,7 +530,7 @@ export function CaregiverDetailView({
                     <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
                       Driver&apos;s License
                     </span>
-                    <span className="font-mono text-xs text-slate-800 font-bold">
+                    <span className=" text-xs text-slate-800 font-bold">
                       {caregiver.personalInfo.maskedIdentifiers.driversLicenseMasked}
                     </span>
                   </div>
@@ -538,7 +538,7 @@ export function CaregiverDetailView({
                     <span className="text-slate-400 text-[10px] uppercase font-bold block mb-0.5">
                       TIN / W-9 Status
                     </span>
-                    <span className="font-mono text-xs text-slate-800 font-bold">
+                    <span className=" text-xs text-slate-800 font-bold">
                       {caregiver.personalInfo.maskedIdentifiers.taxIdMasked}
                     </span>
                   </div>
@@ -824,7 +824,7 @@ export function CaregiverDetailView({
                   <span className="text-slate-400 text-[11px] block">Emergency Phone</span>
                   <a
                     href={`tel:${caregiver.personalInfo.emergencyContact.phone}`}
-                    className="font-mono font-bold text-[#3D6B22] hover:underline"
+                    className=" font-bold text-[#3D6B22] hover:underline"
                   >
                     {caregiver.personalInfo.emergencyContact.phone}
                   </a>
@@ -848,7 +848,7 @@ export function CaregiverDetailView({
                   <h3 className="font-bold text-slate-900 text-sm">
                     {caregiver.relationship.linkedHousehold.name}
                   </h3>
-                  <span className="font-mono text-xs text-slate-500">
+                  <span className=" text-xs text-slate-500">
                     {caregiver.relationship.linkedHousehold.code}
                   </span>
                 </div>
@@ -919,7 +919,7 @@ export function CaregiverDetailView({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Client ID:</span>
-                  <span className="font-mono font-bold text-slate-900">
+                  <span className=" font-bold text-slate-900">
                     {caregiver.availabilityAssignments.assignedClient.id}
                   </span>
                 </div>
@@ -1083,7 +1083,7 @@ export function CaregiverDetailView({
                     <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                       {item.description}
                     </p>
-                    <span className="text-[10px] text-slate-400 block mt-1 font-mono">
+                    <span className="text-[10px] text-slate-400 block mt-1 ">
                       Logged by {item.actor}
                     </span>
                   </div>

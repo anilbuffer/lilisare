@@ -18,7 +18,6 @@ import {
   ArrowRight,
   Send,
   Sparkles,
-  Edit3,
   Star,
   ShieldCheck,
   Award,
@@ -53,6 +52,7 @@ import { CaregiverScheduleShiftModal } from "@/components/caregivers/modals/Care
 import { toast } from "sonner";
 import { CaregiverRecord } from "@/types/caregiver";
 import { getCaregiversFromStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 
 // The 13 Dedicated Tab Components
 import { CaregiverProfileTab } from "./tabs/CaregiverProfileTab";
@@ -71,6 +71,7 @@ import { CaregiverMyAgencyTab } from "./tabs/CaregiverMyAgencyTab";
 
 interface AdminCaregiverDetailViewProps {
   caregiverId: string;
+  initialEditMode?: boolean;
 }
 
 // 13 exact tabs matching the user's latest specification & attached references
@@ -141,7 +142,10 @@ function getStatusBadge(status: AdminCaregiverProfile["status"]) {
   }
 }
 
-export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailViewProps) {
+export function AdminCaregiverDetailView({
+  caregiverId,
+  initialEditMode = false,
+}: AdminCaregiverDetailViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -149,6 +153,7 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
   const [profile, setProfile] = useState<AdminCaregiverProfile | null>(null);
   const [rawRecord, setRawRecord] = useState<CaregiverRecord | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(initialEditMode);
 
   // Modals
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -246,21 +251,45 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
     };
   }, []);
 
-  // Load consistent caregiver profile by ID & sync tab from URL query
+  // Load consistent caregiver profile by ID & sync tab from URL query with real-time intake updates
   useEffect(() => {
     setIsMounted(true);
-    const loadedProfile = getAdminCaregiverProfileById(caregiverId);
-    setProfile(loadedProfile);
 
-    // Also look up raw record for modal compatibility
-    const all = getCaregiversFromStorage();
-    let found = all.find((c) => c.id.toLowerCase() === caregiverId.toLowerCase());
-    if (!found) {
-      found =
-        INITIAL_CAREGIVERS.find((c) => c.id.toLowerCase() === caregiverId.toLowerCase()) ||
-        INITIAL_CAREGIVERS[0];
-    }
-    setRawRecord(found);
+    const refreshData = () => {
+      const loadedProfile = getAdminCaregiverProfileById(caregiverId);
+      setProfile(loadedProfile);
+
+      // Also look up raw record for modal compatibility
+      const all = getCaregiversFromStorage();
+      let found = all.find(
+        (c) =>
+          c.id.toLowerCase() === caregiverId.toLowerCase() ||
+          (c.id.replace(/\D/g, "") && c.id.replace(/\D/g, "") === caregiverId.replace(/\D/g, ""))
+      );
+      if (!found) {
+        found =
+          INITIAL_CAREGIVERS.find(
+            (c) =>
+              c.id.toLowerCase() === caregiverId.toLowerCase() ||
+              (c.id.replace(/\D/g, "") && c.id.replace(/\D/g, "") === caregiverId.replace(/\D/g, ""))
+          ) || INITIAL_CAREGIVERS[0];
+      }
+      setRawRecord(found);
+    };
+
+    refreshData();
+
+    // Subscribe to intake conversions and live entity updates
+    const unsubscribe = subscribeToIntakeSync(() => {
+      refreshData();
+    });
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "lilisare_caregivers_v1" || e.key === "lilisare_clients_records") {
+        refreshData();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
 
     const tabParam = searchParams.get("tab");
     if (tabParam) {
@@ -272,7 +301,17 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
       );
       if (match) setActiveTab(match.id);
     }
-  }, [caregiverId, searchParams]);
+
+    if (searchParams.get("mode") === "edit" || initialEditMode) {
+      setIsEditingProfile(true);
+      setActiveTab("profile");
+    }
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [caregiverId, searchParams, initialEditMode]);
 
   if (!isMounted || !profile) {
     return (
@@ -337,7 +376,7 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                 {profile.name}
               </h1>
-              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+              <span className="text-xs  font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
                 #{profile.numericId || profile.id}
               </span>
             </div>
@@ -371,14 +410,6 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
             <MessageSquare className="w-4 h-4 text-slate-400" />
             <span>Send Message</span>
           </button>
-
-          <Link
-            href={`/admin/caregivers/${caregiverId}/edit`}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer"
-          >
-            <Edit3 className="w-4 h-4 text-slate-400" />
-            <span>Edit Profile</span>
-          </Link>
         </div>
       </div>
 
@@ -419,8 +450,8 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
                 type="button"
                 onClick={() => handleSelectTab(tab.id)}
                 className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-all shrink-0 cursor-pointer whitespace-nowrap ${isActive
-                    ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                  ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
                   }`}
               >
                 <span>{tab.label}</span>
@@ -435,10 +466,10 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
                 type="button"
                 onClick={() => setIsMoreOpen(!isMoreOpen)}
                 className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold tracking-tight inline-flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${isOverflowActive
-                    ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
-                    : isMoreOpen
-                      ? "bg-slate-100 text-slate-900 border border-slate-300"
-                      : "text-slate-700 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 hover:text-slate-900"
+                  ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
+                  : isMoreOpen
+                    ? "bg-slate-100 text-slate-900 border border-slate-300"
+                    : "text-slate-700 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 hover:text-slate-900"
                   }`}
                 aria-expanded={isMoreOpen}
                 aria-label="More caregiver detail tabs"
@@ -472,8 +503,8 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
                           type="button"
                           onClick={() => handleSelectTab(tab.id)}
                           className={`w-full text-left px-3.5 py-2 text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-between ${isTabActive
-                              ? "bg-[#3D6B22]/10 text-[#3D6B22]"
-                              : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                            ? "bg-[#3D6B22]/10 text-[#3D6B22]"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                             }`}
                         >
                           <span>{tab.label}</span>
@@ -492,7 +523,14 @@ export function AdminCaregiverDetailView({ caregiverId }: AdminCaregiverDetailVi
       {/* 04. Tab Content Panel (All 13 Tabs) */}
       <div className="mt-2">
         {/* 1. PROFILE */}
-        {activeTab === "profile" && <CaregiverProfileTab profile={profile} />}
+        {activeTab === "profile" && (
+          <CaregiverProfileTab
+            profile={profile}
+            isEditing={isEditingProfile}
+            onToggleEdit={setIsEditingProfile}
+            onProfileUpdated={(updated) => setProfile(updated)}
+          />
+        )}
 
         {/* 2. CALENDAR */}
         {activeTab === "calendar" && (

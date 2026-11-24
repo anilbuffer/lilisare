@@ -337,9 +337,9 @@ export function ClockInOutCard({
 
               <div className="my-4 p-4 rounded-xl bg-blue-50 border border-blue-200 text-center">
                 <div className="text-xs text-blue-700 font-medium uppercase">Toll-Free EVV Clock-in Line</div>
-                <div className="text-xl font-mono font-bold text-blue-900 mt-1">1-800-555-EVV1 (3881)</div>
+                <div className="text-xl  font-bold text-blue-900 mt-1">1-800-555-EVV1 (3881)</div>
                 <div className="text-xs text-blue-700 mt-2">
-                  Caregiver ID Pin: <span className="font-mono font-bold text-gray-900">8842</span> • Client Pin: <span className="font-mono font-bold text-gray-900">101</span>
+                  Caregiver ID Pin: <span className=" font-bold text-gray-900">8842</span> • Client Pin: <span className=" font-bold text-gray-900">101</span>
                 </div>
               </div>
 

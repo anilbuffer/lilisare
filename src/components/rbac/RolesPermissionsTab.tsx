@@ -568,7 +568,7 @@ export function RolesPermissionsTab() {
                                 <div className="font-semibold text-slate-900 text-xs whitespace-nowrap flex items-center gap-1.5">
                                   {mod.name}
                                   <span
-                                    className={`text-[9px] px-1.5 py-0.5 rounded font-mono uppercase ${mod.category === "portal"
+                                    className={`text-[9px] px-1.5 py-0.5 rounded  uppercase ${mod.category === "portal"
                                       ? "bg-purple-100 text-purple-700"
                                       : "bg-slate-100 text-slate-600"
                                       }`}
@@ -749,7 +749,7 @@ export function RolesPermissionsTab() {
                       <div className="font-semibold text-slate-900 text-xs flex items-center gap-1.5">
                         {mod.name}
                         <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-mono uppercase ${mod.category === "portal"
+                          className={`text-[9px] px-1.5 py-0.5 rounded  uppercase ${mod.category === "portal"
                             ? "bg-purple-100 text-purple-700"
                             : "bg-slate-100 text-slate-600"
                             }`}
@@ -941,14 +941,14 @@ export function RolesPermissionsTab() {
                   CRITICAL: Modifying Platform Owner Super Admin Role
                 </div>
                 <p className="text-xs text-rose-700">
-                  Editing permissions for the Super Admin role modifies platform-owner capabilities. Type <span className="font-mono font-bold select-all">&quot;Super Admin&quot;</span> below to confirm.
+                  Editing permissions for the Super Admin role modifies platform-owner capabilities. Type <span className=" font-bold select-all">&quot;Super Admin&quot;</span> below to confirm.
                 </p>
                 <input
                   type="text"
                   placeholder="Type 'Super Admin' to confirm..."
                   value={superAdminConfirmInput}
                   onChange={(e) => setSuperAdminConfirmInput(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-rose-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-3 py-2 bg-white border border-rose-300 rounded-xl text-xs  font-bold focus:ring-2 focus:ring-rose-500"
                 />
               </div>
             )}

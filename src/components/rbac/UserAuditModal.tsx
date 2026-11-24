@@ -111,7 +111,7 @@ export function UserAuditModal({
                       <Shield className="w-3 h-3" />
                       {log.action}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
+                    <span className="text-xs text-slate-400  flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {new Date(log.timestamp).toLocaleString()}
                     </span>
@@ -131,7 +131,7 @@ export function UserAuditModal({
                   </div>
 
                   {log.diff && (
-                    <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-mono">
+                    <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs ">
                       <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">State Diff</div>
                       <div className="grid grid-cols-2 gap-2 text-slate-700">
                         {log.diff.before && (

@@ -80,7 +80,7 @@ export function VisitTaskChecklist({
                 <div>
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-bold text-xs text-gray-900">{med.medicationName} ({med.dosage})</span>
-                    <span className="text-[10px] font-mono font-semibold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px]  font-semibold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
                       Due {med.scheduleTime}
                     </span>
                   </div>

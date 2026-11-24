@@ -1,4 +1,5 @@
 import { CaregiverRecord } from "@/types/caregiver";
+import { getCaregiversFromStorage } from "@/lib/caregivers/mockData";
 
 export interface CaregiverAttributeDef {
   id: string;
@@ -186,6 +187,7 @@ export interface AdminCaregiverProfile extends AdminCaregiverItem {
     riskLevel: "High" | "Medium" | "Low";
     since: string;
     avatarInitials: string;
+    relationship?: string;
   }[];
   recentActivity: {
     title: string;
@@ -1594,16 +1596,191 @@ export const SEED_ADMIN_CAREGIVERS: AdminCaregiverProfile[] = [
   },
 ];
 
+function computeSortName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length > 1) {
+    return `${parts[parts.length - 1]}, ${parts.slice(0, -1).join(" ")}`;
+  }
+  return name;
+}
+
+function calculateAgeFromDob(dob?: string): number | undefined {
+  if (!dob) return undefined;
+  const birth = new Date(dob);
+  if (isNaN(birth.getTime())) return undefined;
+  const age = Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 3600 * 1000));
+  return age > 0 && age < 120 ? age : undefined;
+}
+
+export function mapCaregiverRecordToAdminProfile(
+  cg: CaregiverRecord,
+  seedMatch?: AdminCaregiverProfile
+): AdminCaregiverProfile {
+  const base = seedMatch || SEED_ADMIN_CAREGIVERS[0];
+  const sortName = seedMatch?.sortName || computeSortName(cg.name);
+
+  const role =
+    seedMatch?.role ||
+    (cg.type === "Family Caregiver"
+      ? "Family Caregiver"
+      : cg.type === "Live-In Caregiver"
+        ? "Live-In Attendant"
+        : cg.type === "Family Friend"
+          ? "Family Friend Caregiver"
+          : "Certified Caregiver Specialist");
+
+  let status: AdminCaregiverProfile["status"] = "Active";
+  if (cg.status === "Active") status = "Active";
+  else if (cg.status === "Onboarding" || cg.status === "Pending") status = "Onboarding";
+  else if (cg.status === "On Hold") status = "On Hold";
+  else status = "Inactive";
+
+  const calculatedAge = calculateAgeFromDob(cg.personalInfo?.dob);
+  const age = calculatedAge ?? seedMatch?.age ?? base.age ?? 38;
+
+  const addr = cg.personalInfo?.address;
+  const formattedAddress = addr
+    ? [addr.street, addr.city, [addr.state, addr.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ")
+    : (seedMatch?.address || base.address);
+
+  // Mapped assigned patients list from intake or assignments
+  let assignedPatientsList = seedMatch?.assignedPatientsList || [];
+  if (cg.availabilityAssignments?.assignedClient?.name) {
+    const ac = cg.availabilityAssignments.assignedClient;
+    const clientNameParts = ac.name.trim().split(" ");
+    const initials =
+      clientNameParts.length > 1
+        ? (clientNameParts[0][0] + clientNameParts[clientNameParts.length - 1][0]).toUpperCase()
+        : ac.name.slice(0, 2).toUpperCase();
+
+    assignedPatientsList = [
+      {
+        id: ac.id || "CL-1001",
+        name: ac.name,
+        relationship: ac.relationship || "Assigned Loved One",
+        schedule: `Weekly: ${ac.weeklyAuthorizedHours || 25} hrs • Mon - Fri`,
+        address: cg.relationship?.linkedHousehold?.address || formattedAddress || "Primary Household Residence",
+        riskLevel: "Medium",
+        since: "2026",
+        avatarInitials: initials,
+      },
+    ];
+  }
+
+  // Emergency contact mapping
+  const emContact = cg.personalInfo?.emergencyContact;
+  const emContactString = emContact?.name
+    ? `${emContact.name} (${emContact.relationship || "Primary Contact"}) - ${emContact.phone}`
+    : (seedMatch?.emergencyContact || base.emergencyContact);
+
+  const complianceRate =
+    cg.evvVisitHistory?.overallComplianceRate ||
+    (cg.verificationChecklist?.training === "Complete" ? 100 : cg.verificationChecklist?.cprFirstAid === "Verified" ? 95 : 85);
+
+  const classification = cg.employmentClassification || seedMatch?.classification || "W-2";
+  const employmentType = classification === "1099" ? "1099" : classification === "Family Paid Exempt" ? "Family Paid Exempt" : "W2";
+
+  return {
+    ...base,
+    id: cg.id,
+    numericId: seedMatch?.numericId || cg.id.replace(/\D/g, "") || base.numericId || "101",
+    name: cg.name,
+    sortName,
+    role,
+    status,
+    extStatus: seedMatch?.extStatus || (cg.status === "Active" ? "Active" : "In Review"),
+    administrator: seedMatch?.administrator || base.administrator || "Mackenzie Bertelsman",
+    gender: cg.personalInfo?.gender || seedMatch?.gender || base.gender || "Female",
+    classes: seedMatch?.classes || [role, "In-Home Caregiver"],
+    homePhone: cg.personalInfo?.secondaryPhone || seedMatch?.homePhone || base.homePhone || cg.personalInfo?.phone || "555-555-5555",
+    mobilePhone: cg.personalInfo?.phone || seedMatch?.mobilePhone || base.mobilePhone || "555-555-5555",
+    rating: seedMatch?.rating || 4.9,
+    complianceRate,
+    activePatients: assignedPatientsList.length,
+    lastActive: seedMatch?.lastActive || "Today",
+    phone: cg.personalInfo?.phone || seedMatch?.phone || base.phone,
+    email: cg.personalInfo?.email || seedMatch?.email || base.email,
+    location: formattedAddress,
+    address: formattedAddress,
+    age,
+    branch: cg.branch || seedMatch?.branch || base.branch || "Brentwood Hub",
+    classification,
+    tenure: seedMatch?.tenure || (cg.hireDate ? `Hired ${cg.hireDate}` : base.tenure),
+    emergencyContact: emContactString,
+    secondaryEmergencyContact: seedMatch?.secondaryEmergencyContact || (cg.relationship?.linkedHousehold?.name ? `${cg.relationship.linkedHousehold.name} Lead - ${cg.relationship.linkedHousehold.phone}` : undefined),
+    emergencyContactPhone: emContact?.phone || seedMatch?.emergencyContactPhone || base.emergencyContactPhone,
+    emergencyContactRelationship: emContact?.relationship || seedMatch?.emergencyContactRelationship || base.emergencyContactRelationship,
+    languages: cg.personalInfo?.languages?.length ? cg.personalInfo.languages : (seedMatch?.languages || base.languages),
+    hireDate: cg.hireDate || seedMatch?.hireDate || base.hireDate,
+    employmentType,
+    payRate: seedMatch?.payRate || (classification === "1099" ? "$32.00/hr" : "$28.50/hr"),
+    overtimeRate: seedMatch?.overtimeRate || (classification === "1099" ? "$48.00/hr" : "$42.75/hr"),
+    skills: seedMatch?.skills || base.skills || ["ADL Support", "Personal Care", "Meal Preparation", "Vital Signs Monitoring"],
+    licenseName: seedMatch?.licenseName || (cg.type === "Family Caregiver" ? "Family In-Home Caregiver Certification" : "Certified Nursing Assistant (CNA)"),
+    licenseIssuer: seedMatch?.licenseIssuer || base.licenseIssuer,
+    licenseNumber: seedMatch?.licenseNumber || `LIC-${cg.id.replace(/\D/g, "") || "98234"}`,
+    licenseExpires: seedMatch?.licenseExpires || base.licenseExpires,
+    cprStatus: cg.verificationChecklist?.cprFirstAid === "Verified" ? "Valid" : cg.verificationChecklist?.cprFirstAid === "Expiring" ? "Expiring Soon" : (seedMatch?.cprStatus || "Valid"),
+    cprExpires: cg.documentsCredentials?.cprExpiryDate || seedMatch?.cprExpires || base.cprExpires,
+    tbTestStatus: cg.documentsCredentials?.tbTestExpiryDate ? "Clear" : (seedMatch?.tbTestStatus || "Clear"),
+    tbExpires: cg.documentsCredentials?.tbTestExpiryDate || seedMatch?.tbExpires || base.tbExpires,
+    backgroundCheckStatus: cg.screeningTraining?.backgroundCheck?.status === "Cleared" ? "Cleared" : cg.screeningTraining?.backgroundCheck?.status === "In Review" ? "In Review" : (seedMatch?.backgroundCheckStatus || "Cleared"),
+    attributes: seedMatch?.attributes || base.attributes,
+    assignedPatientsList,
+    myAgency: {
+      ...base.myAgency,
+      appLoginEmail: cg.personalInfo?.email || seedMatch?.myAgency?.appLoginEmail || base.myAgency?.appLoginEmail || "caregiver@lilisare.health",
+      lastLogin: base.myAgency?.lastLogin || "Today, 08:30 AM",
+      appVersion: base.myAgency?.appVersion || "v2.8.4 (Latest)",
+      deviceType: base.myAgency?.deviceType || "iOS (iPhone 15 Pro)",
+      evvStatus: cg.evvVisitHistory?.isRestrictedEVV ? "Pending Setup" : "Authorized",
+      branchAffiliations: [cg.branch || base.branch || "Brentwood Hub"],
+    },
+    payroll: seedMatch?.payroll || {
+      periodEarnings: "$2,280.00",
+      hours: cg.availabilityAssignments?.weeklyCapacityHours || 40,
+      regularHours: cg.availabilityAssignments?.weeklyCapacityHours || 40,
+      overtimeHours: 0,
+      nextPayDate: "Next Friday",
+    },
+  };
+}
+
 export function getAdminCaregiverProfileById(id: string): AdminCaregiverProfile {
   const normId = id.toUpperCase().trim();
-  const match = SEED_ADMIN_CAREGIVERS.find(
+
+  // 1. Look for live record in persistent storage (e.g. from New Intake creation or Caregiver Registration)
+  let liveRecord: CaregiverRecord | undefined;
+  try {
+    const stored = getCaregiversFromStorage();
+    if (Array.isArray(stored)) {
+      liveRecord = stored.find(
+        (c) =>
+          c.id.toUpperCase() === normId ||
+          c.id.toLowerCase() === id.toLowerCase() ||
+          (c.id.replace(/\D/g, "") && c.id.replace(/\D/g, "") === id.replace(/\D/g, ""))
+      );
+    }
+  } catch {
+    // fallback if SSR or storage unavailable
+  }
+
+  // 2. Look for matching seed caregiver
+  const seedMatch = SEED_ADMIN_CAREGIVERS.find(
     (c) =>
       c.id.toUpperCase() === normId ||
       c.id.toLowerCase() === id.toLowerCase() ||
       (c.numericId && c.numericId === id) ||
       (c.numericId && normId === `CG-${c.numericId}`)
   );
-  if (match) return match;
+
+  // If live record exists, map and return it seamlessly synchronized
+  if (liveRecord) {
+    return mapCaregiverRecordToAdminProfile(liveRecord, seedMatch);
+  }
+
+  // If seed match exists
+  if (seedMatch) return seedMatch;
 
   // Fallback default
   return SEED_ADMIN_CAREGIVERS[0];

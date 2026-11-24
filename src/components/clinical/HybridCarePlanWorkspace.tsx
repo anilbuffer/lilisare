@@ -142,7 +142,7 @@ export function HybridCarePlanWorkspace({ patientId, templateId, initialMode, on
                     </div>
                     <span className="font-semibold text-sm text-slate-700">Audio Recording</span>
                   </div>
-                  <span className="text-xs font-mono text-slate-500 bg-slate-200 px-2 py-1 rounded-md">03:42 / 05:10</span>
+                  <span className="text-xs  text-slate-500 bg-slate-200 px-2 py-1 rounded-md">03:42 / 05:10</span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -189,7 +189,7 @@ export function HybridCarePlanWorkspace({ patientId, templateId, initialMode, on
                           {segment.confidence === "missing" && <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]" title="Unmapped" />}
                         </div>
                         <div>
-                          <div className="text-xs font-mono text-slate-400 mb-1">{segment.timestamp}</div>
+                          <div className="text-xs  text-slate-400 mb-1">{segment.timestamp}</div>
                           <p className={clsx(
                             "text-xs leading-relaxed",
                             isHovered ? "text-slate-900 font-medium" : "text-slate-600"
@@ -223,7 +223,7 @@ export function HybridCarePlanWorkspace({ patientId, templateId, initialMode, on
                     <div className="w-2 h-2 rounded-full bg-red-500" /> Missing / Unmapped
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={toggleRecordingNote}
                   className={clsx(
                     "hidden md:flex w-full py-2 border border-dashed rounded-xl font-medium text-xs transition-colors items-center justify-center gap-2",

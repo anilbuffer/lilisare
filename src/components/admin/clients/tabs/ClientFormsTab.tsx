@@ -127,7 +127,7 @@ export function ClientFormsTab({ client, onUpdateClient }: ClientFormsTabProps) 
             >
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-xs font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded">
+                  <span className=" text-xs font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded">
                     {f.id}
                   </span>
                   <h4 className="text-sm font-bold text-slate-900">{f.title}</h4>

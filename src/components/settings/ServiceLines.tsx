@@ -141,7 +141,7 @@ export function ServiceLines() {
               ) : (
                 filteredServices.map((svc, index) => (
                   <tr key={svc.id} className="hover:bg-slate-50/70 transition-colors group">
-                    <td className="px-5 py-3.5 font-mono text-slate-400 font-medium">
+                    <td className="px-5 py-3.5  text-slate-400 font-medium">
                       {svc.order || index + 1}
                     </td>
                     <td className="px-6 py-3.5">
@@ -157,7 +157,7 @@ export function ServiceLines() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 font-mono font-semibold text-slate-700">
+                    <td className="px-4 py-3.5  font-semibold text-slate-700">
                       <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200">
                         {svc.code}
                       </span>
@@ -172,10 +172,10 @@ export function ServiceLines() {
                     <td className="px-4 py-3.5 text-slate-600 font-medium whitespace-nowrap">
                       {svc.unitType}
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono text-slate-900 font-bold whitespace-nowrap">
+                    <td className="px-5 py-3.5 text-right  text-slate-900 font-bold whitespace-nowrap">
                       {svc.defaultBillRate}
                     </td>
-                    <td className="px-5 py-3.5 text-right font-mono text-slate-800 font-semibold whitespace-nowrap">
+                    <td className="px-5 py-3.5 text-right  text-slate-800 font-semibold whitespace-nowrap">
                       {svc.defaultPayRate}
                     </td>
                     <td className="px-5 py-3.5 text-center">

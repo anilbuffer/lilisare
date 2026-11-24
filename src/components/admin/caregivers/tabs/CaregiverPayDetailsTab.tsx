@@ -84,7 +84,7 @@ export function CaregiverPayDetailsTab({ profile }: CaregiverPayDetailsTabProps)
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900 mt-2 font-mono">
+          <p className="text-2xl font-bold text-slate-900 mt-2 ">
             {profile.payRate || "$28.50/hr"}
           </p>
           <p className="text-[11px] font-medium text-slate-400 mt-1">Standard clinical shift rate</p>
@@ -98,7 +98,7 @@ export function CaregiverPayDetailsTab({ profile }: CaregiverPayDetailsTabProps)
               <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900 mt-2 font-mono">
+          <p className="text-2xl font-bold text-slate-900 mt-2 ">
             {profile.overtimeRate || "$42.75/hr"}
           </p>
           <p className="text-[11px] font-medium text-slate-400 mt-1">Hours exceeding 40/week</p>
@@ -112,7 +112,7 @@ export function CaregiverPayDetailsTab({ profile }: CaregiverPayDetailsTabProps)
               <Calendar className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl font-bold text-slate-900 mt-2 font-mono">
+          <p className="text-2xl font-bold text-slate-900 mt-2 ">
             {profile.holidayRate || "$57.00/hr"}
           </p>
           <p className="text-[11px] font-medium text-slate-400 mt-1">Recognized state holidays</p>
@@ -173,10 +173,10 @@ export function CaregiverPayDetailsTab({ profile }: CaregiverPayDetailsTabProps)
                     </div>
                   </td>
                   <td className="py-3.5 px-4 text-slate-600 font-medium">{stub.payDate}</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-700">{stub.regularHours} hrs</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-700">{stub.overtimeHours} hrs</td>
-                  <td className="py-3.5 px-4 font-bold text-slate-900 font-mono">{stub.grossPay}</td>
-                  <td className="py-3.5 px-4 font-bold text-[#1E5622] font-mono">{stub.netPay}</td>
+                  <td className="py-3.5 px-4  text-slate-700">{stub.regularHours} hrs</td>
+                  <td className="py-3.5 px-4  text-slate-700">{stub.overtimeHours} hrs</td>
+                  <td className="py-3.5 px-4 font-bold text-slate-900 ">{stub.grossPay}</td>
+                  <td className="py-3.5 px-4 font-bold text-[#1E5622] ">{stub.netPay}</td>
                   <td className="py-3.5 px-4">
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -235,25 +235,25 @@ export function CaregiverPayDetailsTab({ profile }: CaregiverPayDetailsTabProps)
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Regular Shift Hours:</span>
-                  <span className="font-mono text-slate-800">{selectedPaystub.regularHours} hrs @ {profile.payRate || "$28.50"}/hr</span>
+                  <span className=" text-slate-800">{selectedPaystub.regularHours} hrs @ {profile.payRate || "$28.50"}/hr</span>
                 </div>
                 {selectedPaystub.overtimeHours > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500">Overtime Hours (1.5x):</span>
-                    <span className="font-mono text-purple-700 font-semibold">{selectedPaystub.overtimeHours} hrs @ {profile.overtimeRate || "$42.75"}/hr</span>
+                    <span className=" text-purple-700 font-semibold">{selectedPaystub.overtimeHours} hrs @ {profile.overtimeRate || "$42.75"}/hr</span>
                   </div>
                 )}
                 <div className="flex items-center justify-between pt-1 border-t border-slate-200/80">
                   <span className="text-slate-700 font-bold">Gross Earnings:</span>
-                  <span className="font-mono font-bold text-slate-900">{selectedPaystub.grossPay}</span>
+                  <span className=" font-bold text-slate-900">{selectedPaystub.grossPay}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500">Estimated Taxes & FICA:</span>
-                  <span className="font-mono text-rose-600 font-semibold">-$243.50</span>
+                  <span className=" text-rose-600 font-semibold">-$243.50</span>
                 </div>
                 <div className="flex items-center justify-between pt-1 border-t border-slate-200/80">
                   <span className="text-slate-900 font-extrabold text-sm">Net Deposit Amount:</span>
-                  <span className="font-mono font-extrabold text-[#1E5622] text-sm">{selectedPaystub.netPay}</span>
+                  <span className=" font-extrabold text-[#1E5622] text-sm">{selectedPaystub.netPay}</span>
                 </div>
               </div>
 

@@ -168,10 +168,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
           careNeeds: inq.careRequirements?.careType || ["ADL Support"],
           potentialCaregiver: inq.familyInfo?.potentialCaregiver
             ? {
-                name: inq.familyInfo.potentialCaregiver.name,
-                relationship: inq.familyInfo.potentialCaregiver.relationship,
-                phone: inq.familyInfo.potentialCaregiver.phone || inq.familyInfo.phone,
-              }
+              name: inq.familyInfo.potentialCaregiver.name,
+              relationship: inq.familyInfo.potentialCaregiver.relationship,
+              phone: inq.familyInfo.potentialCaregiver.phone || inq.familyInfo.phone,
+            }
             : undefined,
         }));
 
@@ -453,33 +453,33 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
         },
         ...(emergencyName && emergencyName !== contactName
           ? [
-              {
-                id: `RP-${newId}-2`,
-                name: emergencyName,
-                relationship: emergencyRel || "Family Contact",
-                phone: emergencyPhone || contactPhone || "(555) 000-0000",
-                email: "emergency@example.com",
-                address: `${address}, ${city}, ${state} ${zip}`,
-                isPrimaryDecisionMaker: false,
-                isBillingContact: false,
-                isEmergencyContact: true,
-                hipaaAuthorized: true,
-                notes: "Designated 24/7 backup contact.",
-              },
-            ]
+            {
+              id: `RP-${newId}-2`,
+              name: emergencyName,
+              relationship: emergencyRel || "Family Contact",
+              phone: emergencyPhone || contactPhone || "(555) 000-0000",
+              email: "emergency@example.com",
+              address: `${address}, ${city}, ${state} ${zip}`,
+              isPrimaryDecisionMaker: false,
+              isBillingContact: false,
+              isEmergencyContact: true,
+              hipaaAuthorized: true,
+              notes: "Designated 24/7 backup contact.",
+            },
+          ]
           : []),
       ],
       assignedCareTeam: {
         primaryCaregiver: caregiverName
           ? {
-              id: `CG-${nextNum}`,
-              name: caregiverName,
-              relationship: familyCaregiverRel,
-              classification: "W-2",
-              status: "Active",
-              phone: caregiverPhone || contactPhone,
-              email: contactEmail || "caregiver@example.com",
-            }
+            id: `CG-${nextNum}`,
+            name: caregiverName,
+            relationship: familyCaregiverRel,
+            classification: "W-2",
+            status: "Active",
+            phone: caregiverPhone || contactPhone,
+            email: contactEmail || "caregiver@example.com",
+          }
           : null,
         backupCaregiver: null,
         familyContact: {
@@ -675,20 +675,18 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                   }}
                 >
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                      isDone
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone
                         ? "bg-[#3D6B22] text-white shadow-sm"
                         : isCurrent
-                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
-                        : "bg-slate-100 text-slate-400 border border-slate-200"
-                    }`}
+                          ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                          : "bg-slate-100 text-slate-400 border border-slate-200"
+                      }`}
                   >
                     {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
                   </div>
                   <span
-                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${
-                      isCurrent ? "text-[#3D6B22]" : "text-slate-500"
-                    }`}
+                    className={`text-[11px] sm:text-xs mt-2 font-semibold truncate max-w-full ${isCurrent ? "text-[#3D6B22]" : "text-slate-500"
+                      }`}
                   >
                     {s.title}
                   </span>
@@ -723,18 +721,16 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                   handleSelectInquiry(CONVERTABLE_INQUIRIES[0]);
                 }
               }}
-              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
-                creationPath === "convert"
+              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${creationPath === "convert"
                   ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
                   : "border-slate-200 bg-slate-50/50 hover:bg-white"
-              }`}
+                }`}
             >
               <div
-                className={`p-2 rounded-xl shrink-0 ${
-                  creationPath === "convert"
+                className={`p-2 rounded-xl shrink-0 ${creationPath === "convert"
                     ? "bg-[#3D6B22] text-white shadow-xs"
                     : "bg-slate-200 text-slate-600"
-                }`}
+                  }`}
               >
                 <FolderInput className="w-4 h-4" />
               </div>
@@ -759,18 +755,16 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 setContactEmail("");
                 setAddress("");
               }}
-              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${
-                creationPath === "direct"
+              className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${creationPath === "direct"
                   ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
                   : "border-slate-200 bg-slate-50/50 hover:bg-white"
-              }`}
+                }`}
             >
               <div
-                className={`p-2 rounded-xl shrink-0 ${
-                  creationPath === "direct"
+                className={`p-2 rounded-xl shrink-0 ${creationPath === "direct"
                     ? "bg-[#3D6B22] text-white shadow-xs"
                     : "bg-slate-200 text-slate-600"
-                }`}
+                  }`}
               >
                 <UserPlus className="w-4 h-4" />
               </div>
@@ -797,14 +791,13 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     key={inq.id}
                     type="button"
                     onClick={() => handleSelectInquiry(inq)}
-                    className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
-                      selectedInquiryId === inq.id
+                    className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${selectedInquiryId === inq.id
                         ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs font-semibold ring-1 ring-[#3D6B22]"
                         : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-slate-500 font-bold">{inq.id}</span>
+                      <span className=" text-[10px] text-slate-500 font-bold">{inq.id}</span>
                       <span className="text-[10px] font-bold text-[#1E5622] bg-[#E3F1D9] px-2 py-0.5 rounded-full">
                         Ready
                       </span>
@@ -978,7 +971,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                         value={ssn}
                         onChange={(e) => setSsn(e.target.value)}
                         placeholder="964-72-9331"
-                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all font-mono placeholder:text-slate-400 text-slate-800"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all  placeholder:text-slate-400 text-slate-800"
                       />
                     </div>
                   </div>
@@ -1076,11 +1069,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                           key={method}
                           type="button"
                           onClick={() => setPreferredMethod(method)}
-                          className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
-                            preferredMethod === method
+                          className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${preferredMethod === method
                               ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                               : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                          }`}
+                            }`}
                         >
                           {method}
                         </button>
@@ -1317,18 +1309,16 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div
                     onClick={() => setHouseholdChoice("existing")}
-                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
-                      householdChoice === "existing"
+                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${householdChoice === "existing"
                         ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
                         : "border-slate-200 bg-slate-50/50 hover:bg-white"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${
-                        householdChoice === "existing"
+                      className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${householdChoice === "existing"
                           ? "border-[#3D6B22] bg-[#3D6B22] text-white"
                           : "border-slate-300 bg-white"
-                      }`}
+                        }`}
                     >
                       {householdChoice === "existing" && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
@@ -1340,18 +1330,16 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
 
                   <div
                     onClick={() => setHouseholdChoice("new")}
-                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${
-                      householdChoice === "new"
+                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${householdChoice === "new"
                         ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
                         : "border-slate-200 bg-slate-50/50 hover:bg-white"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${
-                        householdChoice === "new"
+                      className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${householdChoice === "new"
                           ? "border-[#3D6B22] bg-[#3D6B22] text-white"
                           : "border-slate-300 bg-white"
-                      }`}
+                        }`}
                     >
                       {householdChoice === "new" && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
@@ -1491,18 +1479,16 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                       <div
                         key={perm}
                         onClick={() => togglePermission(perm)}
-                        className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
-                          isChecked
+                        className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${isChecked
                             ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#1E5622] font-semibold ring-1 ring-[#3D6B22]/30 shadow-xs"
                             : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <span
-                          className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
-                            isChecked
+                          className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${isChecked
                               ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
                               : "border-slate-300 bg-white"
-                          }`}
+                            }`}
                         >
                           {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                         </span>
@@ -1546,11 +1532,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                       key={type}
                       type="button"
                       onClick={() => setCareType(type)}
-                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
-                        careType === type
+                      className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${careType === type
                           ? "border-[#3D6B22] bg-[#3D6B22]/10 text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.12)]"
                           : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
-                      }`}
+                        }`}
                     >
                       <span className="text-xs block font-semibold">{type}</span>
                     </button>
@@ -1628,11 +1613,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                         key={need}
                         type="button"
                         onClick={() => toggleCareNeed(need)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-                          isSelected
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${isSelected
                             ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
                             : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                        }`}
+                          }`}
                       >
                         {isSelected ? "✓ " : "+ "}
                         {need}
@@ -1709,11 +1693,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
-                          consentSigned
+                        className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${consentSigned
                             ? "bg-[#3D6B22] text-white border-[#3D6B22]"
                             : "border-slate-300 bg-white"
-                        }`}
+                          }`}
                       >
                         {consentSigned && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>
@@ -1727,11 +1710,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                       </div>
                     </div>
                     <span
-                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                        consentSigned
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${consentSigned
                           ? "bg-emerald-50 text-[#1E5622] border border-emerald-200"
                           : "bg-rose-50 text-rose-700 border border-rose-200"
-                      }`}
+                        }`}
                     >
                       {consentSigned ? "Signed & Attached" : "Pending Sign-off"}
                     </span>
@@ -1743,11 +1725,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${
-                          physicianOrderUploaded
+                        className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${physicianOrderUploaded
                             ? "bg-[#3D6B22] text-white border-[#3D6B22]"
                             : "border-slate-300 bg-white"
-                        }`}
+                          }`}
                       >
                         {physicianOrderUploaded && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                       </div>
@@ -1813,7 +1794,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                       value={medicaidNumber}
                       onChange={(e) => setMedicaidNumber(e.target.value)}
                       placeholder="MED-9647293"
-                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all font-mono text-slate-800"
+                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all  text-slate-800"
                     />
                   </div>
                 </div>
@@ -1967,7 +1948,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
             </h2>
             <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
               Generated unique Client ID{" "}
-              <strong className="font-mono text-slate-900">{createdClient.id}</strong>. Linked to{" "}
+              <strong className=" text-slate-900">{createdClient.id}</strong>. Linked to{" "}
               <strong className="text-slate-900">{createdClient.household.name}</strong>.
             </p>
           </div>

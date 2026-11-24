@@ -138,7 +138,7 @@ export function ClientRecentActivitySection({
                       {item.title}
                     </p>
                     <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                      <span className="font-mono text-slate-600 font-medium">{item.clientId}</span>
+                      <span className=" text-slate-600 font-medium">{item.clientId}</span>
                       <span> · </span>
                       <span>{item.actor}</span>
                     </p>

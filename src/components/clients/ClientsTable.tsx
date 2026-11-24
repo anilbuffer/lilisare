@@ -105,8 +105,8 @@ export function ClientsTable({
                     key={client.id}
                     onClick={() => onSelectClient(client)}
                     className={`group cursor-pointer transition-colors ${isSelected
-                        ? "bg-[#F2F8EE] border-l-4 border-l-[#3D6B22]"
-                        : "hover:bg-slate-50/80"
+                      ? "bg-[#F2F8EE] border-l-4 border-l-[#3D6B22]"
+                      : "hover:bg-slate-50/80"
                       }`}
                   >
                     {/* Client Name & ID */}
@@ -186,34 +186,34 @@ export function ClientsTable({
                         <span
                           title={`Profile: ${client.readiness.clientProfile}`}
                           className={`w-2 h-2 rounded-full ${client.readiness.clientProfile === "Complete"
-                              ? "bg-emerald-500"
-                              : "bg-amber-500"
+                            ? "bg-emerald-500"
+                            : "bg-amber-500"
                             }`}
                         />
                         <span
                           title={`Care: ${client.readiness.careArrangement}`}
                           className={`w-2 h-2 rounded-full ${client.readiness.careArrangement === "Complete"
-                              ? "bg-emerald-500"
-                              : "bg-amber-500"
+                            ? "bg-emerald-500"
+                            : "bg-amber-500"
                             }`}
                         />
                         <span
                           title={`Docs: ${client.readiness.documents}`}
                           className={`w-2 h-2 rounded-full ${client.readiness.documents === "Verified"
-                              ? "bg-emerald-500"
-                              : "bg-amber-500"
+                            ? "bg-emerald-500"
+                            : "bg-amber-500"
                             }`}
                         />
                         <span
                           title={`Auth: ${client.readiness.authorization}`}
                           className={`w-2 h-2 rounded-full ${client.readiness.authorization === "Verified"
-                              ? "bg-emerald-500"
-                              : client.readiness.authorization === "Expiring"
-                                ? "bg-rose-500"
-                                : "bg-amber-500"
+                            ? "bg-emerald-500"
+                            : client.readiness.authorization === "Expiring"
+                              ? "bg-rose-500"
+                              : "bg-amber-500"
                             }`}
                         />
-                        <span className="text-[11px] font-mono font-bold text-slate-600 ml-1">
+                        <span className="text-[11px]  font-bold text-slate-600 ml-1">
                           {client.readiness.overallScore ?? 85}%
                         </span>
                       </div>

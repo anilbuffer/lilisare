@@ -189,8 +189,8 @@ export function InsightsLiveActivityFeed() {
           <button
             onClick={() => setActiveTab("insights")}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeTab === "insights"
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-600 hover:text-slate-900"
               }`}
           >
             Insights List (4)
@@ -198,8 +198,8 @@ export function InsightsLiveActivityFeed() {
           <button
             onClick={() => setActiveTab("activity")}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${activeTab === "activity"
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-600 hover:text-slate-900"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-600 hover:text-slate-900"
               }`}
           >
             Live Activity List
@@ -270,7 +270,7 @@ export function InsightsLiveActivityFeed() {
                       <h4 className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-[#3D6B22] transition-colors truncate">
                         {act.type}
                       </h4>
-                      <span className="font-mono text-[11px] text-slate-500 font-medium">
+                      <span className=" text-[11px] text-slate-500 font-medium">
                         ({act.recordId})
                       </span>
                     </div>

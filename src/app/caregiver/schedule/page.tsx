@@ -198,7 +198,7 @@ export default function CaregiverSchedulePage() {
                           className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 text-xs space-y-1 cursor-pointer hover:bg-blue-100 transition-colors"
                         >
                           <span className="font-bold text-blue-950 block truncate">{s.client}</span>
-                          <span className="text-[11px] font-mono text-blue-800 flex items-center gap-1">
+                          <span className="text-[11px]  text-blue-800 flex items-center gap-1">
                             <Clock className="w-3 h-3 text-blue-600" /> {s.time}
                           </span>
                           <span className="text-[10px] bg-white text-blue-700 px-1.5 py-0.2 rounded font-medium inline-block border border-blue-100">
@@ -248,7 +248,7 @@ export default function CaregiverSchedulePage() {
 
                     <div className="p-2.5 rounded-xl bg-gray-50 text-xs space-y-1 font-medium">
                       <div className="text-gray-800 font-bold">{s.date}</div>
-                      <div className="text-gray-600 flex items-center gap-1 font-mono">
+                      <div className="text-gray-600 flex items-center gap-1 ">
                         <Clock className="w-3.5 h-3.5 text-blue-600" /> {s.timeWindow}
                       </div>
                     </div>

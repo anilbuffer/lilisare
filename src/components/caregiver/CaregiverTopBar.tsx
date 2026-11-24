@@ -75,7 +75,7 @@ export function CaregiverTopBar({
             </span>
             <span>Clocked In: <span className="font-bold">{activeClientName}</span></span>
             <span className="hidden sm:inline text-emerald-300">|</span>
-            <span className="font-mono bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded text-[11px]">
+            <span className=" bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded text-[11px]">
               {formatTimer(timerSeconds)}
             </span>
           </div>
@@ -93,8 +93,8 @@ export function CaregiverTopBar({
           onClick={onToggleOffline}
           title={isOffline ? "Currently in Offline Mode (Click to connect)" : "Online (Click to simulate rural offline)"}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${isOffline
-              ? "bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100"
-              : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+            ? "bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100"
+            : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
             }`}
         >
           {isOffline ? (

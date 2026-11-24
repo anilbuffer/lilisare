@@ -103,7 +103,7 @@ export function LiliSareJourneyRibbon() {
               className="group block bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 focus:outline-none"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-mono font-bold text-slate-400 group-hover:text-[#3D6B22] transition-colors">
+                <span className="text-[11px]  font-bold text-slate-400 group-hover:text-[#3D6B22] transition-colors">
                   {m.stageNumber}
                 </span>
                 <div className="p-1 rounded-md bg-slate-100 text-slate-600 group-hover:bg-[#3D6B22]/10 group-hover:text-[#3D6B22] transition-colors">

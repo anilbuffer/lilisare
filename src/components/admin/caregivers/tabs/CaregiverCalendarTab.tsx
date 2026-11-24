@@ -134,7 +134,7 @@ export function CaregiverCalendarTab({
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-3 text-xs font-bold text-slate-800 font-mono">
+            <span className="px-3 text-xs font-bold text-slate-800 ">
               {currentWeek}
             </span>
             <button
@@ -230,7 +230,7 @@ export function CaregiverCalendarTab({
                     <span className="text-sm font-bold text-slate-900 group-hover:text-[#1E5622] transition-colors">
                       {shift.client}
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold">
+                    <span className="text-[10px]  px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold">
                       {shift.clientId}
                     </span>
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -247,7 +247,7 @@ export function CaregiverCalendarTab({
                       <CalendarIcon className="w-3.5 h-3.5 text-slate-400" />
                       {shift.date}
                     </span>
-                    <span className="flex items-center gap-1.5 font-mono">
+                    <span className="flex items-center gap-1.5 ">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
                       {shift.time} ({shift.hours} hrs)
                     </span>

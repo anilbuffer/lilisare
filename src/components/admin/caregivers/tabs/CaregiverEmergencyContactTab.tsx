@@ -116,7 +116,7 @@ export function CaregiverEmergencyContactTab({
                   type="text"
                   value={primaryPhone}
                   onChange={(e) => setPrimaryPhone(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold  focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
                 />
               </div>
             </div>
@@ -132,7 +132,7 @@ export function CaregiverEmergencyContactTab({
               </div>
               <div className="flex items-center justify-between p-3 bg-slate-50/70 rounded-xl border border-slate-100">
                 <span className="text-slate-500 font-medium">Telephone:</span>
-                <span className="font-bold text-[#1E5622] font-mono text-sm">{primaryPhone}</span>
+                <span className="font-bold text-[#1E5622]  text-sm">{primaryPhone}</span>
               </div>
             </div>
           )}
@@ -186,7 +186,7 @@ export function CaregiverEmergencyContactTab({
                   type="text"
                   value={secondaryPhone}
                   onChange={(e) => setSecondaryPhone(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold  focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
                 />
               </div>
             </div>
@@ -202,7 +202,7 @@ export function CaregiverEmergencyContactTab({
               </div>
               <div className="flex items-center justify-between p-3 bg-slate-50/70 rounded-xl border border-slate-100">
                 <span className="text-slate-500 font-medium">Telephone:</span>
-                <span className="font-bold text-slate-900 font-mono text-sm">{secondaryPhone}</span>
+                <span className="font-bold text-slate-900  text-sm">{secondaryPhone}</span>
               </div>
             </div>
           )}

@@ -121,17 +121,17 @@ export function ClientAdlsTab({ client, onUpdateClient }: ClientAdlsTabProps) {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                    <span className=" text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                       {item.category}
                     </span>
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isTotal
-                          ? "bg-rose-100 text-rose-800 border border-rose-200"
-                          : isModerate
-                            ? "bg-amber-100 text-amber-800 border border-amber-200"
-                            : isMinimal
-                              ? "bg-blue-100 text-blue-800 border border-blue-200"
-                              : "bg-emerald-50 text-[#3D6B22] border border-emerald-200"
+                        ? "bg-rose-100 text-rose-800 border border-rose-200"
+                        : isModerate
+                          ? "bg-amber-100 text-amber-800 border border-amber-200"
+                          : isMinimal
+                            ? "bg-blue-100 text-blue-800 border border-blue-200"
+                            : "bg-emerald-50 text-[#3D6B22] border border-emerald-200"
                         }`}
                     >
                       {item.level}

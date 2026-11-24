@@ -668,7 +668,7 @@ export function UsersTab() {
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
-                  <div className="flex items-center gap-1 font-mono text-[11px]">
+                  <div className="flex items-center gap-1  text-[11px]">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
                     {user.last_login_at || "Never"}
                   </div>
@@ -890,7 +890,7 @@ export function UsersTab() {
               <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
                 Simulated Invite Activation Link
               </div>
-              <div className="text-xs font-mono text-brand-teal select-all break-all">
+              <div className="text-xs  text-brand-teal select-all break-all">
                 {inviteSuccessNotification.link}
               </div>
             </div>
@@ -1044,7 +1044,7 @@ export function UsersTab() {
                   <div className="font-semibold text-slate-800 truncate">
                     {item.moduleName}
                   </div>
-                  <div className="flex items-center gap-1.5 font-mono shrink-0 text-[11px]">
+                  <div className="flex items-center gap-1.5  shrink-0 text-[11px]">
                     <span
                       className={`px-1.5 py-0.5 rounded capitalize ${item.oldAccess === "none"
                         ? "bg-slate-100 text-slate-500"

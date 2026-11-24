@@ -203,7 +203,7 @@ export function CaregiverNoteListTab({ profile }: CaregiverNoteListTabProps) {
                 <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
                   {note.category}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">{note.date}</span>
+                <span className="text-xs text-slate-400 ">{note.date}</span>
               </div>
             </div>
 

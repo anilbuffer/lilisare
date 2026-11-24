@@ -330,7 +330,7 @@ export function HouseholdDetailView({
                 </div>
                 <div>
                   <span className="text-[11px] font-medium text-slate-400 block mb-0.5">Household Code</span>
-                  <span className="font-mono text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/70 inline-block mt-0.5">
+                  <span className=" text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/70 inline-block mt-0.5">
                     {household.code}
                   </span>
                 </div>
@@ -800,7 +800,7 @@ export function HouseholdDetailView({
                       <span className="text-[11px] text-slate-400 font-medium">{n.timestamp}</span>
                     </div>
                     <p className="text-xs text-slate-600 mt-1 leading-relaxed">{n.details}</p>
-                    <span className="text-[10px] text-slate-400 block mt-1 font-mono">
+                    <span className="text-[10px] text-slate-400 block mt-1 ">
                       Logged by {n.author} ({n.role})
                     </span>
                   </div>

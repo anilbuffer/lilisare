@@ -80,7 +80,7 @@ export function ShiftModal({
                 <div className="font-semibold text-sm">
                   Status: {shift.status}
                 </div>
-                <div className="text-sm font-mono opacity-80">{shift.shiftNumber}</div>
+                <div className="text-sm  opacity-80">{shift.shiftNumber}</div>
               </div>
 
               {/* Patient Info */}

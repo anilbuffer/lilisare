@@ -77,9 +77,8 @@ export function CaregiverRecentActivitySection({
               <div
                 key={item.id}
                 onClick={() => cgId && onSelectCaregiverId(cgId)}
-                className={`p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 ${
-                  cgId ? "cursor-pointer group" : ""
-                }`}
+                className={`p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all text-xs flex items-center justify-between gap-3 ${cgId ? "cursor-pointer group" : ""
+                  }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div
@@ -95,7 +94,7 @@ export function CaregiverRecentActivitySection({
                     <p className="text-[11px] text-slate-400 truncate mt-0.5">
                       {cgId && (
                         <>
-                          <span className="font-mono text-slate-600 font-medium">{cgId}</span>
+                          <span className=" text-slate-600 font-medium">{cgId}</span>
                           <span> · </span>
                         </>
                       )}

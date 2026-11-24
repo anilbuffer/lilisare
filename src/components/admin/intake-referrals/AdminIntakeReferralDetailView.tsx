@@ -275,7 +275,7 @@ export function AdminIntakeReferralDetailView({
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate sm:overflow-visible sm:whitespace-normal">
                 {referral.patientName}
               </h1>
-              <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded text-xs border border-slate-200/70">
+              <span className=" font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded text-xs border border-slate-200/70">
                 {referral.id}
               </span>
             </div>
@@ -453,7 +453,7 @@ export function AdminIntakeReferralDetailView({
                       <Activity className="w-3.5 h-3.5 text-[#3D6B22]" />
                       <span>Primary Clinical Diagnosis</span>
                     </span>
-                    <span className="text-[10px] font-mono font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <span className="text-[10px]  font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
                       ICD-10 Verified
                     </span>
                   </div>
@@ -599,7 +599,7 @@ export function AdminIntakeReferralDetailView({
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                       Household Hub
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <span className="text-[11px]  font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
                       {referral.householdCode || "HH-1002"}
                     </span>
                   </div>
@@ -629,7 +629,7 @@ export function AdminIntakeReferralDetailView({
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                       Client Profile
                     </span>
-                    <span className="text-[11px] font-mono font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <span className="text-[11px]  font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
                       {referral.clientId || "CL-1002"}
                     </span>
                   </div>
@@ -701,7 +701,7 @@ export function AdminIntakeReferralDetailView({
                     </span>
                   </div>
                   <div className="text-xs font-bold text-slate-900">{referral.payerName}</div>
-                  <div className="text-[11px] text-slate-500 font-mono">Prior Auth: AUTH-2026-PA-88419</div>
+                  <div className="text-[11px] text-slate-500 ">Prior Auth: AUTH-2026-PA-88419</div>
                 </div>
               </div>
             </div>
@@ -770,7 +770,7 @@ export function AdminIntakeReferralDetailView({
                       <span className="text-[10px] font-bold text-[#1E5622] bg-[#E8F2E4] px-2 py-0.5 rounded border border-[#3D6B22]/20 block mb-1">
                         {item.status}
                       </span>
-                      <span className="font-mono text-[9px] font-bold text-slate-400">
+                      <span className=" text-[9px] font-bold text-slate-400">
                         {item.badge}
                       </span>
                     </div>
@@ -903,7 +903,7 @@ export function AdminIntakeReferralDetailView({
                     Patient Identity & Family Contacts
                   </h3>
                 </div>
-                <span className="text-xs text-slate-500 font-mono font-bold">
+                <span className="text-xs text-slate-500  font-bold">
                   {referral.id}
                 </span>
               </div>
@@ -1144,7 +1144,7 @@ export function AdminIntakeReferralDetailView({
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-500 font-medium">Prior Authorization Code</span>
-                  <span className="font-mono font-bold text-[#3D6B22]">AUTH-2026-PA-88419</span>
+                  <span className=" font-bold text-[#3D6B22]">AUTH-2026-PA-88419</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-500 font-medium">Authorized Care Level</span>
@@ -1152,7 +1152,7 @@ export function AdminIntakeReferralDetailView({
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-slate-100">
                   <span className="text-slate-500 font-medium">Service Billing Code</span>
-                  <span className="font-mono font-bold text-slate-800">T1019 (Personal Care Assistance)</span>
+                  <span className=" font-bold text-slate-800">T1019 (Personal Care Assistance)</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-slate-500 font-medium">Patient Liability (Co-Pay)</span>

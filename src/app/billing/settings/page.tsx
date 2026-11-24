@@ -389,7 +389,7 @@ export default function BillingSettingsPage() {
                     type="text"
                     value={taxId}
                     onChange={(e) => setTaxId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-teal font-mono tracking-wider"
+                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-teal  tracking-wider"
                   />
                 </div>
 
@@ -399,7 +399,7 @@ export default function BillingSettingsPage() {
                     type="text"
                     value={npiNumber}
                     onChange={(e) => setNpiNumber(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-teal font-mono tracking-wider"
+                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-teal  tracking-wider"
                   />
                 </div>
 
@@ -409,7 +409,7 @@ export default function BillingSettingsPage() {
                     type="text"
                     value={taxonomyCode}
                     onChange={(e) => setTaxonomyCode(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-teal font-mono tracking-wider"
+                    className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-teal  tracking-wider"
                   />
                 </div>
               </div>

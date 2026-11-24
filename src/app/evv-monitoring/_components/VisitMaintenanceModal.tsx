@@ -32,14 +32,14 @@ export function VisitMaintenanceModal({ isOpen, onClose, onSave, exceptionType }
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100]"
             onClick={onClose}
           />
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -70,13 +70,12 @@ export function VisitMaintenanceModal({ isOpen, onClose, onSave, exceptionType }
                     <button
                       key={rc.code}
                       onClick={() => setSelectedCode(rc.code)}
-                      className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors ${
-                        selectedCode === rc.code 
-                          ? "bg-brand-teal/10 border-brand-teal text-brand-teal font-semibold" 
+                      className={`w-full text-left px-3 py-2.5 rounded-lg border text-sm transition-colors ${selectedCode === rc.code
+                          ? "bg-brand-teal/10 border-brand-teal text-brand-teal font-semibold"
                           : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                      }`}
+                        }`}
                     >
-                      <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-xs mr-2">{rc.code}</span>
+                      <span className=" bg-slate-100 px-1.5 py-0.5 rounded text-xs mr-2">{rc.code}</span>
                       {rc.label}
                     </button>
                   ))}
@@ -85,7 +84,7 @@ export function VisitMaintenanceModal({ isOpen, onClose, onSave, exceptionType }
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Resolution Note (Optional)</label>
-                <textarea 
+                <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Additional context for the aggregator..."
@@ -98,7 +97,7 @@ export function VisitMaintenanceModal({ isOpen, onClose, onSave, exceptionType }
               <button onClick={onClose} className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleSave}
                 disabled={!selectedCode}
                 className="px-4 py-2 bg-brand-teal hover:bg-brand-teal/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-lg shadow-brand-teal/20"

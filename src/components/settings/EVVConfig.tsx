@@ -23,7 +23,7 @@ export function EVVConfig() {
               <CheckCircle2 className="w-3.5 h-3.5" /> Connected
             </span>
           </div>
-          
+
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
               <Map className="w-6 h-6 text-slate-600" />
@@ -39,21 +39,21 @@ export function EVVConfig() {
               <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1 block">Aggregator Platform</label>
               <div className="font-semibold text-slate-900">HHAeXchange</div>
             </div>
-            
+
             <div className="pt-4 border-t border-slate-100 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Provider ID</label>
                 <div className="flex relative">
                   <Server className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                  <input type="text" readOnly value="PRV-849201" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-mono" />
+                  <input type="text" readOnly value="PRV-849201" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 " />
                 </div>
               </div>
-              
+
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">API Access Token</label>
                 <div className="flex relative">
                   <Key className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                  <input type="password" readOnly value="************************" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 font-mono" />
+                  <input type="password" readOnly value="************************" className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600 " />
                 </div>
               </div>
             </div>
@@ -69,7 +69,7 @@ export function EVVConfig() {
               <h4 className="font-semibold text-slate-800">Add Operating State</h4>
               <p className="text-sm text-slate-500 mt-1 max-w-[250px] mx-auto">Operating in multiple states? Add another state's EVV aggregator configuration.</p>
             </div>
-            <button 
+            <button
               onClick={() => {
                 setIsConnecting(true);
                 setTimeout(() => setIsConnecting(false), 1500);

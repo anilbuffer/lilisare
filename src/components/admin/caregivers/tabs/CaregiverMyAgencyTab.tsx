@@ -118,7 +118,7 @@ export function CaregiverMyAgencyTab({ profile }: CaregiverMyAgencyTabProps) {
             </div>
             <div className="flex items-center justify-between p-3 bg-slate-50/70 rounded-xl border border-slate-100">
               <span className="text-slate-500 font-medium">Installed Version:</span>
-              <span className="font-mono font-bold text-slate-800">{agencyData.appVersion}</span>
+              <span className=" font-bold text-slate-800">{agencyData.appVersion}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-slate-50/70 rounded-xl border border-slate-100">
               <span className="text-slate-500 font-medium">Hardware Model:</span>

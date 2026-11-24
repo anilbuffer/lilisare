@@ -161,7 +161,7 @@ export function ClientHealthcareTab({
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-xs bg-slate-200/80 text-slate-800 px-2 py-0.5 rounded">
+                    <span className=" font-bold text-xs bg-slate-200/80 text-slate-800 px-2 py-0.5 rounded">
                       {d.code}
                     </span>
                     <span
@@ -273,7 +273,7 @@ export function ClientHealthcareTab({
               value={orderForm.code}
               onChange={(e) => setOrderForm({ ...orderForm, code: e.target.value })}
               placeholder="e.g. G80.9"
-              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono text-slate-800 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm  text-slate-800 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
             />
           </div>
 

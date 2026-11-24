@@ -41,5 +41,5 @@ import { toast } from "sonner";
 import HouseholdsPage from "@/app/households/page";
 
 export default function IntakeHouseholdsPage() {
-  return <HouseholdsPage />;
+  return <HouseholdsPage initialViewMode="list" baseDetailsPath="/intake/households" />;
 }

@@ -192,13 +192,15 @@ export default function IntakeClientsPage() {
         needsAttentionCount={needsAttentionCount}
       />
 
-      {/* 03. Main Interactive Workspace (Kanban / Table / Grid) */}
+      {/* 03. Main Interactive Workspace (Default List View with Kanban toggle) */}
       <ClientManagementWorkspace
         clients={clients}
         selectedStatusFilter={selectedStatus}
         onSelectStatusFilter={setSelectedStatus}
         selectedClientId={selectedClient?.id ?? null}
         onSelectClient={handleSelectClient}
+        baseDetailsPath="/intake/clients"
+        initialViewMode="list"
       />
 
       {/* 04. Contextual Quick-Profile Drawer */}

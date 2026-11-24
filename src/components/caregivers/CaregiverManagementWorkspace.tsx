@@ -47,6 +47,7 @@ interface CaregiverManagementWorkspaceProps {
   activeAttentionCategory: string | null;
   onClearAttentionCategory: () => void;
   baseDetailsPath?: string;
+  initialViewMode?: "kanban" | "list";
 }
 
 // 8 Required Columns for the Caregiver Kanban Board
@@ -183,6 +184,7 @@ export function CaregiverManagementWorkspace({
   activeAttentionCategory,
   onClearAttentionCategory,
   baseDetailsPath = "/caregivers",
+  initialViewMode = "list",
 }: CaregiverManagementWorkspaceProps) {
   const router = useRouter();
 
@@ -192,8 +194,8 @@ export function CaregiverManagementWorkspace({
     setItems(initialCaregivers);
   }, [initialCaregivers]);
 
-  // View Mode: Supports both a proper Kanban board view and a List view (default: kanban matching /intake/pipeline)
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
+  // View Mode: Supports both a proper Kanban board view and a List view (default: list view for fast scanning)
+  const [viewMode, setViewMode] = useState<"kanban" | "list">(initialViewMode);
   const [searchQuery, setSearchQuery] = useState("");
   const [tabFilter, setTabFilter] = useState<string>("ALL");
 

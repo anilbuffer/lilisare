@@ -159,14 +159,23 @@ export function resolveHouseholdStage(
   return "On Hold / Inactive";
 }
 
-export default function HouseholdsPage() {
+interface HouseholdsPageProps {
+  initialViewMode?: "kanban" | "list";
+  baseDetailsPath?: string;
+}
+
+export default function HouseholdsPage({
+  initialViewMode = "list",
+  baseDetailsPath = "/households",
+}: HouseholdsPageProps = {}) {
   const router = useRouter();
+  const cleanBasePath = baseDetailsPath.replace(/\/$/, "");
 
   const [householdsList, setHouseholdsList] = useState<Household[]>(MOCK_HOUSEHOLDS);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState("all");
   const [selectedTab, setSelectedTab] = useState<string>("ALL");
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
+  const [viewMode, setViewMode] = useState<"kanban" | "list">(initialViewMode);
   const [stageOverrides, setStageOverrides] = useState<Record<string, HouseholdKanbanStage>>({});
 
   // Dropdown states for header controls & stage filters
@@ -414,7 +423,7 @@ export default function HouseholdsPage() {
 
           {/* Register Household CTA (Dedicated Action) */}
           <Link
-            href="/households/new"
+            href={`${cleanBasePath}/new`}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white text-xs font-bold rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] transition-all active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4 text-white" />
@@ -744,7 +753,7 @@ export default function HouseholdsPage() {
                                 key={hh.id}
                                 draggable
                                 onDragStart={(e) => handleDragStart(e, hh.id)}
-                                onClick={() => router.push(`/households/${hh.id}`)}
+                                onClick={() => router.push(`${cleanBasePath}/${hh.id}`)}
                                 className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
                                   }`}
                               >
@@ -867,7 +876,7 @@ export default function HouseholdsPage() {
                       return (
                         <tr
                           key={hh.id}
-                          onClick={() => router.push(`/households/${hh.id}`)}
+                          onClick={() => router.push(`${cleanBasePath}/${hh.id}`)}
                           className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                         >
                           <td className="py-3 px-4">
@@ -904,7 +913,7 @@ export default function HouseholdsPage() {
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Link
-                              href={`/households/${hh.id}`}
+                              href={`${cleanBasePath}/${hh.id}`}
                               className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
                             >
                               <span>Details</span>

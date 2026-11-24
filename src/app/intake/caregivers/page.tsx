@@ -206,7 +206,7 @@ export default function IntakeCaregiversPage() {
         needsAttentionCount={needsAttentionCount}
       />
 
-      {/* 03. Caregiver Directory Management Workspace (Flowing the Kanban Board & Cards/List approach) */}
+      {/* 03. Caregiver Directory Management Workspace (Default List View with Kanban toggle) */}
       <div id="intake-caregiver-directory-anchor">
         <CaregiverManagementWorkspace
           caregivers={caregivers}
@@ -216,7 +216,8 @@ export default function IntakeCaregiversPage() {
           onSelectCaregiver={handleSelectCaregiver}
           activeAttentionCategory={activeAttentionCategory}
           onClearAttentionCategory={() => setActiveAttentionCategory(null)}
-          baseDetailsPath="/caregivers"
+          baseDetailsPath="/intake/caregivers"
+          initialViewMode="list"
         />
       </div>
 

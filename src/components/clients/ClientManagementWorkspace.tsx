@@ -142,6 +142,8 @@ interface ClientManagementWorkspaceProps {
   onSelectStatusFilter: (status: string | null) => void;
   selectedClientId: string | null;
   onSelectClient: (client: ClientRecord) => void;
+  baseDetailsPath?: string;
+  initialViewMode?: "kanban" | "list";
 }
 
 const CARE_TYPE_OPTIONS = [
@@ -167,13 +169,17 @@ export function ClientManagementWorkspace({
   onSelectStatusFilter,
   selectedClientId,
   onSelectClient,
+  baseDetailsPath = "/clients",
+  initialViewMode = "list",
 }: ClientManagementWorkspaceProps) {
   const router = useRouter();
 
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
+  const [viewMode, setViewMode] = useState<"kanban" | "list">(initialViewMode);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCareType, setSelectedCareType] = useState("ALL");
   const [stageOverrides, setStageOverrides] = useState<Record<string, ClientKanbanStage>>({});
+
+  const cleanBasePath = baseDetailsPath.replace(/\/$/, "");
 
   // Dropdown & interactive drag states
   const [isStageDropdownOpen, setIsStageDropdownOpen] = useState(false);
@@ -577,7 +583,7 @@ export function ClientManagementWorkspace({
                               key={client.id}
                               draggable
                               onDragStart={(e) => handleDragStart(e, client.id)}
-                              onClick={() => router.push(`/clients/${client.id}`)}
+                              onClick={() => router.push(`${cleanBasePath}/${client.id}`)}
                               className={`group text-left focus:outline-none cursor-pointer w-full bg-white rounded-xl p-3 border border-slate-200 shadow-xs hover:shadow-md hover:border-[#3D6B22]/50 transition-all duration-200 relative overflow-hidden flex flex-col justify-between select-none ${isDragging ? "opacity-40 scale-95 ring-2 ring-[#3D6B22]" : ""
                                 }`}
                             >
@@ -709,7 +715,7 @@ export function ClientManagementWorkspace({
                     return (
                       <tr
                         key={client.id}
-                        onClick={() => router.push(`/clients/${client.id}`)}
+                        onClick={() => router.push(`${cleanBasePath}/${client.id}`)}
                         className="group cursor-pointer hover:bg-slate-50/80 transition-colors"
                       >
                         {/* Client Name & ID */}
@@ -790,13 +796,13 @@ export function ClientManagementWorkspace({
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
-                              onClick={() => router.push(`/clients/${client.id}`)}
+                              onClick={() => router.push(`${cleanBasePath}/${client.id}`)}
                               className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-[#F2F8EE] hover:text-[#3D6B22] border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
                             >
                               Details
                             </button>
                             <Link
-                              href={`/clients/${client.id}`}
+                              href={`${cleanBasePath}/${client.id}`}
                               className="p-1.5 text-slate-400 hover:text-[#3D6B22] transition-colors rounded-xl hover:bg-[#F2F8EE]"
                               title="Full Profile"
                             >

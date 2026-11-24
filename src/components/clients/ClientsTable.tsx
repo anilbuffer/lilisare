@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Users,
   Home,
@@ -27,6 +28,17 @@ export function ClientsTable({
   selectedClientId,
   onSelectClient,
 }: ClientsTableProps) {
+  const pathname = usePathname();
+
+  const getClientDetailPath = (id: string) => {
+    if (pathname.startsWith("/scheduler")) return `/scheduler/clients/${id}`;
+    if (pathname.startsWith("/hr")) return `/hr/clients/${id}`;
+    if (pathname.startsWith("/field-supervisor")) return `/field-supervisor/clients/${id}`;
+    if (pathname.startsWith("/intake")) return `/intake/clients/${id}`;
+    if (pathname.startsWith("/admin")) return `/admin/clients/${id}`;
+    return `/clients/${id}`;
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Active":
@@ -233,7 +245,7 @@ export function ClientsTable({
                           Quick View
                         </button>
                         <Link
-                          href={`/clients/${client.id}`}
+                          href={getClientDetailPath(client.id)}
                           className="p-1 text-slate-400 hover:text-[#3D6B22] transition-colors rounded-lg hover:bg-[#F2F8EE]"
                           title="Full Profile"
                         >

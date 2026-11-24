@@ -91,7 +91,11 @@ export function Modal({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 p-4 sm:p-5 shrink-0 bg-white z-10">
               <div className="flex items-center gap-3">
-                {icon && <div className="shrink-0">{icon}</div>}
+                {icon && (
+                  <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+                    {icon}
+                  </div>
+                )}
                 <div>
                   <h3 className="font-bold text-slate-900 text-base sm:text-lg tracking-tight">{title}</h3>
                   {description && (

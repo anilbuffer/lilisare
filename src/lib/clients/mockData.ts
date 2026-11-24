@@ -4,6 +4,7 @@ import {
   ClientStatus,
   CareArrangementType,
 } from "@/types/client";
+import { JOHNNY_CASH_CLIENT, enrichClientWith17Domains } from "./enterpriseClientEnricher";
 
 export const INITIAL_CLIENTS: ClientRecord[] = [
   {
@@ -92,7 +93,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
       overallScore: 92,
     },
     carePlan: {
-      program: "CES Waiver (Children’s Extensive Support)",
+      program: "Pediatric In-Home Care",
       approvedServices: [
         "Personal Care / ADL Support",
         "Sensory Regulation & Behavioral Coaching",
@@ -1492,6 +1493,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     updatedAt: "2025-01-15T10:00:00Z",
     updatedAtRelative: "Discharged",
   },
+  JOHNNY_CASH_CLIENT,
 ];
 
 // Helper to get all clients with localStorage persistence
@@ -1504,7 +1506,14 @@ export function getClientsFromStorage(): ClientRecord[] {
       return INITIAL_CLIENTS;
     }
     const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_CLIENTS;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      // Ensure Johnny Cash exists
+      if (!parsed.some((c: ClientRecord) => c.id === "CL-1010")) {
+        parsed.push(JOHNNY_CASH_CLIENT);
+      }
+      return parsed;
+    }
+    return INITIAL_CLIENTS;
   } catch {
     return INITIAL_CLIENTS;
   }
@@ -1525,8 +1534,18 @@ export function saveClientsToStorage(clients: ClientRecord[]): void {
 }
 
 export function getClientById(id: string): ClientRecord | undefined {
+  if (id === "CL-1010" || id.toLowerCase() === "johnny-cash") {
+    return JOHNNY_CASH_CLIENT;
+  }
   const clients = getClientsFromStorage();
-  return clients.find((c) => c.id === id);
+  const found = clients.find((c) => c.id === id || c.id.toLowerCase() === id.toLowerCase());
+  if (found) {
+    return enrichClientWith17Domains(found);
+  }
+  if (id === "[id]" || id === "default") {
+    return JOHNNY_CASH_CLIENT;
+  }
+  return undefined;
 }
 
 // Convertable Inquiries for the Add Client wizard (from Intake/Referrals)

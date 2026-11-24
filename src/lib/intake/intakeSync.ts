@@ -20,6 +20,7 @@ import {
 } from "@/lib/caregivers/mockData";
 import { ClientRecord } from "@/types/client";
 import { CaregiverRecord } from "@/types/caregiver";
+import { enrichClientWith17Domains } from "@/lib/clients/enterpriseClientEnricher";
 
 export const INTAKE_STORAGE_KEY = "lilisare_intake_inquiries";
 export const INTAKE_SYNC_EVENT = "lilisare_intake_sync";
@@ -111,16 +112,36 @@ export function convertInquiryToLiveEntities(
   // 1. Create or link Client in Agency Admin
   if (options.createClient) {
     const clients = getClientsFromStorage();
-    createdClient = {
+    const rawName = inquiry.familyInfo.clientInfo.name || "Client Name";
+    const nameParts = rawName.trim().split(" ");
+    const firstName = nameParts[0] || "Client";
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "Recipient";
+    const clientGender = inquiry.familyInfo.clientInfo.gender || "Female";
+    const autoTitle = clientGender === "Female" ? "Ms." : "Mr.";
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const assignedAdmin =
+      inquiry.referralInfo?.assignedCoordinator?.name ||
+      "Dana Jenkins, MSW";
+    const region = inquiry.branch || "North Metro";
+    const referredBySource =
+      (inquiry.referralInfo?.source || inquiry.source || "Intake Referral") +
+      (inquiry.referralInfo?.organization ? ` (${inquiry.referralInfo.organization})` : "");
+    const medicaidNo = `MED-${randomSuffix}93`;
+
+    const rawClient: ClientRecord = {
       id: newClientId,
-      name: inquiry.familyInfo.clientInfo.name,
-      preferredName: inquiry.familyInfo.clientInfo.name.split(" ")[0],
+      title: autoTitle,
+      firstName,
+      lastName,
+      name: rawName,
+      preferredName: firstName,
       avatarUrl: "https://images.unsplash.com/photo-1543332164-6e82f355badc?auto=format&fit=crop&q=80&w=200",
       dob: inquiry.familyInfo.clientInfo.dob || "1980-01-01",
       age: inquiry.familyInfo.clientInfo.age || 45,
-      gender: inquiry.familyInfo.clientInfo.gender || "Female",
+      gender: clientGender,
       primaryLanguage: inquiry.familyInfo.clientInfo.primaryLanguage || "English",
-      status: "Onboarding",
+      ssn: `***-**-${randomSuffix}`,
+      status: "Active",
       careType: "Family Care",
       household: {
         id: newHouseholdId,
@@ -132,6 +153,42 @@ export function convertInquiryToLiveEntities(
         zip: inquiry.familyInfo.householdLocation.zip,
         phone: inquiry.familyInfo.phone,
         totalMembersCount: 2,
+      },
+      agencyInfo: {
+        status: "Active",
+        leadCreatedDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        initialAssessmentDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        conversionDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        startDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        effectiveEndDate: "12/31/2026",
+        administrator: assignedAdmin,
+        regionCode: region,
+        referredBy: referredBySource,
+        medicaidNumber: medicaidNo,
+        preferredCaregiver: inquiry.familyInfo.potentialCaregiver?.name || "Wilson Martin",
+        adminAlerts: {
+          disableClockInAlert: false,
+          disableClockOutAlert: false,
+        },
+        invoicingId: `INV-${newClientId}`,
+      },
+      residentialAddress: {
+        name: rawName,
+        address: inquiry.familyInfo.householdLocation.address,
+        address2: "",
+        city: inquiry.familyInfo.householdLocation.city,
+        state: inquiry.familyInfo.householdLocation.state,
+        zip: inquiry.familyInfo.householdLocation.zip,
+        verified: true,
+      },
+      billingAddress: {
+        sameAsResidential: true,
+        name: inquiry.familyInfo.primaryContact || rawName,
+        address: inquiry.familyInfo.householdLocation.address,
+        address2: "",
+        city: inquiry.familyInfo.householdLocation.city,
+        state: inquiry.familyInfo.householdLocation.state,
+        zip: inquiry.familyInfo.householdLocation.zip,
       },
       primaryContact: {
         name: inquiry.familyInfo.primaryContact,
@@ -145,6 +202,21 @@ export function convertInquiryToLiveEntities(
         relationship: inquiry.familyInfo.relationship,
         phone: inquiry.familyInfo.phone,
       },
+      responsibleParties: [
+        {
+          id: `RP-${newClientId}-1`,
+          name: inquiry.familyInfo.primaryContact,
+          relationship: inquiry.familyInfo.relationship,
+          phone: inquiry.familyInfo.phone,
+          email: inquiry.familyInfo.email,
+          address: `${inquiry.familyInfo.householdLocation.address}, ${inquiry.familyInfo.householdLocation.city}, ${inquiry.familyInfo.householdLocation.state}`,
+          isPrimaryDecisionMaker: true,
+          isBillingContact: true,
+          isEmergencyContact: true,
+          hipaaAuthorized: true,
+          notes: "Primary authorized representative from intake referral.",
+        },
+      ],
       assignedCareTeam: {
         primaryCaregiver: inquiry.familyInfo.potentialCaregiver?.name
           ? {
@@ -165,7 +237,7 @@ export function convertInquiryToLiveEntities(
           phone: inquiry.familyInfo.phone,
           email: inquiry.familyInfo.email,
         },
-        caseManager: inquiry.referralInfo.caseManager
+        caseManager: inquiry.referralInfo?.caseManager
           ? {
               name: inquiry.referralInfo.caseManager.name,
               agency: inquiry.referralInfo.caseManager.agency || "State Medicaid Agency",
@@ -182,17 +254,17 @@ export function convertInquiryToLiveEntities(
         overallScore: 65,
       },
       carePlan: {
-        program: inquiry.careRequirements.programInterest || "Pediatric In-Home Care (Medicaid EPSDT)",
-        approvedServices: inquiry.careRequirements.careType || ["Personal Care", "Companion Support"],
-        authorizedWeeklyHours: inquiry.careRequirements.hoursPerWeek || 25,
+        program: inquiry.careRequirements?.programInterest || "Pediatric In-Home Care (Medicaid EPSDT)",
+        approvedServices: inquiry.careRequirements?.careType || ["Personal Care", "Companion Support"],
+        authorizedWeeklyHours: inquiry.careRequirements?.hoursPerWeek || 25,
         scheduledWeeklyHours: 0,
         hoursUsedThisWeek: 0,
         effectiveDate: new Date().toISOString().slice(0, 10),
         reviewDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
         needsReview: false,
         frequency: "Monday - Friday",
-        careNeeds: inquiry.careRequirements.careType || ["ADL Support"],
-        specialInstructions: inquiry.careRequirements.supportRequirements || "Standard ADL support",
+        careNeeds: inquiry.careRequirements?.careType || ["ADL Support"],
+        specialInstructions: inquiry.careRequirements?.supportRequirements || "Standard ADL support",
         mobilityNotes: inquiry.familyInfo.clientInfo.mobilityNotes || "Needs standby assistance",
         dietaryRestrictions: "None reported",
         allergies: [],
@@ -200,17 +272,17 @@ export function convertInquiryToLiveEntities(
       },
       authorization: {
         authNumber: `AUTH-${Math.floor(7000 + Math.random() * 500)}`,
-        payer: inquiry.careRequirements.programInterest || "Georgia Medicaid Waiver (CCSP)",
+        payer: inquiry.careRequirements?.programInterest || "Georgia Medicaid Waiver (CCSP)",
         status: "Pending Renewal",
         startDate: new Date().toISOString().slice(0, 10),
         expiryDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
         daysUntilExpiry: 180,
-        totalUnitsApproved: (inquiry.careRequirements.hoursPerWeek || 25) * 4 * 6,
+        totalUnitsApproved: (inquiry.careRequirements?.hoursPerWeek || 25) * 4 * 6,
         unitsUsed: 0,
-        unitsRemaining: (inquiry.careRequirements.hoursPerWeek || 25) * 4 * 6,
-        weeklyHourCap: inquiry.careRequirements.hoursPerWeek || 25,
-        caseManagerName: inquiry.referralInfo.caseManager?.name || "Assigned Case Manager",
-        caseManagerAgency: inquiry.referralInfo.caseManager?.agency || "State Medicaid DHS",
+        unitsRemaining: (inquiry.careRequirements?.hoursPerWeek || 25) * 4 * 6,
+        weeklyHourCap: inquiry.careRequirements?.hoursPerWeek || 25,
+        caseManagerName: inquiry.referralInfo?.caseManager?.name || "Assigned Case Manager",
+        caseManagerAgency: inquiry.referralInfo?.caseManager?.agency || "State Medicaid DHS",
       },
       documents: [],
       householdMembers: [
@@ -251,6 +323,8 @@ export function convertInquiryToLiveEntities(
       updatedAtRelative: "Just now",
       convertedFromInquiryId: inquiry.id,
     };
+
+    createdClient = enrichClientWith17Domains(rawClient);
     saveClientsToStorage([createdClient, ...clients]);
   }
 

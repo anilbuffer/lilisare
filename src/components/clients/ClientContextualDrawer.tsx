@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -39,6 +39,16 @@ export function ClientContextualDrawer({
   onEditClient,
 }: ClientContextualDrawerProps) {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const getClientDetailPath = (id: string) => {
+    if (pathname.startsWith("/scheduler")) return `/scheduler/clients/${id}`;
+    if (pathname.startsWith("/hr")) return `/hr/clients/${id}`;
+    if (pathname.startsWith("/field-supervisor")) return `/field-supervisor/clients/${id}`;
+    if (pathname.startsWith("/intake")) return `/intake/clients/${id}`;
+    if (pathname.startsWith("/admin")) return `/admin/clients/${id}`;
+    return `/clients/${id}`;
+  };
 
   if (!isOpen || !client) return null;
 
@@ -371,7 +381,7 @@ export function ClientContextualDrawer({
           {/* Footer Actions */}
           <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center gap-3">
             <Link
-              href={`/clients/${client.id}`}
+              href={getClientDetailPath(client.id)}
               className="flex-1 flex items-center justify-center gap-2 bg-[#1B3414] hover:bg-[#274C1D] text-white py-2.5 px-4 rounded-xl text-xs font-bold transition-colors shadow-sm"
             >
               <span>View Full Profile</span>

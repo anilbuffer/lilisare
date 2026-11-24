@@ -29,6 +29,8 @@ import {
   User,
   Building2,
   Globe,
+  Lock,
+  CreditCard,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import {
@@ -42,6 +44,9 @@ import { ClientRecord, CareArrangementType, ClientStatus } from "@/types/client"
 import { VoiceDictationBanner } from "@/components/ui/VoiceDictationBanner";
 import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
+import { getIntakeInquiriesFromStorage } from "@/lib/intake/intakeSync";
+import { enrichClientWith17Domains } from "@/lib/clients/enterpriseClientEnricher";
+import { InquiryRecord } from "@/types/intake";
 
 interface AddClientPageProps {
   baseBackPath?: string;
@@ -55,21 +60,39 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
   const [creationPath, setCreationPath] = useState<"direct" | "convert">("convert");
   const [selectedInquiryId, setSelectedInquiryId] = useState<string>("INQ-1042");
 
-  // Step 1: Personal & Contact Information
+  // Step 1: Personal & Contact Information (Synchronized with Card 1: Personal Information)
+  const [title, setTitle] = useState("Mr.");
   const [clientName, setClientName] = useState("");
   const [preferredName, setPreferredName] = useState("");
   const [dob, setDob] = useState("");
   const [gender, setGender] = useState("Male");
   const [primaryLanguage, setPrimaryLanguage] = useState("English");
+  const [ssn, setSsn] = useState("964-72-9331");
+
+  // Primary Contact
   const [contactName, setContactName] = useState("");
   const [contactRelationship, setContactRelationship] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [preferredMethod, setPreferredMethod] = useState<"Phone" | "Email" | "SMS">("Phone");
+
+  // Residential Address (Card 3: Residential Address)
   const [address, setAddress] = useState("");
+  const [address2, setAddress2] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("OR");
   const [zip, setZip] = useState("");
+
+  // Billing Address (Card 4: Billing Address)
+  const [billingSameAsResidential, setBillingSameAsResidential] = useState(true);
+  const [billingName, setBillingName] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
+  const [billingAddress2, setBillingAddress2] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+  const [billingState, setBillingState] = useState("OR");
+  const [billingZip, setBillingZip] = useState("");
+
+  // Emergency Contact
   const [emergencyName, setEmergencyName] = useState("");
   const [emergencyRel, setEmergencyRel] = useState("");
   const [emergencyPhone, setEmergencyPhone] = useState("");
@@ -102,16 +125,68 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
     "Sensory Regulation Support",
   ]);
 
-  // Step 4: Documents & Review
+  // Step 4: Documents, Authorizations & Agency Care Info (Card 2: Agency Care Information)
   const [consentSigned, setConsentSigned] = useState(true);
   const [termsAccepted, setTermsAccepted] = useState(true);
   const [physicianOrderUploaded, setPhysicianOrderUploaded] = useState(true);
   const [authNumber, setAuthNumber] = useState("AUTH-2026-NEW");
   const [payerName, setPayerName] = useState("State Medicaid Waiver (DHS)");
   const [caseManagerName, setCaseManagerName] = useState("Dana Jenkins, MSW");
+  const [administrator, setAdministrator] = useState("Dana Jenkins, MSW");
+  const [regionCode, setRegionCode] = useState("Brentwood");
+  const [referredBy, setReferredBy] = useState("Walker (Baptist), Jennifer");
+  const [medicaidNumber, setMedicaidNumber] = useState("MED-9647293");
+
+  // Available convertable inquiries (dynamic from intake + fallback)
+  const [availableInquiries, setAvailableInquiries] = useState<ConvertableInquiry[]>(CONVERTABLE_INQUIRIES);
 
   // Submitted client output
   const [createdClient, setCreatedClient] = useState<ClientRecord | null>(null);
+
+  // Load inquiries from storage on mount
+  React.useEffect(() => {
+    try {
+      const stored = getIntakeInquiriesFromStorage();
+      if (Array.isArray(stored) && stored.length > 0) {
+        const dynamicMapped: ConvertableInquiry[] = stored.map((inq: InquiryRecord) => ({
+          id: inq.id,
+          familyName: inq.familyName,
+          clientName: inq.familyInfo?.clientInfo?.name || "Client Name",
+          age: inq.familyInfo?.clientInfo?.age || 75,
+          dob: inq.familyInfo?.clientInfo?.dob || "1951-05-14",
+          gender: inq.familyInfo?.clientInfo?.gender || "Female",
+          careType: (inq.careRequirements?.careType?.[0] as CareArrangementType) || "Family Care",
+          primaryContact: inq.familyInfo?.primaryContact || "Primary Contact",
+          relationship: inq.familyInfo?.relationship || "Family Member",
+          phone: inq.familyInfo?.phone || "(555) 000-0000",
+          email: inq.familyInfo?.email || "contact@family.com",
+          address: inq.familyInfo?.householdLocation?.address || "100 Main St",
+          city: inq.familyInfo?.householdLocation?.city || "Atlanta",
+          state: inq.familyInfo?.householdLocation?.state || "GA",
+          zip: inq.familyInfo?.householdLocation?.zip || "30305",
+          programRequested: inq.careRequirements?.programInterest || "IHSS (In-Home Support Services)",
+          careNeeds: inq.careRequirements?.careType || ["ADL Support"],
+          potentialCaregiver: inq.familyInfo?.potentialCaregiver
+            ? {
+                name: inq.familyInfo.potentialCaregiver.name,
+                relationship: inq.familyInfo.potentialCaregiver.relationship,
+                phone: inq.familyInfo.potentialCaregiver.phone || inq.familyInfo.phone,
+              }
+            : undefined,
+        }));
+
+        const combined = [...dynamicMapped];
+        CONVERTABLE_INQUIRIES.forEach((c) => {
+          if (!combined.some((item) => item.id.toLowerCase() === c.id.toLowerCase())) {
+            combined.push(c);
+          }
+        });
+        setAvailableInquiries(combined);
+      }
+    } catch (e) {
+      console.warn("Could not load dynamic intake inquiries", e);
+    }
+  }, []);
 
   // Auto-fill when selecting an inquiry
   const handleSelectInquiry = (inquiry: ConvertableInquiry) => {
@@ -120,6 +195,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
     setPreferredName(inquiry.clientName.split(" ")[0]);
     setDob(inquiry.dob);
     setGender(inquiry.gender);
+    setTitle(inquiry.gender === "Female" ? "Ms." : "Mr.");
     setContactName(inquiry.primaryContact);
     setContactRelationship(inquiry.relationship);
     setContactPhone(inquiry.phone);
@@ -130,20 +206,35 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
     setZip(inquiry.zip);
     setCareType(inquiry.careType);
     setProgram(inquiry.programRequested);
+    if (inquiry.careNeeds && inquiry.careNeeds.length > 0) {
+      setSelectedCareNeeds(inquiry.careNeeds);
+    }
     if (inquiry.potentialCaregiver) {
       setCaregiverName(inquiry.potentialCaregiver.name);
       setCaregiverPhone(inquiry.potentialCaregiver.phone);
       setFamilyCaregiverRel(inquiry.potentialCaregiver.relationship);
     }
-    toast.success(`Populated details from inquiry ${inquiry.id}`);
+    // Auto-populate 17-Domain extended fields
+    const randomSuffix = inquiry.id.replace(/\D/g, "") || "1042";
+    setSsn(`964-72-${randomSuffix.padStart(4, "0").slice(0, 4)}`);
+    setMedicaidNumber(`MED-${randomSuffix}93`);
+    setRegionCode(inquiry.state === "GA" ? "North Metro" : "Brentwood");
+    setReferredBy("Intake Referral Pipeline");
+    setBillingName(inquiry.primaryContact || inquiry.clientName);
+    setBillingAddress(inquiry.address);
+    setBillingCity(inquiry.city);
+    setBillingState(inquiry.state);
+    setBillingZip(inquiry.zip);
+    setBillingSameAsResidential(true);
+    toast.success(`Populated all Client Details fields from intake inquiry ${inquiry.id}`);
   };
 
   // Pre-fill default on mount if in convert mode
   React.useEffect(() => {
-    if (creationPath === "convert" && CONVERTABLE_INQUIRIES.length > 0 && !clientName) {
-      handleSelectInquiry(CONVERTABLE_INQUIRIES[0]);
+    if (creationPath === "convert" && availableInquiries.length > 0 && !clientName) {
+      handleSelectInquiry(availableInquiries[0]);
     }
-  }, [creationPath]);
+  }, [creationPath, availableInquiries]);
 
   const togglePermission = (perm: string) => {
     if (permissions.includes(perm)) {
@@ -162,19 +253,23 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
   };
 
   const handleVoiceDictate = () => {
+    setTitle("Mr.");
     setClientName("Arthur Reynolds");
     setPreferredName("Artie");
     setDob("1948-06-15");
     setGender("Male");
     setPrimaryLanguage("English");
+    setSsn("964-72-9331");
     setContactName("Mary Reynolds");
     setContactRelationship("Daughter & Legal Guardian");
     setContactPhone("(541) 555-1234");
     setContactEmail("mary.reynolds@example.com");
     setAddress("742 Evergreen Terrace");
+    setAddress2("Suite 2B");
     setCity("Springfield");
     setState("OR");
     setZip("97477");
+    setBillingSameAsResidential(true);
     setEmergencyName("David Miller");
     setEmergencyRel("Son-in-law");
     setEmergencyPhone("(541) 555-0211");
@@ -185,6 +280,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
     setFamilyCaregiverRel("Daughter (Family Paid Caregiver)");
     setPayerName("Oregon Health Plan (OHP Medicaid)");
     setCaseManagerName("Dana Jenkins, MSW");
+    setAdministrator("Dana Jenkins, MSW");
+    setRegionCode("Brentwood");
+    setReferredBy("Springfield Regional Medical Center");
+    setMedicaidNumber("MED-9647293");
     setAuthorizedHours(30);
     setSpecialInstructions(
       "Client requires standby assistance with ambulation and reminders for medication schedule."
@@ -269,19 +368,63 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
       }
     }
 
-    // Client status starts as "Onboarding"
-    const newRecord: ClientRecord = {
+    // Client status starts as "Active" or "Onboarding" with complete 17 domains
+    const nameParts = clientName.trim().split(" ");
+    const firstName = nameParts[0] || "Client";
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "Recipient";
+
+    const baseRecord: ClientRecord = {
       id: newId,
+      title: title || (gender === "Female" ? "Ms." : "Mr."),
+      firstName: firstName,
+      lastName: lastName,
       name: clientName,
-      preferredName: preferredName || clientName.split(" ")[0],
+      preferredName: preferredName || firstName,
       avatarUrl: `https://images.unsplash.com/photo-${1500000000000 + nextNum}?auto=format&fit=crop&q=80&w=200`,
       dob: dob || "2018-06-15",
       age: 8,
       gender: gender,
       primaryLanguage: primaryLanguage,
-      status: "Onboarding",
+      ssn: ssn || `964-72-${String(nextNum).slice(0, 4)}`,
+      status: "Active",
       careType: careType,
       household: householdInfo,
+      agencyInfo: {
+        status: "Active",
+        leadCreatedDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        initialAssessmentDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        conversionDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        startDate: new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" }),
+        effectiveEndDate: "12/31/2026",
+        administrator: administrator || "Dana Jenkins, MSW",
+        regionCode: regionCode || "Brentwood",
+        referredBy: referredBy || (creationPath === "convert" ? "Intake Referral Conversion" : "Direct Intake Registration"),
+        medicaidNumber: medicaidNumber || `MED-${nextNum}93`,
+        preferredCaregiver: caregiverName || "Wilson Martin",
+        adminAlerts: {
+          disableClockInAlert: false,
+          disableClockOutAlert: false,
+        },
+        invoicingId: `INV-${newId}`,
+      },
+      residentialAddress: {
+        name: clientName,
+        address: address,
+        address2: address2 || "",
+        city: city,
+        state: state,
+        zip: zip,
+        verified: true,
+      },
+      billingAddress: {
+        sameAsResidential: billingSameAsResidential,
+        name: billingSameAsResidential ? clientName : (billingName || clientName),
+        address: billingSameAsResidential ? address : (billingAddress || address),
+        address2: billingSameAsResidential ? (address2 || "") : (billingAddress2 || ""),
+        city: billingSameAsResidential ? city : (billingCity || city),
+        state: billingSameAsResidential ? state : (billingState || state),
+        zip: billingSameAsResidential ? zip : (billingZip || zip),
+      },
       primaryContact: {
         name: contactName || "Parent / Guardian",
         relationship: contactRelationship || "Mother & Legal Guardian",
@@ -294,6 +437,38 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
         relationship: emergencyRel || "Family",
         phone: emergencyPhone || contactPhone || "(555) 000-0000",
       },
+      responsibleParties: [
+        {
+          id: `RP-${newId}-1`,
+          name: contactName || "Parent / Guardian",
+          relationship: contactRelationship || "Primary POA & Guardian",
+          phone: contactPhone || "(555) 000-0000",
+          email: contactEmail || "contact@example.com",
+          address: `${address}, ${city}, ${state} ${zip}`,
+          isPrimaryDecisionMaker: true,
+          isBillingContact: true,
+          isEmergencyContact: true,
+          hipaaAuthorized: true,
+          notes: "Primary authorized contact synchronized from intake registration.",
+        },
+        ...(emergencyName && emergencyName !== contactName
+          ? [
+              {
+                id: `RP-${newId}-2`,
+                name: emergencyName,
+                relationship: emergencyRel || "Family Contact",
+                phone: emergencyPhone || contactPhone || "(555) 000-0000",
+                email: "emergency@example.com",
+                address: `${address}, ${city}, ${state} ${zip}`,
+                isPrimaryDecisionMaker: false,
+                isBillingContact: false,
+                isEmergencyContact: true,
+                hipaaAuthorized: true,
+                notes: "Designated 24/7 backup contact.",
+              },
+            ]
+          : []),
+      ],
       assignedCareTeam: {
         primaryCaregiver: caregiverName
           ? {
@@ -301,7 +476,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
               name: caregiverName,
               relationship: familyCaregiverRel,
               classification: "W-2",
-              status: "Onboarding",
+              status: "Active",
               phone: caregiverPhone || contactPhone,
               email: contactEmail || "caregiver@example.com",
             }
@@ -316,7 +491,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
         },
         onboardingCoordinator: {
           id: "OC-12",
-          name: "Dana Jenkins, MSW",
+          name: administrator || "Dana Jenkins, MSW",
           email: "dana.jenkins@lilisare.com",
           phone: "(541) 555-4321",
         },
@@ -332,7 +507,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
         careArrangement: caregiverName ? "Complete" : "Pending",
         documents: consentSigned ? "Review needed" : "Missing",
         authorization: "Pending",
-        overallScore: 65,
+        overallScore: 85,
       },
       carePlan: {
         program: program,
@@ -409,10 +584,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
           id: `ACT-${Date.now()}`,
           timestamp: "Just now",
           type: "status_change",
-          author: "Dana Jenkins",
+          author: administrator || "Dana Jenkins",
           authorRole: "Onboarding Coordinator",
           title: `Client Record ${newId} Created (${creationPath === "convert" ? `Converted from ${selectedInquiryId}` : "Direct Admin Creation"})`,
-          details: `Client onboarding record initialized. Connected to ${householdInfo.name}. Initial status: Onboarding.`,
+          details: `Client onboarding record initialized. Connected to ${householdInfo.name}. Initial status: Active.`,
         },
       ],
       attentionItems: [
@@ -431,11 +606,12 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
       convertedFromInquiryId: creationPath === "convert" ? selectedInquiryId : undefined,
     };
 
+    const newRecord = enrichClientWith17Domains(baseRecord);
     const updatedList = [newRecord, ...existingClients];
     saveClientsToStorage(updatedList);
     setCreatedClient(newRecord);
     setCurrentStep(5); // Success step
-    toast.success(`Client ${newRecord.name} (${newRecord.id}) registered successfully!`);
+    toast.success(`Client ${newRecord.name} (${newRecord.id}) registered and synchronized across all 17 domains!`);
   };
 
   const steps = [
@@ -616,7 +792,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 Select Qualified Inquiry to Convert:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {CONVERTABLE_INQUIRIES.map((inq) => (
+                {availableInquiries.map((inq) => (
                   <button
                     key={inq.id}
                     type="button"
@@ -669,12 +845,27 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 </p>
               </div>
 
-              {/* Client Demographics */}
+              {/* Client Demographics (Card 1: Personal Information) */}
               <div className="space-y-4 pt-1">
                 <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
                   Client Details (Person Receiving Care)
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Title</label>
+                    <select
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-700 cursor-pointer"
+                    >
+                      <option value="Mr.">Mr.</option>
+                      <option value="Ms.">Ms.</option>
+                      <option value="Mrs.">Mrs.</option>
+                      <option value="Dr.">Dr.</option>
+                      <option value="Master">Master</option>
+                    </select>
+                  </div>
+
                   <div className="sm:col-span-2 space-y-1.5">
                     <label className="text-[13px] font-medium text-slate-700">
                       Full Legal Name <span className="text-red-500">*</span>
@@ -696,7 +887,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
 
                   <div className="space-y-1.5">
                     <label className="text-[13px] font-medium text-slate-700">
-                      Preferred / Nickname
+                      Goes By (Nickname)
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -713,7 +904,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4.5">
                   <div className="space-y-1.5">
                     <label className="text-[13px] font-medium text-slate-700">
                       Date of Birth <span className="text-red-500">*</span>
@@ -770,6 +961,24 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                         onChange={(e) => setPrimaryLanguage(e.target.value)}
                         placeholder="English"
                         className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">
+                      Social Security Number
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Lock className="h-4 w-4" />
+                      </div>
+                      <input
+                        type="text"
+                        value={ssn}
+                        onChange={(e) => setSsn(e.target.value)}
+                        placeholder="964-72-9331"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all font-mono placeholder:text-slate-400 text-slate-800"
                       />
                     </div>
                   </div>
@@ -881,10 +1090,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 </div>
               </div>
 
-              {/* Household Physical Address */}
+              {/* Household Physical Address (Card 3: Residential Address) */}
               <div className="space-y-4 pt-3 border-t border-slate-100">
                 <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                  Household Physical Address
+                  Household Physical Address (Residential)
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4.5">
                   <div className="sm:col-span-2 space-y-1.5">
@@ -903,7 +1112,18 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Address Line 2 (Apt, Suite, Bldg)</label>
+                    <input
+                      type="text"
+                      value={address2}
+                      onChange={(e) => setAddress2(e.target.value)}
+                      placeholder="e.g. Apt 4B (Optional)"
+                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1.5">
                     <label className="text-[13px] font-medium text-slate-700">City</label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -919,14 +1139,14 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="sm:col-span-2 space-y-1.5">
                     <label className="text-[13px] font-medium text-slate-700">State / Zip</label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
-                        className="w-16 px-2.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-center font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
+                        className="w-20 px-2.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm text-center font-bold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
                       />
                       <input
                         type="text"
@@ -938,6 +1158,83 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Billing Address (Card 4: Billing Address) */}
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                    Billing Address & Payee Information
+                  </span>
+                  <label className="inline-flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 select-none">
+                    <input
+                      type="checkbox"
+                      checked={billingSameAsResidential}
+                      onChange={(e) => setBillingSameAsResidential(e.target.checked)}
+                      className="w-4 h-4 rounded text-[#3D6B22] focus:ring-[#3D6B22]/20 border-slate-300"
+                    />
+                    <span>Same as Residential Address</span>
+                  </label>
+                </div>
+
+                {!billingSameAsResidential && (
+                  <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200 space-y-4 animate-in fade-in duration-150">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[13px] font-medium text-slate-700">Billing Name / Payee</label>
+                        <input
+                          type="text"
+                          value={billingName}
+                          onChange={(e) => setBillingName(e.target.value)}
+                          placeholder="e.g. Responsible Contact or Trust"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] text-slate-800"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[13px] font-medium text-slate-700">Billing Street Address</label>
+                        <input
+                          type="text"
+                          value={billingAddress}
+                          onChange={(e) => setBillingAddress(e.target.value)}
+                          placeholder="105 WOODED CREST DR"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] text-slate-800"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[13px] font-medium text-slate-700">City</label>
+                        <input
+                          type="text"
+                          value={billingCity}
+                          onChange={(e) => setBillingCity(e.target.value)}
+                          placeholder="Waco"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] text-slate-800"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[13px] font-medium text-slate-700">State</label>
+                        <input
+                          type="text"
+                          value={billingState}
+                          onChange={(e) => setBillingState(e.target.value)}
+                          placeholder="TX"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] text-slate-800"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[13px] font-medium text-slate-700">Zip Code</label>
+                        <input
+                          type="text"
+                          value={billingZip}
+                          onChange={(e) => setBillingZip(e.target.value)}
+                          placeholder="76712-3260"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] text-slate-800"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Emergency Contact */}
@@ -1466,6 +1763,58 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#1E5622] border border-emerald-200">
                       {physicianOrderUploaded ? "Attached" : "Missing"}
                     </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Agency Care & Administrator Metadata (Card 2: Agency Care Information) */}
+              <div className="space-y-4 pt-3 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Agency Care & Administrative Assignment
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Administrator</label>
+                    <input
+                      type="text"
+                      value={administrator}
+                      onChange={(e) => setAdministrator(e.target.value)}
+                      placeholder="Dana Jenkins, MSW"
+                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Region Code / Branch</label>
+                    <input
+                      type="text"
+                      value={regionCode}
+                      onChange={(e) => setRegionCode(e.target.value)}
+                      placeholder="Brentwood"
+                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Referred By</label>
+                    <input
+                      type="text"
+                      value={referredBy}
+                      onChange={(e) => setReferredBy(e.target.value)}
+                      placeholder="Walker (Baptist), Jennifer"
+                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[13px] font-medium text-slate-700">Medicaid Number</label>
+                    <input
+                      type="text"
+                      value={medicaidNumber}
+                      onChange={(e) => setMedicaidNumber(e.target.value)}
+                      placeholder="MED-9647293"
+                      className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all font-mono text-slate-800"
+                    />
                   </div>
                 </div>
               </div>

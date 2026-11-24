@@ -176,6 +176,28 @@ export interface ClientTriJourney {
   };
 }
 
+export interface ClientAttributeItem {
+  id: string;
+  name: string;
+  description: string;
+  options: ("Yes" | "No")[] | ("Yes" | "No" | "Preferred")[];
+  selected: "Yes" | "No" | "Preferred";
+  category?: "Clinical & Equipment" | "Home Environment" | "Caregiver Qualifications" | "Language & Lifestyle";
+}
+
+export interface ClientAttributesRecord {
+  items: ClientAttributeItem[];
+  tags?: string[];
+  notes?: string;
+  petInHome?: boolean;
+  petDetails?: string;
+  smokerInHome?: boolean;
+  languagePreferences?: string[];
+  caregiverGenderPreference?: "Female" | "Male" | "No Preference";
+  mobilityEquipment?: string[];
+  specialInstructions?: string;
+}
+
 export interface ClientRecord {
   id: string; // e.g. CL-1001
   name: string;
@@ -201,4 +223,175 @@ export interface ClientRecord {
   updatedAt: string;
   updatedAtRelative: string;
   convertedFromInquiryId?: string;
+
+  // 17-Domain Extended Enterprise Data Model
+  title?: string;
+  firstName?: string;
+  lastName?: string;
+  ssn?: string;
+  agencyInfo?: {
+    status: string;
+    leadCreatedDate?: string;
+    initialAssessmentDate?: string;
+    conversionDate?: string;
+    startDate?: string;
+    effectiveEndDate?: string;
+    administrator?: string;
+    regionCode?: string;
+    referredBy?: string;
+    medicaidNumber?: string;
+    preferredCaregiver?: string;
+    adminAlerts?: {
+      disableClockInAlert: boolean;
+      disableClockOutAlert: boolean;
+    };
+    invoicingId?: string;
+  };
+  residentialAddress?: {
+    name: string;
+    address: string;
+    address2?: string;
+    city: string;
+    state: string;
+    zip: string;
+    verified?: boolean;
+  };
+  billingAddress?: {
+    sameAsResidential: boolean;
+    name: string;
+    address: string;
+    address2?: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  calendarVisits?: Array<{
+    id: string;
+    title: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+    caregiverName: string;
+    caregiverId: string;
+    serviceType: string;
+    status: "Scheduled" | "In-Progress" | "Completed" | "Missed" | "Cancelled";
+    evvVerified: boolean;
+  }>;
+  schedules?: Array<{
+    id: string;
+    dayOfWeek: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+    startTime: string;
+    endTime: string;
+    hours: number;
+    serviceCode: string;
+    caregiverName: string;
+    caregiverId: string;
+    status: "Active" | "Paused";
+  }>;
+  careNotes?: Array<{
+    id: string;
+    visitDate: string;
+    caregiverName: string;
+    caregiverId: string;
+    service: string;
+    clockIn: string;
+    clockOut: string;
+    adlsCompleted: string[];
+    vitals?: { bp?: string; pulse?: number; temp?: string };
+    notes: string;
+    supervisorApproval: "Approved" | "Pending Review" | "Needs Attention";
+    evvLocationStatus: "Verified GPS" | "Exception" | "Manual Sign-off";
+  }>;
+  notes?: Array<{
+    id: string;
+    timestamp: string;
+    author: string;
+    authorRole: string;
+    category: "General" | "Family Communication" | "Coordination" | "Supervisory" | "Billing";
+    title: string;
+    content: string;
+    isPinned?: boolean;
+  }>;
+  responsibleParties?: Array<{
+    id: string;
+    name: string;
+    relationship: string;
+    phone: string;
+    email: string;
+    address?: string;
+    isPrimaryDecisionMaker: boolean;
+    isBillingContact: boolean;
+    isEmergencyContact: boolean;
+    hipaaAuthorized: boolean;
+    notes?: string;
+  }>;
+  wallet?: {
+    balance: number;
+    escrowBalance: number;
+    monthlySpendCap: number;
+    autoPayEnabled: boolean;
+    paymentMethod: string;
+  };
+  transactions?: Array<{
+    id: string;
+    date: string;
+    type: "Claim Payer" | "Private Pay Invoice" | "Wallet Credit" | "Copay Adjustment" | "Disbursement";
+    referenceNo: string;
+    description: string;
+    amount: number;
+    status: "Paid" | "Pending" | "Disputed" | "Reconciled";
+  }>;
+  healthcare?: {
+    diagnoses: Array<{ code: string; description: string; type: "Primary" | "Secondary"; onsetDate: string }>;
+    medications: Array<{ name: string; dosage: string; frequency: string; route: string; prescriber: string; purpose: string }>;
+    allergies: Array<{ allergen: string; reaction: string; severity: "Mild" | "Moderate" | "Severe" }>;
+    vitals: Array<{ recordedDate: string; bp: string; pulse: number; respRate: number; temp: string; recordedBy: string }>;
+    physicians: Array<{ name: string; specialty: string; clinic: string; phone: string; fax: string }>;
+  };
+  incidents?: Array<{
+    id: string;
+    date: string;
+    category: "Fall" | "Medication Error" | "Hospitalization" | "Skin Tear / Injury" | "Behavioral Exception";
+    severity: "Low" | "Medium" | "High" | "Critical";
+    reportedBy: string;
+    description: string;
+    actionTaken: string;
+    stateReported: boolean;
+    status: "Closed" | "Under Investigation" | "Review Required";
+  }>;
+  adls?: Array<{
+    category: "ADL" | "IADL";
+    name: string;
+    level: "Independent" | "Supervision" | "Minimal Assist" | "Moderate Assist" | "Total Dependent";
+    frequency: string;
+    instructions: string;
+  }>;
+  planOfCareDetails?: {
+    goals: Array<{ goal: string; targetDate: string; progress: "In Progress" | "Achieved" | "Needs Adjustment" }>;
+    interventions: string[];
+    riskFactors: string[];
+    emergencyProtocol: string;
+    physicianSignedDate: string;
+    nextReviewDate: string;
+    rnSupervisor: string;
+  };
+  attributes?: ClientAttributesRecord;
+  forms?: Array<{
+    id: string;
+    title: string;
+    type: "Waiver Assessment" | "Consent & Release" | "Clinical Assessment" | "Family Agreement";
+    status: "Completed & Signed" | "Pending Signature" | "Draft" | "Annual Renewal Due";
+    lastUpdated: string;
+    signedBy?: string;
+  }>;
 }
+
+// Convenience Type Aliases for 17 Modular Domains
+export type CalendarVisit = NonNullable<ClientRecord["calendarVisits"]>[number];
+export type ResponsibleParty = NonNullable<ClientRecord["responsibleParties"]>[number];
+export type TransactionRecord = NonNullable<ClientRecord["transactions"]>[number];
+export type IncidentReport = NonNullable<ClientRecord["incidents"]>[number];
+export type AdlAssessmentItem = NonNullable<ClientRecord["adls"]>[number];
+export type AssessmentFormItem = NonNullable<ClientRecord["forms"]>[number];
+export type DocumentItem = ClientDocument;
+

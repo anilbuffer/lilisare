@@ -40,6 +40,7 @@ import {
   getHouseholdsFromStorage,
   saveHouseholdsToStorage,
 } from "@/lib/households/mockData";
+import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -77,24 +78,16 @@ export function AdminHouseholdDirectory() {
   const [selectedHousehold, setSelectedHousehold] = useState<Household | null>(
     null
   );
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-  // New Household Form State
-  const [formName, setFormName] = useState("");
-  const [formClientName, setFormClientName] = useState("");
-  const [formCaregiverName, setFormCaregiverName] = useState("");
-  const [formProgram, setFormProgram] = useState("Medicaid Waiver (CHC)");
-  const [formAddress, setFormAddress] = useState("");
-  const [formCity, setFormCity] = useState("Springfield");
-  const [formZip, setFormZip] = useState("19087");
-  const [formHours, setFormHours] = useState(30);
-
-  // Initialize from storage & sync
+  // Initialize from storage & sync across journeys
   useEffect(() => {
     const stored = getHouseholdsFromStorage();
     if (stored && stored.length > 0) {
       setHouseholdsList(stored);
     }
+    const unsubscribe = subscribeToIntakeSync(() => {
+      setHouseholdsList(getHouseholdsFromStorage());
+    });
+    return unsubscribe;
   }, []);
 
   // Close filter dropdowns on outside click
@@ -226,74 +219,6 @@ export function AdminHouseholdDirectory() {
     setCurrentPage(1);
   };
 
-  const handleAddHousehold = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formName.trim() || !formClientName.trim()) {
-      toast.error("Please fill in Household Name and Client Name");
-      return;
-    }
-
-    const nextCodeNum = 1000 + householdsList.length + 1;
-    const newHh: Household = {
-      id: `hh-${nextCodeNum}`,
-      code: `HH-${nextCodeNum}`,
-      name: formName.trim(),
-      address: formAddress || "100 Maple Avenue",
-      city: formCity,
-      state: "PA",
-      zip: formZip,
-      phone: "(555) 000-0000",
-      program: formProgram,
-      caseManager: {
-        name: "Dana Jenkins, MSW",
-        agency: "State Dept of Human Services",
-        email: "dana.jenkins@dhs.state.gov",
-        phone: "(555) 432-8765",
-      },
-      client: {
-        id: `cl-${nextCodeNum}`,
-        name: formClientName.trim(),
-        role: "client",
-        relationship: "Self",
-        status: "Active",
-        phone: "(555) 000-0000",
-        email: `${formClientName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
-      },
-      primaryCaregiver: {
-        id: `cg-${nextCodeNum}`,
-        name: formCaregiverName.trim() || "Elena Rodriguez",
-        role: "caregiver",
-        relationship: "Agency Caregiver",
-        status: "Active",
-        phone: "(555) 345-6789",
-        email: "elena.r@lilisare.com",
-      },
-      authorizedHoursPerWeek: Number(formHours) || 30,
-      scheduledHoursPerWeek: Math.max(0, Number(formHours) - 4) || 26,
-      authStatus: "Approved",
-      authExpiry: "2027-11-01",
-      triJourneyStatus: {
-        clientStage: "Care Active",
-        caregiverStage: "Active",
-        opsStage: "Scheduling",
-      },
-      evvComplianceRate: 98,
-      lastVisitDate: "Today",
-    };
-
-    const updated = [newHh, ...householdsList];
-    setHouseholdsList(updated);
-    saveHouseholdsToStorage(updated);
-    toast.success(`Household ${newHh.name} (${newHh.code}) registered`);
-    setIsAddModalOpen(false);
-
-    // Reset Form
-    setFormName("");
-    setFormClientName("");
-    setFormCaregiverName("");
-    setFormAddress("");
-  };
-
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Header & Actions Bar */}
@@ -304,13 +229,13 @@ export function AdminHouseholdDirectory() {
           </h1>
         </div>
 
-        <button
-          onClick={() => setIsAddModalOpen(true)}
+        <Link
+          href="/admin/households/new"
           className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>New Household</span>
-        </button>
+        </Link>
       </div>
 
       {/* 02. Executive KPI Cards (Harmonized with Clients, Caregivers, Referrals) */}
@@ -831,153 +756,6 @@ export function AdminHouseholdDirectory() {
           </button>
         </div>
       </div>
-
-      {/* 06. Add New Household Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden flex flex-col">
-            <div className="border-b border-slate-100 p-4 sm:p-5 flex items-center justify-between bg-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center">
-                  <Plus className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                    Create New Household
-                  </h3>
-                  <div className="text-xs text-slate-500 font-medium">
-                    Register a managed household uniting patient, caregiver, and care ops.
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddHousehold} className="p-4 sm:p-6 space-y-4">
-              <div>
-                <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                  Household Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Jenkins Family Household"
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                    Primary Client Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Eleanor Jenkins"
-                    value={formClientName}
-                    onChange={(e) => setFormClientName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                    Assigned Caregiver
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Elena Rodriguez"
-                    value={formCaregiverName}
-                    onChange={(e) => setFormCaregiverName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                    Care Program
-                  </label>
-                  <select
-                    value={formProgram}
-                    onChange={(e) => setFormProgram(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
-                  >
-                    <option value="Medicaid Waiver (CHC)">Medicaid Waiver (CHC)</option>
-                    <option value="VA Community Care">VA Community Care</option>
-                    <option value="Private Pay">Private Pay</option>
-                    <option value="CES Waiver (Children's Support)">
-                      CES Waiver (Children's Support)
-                    </option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                    Authorized Hours / Week
-                  </label>
-                  <input
-                    type="number"
-                    value={formHours}
-                    onChange={(e) => setFormHours(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                    Street Address
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 214 Maple Ridge Lane"
-                    value={formAddress}
-                    onChange={(e) => setFormAddress(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all placeholder:text-slate-400 text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    value={formCity}
-                    onChange={(e) => setFormCity(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Register Household</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

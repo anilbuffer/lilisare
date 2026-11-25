@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,7 +11,6 @@ import {
   Building2,
   Clock,
   FileText,
-  Heart,
   Home,
   Mail,
   MapPin,
@@ -22,30 +21,30 @@ import {
   User,
   AlertTriangle,
   Send,
-  Calendar,
   ExternalLink,
-  Activity,
   ClipboardCheck,
   ShieldAlert,
-  Sparkles,
-  Layers,
-  PhoneCall,
   FileCheck,
   Copy,
   Check,
-  Info,
-  CheckCircle,
   Archive,
   Trash2,
+  Edit3,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
+import {
+  ResponsiveDomainTabStrip,
+  DomainTabItem,
+} from "@/components/ui/ResponsiveDomainTabStrip";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import {
   convertInquiryToLiveEntities,
   getIntakeInquiriesFromStorage,
   archiveReferralAcrossStores,
   deleteReferralAcrossStores,
+  subscribeToIntakeSync,
 } from "@/lib/intake/intakeSync";
 import { getClientsFromStorage, saveClientsToStorage } from "@/lib/clients/mockData";
 import { getHouseholdsFromStorage, saveHouseholdsToStorage } from "@/lib/households/mockData";
@@ -57,25 +56,28 @@ import {
   getAdminReferralsFromStorage,
   saveAdminReferralsToStorage,
 } from "@/lib/intake-referrals/adminIntakeReferralsData";
+import { ReferralProfileTab } from "./ReferralProfileTab";
 
 interface AdminIntakeReferralDetailViewProps {
   referralId: string;
+  initialEditMode?: boolean;
 }
 
-type TabType = "overview" | "clinical" | "contact" | "payer" | "chronology";
+type ReferralTabType =
+  | "profile"
+  | "clinical"
+  | "contact"
+  | "payer"
+  | "connected"
+  | "chronology";
 
-interface TabDef {
-  id: TabType;
-  label: string;
-  icon: React.ElementType;
-}
-
-const TABS: TabDef[] = [
-  { id: "overview", label: "Overview", icon: User },
-  { id: "clinical", label: "Clinical & Triage", icon: Stethoscope },
-  { id: "contact", label: "Demographics & Contact", icon: MapPin },
-  { id: "payer", label: "Payer & Source", icon: Building2 },
-  { id: "chronology", label: "Activity & Notes", icon: Clock },
+const REFERRAL_TABS: DomainTabItem<ReferralTabType>[] = [
+  { id: "profile", label: "PROFILE", minWidth: 92 },
+  { id: "clinical", label: "CLINICAL & TRIAGE", minWidth: 152 },
+  { id: "contact", label: "DEMOGRAPHICS & CONTACT", minWidth: 196 },
+  { id: "payer", label: "PAYER & SOURCE", minWidth: 140 },
+  { id: "connected", label: "CONNECTED RECORDS", minWidth: 170 },
+  { id: "chronology", label: "ACTIVITY & NOTES", minWidth: 148 },
 ];
 
 function getInitials(name: string): string {
@@ -97,11 +99,15 @@ const STATUS_OPTIONS: ReferralStatus[] = [
 
 export function AdminIntakeReferralDetailView({
   referralId,
+  initialEditMode = false,
 }: AdminIntakeReferralDetailViewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const perms = usePortalPermissions();
+
   const [referral, setReferral] = useState<AdminIntakeReferralItem | null>(null);
-  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [activeTab, setActiveTab] = useState<ReferralTabType>("profile");
+  const [isEditingProfile, setIsEditingProfile] = useState(initialEditMode);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -117,34 +123,58 @@ export function AdminIntakeReferralDetailView({
 
   useEffect(() => {
     setIsMounted(true);
-    const item = getAdminReferralById(referralId);
-    if (item) {
-      setReferral(item);
-      setNotesList([
-        {
-          author: item.assignedCoordinator || "Maria Santos, BSN",
-          role: "Intake Coordinator & Triage RN",
-          time: `${item.daysInPipeline} days ago`,
-          category: "Clinical",
-          text: item.triageNotes,
-        },
-        {
-          author: "Discharge Navigator (UPMC)",
-          role: "Hospital Referral Source",
-          time: item.receivedDate,
-          category: "Payer",
-          text: `Inbound referral submitted with complete clinical packet: H&P, Surgical Report (s/p Right Hip ORIF), and CMS-485 Face-to-Face Physician Order. Prior Auth AUTH-2026-PA-88419 confirmed active with UPMC CHC.`,
-        },
-        {
-          author: "System Intake Gateway",
-          role: "Automated Ingestion",
-          time: item.receivedDate,
-          category: "Coordination",
-          text: `Inbound referral ingested from ${item.referralSource}. Initial triage priority designated as ${item.priority}. Assigned to ${item.assignedCoordinator}.`,
-        },
-      ]);
-    }
+    const load = () => {
+      const item = getAdminReferralById(referralId);
+      if (item) {
+        setReferral(item);
+        setNotesList((prev) =>
+          prev.length > 0
+            ? prev
+            : [
+                {
+                  author: item.assignedCoordinator || "Maria Santos, BSN",
+                  role: "Intake Coordinator & Triage RN",
+                  time: `${item.daysInPipeline} days ago`,
+                  category: "Clinical",
+                  text: item.triageNotes,
+                },
+                {
+                  author: item.referralSourceContact || "Discharge Navigator",
+                  role: "Referral Partner",
+                  time: item.receivedDate,
+                  category: "Payer",
+                  text: `Inbound referral received from ${item.referralSource}. Payer: ${item.payerName} (${item.estimatedHoursPerWeek} hrs/wk).`,
+                },
+                {
+                  author: "System Intake Gateway",
+                  role: "Automated Ingestion",
+                  time: item.receivedDate,
+                  category: "Coordination",
+                  text: `Referral logged with ${item.priority} priority and assigned to ${item.assignedCoordinator}.`,
+                },
+              ]
+        );
+      }
+    };
+    load();
+    return subscribeToIntakeSync(load);
   }, [referralId]);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) {
+      const match = REFERRAL_TABS.find(
+        (t) =>
+          t.id === tabParam.toLowerCase() ||
+          t.label.toLowerCase() === tabParam.toLowerCase()
+      );
+      if (match) setActiveTab(match.id);
+    }
+    if (searchParams.get("mode") === "edit" || initialEditMode) {
+      setIsEditingProfile(true);
+      setActiveTab("profile");
+    }
+  }, [searchParams, initialEditMode]);
 
   if (!isMounted) {
     return (
@@ -193,8 +223,8 @@ export function AdminIntakeReferralDetailView({
 
     setNotesList((prev) => [
       {
-        author: "Agency Executive",
-        role: "Agency Administrator",
+        author: perms.actorName,
+        role: perms.roleLabel,
         time: "Just now",
         category: "Coordination",
         text: `Pipeline status manually updated to ${newStatus}.`,
@@ -204,7 +234,6 @@ export function AdminIntakeReferralDetailView({
   };
 
   const handleConvertToClient = () => {
-    // Attempt synchronized conversion from matching Intake Inquiry first
     const numericSuffix = referral.id.replace(/\D/g, "");
     const inquiries = getIntakeInquiriesFromStorage();
     const matchedInquiry = inquiries.find(
@@ -214,8 +243,10 @@ export function AdminIntakeReferralDetailView({
         inq.familyInfo.clientInfo.name.toLowerCase() === referral.patientName.toLowerCase()
     );
 
-    let createdClientId = referral.clientId || `CL-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
-    let createdHouseholdCode = referral.householdCode || `HH-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
+    let createdClientId =
+      referral.clientId || `CL-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
+    let createdHouseholdCode =
+      referral.householdCode || `HH-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
 
     if (matchedInquiry && !matchedInquiry.onboardingStatus?.converted) {
       const conv = convertInquiryToLiveEntities(matchedInquiry.id);
@@ -387,11 +418,11 @@ export function AdminIntakeReferralDetailView({
     const updated = all.map((r) =>
       r.id === referral.id
         ? {
-          ...r,
-          status: "Enrolled" as ReferralStatus,
-          clientId: createdClientId,
-          householdCode: createdHouseholdCode,
-        }
+            ...r,
+            status: "Enrolled" as ReferralStatus,
+            clientId: createdClientId,
+            householdCode: createdHouseholdCode,
+          }
         : r
     );
     saveAdminReferralsToStorage(updated);
@@ -401,7 +432,9 @@ export function AdminIntakeReferralDetailView({
       clientId: createdClientId,
       householdCode: createdHouseholdCode,
     });
-    toast.success(`${referral.patientName} admitted & synced to Client (${createdClientId}) and Household (${createdHouseholdCode})`);
+    toast.success(
+      `${referral.patientName} admitted & synced to Client (${createdClientId}) and Household (${createdHouseholdCode})`
+    );
 
     setNotesList((prev) => [
       {
@@ -438,8 +471,8 @@ export function AdminIntakeReferralDetailView({
 
     setNotesList((prev) => [
       {
-        author: "Agency Administrator",
-        role: "Executive Staff",
+        author: perms.actorName,
+        role: perms.roleLabel,
         time: "Just now",
         category: noteCategory,
         text: newNote.trim(),
@@ -458,65 +491,70 @@ export function AdminIntakeReferralDetailView({
       : notesList.filter((n) => n.category.toLowerCase() === noteFilter.toLowerCase());
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-4 pb-16 animate-in fade-in duration-200">
-      {/* 01. Back Navigation Button */}
+    <div className="w-full max-w-9xl mx-auto space-y-5 pb-16 animate-in fade-in duration-300">
+      {/* 01. Back Navigation Link */}
       <div>
         <Link
           href="/admin/intake-referrals"
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer w-fit"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Referrals Directory</span>
         </Link>
       </div>
 
-      {/* 02. Hero Identity & Actions Card */}
-      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-        <div className="flex items-center gap-4 sm:gap-5 min-w-0 flex-1">
-          {/* Avatar Box with Floating Priority Badge */}
+      {/* 02. Hero Identity Card (Matched to AdminCaregiverDetailView & AdminClientDetailView) */}
+      <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
           <div className="relative shrink-0">
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20 flex items-center justify-center text-xl font-black shadow-2xs">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20 flex items-center justify-center text-xl font-bold">
               {initials}
             </div>
             <div className="absolute -bottom-1 -right-1">
               <span
-                className={`border-2 border-white shadow-xs font-bold text-white whitespace-nowrap px-2 py-0.5 text-[10px] rounded-full tracking-wide ${referral.priority === "Urgent"
-                  ? "bg-rose-600"
-                  : referral.priority === "High"
-                    ? "bg-amber-600"
-                    : "bg-[#3D6B22]"
-                  }`}
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs border-2 border-white ${
+                  referral.priority === "Urgent"
+                    ? "bg-rose-600"
+                    : referral.priority === "High"
+                      ? "bg-amber-500"
+                      : "bg-[#3D6B22]"
+                }`}
               >
                 {referral.priority}
               </span>
             </div>
           </div>
 
-          {/* Clean Heading without Cluttered Subtext */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate sm:overflow-visible sm:whitespace-normal">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
                 {referral.patientName}
               </h1>
-              <span className=" font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded text-xs border border-slate-200/70">
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
                 {referral.id}
               </span>
             </div>
 
-            <div className="mt-1 text-xs text-slate-500 font-medium">
-              Received: {referral.receivedDate} ({referral.daysInPipeline}d in pipeline)
+            <div className="mt-1 flex items-center gap-2 flex-wrap text-xs sm:text-sm text-slate-600">
+              <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#3D6B22] border border-emerald-200/80">
+                {referral.program}
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="text-xs text-slate-500 font-medium">
+                Received {referral.receivedDate} ({referral.daysInPipeline}d in pipeline)
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Action Controls Column */}
-        <div className="flex flex-wrap items-center gap-2 w-full xl:w-auto shrink-0 border-t xl:border-t-0 pt-3.5 xl:pt-0 border-slate-100">
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0 border-t xl:border-t-0 pt-3.5 xl:pt-0 border-slate-100">
           {/* Status Dropdown */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
             >
               <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
               <span>{referral.status}</span>
@@ -531,11 +569,13 @@ export function AdminIntakeReferralDetailView({
                 {STATUS_OPTIONS.map((stg) => (
                   <button
                     key={stg}
+                    type="button"
                     onClick={() => handleUpdateStatus(stg)}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${referral.status === stg
-                      ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
-                      : "text-slate-800"
-                      }`}
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${
+                      referral.status === stg
+                        ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
+                        : "text-slate-800"
+                    }`}
                   >
                     <span>{stg}</span>
                     {referral.status === stg && (
@@ -547,911 +587,545 @@ export function AdminIntakeReferralDetailView({
             )}
           </div>
 
-          {/* Archive Referral (Intake & Admin) */}
-          {perms.referrals.canArchive && referral.status !== "Archived" && referral.status !== "Enrolled" && (
-            <button
-              type="button"
-              onClick={handleArchiveReferral}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
-            >
-              <Archive className="w-3.5 h-3.5 text-slate-400" />
-              <span>Archive</span>
-            </button>
-          )}
+          <Link
+            href={`/admin/intake-referrals/${referral.id}/edit`}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Edit3 className="w-4 h-4 text-slate-400" />
+            <span>Edit Referral</span>
+          </Link>
 
-          {/* Delete Referral (Agency Admin Only) */}
+          {perms.referrals.canArchive &&
+            referral.status !== "Archived" &&
+            referral.status !== "Enrolled" && (
+              <button
+                type="button"
+                onClick={handleArchiveReferral}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Archive className="w-4 h-4 text-slate-400" />
+                <span>Archive</span>
+              </button>
+            )}
+
           {perms.referrals.canDelete && (
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
               <span>Delete</span>
             </button>
           )}
 
-          {/* Admit to Client CTA */}
           {referral.status !== "Enrolled" ? (
             <button
+              type="button"
               onClick={handleConvertToClient}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] active:scale-[0.98] transition-all rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] hover:shadow-[0_4px_12px_rgba(61,107,34,0.25)] cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
             >
-              <CheckCircle2 className="w-3.5 h-3.5" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-100" />
               <span>Admit as Active Client</span>
             </button>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Client Enrolled</span>
             </span>
           )}
         </div>
       </div>
 
-      {/* 03. Clean Tab Navigation Bar */}
-      <div className="flex items-center gap-1 p-1 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.03)] rounded-2xl overflow-x-auto no-scrollbar border border-slate-200 w-full">
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
-          const Icon = tab.icon;
+      {/* 03. Space-Aware Responsive Tab Navigation Strip */}
+      <ResponsiveDomainTabStrip
+        tabs={REFERRAL_TABS}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        ariaLabel="Referral record sections"
+      />
 
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative px-4 py-2 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap rounded-xl cursor-pointer flex items-center gap-2 ${isActive
-                ? "bg-[#EAF5E9] text-[#2B5E1A] border border-[#3D6B22]/20 shadow-2xs font-bold"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#3D6B22]" : "text-slate-400"}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 04. Tab Content Panes */}
-
-      {/* =========================================================================
-          TAB 1: OVERVIEW
-         ========================================================================= */}
-      {activeTab === "overview" && (
-        <div className="space-y-4">
-          {/* Stats Cards (Consistent with Global UI Card Standardization) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-            {/* Card 1: Patient Demographics */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-normal text-slate-400">Client Demographics</span>
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-                  <User className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                {referral.age}yo {referral.gender}
-              </div>
-            </div>
-
-            {/* Card 2: Benefit Program */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-normal text-slate-400">Benefit Program</span>
-                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                  <Building2 className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate" title={referral.program}>
-                {referral.program}
-              </div>
-            </div>
-
-            {/* Card 3: Assigned Coordinator */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-normal text-slate-400">Assigned Coordinator</span>
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
-                  <Stethoscope className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate" title={referral.assignedCoordinator}>
-                {referral.assignedCoordinator}
-              </div>
-            </div>
-
-            {/* Card 4: Target Capacity */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-normal text-slate-400">Target Capacity</span>
-                <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
-                  <Clock className="w-4 h-4" />
-                </div>
-              </div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                {referral.estimatedHoursPerWeek} hrs/week
-              </div>
-            </div>
-          </div>
-
-          {/* Overview Two-Column Information Architecture */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
-            {/* Left Column (8 cols): Clinical & Operational Directives */}
-            <div className="lg:col-span-8 space-y-4">
-              {/* Card 1: Clinical Profile & Diagnostic Overview */}
-              <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                      <Stethoscope className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                      Clinical Profile & Diagnostic Summary
-                    </h3>
-                  </div>
-                  <span className="text-xs font-bold text-[#1E5622] bg-[#E8F2E4] px-2.5 py-0.5 rounded-full border border-[#3D6B22]/20">
-                    Acuity: Level 3
-                  </span>
-                </div>
-
-                {/* Primary Diagnosis Box */}
-                <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-[#3D6B22]" />
-                      <span>Primary Clinical Diagnosis</span>
-                    </span>
-                    <span className="text-[10px]  font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      ICD-10 Verified
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-900 font-bold leading-relaxed">
-                    {referral.primaryDiagnosis}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-white text-slate-600 border border-slate-200">
-                      S/P Right Hip ORIF (S72.001A)
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-white text-slate-600 border border-slate-200">
-                      Vascular Dementia (F01.50)
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-white text-slate-600 border border-slate-200">
-                      Fall Risk High (Z91.81)
-                    </span>
-                  </div>
-                </div>
-
-                {/* Triage Directives */}
-                <div className="space-y-1.5">
-                  <span className="font-bold text-slate-900 block text-xs uppercase tracking-wider text-slate-500">
-                    Intake Assessment & Triage Directives
-                  </span>
-                  <div className="p-4 bg-white rounded-xl border border-slate-200/90 text-xs sm:text-sm text-slate-700 leading-relaxed font-medium shadow-2xs">
-                    {referral.triageNotes}
-                  </div>
-                </div>
-
-                {/* Requested Services */}
-                <div className="space-y-2">
-                  <span className="font-bold text-slate-900 block text-xs uppercase tracking-wider text-slate-500">
-                    Requested In-Home Service Lines
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    {referral.requestedServices.map((svc) => (
-                      <div
-                        key={svc}
-                        className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center gap-2.5"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-[#E8F2E4] text-[#1E5622] flex items-center justify-center shrink-0">
-                          <Heart className="w-4 h-4 text-[#3D6B22]" />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-xs font-bold text-slate-900 block truncate">{svc}</span>
-                          <span className="text-[10px] text-slate-400 font-medium">Authorized Care</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Intake Readiness & Milestone Checklist */}
-              <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                      <ClipboardCheck className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                      Intake Readiness & Admission Milestones
-                    </h3>
-                  </div>
-                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                    4 of 6 Completed
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50/50 border border-emerald-200/60">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 font-bold block">Referral Packet Ingestion</strong>
-                      <span className="text-slate-500 text-[11px]">Discharge summary & Face-to-Face verified</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50/50 border border-emerald-200/60">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 font-bold block">Payer Eligibility Verified</strong>
-                      <span className="text-slate-500 text-[11px]">UPMC CHC active waiver coverage on file</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50/50 border border-emerald-200/60">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 font-bold block">Clinical Triage & Risk Review</strong>
-                      <span className="text-slate-500 text-[11px]">Assigned to Maria Santos, BSN</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50/50 border border-emerald-200/60">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 font-bold block">Prior Authorization Confirmed</strong>
-                      <span className="text-slate-500 text-[11px]">AUTH-2026-PA-88419 (35 hrs/wk)</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50/50 border border-amber-200/60">
-                    <Clock className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                    <div>
-                      <strong className="text-slate-900 font-bold block">In-Home Clinical Assessment</strong>
-                      <span className="text-slate-500 text-[11px]">Scheduled for Nov 24, 2026 at 10:00 AM</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
-                    <User className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-                    <div>
-                      <strong className="text-slate-700 font-bold block">Caregiver Staffing Roster</strong>
-                      <span className="text-slate-500 text-[11px]">Pending aide matching for 35 hrs/wk</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column (4 cols): Connected Records & Operational Cards */}
-            <div className="lg:col-span-4 space-y-4">
-              {/* Connected Records Container */}
-              <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                      <Home className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                      Connected Records
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#3D6B22] bg-[#E8F2E4] px-2 py-0.5 rounded-full border border-[#3D6B22]/20">
-                    Three Journeys
-                  </span>
-                </div>
-
-                {/* 1. Household Hub Action Card */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/70 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Household Hub
-                    </span>
-                    <span className="text-[11px]  font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      {referral.householdCode || "HH-1002"}
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-slate-900">Whitfield Family Household</div>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    214 Maple Ridge Lane · 2 Members · 1 Assigned Caregiver
-                  </p>
-                  {referral.householdCode ? (
-                    <Link
-                      href={`/admin/households/${referral.householdCode.toLowerCase()}`}
-                      className="inline-flex items-center justify-between w-full px-3.5 py-2 text-xs font-bold text-[#1E5622] bg-white hover:bg-[#E8F2E4] border border-slate-200 hover:border-[#3D6B22]/30 rounded-xl shadow-2xs transition-all cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Home className="w-3.5 h-3.5 text-[#3D6B22]" />
-                        <span>Open Household Hub</span>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22] group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                  ) : (
-                    <span className="text-xs text-slate-400 italic">No linked household recorded</span>
-                  )}
-                </div>
-
-                {/* 2. Client Profile Action Card */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/70 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Client Profile
-                    </span>
-                    <span className="text-[11px]  font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      {referral.clientId || "CL-1002"}
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-slate-900">{referral.patientName}</div>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Direct client chart with care plans, medication administration, and clinical notes.
-                  </p>
-                  {referral.clientId ? (
-                    <Link
-                      href={`/admin/clients/${referral.clientId}`}
-                      className="inline-flex items-center justify-between w-full px-3.5 py-2 text-xs font-bold text-slate-800 bg-white hover:bg-slate-100/80 border border-slate-200 hover:border-slate-300 rounded-xl shadow-2xs transition-all cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <User className="w-3.5 h-3.5 text-[#3D6B22]" />
-                        <span>View Client Profile</span>
-                      </div>
-                      <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={handleConvertToClient}
-                      className="inline-flex items-center justify-center w-full px-3.5 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-2xs transition-all cursor-pointer"
-                    >
-                      <span>Generate Client Profile</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* 3. Assigned Lead Coordinator Card */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/70 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Assigned Coordinator
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Active Lead
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-slate-900">{referral.assignedCoordinator}</div>
-                  <div className="text-[11px] text-slate-500">Lead Intake RN & Triage Navigator</div>
-                  <div className="flex items-center gap-3 pt-1 text-xs">
-                    <a
-                      href="tel:(555) 882-9011"
-                      className="text-[#3D6B22] font-semibold flex items-center gap-1 hover:underline"
-                    >
-                      <Phone className="w-3 h-3" />
-                      <span>Direct</span>
-                    </a>
-                    <span className="text-slate-300">·</span>
-                    <a
-                      href="mailto:maria.santos@lilisare.com"
-                      className="text-[#3D6B22] font-semibold flex items-center gap-1 hover:underline"
-                    >
-                      <Mail className="w-3 h-3" />
-                      <span>Email</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* 4. Insurance & Payer Quick Card */}
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/70 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Insurance & Payer
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      <span>Active Auth</span>
-                    </span>
-                  </div>
-                  <div className="text-xs font-bold text-slate-900">{referral.payerName}</div>
-                  <div className="text-[11px] text-slate-500 ">Prior Auth: AUTH-2026-PA-88419</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* 04. Tab Content Modules */}
+      {activeTab === "profile" && (
+        <ReferralProfileTab
+          referral={referral}
+          isEditing={isEditingProfile}
+          onToggleEdit={setIsEditingProfile}
+          onUpdateReferral={setReferral}
+          onLogActivity={(category, text) =>
+            setNotesList((prev) => [
+              {
+                author: perms.actorName,
+                role: perms.roleLabel,
+                time: "Just now",
+                category,
+                text,
+              },
+              ...prev,
+            ])
+          }
+        />
       )}
 
-      {/* =========================================================================
-          TAB 2: CLINICAL & TRIAGE
-         ========================================================================= */}
       {activeTab === "clinical" && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-            {/* Functional ADL & Mobility Matrix */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                    <ClipboardCheck className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    ADL & Mobility Directives
-                  </h3>
-                </div>
-                <span className="text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
-                  Priority: {referral.priority}
-                </span>
-              </div>
-
-              <div className="space-y-2.5">
-                {[
-                  {
-                    task: "Bathing & Personal Hygiene",
-                    req: "Hands-on assistance required with shower chair & transfer bench",
-                    status: "Total Assist",
-                    badge: "ADL-01",
-                  },
-                  {
-                    task: "Bed Mobility & Transfers",
-                    req: "Standby assist with gait belt (Right leg non-weight bearing x 3 weeks)",
-                    status: "Standby Guard",
-                    badge: "ADL-02",
-                  },
-                  {
-                    task: "Medication Reminders",
-                    req: "Supervised self-administration and blister-pack verification",
-                    status: "Prompting",
-                    badge: "IADL-01",
-                  },
-                  {
-                    task: "Meal Prep & Hydration",
-                    req: "Heart-healthy meal preparation and minimum 1500ml daily fluid prompting",
-                    status: "Full Prep",
-                    badge: "IADL-02",
-                  },
-                ].map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs"
-                  >
-                    <div className="space-y-0.5 max-w-[70%]">
-                      <span className="font-bold text-slate-900 block">{item.task}</span>
-                      <span className="text-slate-500 block text-[11px] leading-tight">{item.req}</span>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-[10px] font-bold text-[#1E5622] bg-[#E8F2E4] px-2 py-0.5 rounded border border-[#3D6B22]/20 block mb-1">
-                        {item.status}
-                      </span>
-                      <span className=" text-[9px] font-bold text-slate-400">
-                        {item.badge}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Clinical Precaution Alert */}
-              <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-start gap-3 text-xs text-amber-900">
-                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="leading-relaxed">
-                  <strong className="font-bold block text-amber-950 mb-0.5">
-                    Fall Risk & Surgical Precaution (Right Hip ORIF):
-                  </strong>
-                  Patient has a high Morse Fall Risk score (65). Walker must be utilized for all ambulatory
-                  transfers. No hip flexion beyond 90 degrees. Caregiver must verify gait belt application.
-                </div>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-in fade-in duration-200">
+          <Card className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <ClipboardCheck className="w-4 h-4 text-[#3D6B22]" />
+                <span>ADL & Mobility Directives</span>
+              </h3>
+              <span className="text-xs font-semibold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                Priority: {referral.priority}
+              </span>
             </div>
 
-            {/* Supervisory Assessment Protocol & Nursing Oversight */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                    <Stethoscope className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    Supervisory Nursing Oversight
-                  </h3>
-                </div>
-                <span className="text-xs text-slate-500">
-                  Lead RN: <strong className="text-slate-800">{referral.assignedCoordinator}</strong>
-                </span>
-              </div>
+            <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-2">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                Primary Clinical Diagnosis
+              </span>
+              <p className="text-xs sm:text-sm text-slate-900 font-bold leading-relaxed">
+                {referral.primaryDiagnosis}
+              </p>
+            </div>
 
-              <div className="space-y-3 text-xs">
-                {/* Protocol 1 */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Initial In-Home Clinical OASIS
-                    </span>
-                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                      Scheduled Nov 24
-                    </span>
+            <div className="space-y-2.5 text-xs">
+              {[
+                {
+                  task: "Bathing & Personal Hygiene",
+                  req: "Hands-on assistance required with shower chair & transfer bench",
+                  status: "Total Assist",
+                },
+                {
+                  task: "Bed Mobility & Transfers",
+                  req: "Standby assist with gait belt and safe transfer supervision",
+                  status: "Standby Guard",
+                },
+                {
+                  task: "Medication Reminders",
+                  req: "Supervised self-administration and daily schedule verification",
+                  status: "Prompting",
+                },
+              ].map((item) => (
+                <div
+                  key={item.task}
+                  className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200/70"
+                >
+                  <div className="space-y-0.5 max-w-[72%]">
+                    <span className="font-bold text-slate-900 block">{item.task}</span>
+                    <span className="text-slate-500 block text-[11px]">{item.req}</span>
                   </div>
-                  <div className="font-bold text-slate-900">
-                    Comprehensive In-Home Intake OASIS & Home Safety Assessment
-                  </div>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Mandatory in-person RN clinical assessment to establish baseline vital signs, surgical site
-                    inspection, and develop individualized aide care plan.
-                  </p>
-                </div>
-
-                {/* Protocol 2 */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Caregiver Staffing Competencies
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                      Match Required
-                    </span>
-                  </div>
-                  <div className="font-bold text-slate-900">
-                    Certified Aide with Dementia & Orthopedic Transfer Competency
-                  </div>
-                  <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Caregiver must hold active transfer competency certification, experience with surgical recovery,
-                    and calm demeanor for mild cognitive re-direction.
-                  </p>
-                </div>
-
-                {/* Protocol 3 */}
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      State Mandated Supervisory Cycle
-                    </div>
-                    <div className="font-bold text-slate-900 mt-0.5">Every 60 Calendar Days</div>
-                    <div className="text-[11px] text-slate-500">Unannounced on-site caregiver observation</div>
-                  </div>
-                  <span className="text-xs font-semibold text-[#1E5622] bg-[#E8F2E4] px-2.5 py-1 rounded-lg border border-[#3D6B22]/20">
-                    Mandated
+                  <span className="text-[10px] font-bold text-[#1E5622] bg-[#E8F2E4] px-2 py-0.5 rounded border border-[#3D6B22]/20 shrink-0">
+                    {item.status}
                   </span>
                 </div>
+              ))}
+            </div>
+
+            <div className="p-4 bg-amber-50/70 border border-amber-200/80 rounded-xl flex items-start gap-3 text-xs text-amber-900">
+              <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <strong className="font-bold block text-amber-950 mb-0.5">
+                  Triage & Safety Directives
+                </strong>
+                {referral.triageNotes}
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <Stethoscope className="w-4 h-4 text-[#3D6B22]" />
+                <span>Supervisory Nursing Oversight</span>
+              </h3>
+              <span className="text-xs text-slate-500">
+                Lead: <strong className="text-slate-800">{referral.assignedCoordinator}</strong>
+              </span>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Initial In-Home Clinical Assessment
+                  </span>
+                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    Target: {referral.targetStartDate}
+                  </span>
+                </div>
+                <div className="font-bold text-slate-900">
+                  Comprehensive In-Home Intake & Home Safety Assessment
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Mandatory RN assessment to establish baseline clinical metrics and finalize care plan prior to activation.
+                </p>
               </div>
 
-              {/* DME & Assistive Devices */}
               <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1.5">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Durable Medical Equipment (DME) in Residence
+                  Requested Service Lines
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="px-2 py-1 rounded-md text-[11px] font-semibold bg-white text-slate-700 border border-slate-200">
-                    Front-Wheeled Walker
-                  </span>
-                  <span className="px-2 py-1 rounded-md text-[11px] font-semibold bg-white text-slate-700 border border-slate-200">
-                    Shower Chair with Back
-                  </span>
-                  <span className="px-2 py-1 rounded-md text-[11px] font-semibold bg-white text-slate-700 border border-slate-200">
-                    Raised Toilet Seat with Arms
-                  </span>
-                  <span className="px-2 py-1 rounded-md text-[11px] font-semibold bg-white text-slate-700 border border-slate-200">
-                    Gait Belt
-                  </span>
+                  {referral.requestedServices.map((svc) => (
+                    <span
+                      key={svc}
+                      className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white text-slate-700 border border-slate-200"
+                    >
+                      {svc}
+                    </span>
+                  ))}
                 </div>
               </div>
+
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Supervisory Cycle
+                  </div>
+                  <div className="font-bold text-slate-900 mt-0.5">Every 60 Calendar Days</div>
+                </div>
+                <span className="text-xs font-semibold text-[#1E5622] bg-[#E8F2E4] px-2.5 py-1 rounded-lg border border-[#3D6B22]/20">
+                  Mandated
+                </span>
+              </div>
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
-      {/* =========================================================================
-          TAB 3: DEMOGRAPHICS & CONTACT
-         ========================================================================= */}
       {activeTab === "contact" && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-            {/* Patient Legal Identity & Family Contacts */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    Patient Identity & Family Contacts
-                  </h3>
-                </div>
-                <span className="text-xs text-slate-500  font-bold">
-                  {referral.id}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-in fade-in duration-200">
+          <Card className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <User className="w-4 h-4 text-[#3D6B22]" />
+                <span>Client Identity & Contacts</span>
+              </h3>
+              <span className="text-xs text-slate-500 font-bold">{referral.id}</span>
+            </div>
+
+            <div className="space-y-2.5 text-xs divide-y divide-slate-100">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Full Legal Name</span>
+                <span className="font-bold text-slate-900">{referral.patientName}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Age & Gender</span>
+                <span className="font-bold text-slate-900">
+                  {referral.age} years old ({referral.gender})
                 </span>
               </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Full Legal Name</span>
-                  <span className="font-bold text-slate-900">{referral.patientName}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Age & Gender</span>
-                  <span className="font-bold text-slate-900">{referral.age} years old ({referral.gender})</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Primary Telephone</span>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`tel:${referral.phone}`}
-                      className="font-bold text-[#3D6B22] hover:underline flex items-center gap-1"
-                    >
-                      <Phone className="w-3 h-3" />
-                      <span>{referral.phone}</span>
-                    </a>
-                    <button
-                      onClick={() => handleCopy(referral.phone, "Phone")}
-                      className="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
-                      title="Copy phone"
-                    >
-                      {copiedField === "Phone" ? (
-                        <Check className="w-3 h-3 text-emerald-600" />
-                      ) : (
-                        <Copy className="w-3 h-3" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Email Address</span>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`mailto:${referral.email}`}
-                      className="font-bold text-[#3D6B22] hover:underline flex items-center gap-1"
-                    >
-                      <Mail className="w-3 h-3" />
-                      <span className="truncate max-w-[200px]">{referral.email}</span>
-                    </a>
-                    <button
-                      onClick={() => handleCopy(referral.email, "Email")}
-                      className="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
-                      title="Copy email"
-                    >
-                      {copiedField === "Email" ? (
-                        <Check className="w-3 h-3 text-emerald-600" />
-                      ) : (
-                        <Copy className="w-3 h-3" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Primary Language</span>
-                  <span className="font-bold text-slate-900">English (Preferred)</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Responsible Family / POA</span>
-                  <span className="font-bold text-slate-900">Robert Whitfield (Son, Healthcare POA)</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-slate-500 font-medium">POA Direct Line</span>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Primary Telephone</span>
+                <div className="flex items-center gap-2">
                   <a
-                    href="tel:(555) 341-9920"
+                    href={`tel:${referral.phone}`}
                     className="font-bold text-[#3D6B22] hover:underline flex items-center gap-1"
                   >
                     <Phone className="w-3 h-3" />
-                    <span>(555) 341-9920</span>
+                    <span>{referral.phone}</span>
                   </a>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(referral.phone, "Phone")}
+                    className="p-1 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                    title="Copy phone"
+                  >
+                    {copiedField === "Phone" ? (
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Service Residence & EVV Geofence Parameters */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Email Address</span>
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    Service Residence & EVV Geofence
-                  </h3>
-                </div>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  GPS Active
-                </span>
-              </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Physical Address</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 text-right">{referral.address}</span>
-                    <button
-                      onClick={() => handleCopy(`${referral.address}, ${referral.city}, PA ${referral.zip}`, "Address")}
-                      className="p-1 text-slate-400 hover:text-slate-600 rounded transition-colors"
-                      title="Copy address"
-                    >
-                      {copiedField === "Address" ? (
-                        <Check className="w-3 h-3 text-emerald-600" />
-                      ) : (
-                        <Copy className="w-3 h-3" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">City, State, Zip</span>
-                  <span className="font-bold text-slate-900">{referral.city}, PA {referral.zip}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Residence Classification</span>
-                  <span className="font-bold text-slate-900">Single Family Home (1st Floor Accessible)</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">EVV Perimeter Radius</span>
-                  <span className="font-bold text-emerald-700">150 Meters Geofence Enforced</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Access Instructions</span>
-                  <span className="font-bold text-slate-800">Key safe on side porch (Code on file)</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-slate-500 font-medium">Environmental Hazards / Pets</span>
-                  <span className="font-bold text-slate-900">No pets · Non-smoking household</span>
+                  <a
+                    href={`mailto:${referral.email}`}
+                    className="font-bold text-[#3D6B22] hover:underline flex items-center gap-1"
+                  >
+                    <Mail className="w-3 h-3" />
+                    <span className="truncate max-w-[200px]">{referral.email}</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(referral.email, "Email")}
+                    className="p-1 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                    title="Copy email"
+                  >
+                    {copiedField === "Email" ? (
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </Card>
 
-      {/* =========================================================================
-          TAB 4: PAYER & SOURCE
-         ========================================================================= */}
-      {activeTab === "payer" && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-            {/* Inbound Referral Partner Information */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                    <Building2 className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    Inbound Referral Partner
-                  </h3>
-                </div>
-                <span className="text-xs font-semibold text-[#1E5622] bg-[#E8F2E4] px-2.5 py-0.5 rounded-full border border-[#3D6B22]/20">
-                  Hospital Partner
-                </span>
-              </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Referring Organization</span>
-                  <span className="font-bold text-slate-900">{referral.referralSource}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Discharge Contact Person</span>
-                  <span className="font-bold text-slate-900">
-                    {referral.referralSourceContact || "Dr. Karen Vance, Discharge Navigator"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Direct Telephone & Fax</span>
-                  <span className="font-bold text-slate-900">(412) 555-8290 · Fax: (412) 555-8299</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Transmission Interface</span>
-                  <span className="font-bold text-slate-900">Direct EHR Inbound API (FHIR Standard)</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-slate-500 font-medium">Referral Ingestion Date</span>
-                  <span className="font-bold text-slate-900">{referral.receivedDate} ({referral.daysInPipeline} days elapsed)</span>
-                </div>
-              </div>
-
-              {/* Ingestion Packet Checklist */}
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  Received Clinical Packet Documents
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-1.5 text-slate-700">
-                    <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Discharge Summary</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-700">
-                    <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>PT Rehab Evaluation</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-700">
-                    <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>CMS-485 Face-to-Face</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-700">
-                    <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Medication List (MAR)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Payer Authorization & Benefit Status */}
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    Payer Authorization Details
-                  </h3>
-                </div>
-                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Coverage Active
-                </span>
-              </div>
-
-              <div className="space-y-2.5 text-xs">
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Primary Payer Name</span>
-                  <span className="font-bold text-slate-900">{referral.payerName}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Funding Stream</span>
-                  <span className="font-bold text-slate-900">{referral.program}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Prior Authorization Code</span>
-                  <span className=" font-bold text-[#3D6B22]">AUTH-2026-PA-88419</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Authorized Care Level</span>
-                  <span className="font-bold text-slate-900">{referral.estimatedHoursPerWeek} Hours / Week</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                  <span className="text-slate-500 font-medium">Service Billing Code</span>
-                  <span className=" font-bold text-slate-800">T1019 (Personal Care Assistance)</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-slate-500 font-medium">Patient Liability (Co-Pay)</span>
-                  <span className="font-bold text-emerald-700">$0.00 / Fully Covered State Waiver</span>
-                </div>
-              </div>
-
-              {/* Coverage Effective Period */}
-              <div className="p-3.5 bg-emerald-50/50 border border-emerald-200/60 rounded-xl flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">
-                    Authorization Validity Window
-                  </span>
-                  <strong className="text-slate-900 font-bold block mt-0.5">
-                    Nov 22, 2026 — May 21, 2027 (180 Days)
-                  </strong>
-                </div>
-                <span className="text-xs font-bold text-emerald-800 bg-white px-2.5 py-1 rounded-lg border border-emerald-200">
-                  Verified
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =========================================================================
-          TAB 5: CHRONOLOGY & ACTIVITY LOG
-         ========================================================================= */}
-      {activeTab === "chronology" && (
-        <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#E8F2E4] flex items-center justify-center text-[#1E5622]">
-                <Clock className="w-4 h-4" />
-              </div>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Intake Chronology & Coordination Log
+          <Card className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#3D6B22]" />
+                <span>Service Residence & EVV Geofence</span>
               </h3>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                GPS Ready
+              </span>
             </div>
 
-            {/* Filter Buttons */}
+            <div className="space-y-2.5 text-xs divide-y divide-slate-100">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Physical Address</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-900 text-right">{referral.address}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleCopy(`${referral.address}, ${referral.city} ${referral.zip}`, "Address")
+                    }
+                    className="p-1 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                    title="Copy address"
+                  >
+                    {copiedField === "Address" ? (
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">City & ZIP</span>
+                <span className="font-bold text-slate-900">
+                  {referral.city}, {referral.zip}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">EVV Perimeter Radius</span>
+                <span className="font-bold text-emerald-700">150 Meters Geofence</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === "payer" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-in fade-in duration-200">
+          <Card className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#3D6B22]" />
+                <span>Inbound Referral Partner</span>
+              </h3>
+              <span className="text-xs font-semibold text-[#1E5622] bg-[#E8F2E4] px-2.5 py-0.5 rounded-full border border-[#3D6B22]/20">
+                Partner Source
+              </span>
+            </div>
+
+            <div className="space-y-2.5 text-xs divide-y divide-slate-100">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Referring Organization</span>
+                <span className="font-bold text-slate-900">{referral.referralSource}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Source Contact</span>
+                <span className="font-bold text-slate-900">
+                  {referral.referralSourceContact || "Direct Referral"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Ingestion Date</span>
+                <span className="font-bold text-slate-900">
+                  {referral.receivedDate} ({referral.daysInPipeline} days elapsed)
+                </span>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 space-y-2">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Clinical Packet Checklist
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {["Discharge Summary", "Care Assessment", "Physician Orders", "Consent Package"].map(
+                  (doc) => (
+                    <div key={doc} className="flex items-center gap-1.5 text-slate-700">
+                      <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>{doc}</span>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#3D6B22]" />
+                <span>Payer & Authorization Details</span>
+              </h3>
+              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                {referral.insuranceVerified ? "Verified" : "Pending"}
+              </span>
+            </div>
+
+            <div className="space-y-2.5 text-xs divide-y divide-slate-100">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Primary Payer</span>
+                <span className="font-bold text-slate-900">{referral.payerName}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Funding Program</span>
+                <span className="font-bold text-slate-900">{referral.program}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Target Weekly Hours</span>
+                <span className="font-bold text-slate-900">
+                  {referral.estimatedHoursPerWeek} Hours / Week
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500 font-medium">Target Start Date</span>
+                <span className="font-bold text-emerald-700">{referral.targetStartDate}</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === "connected" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-in fade-in duration-200">
+          {/* Household Hub Card */}
+          <Card className="p-5 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Household Hub
+                </span>
+                <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {referral.householdCode || "Pending"}
+                </span>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">
+                {referral.patientName.split(" ").pop()} Household
+              </h3>
+              <p className="text-xs text-slate-500">
+                Unified family care unit linking Client, Caregiver, and Agency Operations.
+              </p>
+            </div>
+            {referral.householdCode ? (
+              <Link
+                href={`/admin/households/${referral.householdCode.toLowerCase()}`}
+                className="inline-flex items-center justify-between w-full px-3.5 py-2 text-xs font-bold text-[#1E5622] bg-[#E8F2E4]/60 hover:bg-[#E8F2E4] border border-[#3D6B22]/20 rounded-xl transition-all"
+              >
+                <span>Open Household Hub</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={handleConvertToClient}
+                className="inline-flex items-center justify-center w-full px-3.5 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl cursor-pointer"
+              >
+                Create & Link Household
+              </button>
+            )}
+          </Card>
+
+          {/* Client Profile Card */}
+          <Card className="p-5 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Client Profile
+                </span>
+                <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {referral.clientId || "Pending"}
+                </span>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">{referral.patientName}</h3>
+              <p className="text-xs text-slate-500">
+                17-domain client chart covering ADLs, plan of care, authorizations, and notes.
+              </p>
+            </div>
+            {referral.clientId ? (
+              <Link
+                href={`/admin/clients/${referral.clientId}`}
+                className="inline-flex items-center justify-between w-full px-3.5 py-2 text-xs font-bold text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all"
+              >
+                <span>View Client Profile</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={handleConvertToClient}
+                className="inline-flex items-center justify-center w-full px-3.5 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl cursor-pointer"
+              >
+                Admit as Active Client
+              </button>
+            )}
+          </Card>
+
+          {/* Assigned Coordinator Card */}
+          <Card className="p-5 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Assigned Coordinator
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Active Lead
+                </span>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">{referral.assignedCoordinator}</h3>
+              <p className="text-xs text-slate-500">Lead Intake & Triage Navigator</p>
+            </div>
+            <div className="flex items-center gap-3 pt-2 border-t border-slate-100 text-xs">
+              <a
+                href={`tel:${referral.phone}`}
+                className="text-[#3D6B22] font-semibold flex items-center gap-1 hover:underline"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Call Client</span>
+              </a>
+              <span className="text-slate-300">•</span>
+              <a
+                href={`mailto:${referral.email}`}
+                className="text-[#3D6B22] font-semibold flex items-center gap-1 hover:underline"
+              >
+                <Mail className="w-3.5 h-3.5" />
+                <span>Email</span>
+              </a>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === "chronology" && (
+        <Card className="p-5 sm:p-6 space-y-5 animate-in fade-in duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#3D6B22]" />
+              <span>Intake Chronology & Coordination Log</span>
+            </h3>
+
             <div className="flex items-center gap-1.5 flex-wrap">
               {["All", "Coordination", "Clinical", "Payer"].map((flt) => (
                 <button
                   key={flt}
                   type="button"
                   onClick={() => setNoteFilter(flt)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${noteFilter === flt
-                    ? "bg-[#3D6B22] text-white shadow-2xs"
-                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/70"
-                    }`}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    noteFilter === flt
+                      ? "bg-[#3D6B22] text-white shadow-2xs"
+                      : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/70"
+                  }`}
                 >
                   {flt}
                 </button>
@@ -1459,9 +1133,11 @@ export function AdminIntakeReferralDetailView({
             </div>
           </div>
 
-          {/* Add Note Form */}
-          <form onSubmit={handleAddNote} className="space-y-3 p-4 bg-slate-50/80 rounded-xl border border-slate-200/80">
-            <div className="flex items-center justify-between">
+          <form
+            onSubmit={handleAddNote}
+            className="space-y-3 p-4 bg-slate-50/80 rounded-xl border border-slate-200/80"
+          >
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-slate-700">Add Coordination Note</span>
               <div className="flex items-center gap-1.5">
                 {(["Coordination", "Clinical", "Payer", "Family"] as const).map((cat) => (
@@ -1469,10 +1145,11 @@ export function AdminIntakeReferralDetailView({
                     key={cat}
                     type="button"
                     onClick={() => setNoteCategory(cat)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${noteCategory === cat
-                      ? "bg-[#3D6B22] text-white shadow-2xs"
-                      : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
-                      }`}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                      noteCategory === cat
+                        ? "bg-[#3D6B22] text-white shadow-2xs"
+                        : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                    }`}
                   >
                     {cat}
                   </button>
@@ -1492,7 +1169,7 @@ export function AdminIntakeReferralDetailView({
               <button
                 type="submit"
                 disabled={!newNote.trim()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all cursor-pointer shadow-md shadow-[#3D6B22]/20"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all cursor-pointer shadow-md shadow-[#3D6B22]/20"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Post Coordination Note</span>
@@ -1500,8 +1177,7 @@ export function AdminIntakeReferralDetailView({
             </div>
           </form>
 
-          {/* Timeline List */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1">
             {filteredNotes.map((item, idx) => (
               <div
                 key={idx}
@@ -1523,7 +1199,7 @@ export function AdminIntakeReferralDetailView({
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {perms.referrals.canDelete && (

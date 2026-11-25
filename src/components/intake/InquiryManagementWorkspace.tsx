@@ -23,6 +23,7 @@ import {
   CheckCircle2,
   Archive,
   GripVertical,
+  Edit3,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -744,13 +745,22 @@ export function InquiryManagementWorkspace({
                             className="py-3.5 px-4 pr-6 text-right"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <Link
-                              href={detailsHref}
-                              className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                            >
-                              <span>Details</span>
-                              <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
-                            </Link>
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <Link
+                                href={detailsHref}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                              >
+                                <span>Details</span>
+                                <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                              </Link>
+                              <Link
+                                href={`${detailsHref.replace(/\/$/, "")}/edit`}
+                                title="Edit Inquiry"
+                                className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 hover:bg-emerald-50/60 transition-colors cursor-pointer"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       );

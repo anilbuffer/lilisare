@@ -33,6 +33,7 @@ import {
   Briefcase,
   Activity,
   Trash2,
+  Edit3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
@@ -77,7 +78,7 @@ export function AdminHouseholdDirectory() {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6;
+  const pageSize = 10;
 
   // Selected Household for Quick Review Drawer
   const [selectedHousehold, setSelectedHousehold] = useState<Household | null>(
@@ -232,10 +233,10 @@ export function AdminHouseholdDirectory() {
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 01. Header & Actions Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Households Hub
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Households Directory
           </h1>
         </div>
 
@@ -525,14 +526,14 @@ export function AdminHouseholdDirectory() {
         /* ======================== LIST VIEW ======================== */
         <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs whitespace-nowrap">
-              <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold">
-                <tr>
-                  <th className="px-6 py-4">Household</th>
-                  <th className="px-6 py-4">Client</th>
-                  <th className="px-6 py-4">Primary Caregiver</th>
-                  <th className="px-6 py-4">Tri-Journey Stage</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Household</th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client</th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Primary Caregiver</th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tri-Journey Stage</th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -597,10 +598,17 @@ export function AdminHouseholdDirectory() {
                       <div className="inline-flex items-center justify-end gap-1.5">
                         <Link
                           href={`/admin/households/${hh.id}`}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#E8F2E4] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#1E5622] rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
                         >
-                          <span>Details</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                          <span>View Profile</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                        </Link>
+                        <Link
+                          href={`/admin/households/${hh.id}/edit`}
+                          title="Edit Household"
+                          className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 hover:bg-emerald-50/60 transition-colors cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
                         </Link>
                         {perms.households.canDelete && (
                           <button

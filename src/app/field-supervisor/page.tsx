@@ -35,7 +35,7 @@ export default function FieldSupervisorDashboard() {
   }).format(new Date());
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6">
+    <div className="w-full max-w-9xl mx-auto space-y-6">
       {/* Premium Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-xl p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
         <div>

@@ -38,7 +38,7 @@ export default function DashboardPage() {
   }).format(new Date());
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-14 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-14 animate-in fade-in duration-300">
       {/* 01 & 02. Page Header: Greeting • Date • AI Briefing */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

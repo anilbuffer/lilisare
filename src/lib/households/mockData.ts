@@ -551,10 +551,12 @@ export function getHouseholdById(id: string): Household | undefined {
 }
 
 export function getAllHouseholdIds(): string[] {
-  const ids: string[] = [];
+  const map = new Map<string, string>();
   MOCK_HOUSEHOLDS.forEach((h) => {
-    ids.push(h.id);
-    ids.push(h.code);
+    map.set(h.id.toLowerCase(), h.id);
+    if (!map.has(h.code.toLowerCase())) {
+      map.set(h.code.toLowerCase(), h.code);
+    }
   });
-  return Array.from(new Set(ids));
+  return Array.from(map.values());
 }

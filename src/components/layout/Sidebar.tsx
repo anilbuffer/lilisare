@@ -26,7 +26,6 @@ import {
   LogOut,
   User,
   PanelLeftClose,
-  PanelLeftOpen,
   FileText,
   UserPlus,
   MapPin,
@@ -707,21 +706,6 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           isCollapsed ? "lg:w-[76px] w-[260px]" : "w-[260px]"
         )}
       >
-        {/* Floating Edge Toggle Button */}
-        <button
-          onClick={toggleCollapse}
-          title={isCollapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}
-          className="hidden lg:flex absolute -right-3.5 top-5 z-50 w-7 h-7 rounded-full bg-brand-teal text-white items-center justify-center shadow-lg border border-white/90 ring-2 ring-slate-900/60 hover:scale-110 active:scale-95 transition-all cursor-pointer"
-          aria-label="Toggle Sidebar"
-        >
-          <PanelLeftClose
-            className={clsx(
-              "w-4 h-4 transition-transform duration-300 ease-in-out",
-              isCollapsed && "rotate-180"
-            )}
-          />
-        </button>
-
         {/* Header / Logo Area */}
         <div
           className={clsx(

@@ -106,33 +106,6 @@ export function EvvVisitsWorkspace() {
   }, []);
 
   // Day Stepping Handlers
-  const handlePreviousDay = () => {
-    try {
-      const [y, m, d] = selectedDate.split("-").map(Number);
-      const dt = new Date(y, m - 1, d);
-      dt.setDate(dt.getDate() - 1);
-      const prevIso = dt.toISOString().split("T")[0];
-      setSelectedDate(prevIso);
-      setSelectedDateFilter("SPECIFIC");
-      setCurrentPage(1);
-    } catch {
-      // fallback
-    }
-  };
-
-  const handleNextDay = () => {
-    try {
-      const [y, m, d] = selectedDate.split("-").map(Number);
-      const dt = new Date(y, m - 1, d);
-      dt.setDate(dt.getDate() + 1);
-      const nextIso = dt.toISOString().split("T")[0];
-      setSelectedDate(nextIso);
-      setSelectedDateFilter("SPECIFIC");
-      setCurrentPage(1);
-    } catch {
-      // fallback
-    }
-  };
 
   // Date-filtered pool of visits (e.g. today's 128 visits or all dates)
   const dateFilteredVisits = useMemo(() => {
@@ -360,18 +333,8 @@ export function EvvVisitsWorkspace() {
 
         {/* Date Filter & Action Buttons */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          {/* Functional Date Filter & Day Stepper */}
-          <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-2xs gap-0.5">
-            {/* Previous Day */}
-            <button
-              type="button"
-              onClick={handlePreviousDay}
-              title="Previous Day"
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-
+          {/* Functional Date Filter (Pill container matching LiliSare standards) */}
+          <div className="flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-2xs">
             {/* Date Button with Native Date Input Picker */}
             <div className="relative">
               <button
@@ -380,7 +343,7 @@ export function EvvVisitsWorkspace() {
                   setSelectedDateFilter("SPECIFIC");
                   dateInputRef.current?.showPicker?.();
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${selectedDateFilter === "SPECIFIC"
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${selectedDateFilter === "SPECIFIC"
                     ? "bg-[#3D6B22] text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
                   }`}
@@ -409,18 +372,6 @@ export function EvvVisitsWorkspace() {
               />
             </div>
 
-            {/* Next Day */}
-            <button
-              type="button"
-              onClick={handleNextDay}
-              title="Next Day"
-              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-
-            <div className="h-4 w-px bg-slate-200 mx-1" />
-
             {/* All Dates Button */}
             <button
               type="button"
@@ -428,7 +379,7 @@ export function EvvVisitsWorkspace() {
                 setSelectedDateFilter("ALL");
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${selectedDateFilter === "ALL"
+              className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${selectedDateFilter === "ALL"
                   ? "bg-[#3D6B22] text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
                 }`}
@@ -646,7 +597,10 @@ export function EvvVisitsWorkspace() {
                     Actual Time
                   </th>
                   <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Status
+                    Visit Status
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Verification
                   </th>
                   <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
                     Actions
@@ -710,9 +664,14 @@ export function EvvVisitsWorkspace() {
                         </p>
                       </td>
 
-                      {/* Status */}
+                      {/* Visit Status */}
                       <td className="py-4 px-4 sm:px-6">
                         {renderVisitStatusBadge(visit.visitStatus)}
+                      </td>
+
+                      {/* Verification Status */}
+                      <td className="py-4 px-4 sm:px-6">
+                        {renderVerificationStatusBadge(visit.verificationStatus)}
                       </td>
 
                       {/* Actions */}

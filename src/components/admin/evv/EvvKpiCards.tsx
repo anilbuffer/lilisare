@@ -78,11 +78,10 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
                   {card.label}
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className={`text-lg sm:text-xl font-bold tracking-tight ${card.accent}`}>
+                  <span className={`text-xl sm:text-2xl font-bold tracking-tight ${card.accent}`}>
                     {card.value}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-medium mt-1">{card.subtext}</p>
               </div>
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.iconBg} ${card.iconColor}`}>
                 <Icon className="w-4 h-4" />

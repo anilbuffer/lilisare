@@ -409,25 +409,6 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
               <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
                 {visit.caregiverName}
               </h1>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-mono">
-                {visit.id} · Shift {visit.visitNumber}
-              </span>
-              <span
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                  visit.verificationStatus === "Verified"
-                    ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20"
-                    : visit.verificationStatus === "Exception"
-                    ? "bg-amber-100 text-amber-800 border-amber-300"
-                    : visit.verificationStatus === "Under Review"
-                    ? "bg-purple-50 text-purple-700 border-purple-200"
-                    : visit.verificationStatus === "Correction Required"
-                    ? "bg-rose-50 text-rose-700 border-rose-200"
-                    : "bg-slate-100 text-slate-600 border-slate-200"
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                {visit.verificationStatus}
-              </span>
             </div>
 
             <div className="mt-1 flex items-center gap-2 flex-wrap text-xs sm:text-sm text-slate-600">
@@ -443,12 +424,6 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
                 >
                   {visit.clientName}
                 </Link>
-              </span>
-              <span className="text-slate-400">•</span>
-              <span className="text-slate-500 font-medium flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                {visit.date} ({formatTimeDisplay(visit.scheduledStartTime)} –{" "}
-                {formatTimeDisplay(visit.scheduledEndTime)})
               </span>
             </div>
           </div>
@@ -531,11 +506,10 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
                 key={tab.id}
                 type="button"
                 onClick={() => handleSelectTab(tab.id)}
-                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-all shrink-0 cursor-pointer whitespace-nowrap ${
-                  isActive
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
-                }`}
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-all shrink-0 cursor-pointer whitespace-nowrap ${isActive
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -548,13 +522,12 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
               <button
                 type="button"
                 onClick={() => setIsMoreOpen((prev) => !prev)}
-                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  isOverflowActive
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : isMoreOpen
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${isOverflowActive
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : isMoreOpen
                     ? "bg-slate-100 text-slate-900"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
-                }`}
+                  }`}
               >
                 <span>
                   {isOverflowActive && activeOverflowTab
@@ -562,9 +535,8 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
                     : `MORE (${overflowTabs.length})`}
                 </span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    isMoreOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${isMoreOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -581,11 +553,10 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
                         key={tab.id}
                         type="button"
                         onClick={() => handleSelectTab(tab.id)}
-                        className={`w-full text-left px-3.5 py-2 text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${
-                          isTabActive
-                            ? "bg-[#3D6B22]/10 text-[#3D6B22]"
-                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                        }`}
+                        className={`w-full text-left px-3.5 py-2 text-xs font-bold flex items-center justify-between transition-colors cursor-pointer ${isTabActive
+                          ? "bg-[#3D6B22]/10 text-[#3D6B22]"
+                          : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                          }`}
                       >
                         <span>{tab.label}</span>
                         {isTabActive && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
@@ -649,7 +620,7 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
           <div className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
             {visit.clientName}
           </div>
-          <div className="mt-1 flex items-center gap-2 text-xs text-slate-500 font-mono">
+          <div className="mt-1 flex items-center gap-2 text-xs text-slate-500 ">
             <span>ID: {visit.clientId}</span>
             <span>•</span>
             <span>Medicaid: {visit.clientMedicaidId}</span>
@@ -665,7 +636,7 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Service Information
             </span>
-            <span className="font-mono text-[11px] font-semibold text-[#1E5622] bg-[#E8F2E4] px-2 py-0.5 rounded">
+            <span className=" text-[11px] font-semibold text-[#1E5622] bg-[#E8F2E4] px-2 py-0.5 rounded">
               {visit.serviceCode}
             </span>
           </div>
@@ -678,7 +649,7 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
           </div>
           <p className="text-[11px] text-slate-500 mt-2">
             Authorization:{" "}
-            <span className="font-mono font-medium text-slate-700">
+            <span className=" font-medium text-slate-700">
               {visit.authorizationNumber}
             </span>
           </p>
@@ -688,39 +659,42 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
         <div className={CARD_CLASS}>
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              EVV Verification
+              EVV Verification & Schedule
             </span>
             <span className="text-[11px] font-semibold text-slate-500">
               {verifiedCount} / 6 Elements
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                visit.verificationStatus === "Verified"
-                  ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20"
-                  : visit.verificationStatus === "Exception"
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${visit.verificationStatus === "Verified"
+                ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20"
+                : visit.verificationStatus === "Exception"
                   ? "bg-amber-100 text-amber-800 border-amber-300"
                   : visit.verificationStatus === "Under Review"
-                  ? "bg-purple-50 text-purple-700 border-purple-200"
-                  : visit.verificationStatus === "Correction Required"
-                  ? "bg-rose-50 text-rose-700 border-rose-200"
-                  : "bg-slate-100 text-slate-600 border-slate-200"
-              }`}
+                    ? "bg-purple-50 text-purple-700 border-purple-200"
+                    : visit.verificationStatus === "Correction Required"
+                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
+                }`}
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               {visit.verificationStatus}
             </span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+              {visit.id} · Shift {visit.visitNumber}
+            </span>
           </div>
-          <div className="mt-2 text-xs text-slate-500 flex items-center justify-between">
+          <div className="mt-2 text-xs text-slate-600 flex items-center gap-1.5 font-medium">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <span>
-              Capture: {visit.sixElements.locationOfService.verified ? "Mobile GPS" : "Flagged"}
-            </span>
-            <span className="font-medium text-slate-600">
-              {visit.sixElements.timeBeginsAndEnds.verified ? "Times Match" : "Discrepancy"}
+              {visit.date} ({formatTimeDisplay(visit.scheduledStartTime)} – {formatTimeDisplay(visit.scheduledEndTime)})
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">21st Century Cures Act Compliant</p>
+          <div className="mt-1.5 text-[11px] text-slate-500 flex items-center justify-between">
+            <span>Capture: {visit.sixElements.locationOfService.verified ? "Mobile GPS" : "Flagged"}</span>
+            <span className="text-slate-400">21st Century Cures Act Compliant</span>
+          </div>
         </div>
       </div>
 
@@ -869,11 +843,10 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
               <div className="flex items-center justify-between pt-2 border-t border-slate-200/70">
                 <span className="text-[11px] font-bold text-slate-500">Billing Readiness:</span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                    visit.billingReadiness === "Ready for Billing"
-                      ? "bg-[#E8F2E4] text-[#1E5622]"
-                      : "bg-amber-100 text-amber-800"
-                  }`}
+                  className={`px-2 py-0.5 rounded text-[11px] font-bold ${visit.billingReadiness === "Ready for Billing"
+                    ? "bg-[#E8F2E4] text-[#1E5622]"
+                    : "bg-amber-100 text-amber-800"
+                    }`}
                 >
                   {visit.billingReadiness}
                 </span>
@@ -881,11 +854,10 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-500">Payroll Readiness:</span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                    visit.payrollReadiness === "Ready for Payroll"
-                      ? "bg-[#E8F2E4] text-[#1E5622]"
-                      : "bg-amber-100 text-amber-800"
-                  }`}
+                  className={`px-2 py-0.5 rounded text-[11px] font-bold ${visit.payrollReadiness === "Ready for Payroll"
+                    ? "bg-[#E8F2E4] text-[#1E5622]"
+                    : "bg-amber-100 text-amber-800"
+                    }`}
                 >
                   {visit.payrollReadiness}
                 </span>
@@ -909,11 +881,11 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
               <div className="space-y-2 text-xs">
                 <div>
                   <span className="text-sm font-bold text-slate-900 block">{visit.clientName}</span>
-                  <span className="font-mono text-slate-500 text-[11px]">ID: {visit.clientId}</span>
+                  <span className=" text-slate-500 text-[11px]">ID: {visit.clientId}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Medicaid ID:</span>
-                  <p className="font-mono font-semibold text-slate-800">{visit.clientMedicaidId}</p>
+                  <p className=" font-semibold text-slate-800">{visit.clientMedicaidId}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Household:</span>
@@ -945,7 +917,7 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
               <div className="space-y-2 text-xs">
                 <div>
                   <span className="text-sm font-bold text-slate-900 block">{visit.caregiverName}</span>
-                  <span className="font-mono text-slate-500 text-[11px]">ID: {visit.caregiverId}</span>
+                  <span className=" text-slate-500 text-[11px]">ID: {visit.caregiverId}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Role:</span>
@@ -1046,7 +1018,7 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
                       </span>
                       <span className="font-bold text-slate-900 text-sm">{item.title}</span>
                     </div>
-                    <p className="text-xs text-slate-600 font-mono pl-7">{item.value}</p>
+                    <p className="text-xs text-slate-600  pl-7">{item.value}</p>
                     <p className="text-[11px] text-slate-400 pl-7">{item.description}</p>
                     {item.notes && (
                       <p className="text-[11px] font-semibold text-amber-800 pl-7">{item.notes}</p>
@@ -1268,7 +1240,7 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
 
             <div className="space-y-5">
               {/* Form Input using standardized FormControls */}
-              <div className="p-4 sm:p-5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-4">
+              <div className="p-4 sm:p-5 rounded-xl border border-slate-200 space-y-4">
                 <FormSection
                   title="Document Investigation or Decision"
                   description="All reviews preserve original caregiver submissions while adding reviewer notes and official reason codes."
@@ -1359,7 +1331,7 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
                             {note.reviewerName}{" "}
                             <span className="font-normal text-slate-500">({note.reviewerRole})</span>
                           </span>
-                          <span className="text-slate-400 font-mono text-[11px]">{note.timestamp}</span>
+                          <span className="text-slate-400  text-[11px]">{note.timestamp}</span>
                         </div>
                         {note.reasonCode && (
                           <div className="text-[11px] font-semibold text-amber-800">
@@ -1404,18 +1376,17 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
               {visit.timeline.map((event) => (
                 <div key={event.id} className="relative">
                   <div
-                    className={`absolute -left-5 top-1 w-3 h-3 rounded-full border-2 bg-white ${
-                      event.badgeType === "warning"
-                        ? "border-amber-500 bg-amber-500"
-                        : event.badgeType === "success"
+                    className={`absolute -left-5 top-1 w-3 h-3 rounded-full border-2 bg-white ${event.badgeType === "warning"
+                      ? "border-amber-500 bg-amber-500"
+                      : event.badgeType === "success"
                         ? "border-[#3D6B22] bg-[#3D6B22]"
                         : "border-slate-400 bg-slate-300"
-                    }`}
+                      }`}
                   />
                   <div className="space-y-0.5">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <span className="font-bold text-slate-900 text-sm">{event.event}</span>
-                      <span className="text-[11px] text-slate-400 font-mono">{event.timestamp}</span>
+                      <span className="text-[11px] text-slate-400 ">{event.timestamp}</span>
                     </div>
                     <div className="text-xs text-slate-500 font-medium">
                       {event.actor} • {event.actorRole}

@@ -438,7 +438,7 @@ export function AdminCaregiverDirectory() {
         <button
           type="button"
           onClick={() => setActiveKpiFilter((prev) => (prev === "ACTIVE" ? "ALL" : "ACTIVE"))}
-          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ACTIVE"
+          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ACTIVE"
             ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
             : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
@@ -454,9 +454,6 @@ export function AdminCaregiverDirectory() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-[11px] font-semibold text-emerald-600 mt-2 flex items-center gap-1">
-            + 2 this week
-          </p>
         </button>
 
         {/* Card 2: Onboarding */}
@@ -465,7 +462,7 @@ export function AdminCaregiverDirectory() {
           onClick={() =>
             setActiveKpiFilter((prev) => (prev === "ONBOARDING" ? "ALL" : "ONBOARDING"))
           }
-          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ONBOARDING"
+          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ONBOARDING"
             ? "border-purple-600 ring-2 ring-purple-600/20 shadow-md"
             : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
@@ -481,9 +478,6 @@ export function AdminCaregiverDirectory() {
               <UserPlus className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-[11px] font-medium text-slate-500 mt-2">
-            1 pending background check
-          </p>
         </button>
 
         {/* Card 3: Avg. Rating */}
@@ -492,7 +486,7 @@ export function AdminCaregiverDirectory() {
           onClick={() =>
             setActiveKpiFilter((prev) => (prev === "HIGH_RATING" ? "ALL" : "HIGH_RATING"))
           }
-          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "HIGH_RATING"
+          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "HIGH_RATING"
             ? "border-amber-500 ring-2 ring-amber-500/20 shadow-md"
             : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
@@ -506,7 +500,6 @@ export function AdminCaregiverDirectory() {
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             </div>
           </div>
-          <p className="text-[11px] font-medium text-slate-500 mt-2">Based on client EVV reviews</p>
         </button>
 
         {/* Card 4: EVV Compliance */}
@@ -515,7 +508,7 @@ export function AdminCaregiverDirectory() {
           onClick={() =>
             setActiveKpiFilter((prev) => (prev === "COMPLIANCE_GAP" ? "ALL" : "COMPLIANCE_GAP"))
           }
-          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "COMPLIANCE_GAP"
+          className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "COMPLIANCE_GAP"
             ? "border-rose-500 ring-2 ring-rose-500/20 shadow-md"
             : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
@@ -529,7 +522,6 @@ export function AdminCaregiverDirectory() {
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-[11px] font-medium text-emerald-600 mt-2">Exceeds state standards</p>
         </button>
       </div>
 

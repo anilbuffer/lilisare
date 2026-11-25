@@ -333,7 +333,7 @@ export function AdminIntakeReferralsDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Total Referrals</span>
+            <span className="text-xs font-semibold text-slate-700">Total Referrals</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <FileText className="w-4 h-4" />
             </div>
@@ -346,7 +346,7 @@ export function AdminIntakeReferralsDirectory() {
         {/* Card 2: Conversion Rate */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Conversion Rate</span>
+            <span className="text-xs font-semibold text-slate-700">Conversion Rate</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
               <Sparkles className="w-4 h-4" />
             </div>
@@ -367,7 +367,7 @@ export function AdminIntakeReferralsDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">RN Assessments</span>
+            <span className="text-xs font-semibold text-slate-700">RN Assessments</span>
             <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
               <Stethoscope className="w-4 h-4" />
             </div>
@@ -380,7 +380,7 @@ export function AdminIntakeReferralsDirectory() {
         {/* Card 4: Avg. Days to Onboard */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Intake Velocity</span>
+            <span className="text-xs font-semibold text-slate-700">Intake Velocity</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <Clock className="w-4 h-4" />
             </div>
@@ -401,7 +401,7 @@ export function AdminIntakeReferralsDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Urgent Triage</span>
+            <span className="text-xs font-semibold text-slate-700">Urgent Triage</span>
             <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -628,7 +628,7 @@ export function AdminIntakeReferralsDirectory() {
                         {ref.requestedServices.map((svc, idx) => (
                           <span
                             key={idx}
-                            className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20"
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20"
                           >
                             {svc}
                           </span>
@@ -639,7 +639,7 @@ export function AdminIntakeReferralsDirectory() {
                     {/* Priority */}
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${ref.priority === "Urgent"
+                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${ref.priority === "Urgent"
                           ? "bg-rose-50 text-rose-700 border-rose-200"
                           : ref.priority === "High"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
@@ -656,7 +656,7 @@ export function AdminIntakeReferralsDirectory() {
                     {/* Status */}
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${ref.status === "Enrolled"
+                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border ${ref.status === "Enrolled"
                           ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                           : ref.status === "Ready for Staffing"
                             ? "bg-teal-50 text-teal-800 border-teal-200"

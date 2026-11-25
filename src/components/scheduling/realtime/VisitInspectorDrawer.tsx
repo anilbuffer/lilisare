@@ -336,12 +336,12 @@ export function VisitInspectorDrawer({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-2.5 px-2 flex items-center justify-center gap-1.5 text-xs font-bold transition-colors border-b-2 cursor-pointer ${active
-                    ? "text-[#3D6B22] border-[#3D6B22] bg-[#F2F8EE]/50"
-                    : "text-slate-500 border-transparent hover:text-slate-800 hover:bg-slate-50"
+                className={`py-2.5 px-1 sm:px-2 flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-bold transition-colors border-b-2 cursor-pointer ${active
+                  ? "text-[#3D6B22] border-[#3D6B22] bg-[#F2F8EE]/50"
+                  : "text-slate-500 border-transparent hover:text-slate-800 hover:bg-slate-50"
                   }`}
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                 <span className="truncate">{tab.label}</span>
               </button>
             );

@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   UserX,
   UserCheck,
-  ChevronLeft,
   Calendar,
   Sparkles,
   Check
@@ -567,7 +566,8 @@ export function PolicyAcknowledgmentMatrix({ policies }: PolicyAcknowledgmentMat
                 pageSize={itemsPerPage}
                 onPageChange={setCurrentPage}
                 entryLabel="signers"
-                className="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50"
+                variant="table-footer"
+                className="border-t border-slate-200 bg-slate-50"
               />
             )}
           </div>

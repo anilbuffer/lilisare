@@ -15,8 +15,6 @@ import {
   List as ListIcon,
   LayoutGrid,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   ArrowRight,
   MoreVertical,
   RotateCcw,
@@ -710,7 +708,7 @@ export function AdminClientDirectory() {
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
                           {/* Default Avatar (Initial Badge) */}
-                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-semibold text-xs shrink-0 shadow-2xs">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-semibold text-xs shrink-0 shadow-2xs">
                             {initials}
                           </div>
                           <div>
@@ -945,7 +943,7 @@ export function AdminClientDirectory() {
           totalItems={filteredClients.length}
           pageSize={pageSize}
           onPageChange={setCurrentPage}
-          entryLabel="entries"
+          entryLabel="clients"
           variant="standalone-card"
         />
       )}

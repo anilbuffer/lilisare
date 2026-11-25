@@ -15,7 +15,6 @@ import {
   LayoutGrid,
   List as ListIcon,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   ArrowRight,
   X,
@@ -836,7 +835,7 @@ export function AdminIntakeReferralsDirectory() {
           pageSize={pageSize}
           onPageChange={setCurrentPage}
           entryLabel="referrals"
-          className="pt-2 border-t border-slate-100"
+          variant="standalone-card"
         />
       )}
 

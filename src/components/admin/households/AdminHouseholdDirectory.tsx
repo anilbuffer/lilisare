@@ -20,7 +20,6 @@ import {
   ChevronRight,
   Sparkles,
   ChevronDown,
-  ChevronLeft,
   X,
   Phone,
   Mail,
@@ -762,7 +761,7 @@ export function AdminHouseholdDirectory() {
           pageSize={pageSize}
           onPageChange={setCurrentPage}
           entryLabel="households"
-          className="pt-2 border-t border-slate-100"
+          variant="standalone-card"
         />
       )}
       {/* Delete Household Confirmation Modal (Agency Admin Only) */}

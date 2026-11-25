@@ -12,8 +12,6 @@ import {
   AlertTriangle,
   Clock,
   CheckCircle2,
-  ChevronRight,
-  ChevronLeft,
   ArrowUpDown,
   Sparkles,
   FileText,
@@ -345,8 +343,8 @@ export function EvvVisitsWorkspace() {
                   dateInputRef.current?.showPicker?.();
                 }}
                 className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${selectedDateFilter === "SPECIFIC"
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
                   }`}
                 title="Click to select date"
               >
@@ -381,8 +379,8 @@ export function EvvVisitsWorkspace() {
                 setCurrentPage(1);
               }}
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${selectedDateFilter === "ALL"
-                  ? "bg-[#3D6B22] text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
+                ? "bg-[#3D6B22] text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
                 }`}
             >
               All Dates
@@ -635,7 +633,7 @@ export function EvvVisitsWorkspace() {
                       {/* Caregiver with Avatar Initials */}
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0 shadow-2xs">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0 shadow-2xs">
                             {initials}
                           </div>
                           <div>
@@ -781,7 +779,7 @@ export function EvvVisitsWorkspace() {
           totalItems={filteredVisits.length}
           pageSize={pageSize}
           onPageChange={setCurrentPage}
-          entryLabel="entries"
+          entryLabel="visits"
           variant="standalone-card"
         />
       )}

@@ -77,7 +77,7 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-slate-900/60 z-40 min-[1120px]:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm"
             onClick={onClose}
           />
         )}
@@ -85,56 +85,63 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
 
       <aside
         className={clsx(
-          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-[width,transform] duration-300 ease-in-out min-[1120px]:translate-x-0 min-[1120px]:sticky min-[1120px]:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] min-[1120px]:shadow-none select-none",
+          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-[width,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)] lg:translate-x-0 lg:sticky lg:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] lg:shadow-none select-none overflow-x-hidden will-change-[width]",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          isCollapsed ? "min-[1120px]:w-[76px] w-[260px]" : "w-[260px]"
+          isCollapsed ? "lg:w-[76px] w-[260px]" : "w-[260px]"
         )}
       >
         {/* Toggle Button */}
         <button
           onClick={toggleCollapse}
           title={isCollapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}
-          className="hidden min-[1120px]:flex absolute -right-4 top-4 z-50 w-7 h-7 rounded-full bg-brand-teal text-white items-center justify-center shadow-lg border-1 border-white ring-1.5 ring-slate-900/80 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+          className="hidden lg:flex absolute -right-3.5 top-5 z-50 w-7 h-7 rounded-full bg-brand-teal text-white items-center justify-center shadow-lg border border-white/90 ring-2 ring-slate-900/60 hover:scale-110 active:scale-95 transition-all cursor-pointer"
           aria-label="Toggle Sidebar"
         >
-          {isCollapsed ? (
-            <PanelLeftOpen className="w-4.5 h-4.5" />
-          ) : (
-            <PanelLeftClose className="w-4.5 h-4.5" />
-          )}
+          <PanelLeftClose
+            className={clsx(
+              "w-4 h-4 transition-transform duration-300 ease-in-out",
+              isCollapsed && "rotate-180"
+            )}
+          />
         </button>
 
         {/* Header / Logo Area */}
         <div
           className={clsx(
-            "flex items-center h-20 border-b border-sidebar-active/40 relative",
-            isCollapsed ? "px-3 justify-center" : "px-5 justify-start"
+            "flex items-center h-20 border-b border-sidebar-active/40 px-3 relative overflow-hidden transition-all duration-300",
+            isCollapsed ? "justify-center" : "justify-start"
           )}
         >
-          <Link href="/partner" className="flex items-center gap-3 overflow-hidden group">
+          <Link href="/partner" className="flex items-center gap-3 overflow-hidden group w-full">
             <div className="w-12 h-12 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow-md shadow-brand-teal/20 shrink-0 group-hover:scale-105 transition-transform">
               <img src="/logo-mark.svg" alt="LiliSare Logo" className="w-10 h-10 object-contain" />
             </div>
-            {!isCollapsed && (
-              <div className="flex flex-col truncate pr-4">
-                <span className="font-bold text-base lg:text-xl tracking-wide text-white block leading-tight truncate">
-                  LiliSare
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal mt-0.5">
-                  Partner Portal
-                </span>
-              </div>
-            )}
+            <div
+              className={clsx(
+                "flex flex-col truncate transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] overflow-hidden whitespace-nowrap",
+                isCollapsed
+                  ? "max-w-0 opacity-0 -translate-x-3 pointer-events-none"
+                  : "max-w-[180px] opacity-100 translate-x-0"
+              )}
+            >
+              <span className="font-bold text-base lg:text-xl tracking-wide text-white block leading-tight truncate">
+                LiliSare
+              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal mt-0.5">
+                Partner Portal
+              </span>
+            </div>
           </Link>
 
-          {!isCollapsed && (
-            <button
-              onClick={onClose}
-              className="absolute right-4 min-[1120px]:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            >
-              <PanelLeftClose className="w-5 h-5" />
-            </button>
-          )}
+          <button
+            onClick={onClose}
+            className={clsx(
+              "absolute right-4 lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors",
+              isCollapsed && "hidden"
+            )}
+          >
+            <PanelLeftClose className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -157,21 +164,35 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
                     onClick={() => {
                       if (onClose) onClose();
                     }}
+                    aria-label={isCollapsed ? item.name : undefined}
                     className={clsx(
-                      "relative flex items-center justify-between rounded-xl text-sm font-medium transition-colors z-10",
-                      isCollapsed ? "p-3" : "px-3.5 py-2.5",
+                      "relative flex items-center rounded-xl text-sm font-medium transition-colors z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal h-10 px-3",
                       isActive ? "text-white font-semibold" : "text-slate-300 hover:text-white hover:bg-sidebar-active/60"
                     )}
                   >
-                    <div className={clsx("flex items-center gap-2", isCollapsed && "justify-center w-full")}>
-                      <Icon className="w-4 h-4 shrink-0" />
-                      {!isCollapsed && <span className="truncate">{item.name}</span>}
+                    <div className="flex items-center w-full overflow-hidden">
+                      <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                        <Icon className="w-4 h-4 shrink-0" />
+                      </div>
+                      <span
+                        className={clsx(
+                          "truncate text-sm transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] whitespace-nowrap overflow-hidden ml-2.5",
+                          isCollapsed
+                            ? "max-w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                            : "max-w-[170px] opacity-100 translate-x-0"
+                        )}
+                      >
+                        {item.name}
+                      </span>
                     </div>
                   </Link>
 
-                  {/* Tooltip for Mini View */}
+                  {/* Tooltip for Mini View (Hover + Focus) */}
                   {isCollapsed && (
-                    <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl border border-slate-700/80 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2 translate-x-1 group-hover:translate-x-0">
+                    <div
+                      role="tooltip"
+                      className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl border border-slate-700/80 whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2 translate-x-1 group-hover:translate-x-0 group-focus-within:translate-x-0"
+                    >
                       <span>{item.name}</span>
                     </div>
                   )}
@@ -185,30 +206,44 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
         <div className="p-3 border-t border-sidebar-active/60 relative">
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
+            aria-label={isCollapsed ? `${activeMember.name} Profile` : undefined}
             className={clsx(
-              "flex items-center gap-3 w-full hover:bg-sidebar-active p-2 rounded-xl transition-colors text-left cursor-pointer",
-              isCollapsed && "justify-center"
+              "flex items-center w-full hover:bg-sidebar-active p-2 rounded-xl transition-all duration-300 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C573]",
+              isCollapsed ? "justify-center" : "gap-3 justify-between"
             )}
           >
             <div className="w-9 h-9 rounded-full bg-sidebar-active shrink-0 overflow-hidden flex items-center justify-center ring-2 ring-[#93C573]/40">
               <User className="w-4.5 h-4.5 text-emerald-200" />
             </div>
-            {!isCollapsed && (
-              <>
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-sm font-medium text-white truncate">
-                    {activeMember.name}
-                  </div>
-                  <div className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
-                    <Building2 className="w-3 h-3" />
-                    {mockOrganization.name}
-                  </div>
-                </div>
-                <ChevronDown
-                  className={clsx("w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200", isProfileOpen && "rotate-180")}
-                />
-              </>
-            )}
+            <div
+              className={clsx(
+                "flex-1 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] whitespace-nowrap",
+                isCollapsed
+                  ? "max-w-0 opacity-0 -translate-x-2 pointer-events-none"
+                  : "max-w-[150px] opacity-100 translate-x-0"
+              )}
+            >
+              <div className="text-sm font-medium text-white truncate">
+                {activeMember.name}
+              </div>
+              <div className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
+                <Building2 className="w-3 h-3" />
+                {mockOrganization.name}
+              </div>
+            </div>
+            <div
+              className={clsx(
+                "transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shrink-0 overflow-hidden",
+                isCollapsed ? "max-w-0 opacity-0 pointer-events-none" : "max-w-5 opacity-100"
+              )}
+            >
+              <ChevronDown
+                className={clsx(
+                  "w-4 h-4 text-slate-400 transition-transform duration-200",
+                  isProfileOpen && "rotate-180"
+                )}
+              />
+            </div>
           </button>
 
           <AnimatePresence>

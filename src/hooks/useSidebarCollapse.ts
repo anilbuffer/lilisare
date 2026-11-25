@@ -2,31 +2,40 @@
 
 import { useEffect, useCallback, useSyncExternalStore } from "react";
 
-const STORAGE_KEY = "lilisare_sidebar_collapsed_v2";
-// Laptops (< 1536px) and iPad Pro (1024px-1366px) default to minimized sidebar (76px).
-// Large Desktop (>= 1536px) defaults to expanded sidebar (260px).
-const LARGE_DESKTOP_BREAKPOINT = 1536;
+const STORAGE_KEY = "lilisare_sidebar_user_override_v4";
+export const LARGE_DESKTOP_BREAKPOINT = 1280;
 
 // Module-level persistent state so navigation between layouts retains the exact same state without flashing or fluctuating
 let currentCollapsed = false;
 let isInitialized = false;
+let lastBreakpointMode: "desktop" | "laptop" | null = null;
 const listeners = new Set<() => void>();
+
+function getBreakpointMode(): "desktop" | "laptop" {
+  if (typeof window === "undefined") return "desktop";
+  return window.innerWidth >= LARGE_DESKTOP_BREAKPOINT ? "desktop" : "laptop";
+}
 
 function initializeState(): boolean {
   if (typeof window === "undefined") return false;
   if (isInitialized) return currentCollapsed;
 
   isInitialized = true;
+  const mode = getBreakpointMode();
+  lastBreakpointMode = mode;
+
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(`${STORAGE_KEY}_${mode}`);
     if (stored !== null) {
       currentCollapsed = JSON.parse(stored);
       return currentCollapsed;
     }
   } catch {}
 
-  const isLargeDesktop = window.innerWidth >= LARGE_DESKTOP_BREAKPOINT;
-  currentCollapsed = !isLargeDesktop;
+  // Defaults:
+  // Large Desktop (>= 1280px) -> expanded (currentCollapsed = false)
+  // Laptop (1024px - 1279px) -> collapsed mini-rail (currentCollapsed = true)
+  currentCollapsed = mode === "laptop";
   return currentCollapsed;
 }
 
@@ -45,16 +54,19 @@ function getSnapshot(): boolean {
 }
 
 function getServerSnapshot(): boolean {
-  return false;
+  return false; // Server renders expanded baseline
 }
 
-function setCollapsedState(value: boolean | ((prev: boolean) => boolean)) {
+function setCollapsedState(value: boolean | ((prev: boolean) => boolean), persistUserOverride = false) {
   const next = typeof value === "function" ? value(currentCollapsed) : value;
-  if (next === currentCollapsed) return;
+  if (next === currentCollapsed && isInitialized) return;
   currentCollapsed = next;
-  if (typeof window !== "undefined") {
+  isInitialized = true;
+
+  if (persistUserOverride && typeof window !== "undefined") {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      const mode = getBreakpointMode();
+      localStorage.setItem(`${STORAGE_KEY}_${mode}`, JSON.stringify(next));
     } catch {}
   }
   listeners.forEach((listener) => listener());
@@ -64,11 +76,11 @@ export function useSidebarCollapse() {
   const isCollapsed = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggleCollapse = useCallback(() => {
-    setCollapsedState((prev) => !prev);
+    setCollapsedState((prev) => !prev, true);
   }, []);
 
   const setIsCollapsed = useCallback((val: boolean) => {
-    setCollapsedState(val);
+    setCollapsedState(val, true);
   }, []);
 
   useEffect(() => {
@@ -81,9 +93,20 @@ export function useSidebarCollapse() {
 
     const handleResize = () => {
       if (typeof window === "undefined") return;
-      if (localStorage.getItem(STORAGE_KEY) === null) {
-        const isLarge = window.innerWidth >= LARGE_DESKTOP_BREAKPOINT;
-        setCollapsedState(!isLarge);
+      const newMode = getBreakpointMode();
+      if (newMode !== lastBreakpointMode) {
+        lastBreakpointMode = newMode;
+        // User crossed viewport boundary between laptop and large desktop!
+        // Check if user set an explicit manual override for this mode:
+        try {
+          const stored = localStorage.getItem(`${STORAGE_KEY}_${newMode}`);
+          if (stored !== null) {
+            setCollapsedState(JSON.parse(stored), false);
+            return;
+          }
+        } catch {}
+        // Default: desktop -> expanded (false), laptop -> collapsed (true)
+        setCollapsedState(newMode === "laptop", false);
       }
     };
 

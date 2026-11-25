@@ -12,6 +12,7 @@ import { MOCK_HOUSEHOLDS, Household, getHouseholdsFromStorage } from "@/lib/hous
 import { getClientsFromStorage } from "@/lib/clients/mockData";
 import { getCaregiversFromStorage } from "@/lib/caregivers/mockData";
 import { getIntakeInquiriesFromStorage } from "@/lib/intake/intakeSync";
+import { INITIAL_INQUIRIES } from "@/lib/intake/mockIntakeData";
 
 // ==========================================
 // 1. DATA CONTRACTS & MULTI-ENTITY SCHEMAS
@@ -297,15 +298,16 @@ export interface DashboardMetricsSummary {
 /**
  * Computes live metrics dynamically from the underlying operational store.
  */
-export function computeDashboardMetrics(): DashboardMetricsSummary {
+export function computeDashboardMetrics(forceBaseline: boolean = false): DashboardMetricsSummary {
   // In a production database, these derive from SQL aggregates:
   // SELECT COUNT(*) FROM patients WHERE status = 'Active', etc.
 
   // Here we derive dynamically from the operational entities:
-  const clientRecords = typeof window !== "undefined" ? getClientsFromStorage() : Object.values(mockPatients);
-  const caregiverRecords = typeof window !== "undefined" ? getCaregiversFromStorage() : Object.values(mockCaregivers);
-  const householdRecords = typeof window !== "undefined" ? getHouseholdsFromStorage() : MOCK_HOUSEHOLDS;
-  const inquiryRecords = typeof window !== "undefined" ? getIntakeInquiriesFromStorage() : [];
+  const isClient = typeof window !== "undefined" && !forceBaseline;
+  const clientRecords = isClient ? getClientsFromStorage() : Object.values(mockPatients);
+  const caregiverRecords = isClient ? getCaregiversFromStorage() : Object.values(mockCaregivers);
+  const householdRecords = isClient ? getHouseholdsFromStorage() : MOCK_HOUSEHOLDS;
+  const inquiryRecords = isClient ? getIntakeInquiriesFromStorage() : INITIAL_INQUIRIES;
 
   const activeClientsCount = (clientRecords as { status?: string }[]).filter((c) => c.status === "Active").length || 487;
   const activeCaregiversCount = (caregiverRecords as { status?: string }[]).filter((c) => c.status === "Active").length || 902;

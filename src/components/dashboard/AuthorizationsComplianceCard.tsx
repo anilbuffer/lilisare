@@ -38,7 +38,7 @@ interface AuthorizationsComplianceCardProps {
 
 export function AuthorizationsComplianceCard({ metrics: propMetrics }: AuthorizationsComplianceCardProps) {
   const [followupStatus, setFollowupStatus] = useState<string | null>(null);
-  const [internalMetrics, setInternalMetrics] = useState<DashboardMetricsSummary>(computeDashboardMetrics);
+  const [internalMetrics, setInternalMetrics] = useState<DashboardMetricsSummary>(() => computeDashboardMetrics(true));
 
   useEffect(() => {
     setInternalMetrics(computeDashboardMetrics());

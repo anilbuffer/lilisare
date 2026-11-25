@@ -20,7 +20,7 @@ import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 
 export default function DashboardPage() {
   const [isAiBriefingOpen, setIsAiBriefingOpen] = useState(false);
-  const [metrics, setMetrics] = useState<DashboardMetricsSummary>(computeDashboardMetrics);
+  const [metrics, setMetrics] = useState<DashboardMetricsSummary>(() => computeDashboardMetrics(true));
 
   useEffect(() => {
     setMetrics(computeDashboardMetrics());
@@ -46,7 +46,7 @@ export default function DashboardPage() {
             Good morning, Sarah!
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 flex items-center gap-2">
-            <span className="flex items-center gap-1.5">
+            <span suppressHydrationWarning className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
               {today}
             </span>

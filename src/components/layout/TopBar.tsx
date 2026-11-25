@@ -94,7 +94,7 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         <button
           onClick={onMenuClick}
-          className="p-2 -ml-1 rounded-xl text-slate-600 hover:bg-slate-200/70 min-[1120px]:hidden transition-colors active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+          className="p-2 -ml-1 rounded-xl text-slate-600 hover:bg-slate-200/70 lg:hidden transition-colors active:scale-95 min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
           aria-label="Open Navigation Menu"
         >
           <Menu className="w-5 h-5 sm:w-6 sm:h-6" />

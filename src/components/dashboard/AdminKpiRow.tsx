@@ -109,7 +109,10 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
 
               <div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 truncate">
+                  <span
+                    suppressHydrationWarning
+                    className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 truncate"
+                  >
                     {kpi.value}
                   </span>
                   <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] transition-opacity shrink-0 ml-1" />

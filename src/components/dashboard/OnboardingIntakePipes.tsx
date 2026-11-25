@@ -22,7 +22,7 @@ interface OnboardingIntakePipesProps {
 
 export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntakePipesProps) {
   const router = useRouter();
-  const [internalMetrics, setInternalMetrics] = useState<DashboardMetricsSummary>(computeDashboardMetrics);
+  const [internalMetrics, setInternalMetrics] = useState<DashboardMetricsSummary>(() => computeDashboardMetrics(true));
 
   useEffect(() => {
     setInternalMetrics(computeDashboardMetrics());

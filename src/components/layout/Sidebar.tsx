@@ -694,7 +694,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-slate-900/60 z-40 min-[1120px]:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-900/60 z-40 lg:hidden backdrop-blur-sm"
             onClick={onClose}
           />
         )}
@@ -702,30 +702,31 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
       <aside
         className={clsx(
-          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-[width,transform] duration-300 ease-in-out min-[1120px]:translate-x-0 min-[1120px]:sticky min-[1120px]:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] min-[1120px]:shadow-none select-none",
+          "bg-sidebar-bg text-white flex flex-col h-screen fixed top-0 left-0 z-50 transition-[width,transform] duration-300 ease-[cubic-bezier(0.2,0,0,1)] lg:translate-x-0 lg:sticky lg:top-0 shadow-[4px_0_24px_rgba(0,0,0,0.15)] lg:shadow-none select-none overflow-x-hidden will-change-[width]",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          isCollapsed ? "min-[1120px]:w-[76px] w-[260px]" : "w-[260px]"
+          isCollapsed ? "lg:w-[76px] w-[260px]" : "w-[260px]"
         )}
       >
         {/* Floating Edge Toggle Button */}
         <button
           onClick={toggleCollapse}
           title={isCollapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}
-          className="hidden min-[1120px]:flex absolute -right-4 top-4 z-50 w-7 h-7 rounded-full bg-brand-teal text-white items-center justify-center shadow-lg border-1 border-white ring-1.5 ring-slate-900/80 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+          className="hidden lg:flex absolute -right-3.5 top-5 z-50 w-7 h-7 rounded-full bg-brand-teal text-white items-center justify-center shadow-lg border border-white/90 ring-2 ring-slate-900/60 hover:scale-110 active:scale-95 transition-all cursor-pointer"
           aria-label="Toggle Sidebar"
         >
-          {isCollapsed ? (
-            <PanelLeftOpen className="w-4.5 h-4.5" />
-          ) : (
-            <PanelLeftClose className="w-4.5 h-4.5" />
-          )}
+          <PanelLeftClose
+            className={clsx(
+              "w-4 h-4 transition-transform duration-300 ease-in-out",
+              isCollapsed && "rotate-180"
+            )}
+          />
         </button>
 
         {/* Header / Logo Area */}
         <div
           className={clsx(
-            "flex items-center h-20 border-b border-sidebar-active/40 relative",
-            isCollapsed ? "px-3 justify-center" : "px-5 justify-start"
+            "flex items-center h-20 border-b border-sidebar-active/40 px-3 relative overflow-hidden transition-all duration-300",
+            isCollapsed ? "justify-center" : "justify-start"
           )}
         >
           <Link
@@ -752,45 +753,51 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                                   ? "/training-admin"
                                   : "/admin/dashboard"
             }
-            className="flex items-center gap-3 overflow-hidden group"
+            className="flex items-center gap-3 overflow-hidden group w-full"
           >
             <div className="w-12 h-12 rounded-xl bg-white/10 p-1 flex items-center justify-center shadow-md shadow-brand-teal/20 shrink-0 group-hover:scale-105 transition-transform">
               <img src="/logo-mark.svg" alt="LiliSare Logo" className="w-10 h-10 object-contain" />
             </div>
-            {!isCollapsed && (
-              <div className="flex flex-col truncate pr-4">
-                <span className="font-bold text-base lg:text-xl tracking-wide text-white block leading-tight truncate">
-                  LiliSare
+            <div
+              className={clsx(
+                "flex flex-col truncate transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] overflow-hidden whitespace-nowrap",
+                isCollapsed
+                  ? "max-w-0 opacity-0 -translate-x-3 pointer-events-none"
+                  : "max-w-[180px] opacity-100 translate-x-0"
+              )}
+            >
+              <span className="font-bold text-base lg:text-xl tracking-wide text-white block leading-tight truncate">
+                LiliSare
+              </span>
+              {safeUser?.role === "CAREGIVER" && (
+                <span className="text-[10px] font-medium uppercase tracking-wider text-brand-teal flex items-center gap-1 mt-0.5">
+                  <HeartHandshake className="w-3 h-3 inline" /> Caregiver Portal
                 </span>
-                {safeUser?.role === "CAREGIVER" && (
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-brand-teal flex items-center gap-1 mt-0.5">
-                    <HeartHandshake className="w-3 h-3 inline" /> Caregiver Portal
-                  </span>
-                )}
-                {safeUser?.role === "HR" && (
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal mt-0.5">
-                    HR Portal
-                  </span>
-                )}
-                {safeUser?.role === "SCHEDULER" && (
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal mt-0.5">
-                    Dispatch Portal
-                  </span>
-                )}
-              </div>
-            )}
+              )}
+              {safeUser?.role === "HR" && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal mt-0.5">
+                  HR Portal
+                </span>
+              )}
+              {safeUser?.role === "SCHEDULER" && (
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-brand-teal mt-0.5">
+                  Dispatch Portal
+                </span>
+              )}
+            </div>
           </Link>
 
           {/* Mobile Close Button */}
-          {!isCollapsed && (
-            <button
-              onClick={onClose}
-              className="absolute right-4 min-[1120px]:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              aria-label="Close sidebar"
-            >
-              <PanelLeftClose className="w-5 h-5" />
-            </button>
-          )}
+          <button
+            onClick={onClose}
+            className={clsx(
+              "absolute right-4 lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors",
+              isCollapsed && "hidden"
+            )}
+            aria-label="Close sidebar"
+          >
+            <PanelLeftClose className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -806,24 +813,37 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
                 {/* Section Header / Expandable Menu Trigger */}
                 {group.label ? (
-                  !isCollapsed ? (
-                    <button
-                      type="button"
-                      onClick={() => toggleGroup(groupKey)}
-                      className="w-full flex items-center justify-between px-3 pt-2 pb-1 text-[11px] font-bold text-[#8DBE6A] hover:text-white tracking-wider uppercase truncate rounded-lg hover:bg-white/5 transition-colors cursor-pointer select-none group"
-                      aria-expanded={isExpanded}
+                  <div className="relative my-1 px-1 transition-all duration-300">
+                    <div
+                      className={clsx(
+                        "overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] whitespace-nowrap",
+                        isCollapsed
+                          ? "max-h-0 opacity-0 pointer-events-none -translate-x-2"
+                          : "max-h-8 opacity-100 translate-x-0"
+                      )}
                     >
-                      <span className="truncate">{group.label}</span>
-                      <ChevronDown
-                        className={clsx(
-                          "w-3.5 h-3.5 text-[#8DBE6A]/70 group-hover:text-white transition-transform duration-200 shrink-0",
-                          isExpanded ? "rotate-0" : "-rotate-90"
-                        )}
-                      />
-                    </button>
-                  ) : (
-                    <div className="h-px bg-[#26481C] my-2 mx-2" />
-                  )
+                      <button
+                        type="button"
+                        onClick={() => toggleGroup(groupKey)}
+                        className="w-full flex items-center justify-between px-2 pt-2 pb-1 text-[11px] font-bold text-[#8DBE6A] hover:text-white tracking-wider uppercase truncate rounded-lg hover:bg-white/5 transition-colors cursor-pointer select-none group"
+                        aria-expanded={isExpanded}
+                      >
+                        <span className="truncate">{group.label}</span>
+                        <ChevronDown
+                          className={clsx(
+                            "w-3.5 h-3.5 text-[#8DBE6A]/70 group-hover:text-white transition-transform duration-200 shrink-0",
+                            isExpanded ? "rotate-0" : "-rotate-90"
+                          )}
+                        />
+                      </button>
+                    </div>
+                    <div
+                      className={clsx(
+                        "h-px bg-[#26481C] transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] mx-1",
+                        isCollapsed ? "opacity-100 my-1.5" : "opacity-0 max-h-0"
+                      )}
+                    />
+                  </div>
                 ) : null}
 
                 {/* Group Items (Collapsible / Expandable with smooth transition) */}
@@ -858,35 +878,44 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                                 onClick={() => {
                                   if (onClose) onClose();
                                 }}
+                                aria-label={isCollapsed ? item.name : undefined}
                                 className={clsx(
-                                  "relative flex items-center justify-between rounded-xl text-sm font-medium transition-colors z-10",
-                                  isCollapsed ? "p-3" : "px-3 py-2",
+                                  "relative flex items-center rounded-xl text-sm font-medium transition-colors z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C573] h-10 px-3",
                                   isActive
                                     ? "text-white font-semibold"
                                     : "text-[#D2E0D4] hover:text-white hover:bg-[#25461C]/70"
                                 )}
                               >
-                                <div
-                                  className={clsx(
-                                    "flex items-center gap-2.5",
-                                    isCollapsed && "justify-center w-full"
-                                  )}
-                                >
-                                  <Icon
+                                <div className="flex items-center w-full overflow-hidden">
+                                  <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                                    <Icon
+                                      className={clsx(
+                                        "w-4 h-4 shrink-0 transition-colors",
+                                        isActive
+                                          ? "text-[#93C573]"
+                                          : "text-[#B6CDB9] group-hover:text-white"
+                                      )}
+                                    />
+                                  </div>
+                                  <span
                                     className={clsx(
-                                      "w-4 h-4 shrink-0 transition-colors",
-                                      isActive
-                                        ? "text-[#93C573]"
-                                        : "text-[#B6CDB9] group-hover:text-white"
+                                      "truncate text-sm transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] whitespace-nowrap overflow-hidden ml-2.5",
+                                      isCollapsed
+                                        ? "max-w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                                        : "max-w-[170px] opacity-100 translate-x-0"
                                     )}
-                                  />
-                                  {!isCollapsed && <span className="truncate">{item.name}</span>}
+                                  >
+                                    {item.name}
+                                  </span>
                                 </div>
                               </Link>
 
-                              {/* Tooltip for Mini View (without counter numbers) */}
+                              {/* Accessible Tooltip for Mini View (Hover + Focus) */}
                               {isCollapsed && (
-                                <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl border border-slate-700/80 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2 translate-x-1 group-hover:translate-x-0">
+                                <div
+                                  role="tooltip"
+                                  className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl border border-slate-700/80 whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2 translate-x-1 group-hover:translate-x-0 group-focus-within:translate-x-0"
+                                >
                                   <span>{item.name}</span>
                                 </div>
                               )}
@@ -905,62 +934,72 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         {/* HIPAA Card */}
         {safeUser?.role !== "CLIENT" && safeUser?.role !== "FAMILY" && (
           <div className="px-3 mb-3 relative group">
-            {isCollapsed ? (
-              <div
-                onMouseEnter={() => setShowHipaaTooltip(true)}
-                onMouseLeave={() => setShowHipaaTooltip(false)}
-                className="bg-[#14280E]/90 rounded-xl p-3 flex items-center justify-center border border-sidebar-active/60 cursor-pointer hover:bg-sidebar-active/50 transition-colors relative"
-              >
-                <div className="relative">
-                  <ShieldCheck className="w-5 h-5 text-[#93C573]" />
+            <div
+              onMouseEnter={() => isCollapsed && setShowHipaaTooltip(true)}
+              onMouseLeave={() => isCollapsed && setShowHipaaTooltip(false)}
+              className={clsx(
+                "bg-[#14280E]/90 rounded-xl border border-sidebar-active/60 transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] overflow-hidden flex items-center",
+                isCollapsed
+                  ? "p-3 justify-center cursor-pointer hover:bg-sidebar-active/50"
+                  : "p-3.5 justify-start gap-3"
+              )}
+            >
+              <div className="relative shrink-0">
+                <ShieldCheck className="w-5 h-5 text-[#93C573]" />
+                {isCollapsed && (
                   <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-[#93C573] rounded-full ring-2 ring-sidebar-bg"></span>
-                </div>
-
-                <AnimatePresence>
-                  {showHipaaTooltip && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -5 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -5 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute left-full ml-4 bottom-0 w-56 bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-2xl z-50 text-left pointer-events-none"
-                    >
-                      <div className="flex items-center gap-2 text-xs font-bold text-white mb-1">
-                        <ShieldCheck className="w-4 h-4 text-[#93C573]" />
-                        {safeUser?.role === "CAREGIVER"
-                          ? "EVV & HIPAA Compliant"
-                          : safeUser?.role === "SCHEDULER"
-                            ? "HIPAA Protected"
-                            : "HIPAA Compliant"}
-                      </div>
-                      <p className="text-[11px] text-slate-300 leading-normal">
-                        {safeUser?.role === "SCHEDULER"
-                          ? "Role-scoped scheduler view."
-                          : "Data encrypted in transit and at rest."}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                )}
               </div>
-            ) : (
-              <div className="bg-[#14280E]/90 rounded-xl p-4 flex items-start gap-3 border border-sidebar-active">
-                <ShieldCheck className="w-5 h-5 text-[#93C573] shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-sm font-medium text-white">
+
+              <div
+                className={clsx(
+                  "transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] overflow-hidden whitespace-nowrap",
+                  isCollapsed
+                    ? "max-w-0 opacity-0 -translate-x-2 pointer-events-none"
+                    : "max-w-[170px] opacity-100 translate-x-0"
+                )}
+              >
+                <div className="text-sm font-medium text-white truncate">
+                  {safeUser?.role === "CAREGIVER"
+                    ? "EVV & HIPAA Compliant"
+                    : safeUser?.role === "SCHEDULER"
+                      ? "HIPAA Protected"
+                      : "HIPAA Compliant"}
+                </div>
+                <div className="text-xs text-slate-400 truncate mt-0.5">
+                  {safeUser?.role === "SCHEDULER"
+                    ? "Role-scoped scheduler view."
+                    : "Data encrypted in transit."}
+                </div>
+              </div>
+            </div>
+
+            {/* Tooltip in collapsed state */}
+            <AnimatePresence>
+              {isCollapsed && showHipaaTooltip && (
+                <motion.div
+                  initial={{ opacity: 0, x: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -5 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute left-full ml-4 bottom-0 w-56 bg-slate-900 border border-slate-700 p-3 rounded-xl shadow-2xl z-50 text-left pointer-events-none"
+                >
+                  <div className="flex items-center gap-2 text-xs font-bold text-white mb-1">
+                    <ShieldCheck className="w-4 h-4 text-[#93C573]" />
                     {safeUser?.role === "CAREGIVER"
                       ? "EVV & HIPAA Compliant"
                       : safeUser?.role === "SCHEDULER"
                         ? "HIPAA Protected"
                         : "HIPAA Compliant"}
                   </div>
-                  <div className="text-xs text-slate-400 mt-1">
+                  <p className="text-[11px] text-slate-300 leading-normal">
                     {safeUser?.role === "SCHEDULER"
                       ? "Role-scoped scheduler view."
                       : "Data encrypted in transit and at rest."}
-                  </div>
-                </div>
-              </div>
-            )}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
 
@@ -968,57 +1007,70 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         <div className="p-3 border-t border-sidebar-active/60 relative">
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
+            aria-label={isCollapsed ? `${safeUser?.name || "Agency Admin"} Profile` : undefined}
             className={clsx(
-              "flex items-center gap-3 w-full hover:bg-sidebar-active p-2 rounded-xl transition-colors text-left cursor-pointer",
-              isCollapsed && "justify-center"
+              "flex items-center w-full hover:bg-sidebar-active p-2 rounded-xl transition-all duration-300 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C573]",
+              isCollapsed ? "justify-center" : "gap-3 justify-between"
             )}
             title={isCollapsed ? `${safeUser?.name || "Agency Admin"}` : undefined}
           >
             <div className="w-9 h-9 rounded-full bg-sidebar-active shrink-0 overflow-hidden flex items-center justify-center ring-2 ring-[#93C573]/40">
               <User className="w-4.5 h-4.5 text-emerald-200" />
             </div>
-            {!isCollapsed && (
-              <>
-                <div className="flex-1 overflow-hidden">
-                  <div className="text-sm font-medium text-white truncate">
-                    {effectiveRole === "INTAKE_COORDINATOR"
-                      ? (safeUser?.role === "INTAKE_COORDINATOR" ? safeUser?.name : "Sarah Jenkins")
-                      : (safeUser?.name || "Agency Executive")}
-                  </div>
-                  <div className="text-xs text-slate-400 truncate">
-                    {effectiveRole === "INTAKE_COORDINATOR"
-                      ? "Intake Coordinator"
-                      : effectiveRole === "CLIENT"
-                        ? "Patient"
-                        : effectiveRole === "FAMILY"
-                          ? "Family Member"
-                          : effectiveRole === "CAREGIVER"
-                            ? "Caregiver (Field Staff)"
-                            : effectiveRole === "SCHEDULER"
-                              ? "Scheduler / Dispatcher"
-                              : effectiveRole === "HR"
-                                ? "HR Recruiter"
-                                : effectiveRole === "TRAINER"
-                                  ? "Trainer / LMS Admin"
-                                  : effectiveRole === "BILLING_FINANCE_STAFF"
-                                    ? "Billing & Finance"
-                                    : effectiveRole === "CLINICAL_SUPERVISOR_RN"
-                                      ? "Clinical Supervisor RN"
-                                      : effectiveRole === "QA_COMPLIANCE_OFFICER"
-                                        ? "QA & Compliance"
-                                        : effectiveRole === "FIELD_SUPERVISOR"
-                                          ? "Field Supervisor"
-                                          : "Agency Administrator"}
-                  </div>
-                </div>
-                <ChevronDown
-                  className={clsx(
-                    "w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200",
-                    isProfileOpen && "rotate-180"
-                  )}
-                />
-              </>
-            )}
+
+            <div
+              className={clsx(
+                "flex-1 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] whitespace-nowrap",
+                isCollapsed
+                  ? "max-w-0 opacity-0 -translate-x-2 pointer-events-none"
+                  : "max-w-[150px] opacity-100 translate-x-0"
+              )}
+            >
+              <div className="text-sm font-medium text-white truncate">
+                {effectiveRole === "INTAKE_COORDINATOR"
+                  ? (safeUser?.role === "INTAKE_COORDINATOR" ? safeUser?.name : "Sarah Jenkins")
+                  : (safeUser?.name || "Agency Executive")}
+              </div>
+              <div className="text-xs text-slate-400 truncate">
+                {effectiveRole === "INTAKE_COORDINATOR"
+                  ? "Intake Coordinator"
+                  : effectiveRole === "CLIENT"
+                    ? "Patient"
+                    : effectiveRole === "FAMILY"
+                      ? "Family Member"
+                      : effectiveRole === "CAREGIVER"
+                        ? "Caregiver (Field Staff)"
+                        : effectiveRole === "SCHEDULER"
+                          ? "Scheduler / Dispatcher"
+                          : effectiveRole === "HR"
+                            ? "HR Recruiter"
+                            : effectiveRole === "TRAINER"
+                              ? "Trainer / LMS Admin"
+                              : effectiveRole === "BILLING_FINANCE_STAFF"
+                                ? "Billing & Finance"
+                                : effectiveRole === "CLINICAL_SUPERVISOR_RN"
+                                  ? "Clinical Supervisor RN"
+                                  : effectiveRole === "QA_COMPLIANCE_OFFICER"
+                                    ? "QA & Compliance"
+                                    : effectiveRole === "FIELD_SUPERVISOR"
+                                      ? "Field Supervisor"
+                                      : "Agency Administrator"}
+              </div>
+            </div>
+
+            <div
+              className={clsx(
+                "transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] shrink-0 overflow-hidden",
+                isCollapsed ? "max-w-0 opacity-0 pointer-events-none" : "max-w-5 opacity-100"
+              )}
+            >
+              <ChevronDown
+                className={clsx(
+                  "w-4 h-4 text-slate-400 transition-transform duration-200",
+                  isProfileOpen && "rotate-180"
+                )}
+              />
+            </div>
           </button>
 
           <AnimatePresence>

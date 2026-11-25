@@ -660,3 +660,80 @@ export function exportAuthorizationsCsv(records: AuthorizationRecord[]): void {
   link.click();
   document.body.removeChild(link);
 }
+
+// ---------------------------------------------------------------------------
+// LocalStorage Persistence & Lookup Helpers
+// ---------------------------------------------------------------------------
+
+export const STORAGE_KEY_AUTHORIZATIONS = "lilisare_authorizations_records";
+
+export function getAuthorizationsFromStorage(): AuthorizationRecord[] {
+  if (typeof window === "undefined") {
+    return INITIAL_AUTHORIZATIONS;
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_AUTHORIZATIONS);
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY_AUTHORIZATIONS, JSON.stringify(INITIAL_AUTHORIZATIONS));
+      return INITIAL_AUTHORIZATIONS;
+    }
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+    return INITIAL_AUTHORIZATIONS;
+  } catch (e) {
+    console.error("Error reading authorizations from storage:", e);
+    return INITIAL_AUTHORIZATIONS;
+  }
+}
+
+export function saveAuthorizationsToStorage(records: AuthorizationRecord[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY_AUTHORIZATIONS, JSON.stringify(records));
+    window.dispatchEvent(new Event("lilisare-authorizations-sync"));
+  } catch (e) {
+    console.error("Error saving authorizations to storage:", e);
+  }
+}
+
+export function getAuthorizationById(id: string): AuthorizationRecord | undefined {
+  const all = getAuthorizationsFromStorage();
+  const normalizedId = id.trim().toLowerCase();
+  return (
+    all.find(
+      (r) =>
+        r.id.toLowerCase() === normalizedId ||
+        r.internalId.toLowerCase() === normalizedId
+    ) ||
+    INITIAL_AUTHORIZATIONS.find(
+      (r) =>
+        r.id.toLowerCase() === normalizedId ||
+        r.internalId.toLowerCase() === normalizedId
+    )
+  );
+}
+
+export function getAllAuthorizationIds(): string[] {
+  const all = getAuthorizationsFromStorage();
+  const ids = all.map((r) => r.id);
+  const internalIds = all.map((r) => r.internalId).filter(Boolean);
+  return Array.from(new Set([...ids, ...internalIds]));
+}
+
+export function upsertAuthorizationRecord(record: AuthorizationRecord): void {
+  const current = getAuthorizationsFromStorage();
+  const exists = current.some((r) => r.id.toLowerCase() === record.id.toLowerCase());
+  const updated = exists
+    ? current.map((r) => (r.id.toLowerCase() === record.id.toLowerCase() ? record : r))
+    : [record, ...current];
+  saveAuthorizationsToStorage(updated);
+}
+
+export function deleteAuthorizationRecord(id: string): void {
+  const current = getAuthorizationsFromStorage();
+  const updated = current.filter((r) => r.id.toLowerCase() !== id.toLowerCase());
+  saveAuthorizationsToStorage(updated);
+}
+

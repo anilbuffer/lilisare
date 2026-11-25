@@ -173,16 +173,16 @@ export function ResponsiveDomainTabStrip<T extends string>({
                 onSelectTab(tab.id);
                 setIsMoreOpen(false);
               }}
-              className={`relative shrink-0 px-3 sm:px-3.5 py-2 text-xs font-bold tracking-wide transition-all whitespace-nowrap rounded-xl cursor-pointer flex items-center gap-1.5 ${
+              className={`relative shrink-0 px-3 sm:px-3.5 py-2 text-xs font-bold tracking-wide transition-all whitespace-nowrap rounded-xl cursor-pointer flex items-center gap-1.5 min-w-0 ${
                 isActive
                   ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/30"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
               }`}
             >
-              <span>{tab.label}</span>
+              <span className="truncate max-w-[130px] sm:max-w-none">{tab.label}</span>
               {tab.badge && (
                 <span
-                  className={`text-[9px] px-1.5 py-0.2 rounded font-semibold ${
+                  className={`text-[9px] px-1.5 py-0.2 rounded font-semibold shrink-0 ${
                     isActive
                       ? "bg-white/20 text-white"
                       : "bg-slate-100 text-slate-500"
@@ -210,7 +210,7 @@ export function ResponsiveDomainTabStrip<T extends string>({
               aria-expanded={isMoreOpen}
               aria-label="More navigation domains"
             >
-              <span>
+              <span className="truncate max-w-[130px] sm:max-w-none">
                 {isMoreActive && activeCollapsedTab
                   ? `MORE: ${activeCollapsedTab.label}`
                   : `MORE (${collapsedTabs.length})`}

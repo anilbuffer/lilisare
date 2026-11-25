@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
   FileSignature,
   AlertTriangle,
   Clock,
   Search,
-  Filter,
   Download,
   Plus,
   RefreshCw,
@@ -40,15 +40,15 @@ import {
   INITIAL_AUTHORIZATIONS,
   calculateAuthorizationsKpis,
   exportAuthorizationsCsv,
+  getAuthorizationsFromStorage,
 } from "@/lib/admin/authorizationsData";
 
-import { AuthorizationDrawer } from "@/components/admin/authorizations/AuthorizationDrawer";
-import { CreateEditAuthorizationModal } from "@/components/admin/authorizations/CreateEditAuthorizationModal";
 import { EvidenceViewerModal } from "@/components/admin/authorizations/EvidenceViewerModal";
 
 type ActiveTab = "ALL" | "SKILLED" | "NON_MEDICAL" | "PENDING" | "EXHAUSTED" | "DENIED";
 
 export default function AdminAuthorizationsPage() {
+  const router = useRouter();
   const [records, setRecords] = useState<AuthorizationRecord[]>(INITIAL_AUTHORIZATIONS);
   const [activeTab, setActiveTab] = useState<ActiveTab>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,11 +58,25 @@ export default function AdminAuthorizationsPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showDistinctionBanner, setShowDistinctionBanner] = useState(true);
 
-  // Drawer & Modal States
-  const [drawerRecord, setDrawerRecord] = useState<AuthorizationRecord | null>(null);
-  const [createEditRecord, setCreateEditRecord] = useState<AuthorizationRecord | null>(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Evidence modal for quick document preview
   const [evidenceRecord, setEvidenceRecord] = useState<AuthorizationRecord | null>(null);
+
+  // Storage synchronization
+  useEffect(() => {
+    const loadRecords = () => {
+      setRecords(getAuthorizationsFromStorage());
+    };
+    loadRecords();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("lilisare-authorizations-sync", loadRecords);
+      window.addEventListener("storage", loadRecords);
+      return () => {
+        window.removeEventListener("lilisare-authorizations-sync", loadRecords);
+        window.removeEventListener("storage", loadRecords);
+      };
+    }
+  }, []);
 
   // Live KPI Summary
   const kpis = useMemo(() => calculateAuthorizationsKpis(records), [records]);
@@ -71,6 +85,7 @@ export default function AdminAuthorizationsPage() {
   const handleRefresh = () => {
     setIsSyncing(true);
     setTimeout(() => {
+      setRecords(getAuthorizationsFromStorage());
       setIsSyncing(false);
       toast.success("Payer authorizations synchronized with Colorado Medicaid and commercial portals");
     }, 400);
@@ -80,57 +95,6 @@ export default function AdminAuthorizationsPage() {
   const handleExport = () => {
     exportAuthorizationsCsv(records);
     toast.success("Authorizations registry exported as CSV");
-  };
-
-  // Save handler (Create or Edit)
-  const handleSaveRecord = (savedRecord: AuthorizationRecord) => {
-    setRecords((prev) => {
-      const exists = prev.some((r) => r.id === savedRecord.id);
-      if (exists) {
-        return prev.map((r) => (r.id === savedRecord.id ? savedRecord : r));
-      }
-      return [savedRecord, ...prev];
-    });
-
-    // Update drawer record if currently open
-    if (drawerRecord && drawerRecord.id === savedRecord.id) {
-      setDrawerRecord(savedRecord);
-    }
-
-    toast.success(`Authorization ${savedRecord.id} saved successfully`);
-  };
-
-  // Update Status directly
-  const handleUpdateStatus = (id: string, newStatus: AuthorizationStatus, reason: string) => {
-    setRecords((prev) =>
-      prev.map((rec) => {
-        if (rec.id !== id) return rec;
-
-        const updatedHistory = [
-          {
-            status: newStatus,
-            changedAt: new Date().toISOString().slice(0, 10),
-            changedBy: "Marcus Vance (Agency Admin)",
-            reason,
-          },
-          ...rec.statusHistory,
-        ];
-
-        const updated = {
-          ...rec,
-          status: newStatus,
-          statusHistory: updatedHistory,
-        };
-
-        if (drawerRecord && drawerRecord.id === id) {
-          setDrawerRecord(updated);
-        }
-
-        return updated;
-      })
-    );
-
-    toast.success(`Authorization ${id} status updated to ${newStatus}`);
   };
 
   // Filtered Records based on tab, search, and dropdown filters
@@ -182,24 +146,15 @@ export default function AdminAuthorizationsPage() {
   }, [records, activeTab, selectedPayer, selectedCareType, selectedStatus, searchQuery]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-16 animate-in fade-in duration-200">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-20 animate-in fade-in duration-200">
       {/* ----------------------------------------------------------------- */}
       {/* 01. Clean Executive Header & Controls */}
       {/* ----------------------------------------------------------------- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-bold text-[#3D6B22] uppercase tracking-wider bg-[#3D6B22]/10 px-2.5 py-0.5 rounded-full border border-[#3D6B22]/20">
-              Payer Approvals & Lifecycle
-            </span>
-            <span className="text-xs text-slate-400 font-medium">&bull; Skilled & Non-Medical Home Care</span>
-          </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Authorizations Management
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Track payer approvals, authorized service units, remaining visit balances, and renewal cycles.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
@@ -222,17 +177,13 @@ export default function AdminAuthorizationsPage() {
             <span>Export CSV</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setCreateEditRecord(null);
-              setIsCreateModalOpen(true);
-            }}
+          <Link
+            href="/admin/authorizations/new"
             className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>New Authorization</span>
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -323,11 +274,6 @@ export default function AdminAuthorizationsPage() {
               / {records.length} records
             </span>
           </div>
-          <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-1.5">
-            <span className="font-semibold text-purple-700">{kpis.skilledActive} skilled</span>
-            <span>&bull;</span>
-            <span className="font-semibold text-blue-700">{kpis.nonMedicalActive} non-medical</span>
-          </div>
         </div>
 
         {/* Metric 2: Remaining Approved Units */}
@@ -347,10 +293,6 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-medium text-slate-500">
               balance
             </span>
-          </div>
-          <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-1">
-            <span className="font-semibold text-slate-700">{kpis.totalUsedUnits.toLocaleString()}</span>
-            <span>used of {kpis.totalApprovedUnits.toLocaleString()} approved</span>
           </div>
         </div>
 
@@ -372,9 +314,6 @@ export default function AdminAuthorizationsPage() {
               Awaiting Determination
             </span>
           </div>
-          <div className="mt-2 text-[11px] text-slate-500">
-            Care locked until formal Notice of Action
-          </div>
         </div>
 
         {/* Metric 4: Expiring & Exhausted Alerts */}
@@ -395,16 +334,11 @@ export default function AdminAuthorizationsPage() {
               Action Required
             </span>
           </div>
-          <div className="mt-2 text-[11px] text-slate-500 flex items-center gap-1">
-            <span>{kpis.exhaustedOrCritical} exhausted</span>
-            <span>&bull;</span>
-            <span>{kpis.expiringIn30Days} expiring soon</span>
-          </div>
         </div>
       </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* 05. Simple Searchable Toolbar & Navigation Tabs */}
+      {/* 05. Searchable Toolbar & Navigation Tabs */}
       {/* ----------------------------------------------------------------- */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs p-4 space-y-4">
         {/* Navigation Tabs */}
@@ -532,7 +466,7 @@ export default function AdminAuthorizationsPage() {
       {/* ----------------------------------------------------------------- */}
       {/* 06. Patient-Centric Authorizations Table */}
       {/* ----------------------------------------------------------------- */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -541,8 +475,6 @@ export default function AdminAuthorizationsPage() {
                 <th className="py-3 px-4">Payer</th>
                 <th className="py-3 px-4">Service</th>
                 <th className="py-3 px-4">Approved / Used</th>
-                <th className="py-3 px-4">Remaining Units</th>
-                <th className="py-3 px-4">Effective Term</th>
                 <th className="py-3 px-4">Status</th>
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
@@ -550,7 +482,7 @@ export default function AdminAuthorizationsPage() {
             <tbody className="divide-y divide-slate-100 text-xs">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     <ShieldCheck className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                     <p className="font-semibold text-sm text-slate-700">No authorizations match your query</p>
                     <p className="text-xs text-slate-400 mt-1">Try resetting your search filters or active tab.</p>
@@ -561,15 +493,14 @@ export default function AdminAuthorizationsPage() {
                   const remaining = Math.max(0, record.unitsApproved - record.unitsUsed);
                   const burnRate = Math.round((record.unitsUsed / record.unitsApproved) * 100);
                   const isExhausted = remaining <= 30 || burnRate >= 90;
-                  const isSkilled = record.careCategory === "SKILLED_CARE";
 
                   return (
                     <tr
                       key={record.id}
-                      onClick={() => setDrawerRecord(record)}
+                      onClick={() => router.push(`/admin/authorizations/${encodeURIComponent(record.id)}`)}
                       className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                     >
-                      {/* 1. Patient & Care Category */}
+                      {/* 1. Patient */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0">
@@ -609,8 +540,8 @@ export default function AdminAuthorizationsPage() {
                               burnRate >= 90
                                 ? "text-rose-600"
                                 : burnRate >= 75
-                                ? "text-amber-600"
-                                : "text-emerald-700"
+                                  ? "text-amber-600"
+                                  : "text-emerald-700"
                             )}
                           >
                             {burnRate}%
@@ -623,50 +554,15 @@ export default function AdminAuthorizationsPage() {
                               burnRate >= 90
                                 ? "bg-rose-500"
                                 : burnRate >= 75
-                                ? "bg-amber-500"
-                                : "bg-[#3D6B22]"
+                                  ? "bg-amber-500"
+                                  : "bg-[#3D6B22]"
                             )}
                             style={{ width: `${Math.min(burnRate, 100)}%` }}
                           />
                         </div>
-                        <span className="text-[10px] text-slate-400 block mt-1">
-                          {record.unitMeasure}
-                        </span>
                       </td>
 
-                      {/* 5. Remaining Units */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-baseline gap-1">
-                          <span
-                            className={cn(
-                              "text-sm font-extrabold",
-                              isExhausted ? "text-rose-600" : "text-slate-900"
-                            )}
-                          >
-                            {remaining}
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            {record.unitMeasure === "Visits" ? "visits" : "units"}
-                          </span>
-                        </div>
-                        {isExhausted && (
-                          <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200 mt-0.5 inline-block">
-                            Low Units
-                          </span>
-                        )}
-                      </td>
-
-                      {/* 6. Effective Term */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="text-slate-700 font-medium block">
-                          {record.expirationDate}
-                        </span>
-                        <span className="text-[10px] text-slate-400 block">
-                          From: {record.effectiveDate}
-                        </span>
-                      </td>
-
-                      {/* 7. Status */}
+                      {/* 5. Status */}
                       <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
                         <span
                           className={cn(
@@ -674,10 +570,10 @@ export default function AdminAuthorizationsPage() {
                             record.status === "APPROVED"
                               ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                               : record.status === "PENDING" || record.status === "REQUESTED"
-                              ? "bg-amber-50 text-amber-800 border-amber-200"
-                              : record.status === "DENIED"
-                              ? "bg-rose-50 text-rose-800 border-rose-200"
-                              : "bg-slate-100 text-slate-700 border-slate-200"
+                                ? "bg-amber-50 text-amber-800 border-amber-200"
+                                : record.status === "DENIED"
+                                  ? "bg-rose-50 text-rose-800 border-rose-200"
+                                  : "bg-slate-100 text-slate-700 border-slate-200"
                           )}
                         >
                           <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -688,30 +584,25 @@ export default function AdminAuthorizationsPage() {
                       {/* 8. Actions */}
                       <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            title="Open Detailed Drawer"
-                            onClick={() => setDrawerRecord(record)}
+                          <Link
+                            href={`/admin/authorizations/${encodeURIComponent(record.id)}`}
+                            title="View Full Authorization"
                             className="p-1.5 rounded-lg text-slate-500 hover:text-[#3D6B22] hover:bg-slate-100 transition-colors"
                           >
                             <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
+                          </Link>
+                          <Link
+                            href={`/admin/authorizations/${encodeURIComponent(record.id)}/edit`}
                             title="Edit Authorization"
-                            onClick={() => {
-                              setCreateEditRecord(record);
-                              setIsCreateModalOpen(true);
-                            }}
                             className="p-1.5 rounded-lg text-slate-500 hover:text-[#3D6B22] hover:bg-slate-100 transition-colors"
                           >
                             <Edit3 className="w-4 h-4" />
-                          </button>
+                          </Link>
                           <button
                             type="button"
                             title="View Attached Documents"
                             onClick={() => setEvidenceRecord(record)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-[#3D6B22] hover:bg-slate-100 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-[#3D6B22] hover:bg-slate-100 transition-colors cursor-pointer"
                           >
                             <FileSignature className="w-4 h-4" />
                           </button>
@@ -727,35 +618,7 @@ export default function AdminAuthorizationsPage() {
       </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* 07. Detailed Slide-Over Flyout Drawer */}
-      {/* ----------------------------------------------------------------- */}
-      <AuthorizationDrawer
-        isOpen={!!drawerRecord}
-        onClose={() => setDrawerRecord(null)}
-        record={drawerRecord}
-        onEdit={(rec) => {
-          setCreateEditRecord(rec);
-          setIsCreateModalOpen(true);
-        }}
-        onOpenEvidence={(rec) => setEvidenceRecord(rec)}
-        onUpdateStatus={handleUpdateStatus}
-      />
-
-      {/* ----------------------------------------------------------------- */}
-      {/* 08. Create & Edit Authorization Modal */}
-      {/* ----------------------------------------------------------------- */}
-      <CreateEditAuthorizationModal
-        isOpen={isCreateModalOpen}
-        onClose={() => {
-          setIsCreateModalOpen(false);
-          setCreateEditRecord(null);
-        }}
-        recordToEdit={createEditRecord}
-        onSave={handleSaveRecord}
-      />
-
-      {/* ----------------------------------------------------------------- */}
-      {/* 09. Evidence / NOA Viewer Modal */}
+      {/* 07. Evidence / NOA Viewer Modal */}
       {/* ----------------------------------------------------------------- */}
       <EvidenceViewerModal
         isOpen={!!evidenceRecord}

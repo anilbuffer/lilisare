@@ -312,7 +312,7 @@ export function NewReferralFullPage({
               </span>
               <span className="text-xs text-slate-400">Step {step} of 4</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               New Family Referral
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">

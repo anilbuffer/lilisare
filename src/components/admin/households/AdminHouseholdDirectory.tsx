@@ -235,7 +235,7 @@ export function AdminHouseholdDirectory() {
       {/* 01. Header & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Households Directory
           </h1>
         </div>
@@ -265,7 +265,7 @@ export function AdminHouseholdDirectory() {
               <Home className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiStats.totalHouseholds}
           </div>
         </div>
@@ -278,7 +278,7 @@ export function AdminHouseholdDirectory() {
               <Heart className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiStats.totalClients}
           </div>
         </div>
@@ -291,7 +291,7 @@ export function AdminHouseholdDirectory() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiStats.connectedCaregivers}
           </div>
         </div>
@@ -304,7 +304,7 @@ export function AdminHouseholdDirectory() {
               <Activity className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiStats.authUtilization}
           </div>
         </div>
@@ -325,7 +325,7 @@ export function AdminHouseholdDirectory() {
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiStats.bottleneckCount}
           </div>
         </div>

@@ -390,7 +390,7 @@ export function AdminCaregiverDetailView({
           {/* Heading & Meta Subtitle (Clean & non-duplicated) */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
                 {profile.name}
               </h1>
               <span className="text-xs  font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">

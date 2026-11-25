@@ -432,7 +432,7 @@ export function VisitDetailFullPage({
           {/* Heading & Concise Metadata */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
                 {visit.clientName}
               </h1>
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
@@ -811,18 +811,28 @@ export function VisitDetailFullPage({
       {/* 4. EVV & TELEMETRY */}
       {activeTab === "evv" && (
         <div className="space-y-5 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
-              <Navigation className="w-5 h-5" />
+          <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
+                <Navigation className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900 tracking-tight">
+                  Electronic Visit Verification (EVV) &amp; GPS Telemetry
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Real-time clock-in/out compliance, travel distance, and geo-fence verification.
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Electronic Visit Verification (EVV) &amp; GPS Telemetry
-              </h2>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
-                Real-time clock-in/out compliance, travel distance, and geo-fence verification.
-              </p>
-            </div>
+            <Link
+              href={`/admin/evv-visits/${visit.id}/`}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-xs transition-all active:scale-95 whitespace-nowrap self-start sm:self-auto"
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span>Open in EVV Workspace</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

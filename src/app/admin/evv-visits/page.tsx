@@ -1,7 +1,11 @@
-"use client";
+import React from "react";
+import { EvvVisitsWorkspace } from "@/components/admin/evv/EvvVisitsWorkspace";
 
-import EvvMonitoringPage from "@/app/evv-monitoring/page";
+export const metadata = {
+  title: "EVV Visits & Monitoring | LiliSare Admin",
+  description: "Monitor visit activity, identify exceptions, and review EVV records.",
+};
 
 export default function AdminEvvVisitsPage() {
-  return <EvvMonitoringPage />;
+  return <EvvVisitsWorkspace />;
 }

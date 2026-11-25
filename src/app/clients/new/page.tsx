@@ -646,7 +646,7 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 Step {currentStep} of 4: {steps.find((s) => s.num === currentStep)?.title}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               Add New Client
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -676,10 +676,10 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 >
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${isDone
-                        ? "bg-[#3D6B22] text-white shadow-sm"
-                        : isCurrent
-                          ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
-                          : "bg-slate-100 text-slate-400 border border-slate-200"
+                      ? "bg-[#3D6B22] text-white shadow-sm"
+                      : isCurrent
+                        ? "bg-[#3D6B22] text-white ring-4 ring-[#3D6B22]/20 shadow-[0_4px_16px_rgba(61,107,34,0.25)]"
+                        : "bg-slate-100 text-slate-400 border border-slate-200"
                       }`}
                   >
                     {isDone ? <Check className="w-4 h-4 stroke-[3]" /> : s.num}
@@ -722,14 +722,14 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 }
               }}
               className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${creationPath === "convert"
-                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
-                  : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                : "border-slate-200 bg-slate-50/50 hover:bg-white"
                 }`}
             >
               <div
                 className={`p-2 rounded-xl shrink-0 ${creationPath === "convert"
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "bg-slate-200 text-slate-600"
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "bg-slate-200 text-slate-600"
                   }`}
               >
                 <FolderInput className="w-4 h-4" />
@@ -756,14 +756,14 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                 setAddress("");
               }}
               className={`p-3.5 rounded-xl border text-left transition-all flex items-start gap-3 cursor-pointer ${creationPath === "direct"
-                  ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
-                  : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                : "border-slate-200 bg-slate-50/50 hover:bg-white"
                 }`}
             >
               <div
                 className={`p-2 rounded-xl shrink-0 ${creationPath === "direct"
-                    ? "bg-[#3D6B22] text-white shadow-xs"
-                    : "bg-slate-200 text-slate-600"
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "bg-slate-200 text-slate-600"
                   }`}
               >
                 <UserPlus className="w-4 h-4" />
@@ -792,8 +792,8 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     type="button"
                     onClick={() => handleSelectInquiry(inq)}
                     className={`p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${selectedInquiryId === inq.id
-                        ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs font-semibold ring-1 ring-[#3D6B22]"
-                        : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                      ? "border-[#3D6B22] bg-[#3D6B22]/5 shadow-xs font-semibold ring-1 ring-[#3D6B22]"
+                      : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
                       }`}
                   >
                     <div className="flex items-center justify-between">
@@ -1070,8 +1070,8 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                           type="button"
                           onClick={() => setPreferredMethod(method)}
                           className={`py-2.5 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${preferredMethod === method
-                              ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                              : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                             }`}
                         >
                           {method}
@@ -1310,14 +1310,14 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                   <div
                     onClick={() => setHouseholdChoice("existing")}
                     className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${householdChoice === "existing"
-                        ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
-                        : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                      ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                      : "border-slate-200 bg-slate-50/50 hover:bg-white"
                       }`}
                   >
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${householdChoice === "existing"
-                          ? "border-[#3D6B22] bg-[#3D6B22] text-white"
-                          : "border-slate-300 bg-white"
+                        ? "border-[#3D6B22] bg-[#3D6B22] text-white"
+                        : "border-slate-300 bg-white"
                         }`}
                     >
                       {householdChoice === "existing" && <Check className="w-3 h-3 stroke-[3]" />}
@@ -1331,14 +1331,14 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                   <div
                     onClick={() => setHouseholdChoice("new")}
                     className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center gap-3 ${householdChoice === "new"
-                        ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
-                        : "border-slate-200 bg-slate-50/50 hover:bg-white"
+                      ? "border-[#3D6B22] bg-[#3D6B22]/5 ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.1)]"
+                      : "border-slate-200 bg-slate-50/50 hover:bg-white"
                       }`}
                   >
                     <div
                       className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${householdChoice === "new"
-                          ? "border-[#3D6B22] bg-[#3D6B22] text-white"
-                          : "border-slate-300 bg-white"
+                        ? "border-[#3D6B22] bg-[#3D6B22] text-white"
+                        : "border-slate-300 bg-white"
                         }`}
                     >
                       {householdChoice === "new" && <Check className="w-3 h-3 stroke-[3]" />}
@@ -1480,14 +1480,14 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                         key={perm}
                         onClick={() => togglePermission(perm)}
                         className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${isChecked
-                            ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#1E5622] font-semibold ring-1 ring-[#3D6B22]/30 shadow-xs"
-                            : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-50"
+                          ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#1E5622] font-semibold ring-1 ring-[#3D6B22]/30 shadow-xs"
+                          : "border-slate-200 bg-slate-50/60 text-slate-700 hover:bg-slate-50"
                           }`}
                       >
                         <span
                           className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${isChecked
-                              ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
-                              : "border-slate-300 bg-white"
+                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
+                            : "border-slate-300 bg-white"
                             }`}
                         >
                           {isChecked && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -1533,8 +1533,8 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                       type="button"
                       onClick={() => setCareType(type)}
                       className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${careType === type
-                          ? "border-[#3D6B22] bg-[#3D6B22]/10 text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.12)]"
-                          : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
+                        ? "border-[#3D6B22] bg-[#3D6B22]/10 text-[#1E5622] font-bold ring-2 ring-[#3D6B22]/20 shadow-[0_2px_8px_rgba(61,107,34,0.12)]"
+                        : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
                         }`}
                     >
                       <span className="text-xs block font-semibold">{type}</span>
@@ -1614,8 +1614,8 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                         type="button"
                         onClick={() => toggleCareNeed(need)}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${isSelected
-                            ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                            : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                          ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                          : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                           }`}
                       >
                         {isSelected ? "✓ " : "+ "}
@@ -1694,8 +1694,8 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     <div className="flex items-center gap-3">
                       <div
                         className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${consentSigned
-                            ? "bg-[#3D6B22] text-white border-[#3D6B22]"
-                            : "border-slate-300 bg-white"
+                          ? "bg-[#3D6B22] text-white border-[#3D6B22]"
+                          : "border-slate-300 bg-white"
                           }`}
                       >
                         {consentSigned && <Check className="w-3.5 h-3.5 stroke-[3]" />}
@@ -1711,8 +1711,8 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     </div>
                     <span
                       className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${consentSigned
-                          ? "bg-emerald-50 text-[#1E5622] border border-emerald-200"
-                          : "bg-rose-50 text-rose-700 border border-rose-200"
+                        ? "bg-emerald-50 text-[#1E5622] border border-emerald-200"
+                        : "bg-rose-50 text-rose-700 border border-rose-200"
                         }`}
                     >
                       {consentSigned ? "Signed & Attached" : "Pending Sign-off"}
@@ -1726,8 +1726,8 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
                     <div className="flex items-center gap-3">
                       <div
                         className={`w-5 h-5 rounded-md flex items-center justify-center text-xs border transition-all ${physicianOrderUploaded
-                            ? "bg-[#3D6B22] text-white border-[#3D6B22]"
-                            : "border-slate-300 bg-white"
+                          ? "bg-[#3D6B22] text-white border-[#3D6B22]"
+                          : "border-slate-300 bg-white"
                           }`}
                       >
                         {physicianOrderUploaded && <Check className="w-3.5 h-3.5 stroke-[3]" />}

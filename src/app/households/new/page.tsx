@@ -759,7 +759,7 @@ export default function NewHouseholdPage({
               </span>
               <span className="text-xs text-slate-400">Step {step} of 5</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               Register Connected Household
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">

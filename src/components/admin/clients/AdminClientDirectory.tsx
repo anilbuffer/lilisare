@@ -358,7 +358,7 @@ export function AdminClientDirectory() {
          ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Clients Directory
           </h1>
         </div>
@@ -390,7 +390,7 @@ export function AdminClientDirectory() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpis.total}
           </div>
         </div>
@@ -409,7 +409,7 @@ export function AdminClientDirectory() {
               <Heart className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpis.active}
           </div>
         </div>
@@ -428,7 +428,7 @@ export function AdminClientDirectory() {
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpis.highRisk}
           </div>
         </div>
@@ -447,7 +447,7 @@ export function AdminClientDirectory() {
               <Building2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpis.hospitalized}
           </div>
         </div>
@@ -466,7 +466,7 @@ export function AdminClientDirectory() {
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpis.completed}
           </div>
         </div>

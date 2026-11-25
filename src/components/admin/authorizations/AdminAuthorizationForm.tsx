@@ -150,22 +150,22 @@ export function AdminAuthorizationForm({ initialRecord, mode }: AdminAuthorizati
       notes,
       statusHistory: isEditing
         ? [
-            {
-              status,
-              changedAt: new Date().toISOString().slice(0, 10),
-              changedBy: "Marcus Vance (Agency Admin)",
-              reason: "Authorization details updated via Full Page Workspace",
-            },
-            ...(initialRecord?.statusHistory || []),
-          ]
+          {
+            status,
+            changedAt: new Date().toISOString().slice(0, 10),
+            changedBy: "Marcus Vance (Agency Admin)",
+            reason: "Authorization details updated via Full Page Workspace",
+          },
+          ...(initialRecord?.statusHistory || []),
+        ]
         : [
-            {
-              status,
-              changedAt: new Date().toISOString().slice(0, 10),
-              changedBy: "Marcus Vance (Agency Admin)",
-              reason: "Initial authorization entry created in LiliSare Admin",
-            },
-          ],
+          {
+            status,
+            changedAt: new Date().toISOString().slice(0, 10),
+            changedBy: "Marcus Vance (Agency Admin)",
+            reason: "Initial authorization entry created in LiliSare Admin",
+          },
+        ],
     };
 
     upsertAuthorizationRecord(savedRecord);
@@ -192,7 +192,7 @@ export function AdminAuthorizationForm({ initialRecord, mode }: AdminAuthorizati
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
             <span>{isEditing ? "Back to Authorization Detail" : "Back to Authorizations Registry"}</span>
           </Link>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {isEditing ? `Edit Authorization: ${initialRecord?.id}` : "Create New Payer Authorization"}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">

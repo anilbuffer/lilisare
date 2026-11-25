@@ -131,28 +131,28 @@ export function AdminIntakeReferralDetailView({
           prev.length > 0
             ? prev
             : [
-                {
-                  author: item.assignedCoordinator || "Maria Santos, BSN",
-                  role: "Intake Coordinator & Triage RN",
-                  time: `${item.daysInPipeline} days ago`,
-                  category: "Clinical",
-                  text: item.triageNotes,
-                },
-                {
-                  author: item.referralSourceContact || "Discharge Navigator",
-                  role: "Referral Partner",
-                  time: item.receivedDate,
-                  category: "Payer",
-                  text: `Inbound referral received from ${item.referralSource}. Payer: ${item.payerName} (${item.estimatedHoursPerWeek} hrs/wk).`,
-                },
-                {
-                  author: "System Intake Gateway",
-                  role: "Automated Ingestion",
-                  time: item.receivedDate,
-                  category: "Coordination",
-                  text: `Referral logged with ${item.priority} priority and assigned to ${item.assignedCoordinator}.`,
-                },
-              ]
+              {
+                author: item.assignedCoordinator || "Maria Santos, BSN",
+                role: "Intake Coordinator & Triage RN",
+                time: `${item.daysInPipeline} days ago`,
+                category: "Clinical",
+                text: item.triageNotes,
+              },
+              {
+                author: item.referralSourceContact || "Discharge Navigator",
+                role: "Referral Partner",
+                time: item.receivedDate,
+                category: "Payer",
+                text: `Inbound referral received from ${item.referralSource}. Payer: ${item.payerName} (${item.estimatedHoursPerWeek} hrs/wk).`,
+              },
+              {
+                author: "System Intake Gateway",
+                role: "Automated Ingestion",
+                time: item.receivedDate,
+                category: "Coordination",
+                text: `Referral logged with ${item.priority} priority and assigned to ${item.assignedCoordinator}.`,
+              },
+            ]
         );
       }
     };
@@ -418,11 +418,11 @@ export function AdminIntakeReferralDetailView({
     const updated = all.map((r) =>
       r.id === referral.id
         ? {
-            ...r,
-            status: "Enrolled" as ReferralStatus,
-            clientId: createdClientId,
-            householdCode: createdHouseholdCode,
-          }
+          ...r,
+          status: "Enrolled" as ReferralStatus,
+          clientId: createdClientId,
+          householdCode: createdHouseholdCode,
+        }
         : r
     );
     saveAdminReferralsToStorage(updated);
@@ -512,13 +512,12 @@ export function AdminIntakeReferralDetailView({
             </div>
             <div className="absolute -bottom-1 -right-1">
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs border-2 border-white ${
-                  referral.priority === "Urgent"
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs border-2 border-white ${referral.priority === "Urgent"
                     ? "bg-rose-600"
                     : referral.priority === "High"
                       ? "bg-amber-500"
                       : "bg-[#3D6B22]"
-                }`}
+                  }`}
               >
                 {referral.priority}
               </span>
@@ -527,7 +526,7 @@ export function AdminIntakeReferralDetailView({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
                 {referral.patientName}
               </h1>
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
@@ -571,11 +570,10 @@ export function AdminIntakeReferralDetailView({
                     key={stg}
                     type="button"
                     onClick={() => handleUpdateStatus(stg)}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${
-                      referral.status === stg
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${referral.status === stg
                         ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
                         : "text-slate-800"
-                    }`}
+                      }`}
                   >
                     <span>{stg}</span>
                     {referral.status === stg && (
@@ -1121,11 +1119,10 @@ export function AdminIntakeReferralDetailView({
                   key={flt}
                   type="button"
                   onClick={() => setNoteFilter(flt)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    noteFilter === flt
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${noteFilter === flt
                       ? "bg-[#3D6B22] text-white shadow-2xs"
                       : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/70"
-                  }`}
+                    }`}
                 >
                   {flt}
                 </button>
@@ -1145,11 +1142,10 @@ export function AdminIntakeReferralDetailView({
                     key={cat}
                     type="button"
                     onClick={() => setNoteCategory(cat)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                      noteCategory === cat
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${noteCategory === cat
                         ? "bg-[#3D6B22] text-white shadow-2xs"
                         : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
-                    }`}
+                      }`}
                   >
                     {cat}
                   </button>

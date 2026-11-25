@@ -83,7 +83,7 @@ export default function IntakeReportsPage() {
       {/* ---------------------------------------------------- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Intake Reports & Analytics
           </h1>
         </div>

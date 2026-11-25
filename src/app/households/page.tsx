@@ -392,7 +392,7 @@ export default function HouseholdsPage({
       {/* 01. Standardized Page Header matching /intake/pipeline & /clients */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Households & Family Units
           </h1>
         </div>

@@ -199,7 +199,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
               {record.clientName.charAt(0)}
             </div>
             <div className="space-y-0.5">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                 {record.clientName}
               </h1>
               <p className="text-xs text-slate-500">
@@ -432,10 +432,10 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
                     record.status === "APPROVED"
                       ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                       : record.status === "PENDING" || record.status === "REQUESTED"
-                      ? "bg-amber-50 text-amber-800 border-amber-200"
-                      : record.status === "DENIED"
-                      ? "bg-rose-50 text-rose-800 border-rose-200"
-                      : "bg-slate-100 text-slate-700 border-slate-200"
+                        ? "bg-amber-50 text-amber-800 border-amber-200"
+                        : record.status === "DENIED"
+                          ? "bg-rose-50 text-rose-800 border-rose-200"
+                          : "bg-slate-100 text-slate-700 border-slate-200"
                   )}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-current" />

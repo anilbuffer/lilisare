@@ -420,7 +420,7 @@ function AddCaregiverWizard({
                 Step {currentStep} of 5: {stepLabels.find((s) => s.num === currentStep)?.title}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               Add New Caregiver
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">

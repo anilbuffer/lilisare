@@ -101,7 +101,7 @@ export default function CaregiversPage() {
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Caregivers
           </h1>
         </div>
@@ -130,8 +130,8 @@ export default function CaregiversPage() {
                       setIsDateOpen(false);
                     }}
                     className={`w-full text-left px-3 py-1.5 text-xs font-medium flex items-center justify-between cursor-pointer ${selectedDateRange === opt.id
-                        ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
-                        : "text-slate-700 hover:bg-slate-50"
+                      ? "bg-[#F2F8EE] text-[#3D6B22] font-semibold"
+                      : "text-slate-700 hover:bg-slate-50"
                       }`}
                   >
                     <span>{opt.label}</span>

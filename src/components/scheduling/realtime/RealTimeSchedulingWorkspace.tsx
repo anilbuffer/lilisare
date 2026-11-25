@@ -668,18 +668,34 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
                 </span>
               </div>
 
-              {/* Right: + Add a visit action button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setAddModalDefaults({ date: weekDays[2]?.iso || "2026-11-25" });
-                  setIsAddModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] shadow-sm shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4 stroke-[2.5]" />
-                <span>Add a visit</span>
-              </button>
+              {/* Right: Connected Workflows & Add visit */}
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/admin/evv-visits/"
+                  className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+                >
+                  <Clock className="w-3.5 h-3.5 text-[#3D6B22]" />
+                  <span>EVV Monitoring</span>
+                </Link>
+                <Link
+                  href="/admin/caregivers/"
+                  className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+                >
+                  <Users className="w-3.5 h-3.5 text-[#3D6B22]" />
+                  <span>Caregivers</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAddModalDefaults({ date: weekDays[2]?.iso || "2026-11-25" });
+                    setIsAddModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] shadow-sm shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
+                  <span>Add a visit</span>
+                </button>
+              </div>
             </div>
 
             {/* ================================================================= */}

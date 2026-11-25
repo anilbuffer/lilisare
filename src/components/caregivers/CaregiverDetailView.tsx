@@ -341,7 +341,7 @@ export function CaregiverDetailView({
 
           {/* Heading & Subtitle */}
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-1 truncate sm:overflow-visible sm:whitespace-normal">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mb-1 truncate sm:overflow-visible sm:whitespace-normal">
               {caregiver.name}
             </h1>
 

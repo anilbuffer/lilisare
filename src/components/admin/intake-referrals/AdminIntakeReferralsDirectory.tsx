@@ -308,7 +308,7 @@ export function AdminIntakeReferralsDirectory() {
       {/* 01. Header & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Intake & Referrals Directory
           </h1>
         </div>
@@ -338,7 +338,7 @@ export function AdminIntakeReferralsDirectory() {
               <FileText className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.total}
           </div>
         </div>
@@ -351,7 +351,7 @@ export function AdminIntakeReferralsDirectory() {
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.conversionRate}
           </div>
         </div>
@@ -372,7 +372,7 @@ export function AdminIntakeReferralsDirectory() {
               <Stethoscope className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.assessmentCount}
           </div>
         </div>
@@ -385,7 +385,7 @@ export function AdminIntakeReferralsDirectory() {
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.avgDays}
           </div>
         </div>
@@ -406,7 +406,7 @@ export function AdminIntakeReferralsDirectory() {
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.urgentCount}
           </div>
         </div>

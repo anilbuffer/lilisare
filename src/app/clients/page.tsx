@@ -104,7 +104,7 @@ export default function ClientsPage() {
       {/* 01. Page Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Clients & Family Care
           </h1>
         </div>

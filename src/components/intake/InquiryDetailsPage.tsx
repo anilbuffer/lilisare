@@ -394,7 +394,7 @@ export function InquiryDetailsPage({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight truncate">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">
                 {inquiry.familyName}
               </h1>
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80">
@@ -435,11 +435,10 @@ export function InquiryDetailsPage({
                     key={stg}
                     type="button"
                     onClick={() => handleUpdateStatus(stg)}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${
-                      inquiry.stage === stg
+                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${inquiry.stage === stg
                         ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
                         : "text-slate-800"
-                    }`}
+                      }`}
                   >
                     <span>{stg}</span>
                     {inquiry.stage === stg && (

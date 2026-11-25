@@ -398,7 +398,7 @@ export function AdminCaregiverDirectory() {
       {/* 01. Header & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             Caregivers Directory
           </h1>
           <p className="text-xs text-slate-500 font-medium mt-1">
@@ -406,11 +406,25 @@ export function AdminCaregiverDirectory() {
           </p>
         </div>
 
-        {/* Primary Action Button */}
-        <div className="flex items-center gap-3">
+        {/* Actions Bar & Connected Workflows */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Link
+            href="/admin/evv-visits/"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+          >
+            <Clock className="w-3.5 h-3.5 text-[#3D6B22]" />
+            <span>EVV Monitoring</span>
+          </Link>
+          <Link
+            href="/admin/scheduling/"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+          >
+            <Calendar className="w-3.5 h-3.5 text-[#3D6B22]" />
+            <span>Scheduling</span>
+          </Link>
           <Link
             href="/admin/caregivers/new"
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0 self-start sm:self-auto"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>New Caregiver</span>
@@ -435,7 +449,7 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Active Caregivers</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
+              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">
                 {activeCount || 18}
               </p>
             </div>
@@ -462,7 +476,7 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Onboarding</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">
+              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">
                 {onboardingCount || 1}
               </p>
             </div>
@@ -489,7 +503,7 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Avg. Rating</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{avgRating}</p>
+              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">{avgRating}</p>
             </div>
             <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center shrink-0">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -512,7 +526,7 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Compliance Rate</p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">98%</p>
+              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">98%</p>
             </div>
             <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-4 h-4" />

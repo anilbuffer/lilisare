@@ -7,7 +7,7 @@ import {
   EvvReviewNote,
   EvvTimelineEvent,
 } from "@/types/evvVisit";
-import { INITIAL_REALTIME_VISITS } from "@/lib/scheduling/schedulingStore";
+import { INITIAL_REALTIME_VISITS, getVisitsFromStorage } from "@/lib/scheduling/schedulingStore";
 import { INITIAL_CLIENTS } from "@/lib/clients/mockData";
 import { INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
 import { LILISARE_SERVICES } from "@/lib/services";
@@ -53,11 +53,11 @@ const CAREGIVER_ROSTER = [
  */
 const CLIENT_ROSTER = [
   { id: "CL-1001", name: "Leo Miller", address: "742 Evergreen Terrace, Springfield, OR 97477", medicaidId: "OR-MED-1001", phone: "(541) 555-0199", householdId: "hh-1001", householdName: "Miller Household" },
-  { id: "CL-1002", name: "Arthur Dent", address: "42 Hitchhiker Way, Portland, OR 97201", medicaidId: "OR-MED-1002", phone: "(503) 555-0422", householdId: "hh-1002", householdName: "Dent Household" },
-  { id: "CL-1003", name: "Eleanor Ruth Whitfield", address: "123 Main St, Eugene, OR 97401", medicaidId: "OR-MED-1003", phone: "(541) 555-0123", householdId: "hh-1003", householdName: "Whitfield Household" },
-  { id: "CL-1004", name: "Robert DeLuca", address: "5500 E 6th Ave, Denver, CO 80220", medicaidId: "CO-MED-1004", phone: "(303) 555-0550", householdId: "hh-1004", householdName: "DeLuca Household" },
-  { id: "CL-1005", name: "Angela Martinez", address: "1940 Colorado Blvd, Denver, CO 80220", medicaidId: "CO-MED-1005", phone: "(303) 555-1940", householdId: "hh-1005", householdName: "Martinez Household" },
-  { id: "CL-1006", name: "Grace Hopper", address: "880 Broadway, Boulder, CO 80302", medicaidId: "CO-MED-1006", phone: "(303) 555-8800", householdId: "hh-1006", householdName: "Hopper Residence" },
+  { id: "CL-1002", name: "Marcus Whitfield", address: "1248 Oakwood Drive, Cedar Falls, IA 50613", medicaidId: "IA-MED-1002", phone: "(319) 555-3820", householdId: "hh-1002", householdName: "Whitfield Household" },
+  { id: "CL-1003", name: "Lucas Santos", address: "1842 Beacon Hill Dr, Des Moines, IA 50315", medicaidId: "IA-MED-1003", phone: "(515) 555-0142", householdId: "hh-1003", householdName: "Santos Household" },
+  { id: "CL-1004", name: "Raymond Chen", address: "5500 E 6th Ave, Denver, CO 80220", medicaidId: "CO-MED-1004", phone: "(303) 555-0550", householdId: "hh-1004", householdName: "Chen Household" },
+  { id: "CL-1005", name: "Sophia Patel", address: "1940 Colorado Blvd, Denver, CO 80220", medicaidId: "CO-MED-1005", phone: "(303) 555-1940", householdId: "hh-1005", householdName: "Patel Household" },
+  { id: "CL-1006", name: "Evelyn Foster", address: "880 Broadway, Boulder, CO 80302", medicaidId: "CO-MED-1006", phone: "(303) 555-8800", householdId: "hh-1006", householdName: "Foster Household" },
   { id: "CL-1007", name: "John Smith", address: "1284 Oakridge Ave, Denver, CO 80204", medicaidId: "CO-MED-994102", phone: "(303) 555-0142", householdId: "hh-1007", householdName: "Smith Residence" },
   { id: "CL-1008", name: "Michael Brown", address: "450 Spruce St, Boulder, CO 80302", medicaidId: "CO-MED-841920", phone: "(303) 555-0198", householdId: "hh-1008", householdName: "Brown Household" },
   { id: "CL-1009", name: "Emily Jones", address: "7820 S University Blvd, Centennial, CO 80122", medicaidId: "CO-MED-772154", phone: "(303) 555-0814", householdId: "hh-1009", householdName: "Jones Residence" },
@@ -1184,8 +1184,11 @@ export function getEvvVisitById(id: string): EvvVisitRecord | undefined {
 
   if (match) return match;
 
-  // Cross-lookup in INITIAL_REALTIME_VISITS from scheduling
-  const realtimeVisit = INITIAL_REALTIME_VISITS.find((v) => v.id.toLowerCase() === searchId);
+  // Cross-lookup in stored scheduling visits or INITIAL_REALTIME_VISITS from scheduling
+  const storedVisits = typeof window !== "undefined" ? getVisitsFromStorage() : INITIAL_REALTIME_VISITS;
+  const realtimeVisit =
+    storedVisits.find((v) => v.id.toLowerCase() === searchId) ||
+    INITIAL_REALTIME_VISITS.find((v) => v.id.toLowerCase() === searchId);
   if (realtimeVisit) {
     // Synthesize an EVV record matching this scheduling visit
     return {

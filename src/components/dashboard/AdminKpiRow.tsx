@@ -38,7 +38,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       iconBg: "bg-emerald-50",
       iconColor: "text-[#3D6B22]",
       borderHover: "hover:border-[#3D6B22]/50",
-      href: "/intake/pipeline",
+      href: "/admin/intake-referrals",
     },
     {
       id: "time-to-soc",
@@ -48,7 +48,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       iconBg: "bg-teal-50",
       iconColor: "text-teal-700",
       borderHover: "hover:border-teal-500/50",
-      href: "/intake/dashboard",
+      href: "/admin/dashboard",
     },
     {
       id: "visit-completion",
@@ -58,7 +58,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       iconBg: "bg-emerald-50",
       iconColor: "text-[#3D6B22]",
       borderHover: "hover:border-[#3D6B22]/50",
-      href: "/scheduling",
+      href: "/admin/scheduling",
     },
     {
       id: "doc-compliance",
@@ -68,7 +68,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       iconBg: "bg-amber-50",
       iconColor: "text-amber-700",
       borderHover: "hover:border-amber-400",
-      href: "/compliance",
+      href: "/admin/compliance",
     },
     {
       id: "revenue-health",
@@ -78,7 +78,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       iconBg: "bg-emerald-50",
       iconColor: "text-[#3D6B22]",
       borderHover: "hover:border-[#3D6B22]/50",
-      href: "/billing/workspace",
+      href: "/admin/billing",
     },
   ];
 

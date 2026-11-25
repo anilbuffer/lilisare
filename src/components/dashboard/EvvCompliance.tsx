@@ -26,7 +26,7 @@ export function EvvCompliance() {
         </div>
 
         <Link
-          href="/evv-monitoring"
+          href="/admin/evv-visits"
           className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 transition-colors"
         >
           Exceptions <ArrowRight className="w-3.5 h-3.5" />

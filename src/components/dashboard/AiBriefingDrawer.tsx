@@ -66,7 +66,7 @@ export function AiBriefingDrawer({ isOpen, onClose }: AiBriefingDrawerProps) {
                 Authorizations for <strong>Child A (Leo Miller)</strong> and 3 others have been awaiting State DHS approval for &gt;7 days.
               </p>
               <Link
-                href="/billing/authorizations"
+                href="/admin/authorizations"
                 onClick={onClose}
                 className="inline-flex items-center gap-1 text-xs font-bold text-rose-800 hover:underline pt-1"
               >
@@ -88,7 +88,7 @@ export function AiBriefingDrawer({ isOpen, onClose }: AiBriefingDrawerProps) {
                 8 caregivers have expired CPR or TB tests. Automated renewal SMS was sent, but scheduling blocks are pending your review.
               </p>
               <Link
-                href="/compliance"
+                href="/admin/compliance"
                 onClick={onClose}
                 className="inline-flex items-center gap-1 text-xs font-bold text-amber-900 hover:underline pt-1"
               >
@@ -110,7 +110,7 @@ export function AiBriefingDrawer({ isOpen, onClose }: AiBriefingDrawerProps) {
                 Family-centred care onboarding is averaging 14 days. 11 households are currently delayed waiting for signed guardian consent forms.
               </p>
               <Link
-                href="/households"
+                href="/admin/households"
                 onClick={onClose}
                 className="inline-flex items-center gap-1 text-xs font-bold text-blue-800 hover:underline pt-1"
               >

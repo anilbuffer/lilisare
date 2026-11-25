@@ -39,7 +39,7 @@ export function VisitsChart() {
         </div>
 
         <Link
-          href="/scheduling"
+          href="/admin/scheduling"
           className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 transition-colors"
         >
           View shifts <ArrowRight className="w-3.5 h-3.5" />

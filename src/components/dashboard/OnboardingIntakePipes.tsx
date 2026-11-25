@@ -41,35 +41,35 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
       count: metrics.caregiverFunnel.applied,
       pctOfTop: 100,
       color: "bg-[#C2D9C8]",
-      href: "/caregivers?tab=applied",
+      href: "/admin/caregivers?tab=applied",
     },
     {
       name: "Documents",
       count: metrics.caregiverFunnel.documents,
       pctOfTop: Math.round((metrics.caregiverFunnel.documents / metrics.caregiverFunnel.applied) * 100),
       color: "bg-[#93C573]",
-      href: "/caregivers/onboarding?step=docs",
+      href: "/admin/caregivers/onboarding?step=docs",
     },
     {
       name: "Screening & Training",
       count: metrics.caregiverFunnel.screeningAndTraining,
       pctOfTop: Math.round((metrics.caregiverFunnel.screeningAndTraining / metrics.caregiverFunnel.applied) * 100),
       color: "bg-[#5B8E32]",
-      href: "/caregivers/onboarding?step=screening",
+      href: "/admin/caregivers/onboarding?step=screening",
     },
     {
       name: "Authorised",
       count: metrics.caregiverFunnel.authorised,
       pctOfTop: Math.round((metrics.caregiverFunnel.authorised / metrics.caregiverFunnel.applied) * 100),
       color: "bg-[#3D6B22]",
-      href: "/caregivers?status=authorized",
+      href: "/admin/caregivers?status=authorized",
     },
     {
       name: "Active",
       count: metrics.caregiverFunnel.active,
       pctOfTop: Math.round((metrics.caregiverFunnel.active / metrics.caregiverFunnel.applied) * 100),
       color: "bg-[#1B3414]",
-      href: "/caregivers?status=active",
+      href: "/admin/caregivers?status=active",
     },
   ];
 
@@ -80,35 +80,35 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
       count: metrics.familyPipeline.newLead,
       pctOfTop: 100,
       color: "bg-[#C2D9C8]",
-      href: "/intake/pipeline?stage=new",
+      href: "/admin/intake-referrals?stage=new",
     },
     {
       name: "Contacted",
       count: metrics.familyPipeline.contacted,
       pctOfTop: Math.round((metrics.familyPipeline.contacted / metrics.familyPipeline.newLead) * 100),
       color: "bg-[#93C573]",
-      href: "/intake/pipeline?stage=contacted",
+      href: "/admin/intake-referrals?stage=contacted",
     },
     {
       name: "In Assessment",
       count: metrics.familyPipeline.inAssessment,
       pctOfTop: Math.round((metrics.familyPipeline.inAssessment / metrics.familyPipeline.newLead) * 100),
       color: "bg-[#D99B26]",
-      href: "/intake/pipeline?stage=assessment",
+      href: "/admin/intake-referrals?stage=assessment",
     },
     {
       name: "CM Coordination",
       count: metrics.familyPipeline.cmCoordination,
       pctOfTop: Math.round((metrics.familyPipeline.cmCoordination / metrics.familyPipeline.newLead) * 100),
       color: "bg-[#3D6B22]",
-      href: "/intake/pipeline?stage=coordination",
+      href: "/admin/intake-referrals?stage=coordination",
     },
     {
       name: "Converted",
       count: metrics.familyPipeline.converted,
       pctOfTop: Math.round((metrics.familyPipeline.converted / metrics.familyPipeline.newLead) * 100),
       color: "bg-[#1B3414]",
-      href: "/clients?status=Onboarding",
+      href: "/admin/clients?status=Onboarding",
     },
   ];
 
@@ -128,7 +128,7 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
             </div>
 
             <Link
-              href="/caregivers/onboarding"
+              href="/admin/caregivers/onboarding"
               className="text-xs font-semibold text-[#3D6B22] hover:text-[#1B3414] flex items-center gap-1 transition-colors"
             >
               Roster <ArrowRight className="w-3.5 h-3.5" />
@@ -184,7 +184,7 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
             </div>
 
             <Link
-              href="/intake/pipeline"
+              href="/admin/intake-referrals"
               className="text-xs font-semibold text-[#3D6B22] hover:text-[#1B3414] flex items-center gap-1 transition-colors"
             >
               Pipeline <ArrowRight className="w-3.5 h-3.5" />

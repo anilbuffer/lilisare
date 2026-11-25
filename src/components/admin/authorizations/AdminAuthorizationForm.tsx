@@ -34,13 +34,13 @@ interface AdminAuthorizationFormProps {
 }
 
 const CLIENT_OPTIONS = [
-  { id: "CL-4011", name: "Eleanor Ruth Whitfield", hhId: "HH-201", hhName: "Whitfield Household", dob: "1968-04-12", phone: "(303) 555-0144" },
-  { id: "CL-4012", name: "Lucas Gabriel Gomez", hhId: "HH-202", hhName: "Gomez Household", dob: "2016-09-24", phone: "(303) 555-0177" },
-  { id: "CL-4013", name: "Harper Mia Alvarez", hhId: "HH-203", hhName: "Alvarez Household", dob: "2019-11-05", phone: "(303) 555-0182" },
-  { id: "CL-4014", name: "Samuel Thomas Wright", hhId: "HH-204", hhName: "Wright Household", dob: "1975-02-18", phone: "(303) 555-0199" },
-  { id: "CL-4015", name: "Mateo Alexander Silva", hhId: "HH-205", hhName: "Silva Household", dob: "1954-08-30", phone: "(303) 555-0165" },
-  { id: "CL-4016", name: "Amara Joy Washington", hhId: "HH-206", hhName: "Washington Household", dob: "2008-05-14", phone: "(303) 555-0128" },
-  { id: "CL-4017", name: "David Jonathan Brooks", hhId: "HH-207", hhName: "Brooks Household", dob: "1960-12-03", phone: "(303) 555-0139" },
+  { id: "CL-1001", name: "Leo Miller", hhId: "hh-1001", hhName: "Miller Household", dob: "2018-05-14", phone: "(541) 555-0199" },
+  { id: "CL-1002", name: "Marcus Whitfield", hhId: "hh-1002", hhName: "Whitfield Household", dob: "1954-08-20", phone: "(319) 555-3820" },
+  { id: "CL-1003", name: "Lucas Santos", hhId: "hh-1003", hhName: "Santos Household", dob: "2019-03-12", phone: "(515) 555-0142" },
+  { id: "CL-1004", name: "Raymond Chen", hhId: "hh-1004", hhName: "Chen Household", dob: "1960-11-14", phone: "(515) 555-0177" },
+  { id: "CL-1005", name: "Sophia Patel", hhId: "hh-1005", hhName: "Patel Household", dob: "1988-06-22", phone: "(303) 555-1940" },
+  { id: "CL-1006", name: "Evelyn Foster", hhId: "hh-1006", hhName: "Foster Household", dob: "1942-02-18", phone: "(303) 555-8800" },
+  { id: "CL-1007", name: "John Smith", hhId: "hh-1007", hhName: "Smith Residence", dob: "1958-09-15", phone: "(303) 555-0142" },
 ];
 
 export function AdminAuthorizationForm({ initialRecord, mode }: AdminAuthorizationFormProps) {
@@ -48,11 +48,11 @@ export function AdminAuthorizationForm({ initialRecord, mode }: AdminAuthorizati
   const isEditing = mode === "edit";
 
   // Form states
-  const [clientId, setClientId] = useState(initialRecord?.clientId || "CL-4011");
-  const [clientName, setClientName] = useState(initialRecord?.clientName || "Eleanor Ruth Whitfield");
-  const [householdId, setHouseholdId] = useState(initialRecord?.householdId || "HH-201");
-  const [householdName, setHouseholdName] = useState(initialRecord?.householdName || "Whitfield Household");
-  const [clientDob, setClientDob] = useState(initialRecord?.clientDob || "1968-04-12");
+  const [clientId, setClientId] = useState(initialRecord?.clientId || "CL-1001");
+  const [clientName, setClientName] = useState(initialRecord?.clientName || "Leo Miller");
+  const [householdId, setHouseholdId] = useState(initialRecord?.householdId || "hh-1001");
+  const [householdName, setHouseholdName] = useState(initialRecord?.householdName || "Miller Household");
+  const [clientDob, setClientDob] = useState(initialRecord?.clientDob || "2018-05-14");
   const [clientPhone, setClientPhone] = useState(initialRecord?.clientPhone || "(303) 555-0144");
 
   const [careCategory, setCareCategory] = useState<CareCategory>(initialRecord?.careCategory || "NON_MEDICAL");

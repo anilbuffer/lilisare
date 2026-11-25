@@ -71,7 +71,7 @@ export function AuthorizationsComplianceCard({ metrics: propMetrics }: Authoriza
             </div>
 
             <Link
-              href="/billing/authorizations"
+              href="/admin/authorizations"
               className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 shrink-0 whitespace-nowrap transition-colors"
             >
               View All <ArrowRight className="w-3.5 h-3.5" />
@@ -152,7 +152,7 @@ export function AuthorizationsComplianceCard({ metrics: propMetrics }: Authoriza
             </div>
 
             <Link
-              href="/compliance"
+              href="/admin/compliance"
               className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 shrink-0 whitespace-nowrap transition-colors"
             >
               View All <ArrowRight className="w-3.5 h-3.5" />
@@ -162,7 +162,7 @@ export function AuthorizationsComplianceCard({ metrics: propMetrics }: Authoriza
           {/* Documentation & Compliance Triad Pills */}
           <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-4 text-center">
             <Link
-              href="/clinical/visit-notes"
+              href="/admin/care-notes"
               className="p-2 sm:p-2.5 bg-amber-50 hover:bg-amber-100/80 rounded-xl border border-amber-200 transition-colors block"
             >
               <span className="text-[9px] sm:text-[10px] uppercase font-bold text-amber-700 block truncate">Overdue Notes</span>
@@ -173,7 +173,7 @@ export function AuthorizationsComplianceCard({ metrics: propMetrics }: Authoriza
               <span className="text-base sm:text-lg font-extrabold text-amber-950 mt-0.5 block">5</span>
             </div>
             <Link
-              href="/compliance"
+              href="/admin/compliance"
               className="p-2 sm:p-2.5 bg-rose-50 hover:bg-rose-100/80 rounded-xl border border-rose-200 transition-colors block"
             >
               <span className="text-[9px] sm:text-[10px] uppercase font-bold text-rose-700 block truncate">Staff Licenses</span>
@@ -204,7 +204,7 @@ export function AuthorizationsComplianceCard({ metrics: propMetrics }: Authoriza
                       {item.status}
                     </span>
                     <Link
-                      href="/compliance"
+                      href="/admin/compliance"
                       className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-[11px] font-semibold transition-colors flex items-center gap-1"
                     >
                       <Eye className="w-3 h-3 text-slate-500" /> View Credentials

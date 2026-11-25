@@ -17,7 +17,7 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
     if (pathname.startsWith("/admin/caregivers")) return "Agency Caregivers";
     if (pathname.startsWith("/admin/intake-referrals")) return "Intake & Referrals";
     if (pathname.startsWith("/admin/authorizations")) return "Authorizations";
-    if (pathname.startsWith("/admin/scheduling")) return "Scheduling & EVV";
+    if (pathname.startsWith("/admin/scheduling")) return "Real-Time Scheduling";
     if (pathname.startsWith("/admin/evv-visits")) return "EVV Visits & Monitoring";
     if (pathname.startsWith("/admin/care-notes")) return "Care Notes & Clinical Monitoring";
     if (pathname.startsWith("/admin/clinical")) return "Clinical Monitoring";
@@ -42,6 +42,7 @@ export function TopBar({ onMenuClick }: { onMenuClick?: () => void }) {
     if (pathname.startsWith("/intake/clients")) return "Intake Clients";
     if (pathname.startsWith("/intake/caregivers")) return "Intake Caregivers";
     if (pathname.startsWith("/intake/households")) return "Intake Households";
+    if (pathname.startsWith("/intake/scheduling")) return "Real-Time Scheduling";
     if (pathname.startsWith("/intake/settings")) return "Intake Settings";
     if (pathname.startsWith("/intake/dashboard") || pathname === "/intake") return "Intake Coordinator Dashboard";
 

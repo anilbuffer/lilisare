@@ -1,7 +1,8 @@
 "use client";
 
-import SchedulingPage from "@/app/scheduling/page";
+import React from "react";
+import { RealTimeSchedulingWorkspace } from "@/components/scheduling/realtime/RealTimeSchedulingWorkspace";
 
 export default function AdminSchedulingPage() {
-  return <SchedulingPage />;
+  return <RealTimeSchedulingWorkspace portal="admin" />;
 }

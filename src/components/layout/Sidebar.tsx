@@ -183,6 +183,7 @@ const getNavGroups = (role?: string): NavGroup[] => {
           { name: "Clients", icon: Users, id: "clients" },
           { name: "Caregivers", icon: HeartHandshake, id: "caregivers" },
           { name: "Households", icon: Home, id: "households" },
+          { name: "Scheduling", icon: Calendar, id: "scheduling" },
           { name: "Reports", icon: BarChart3, id: "reports" },
           { name: "Settings", icon: Settings, id: "settings" },
         ],
@@ -415,6 +416,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       if (isPath("/intake/clients") || isPath("/intake/patients")) return "clients";
       if (isPath("/intake/caregivers")) return "caregivers";
       if (isPath("/intake/households")) return "households";
+      if (isPath("/intake/scheduling")) return "scheduling";
       if (isPath("/intake/reports") || isPath("/reports")) return "reports";
       if (isPath("/intake/dashboard") || isPath("/intake")) return "dashboard";
     }
@@ -597,6 +599,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       if (id === "clients") return "/intake/clients";
       if (id === "caregivers") return "/intake/caregivers";
       if (id === "households") return "/intake/households";
+      if (id === "scheduling") return "/intake/scheduling";
       if (id === "reports") return "/intake/reports";
       if (id === "settings") return "/intake/settings";
     }

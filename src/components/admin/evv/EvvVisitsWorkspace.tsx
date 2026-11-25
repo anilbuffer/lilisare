@@ -41,10 +41,6 @@ import {
 } from "@/lib/admin/evvVisitsStore";
 import { EvvKpiCards } from "./EvvKpiCards";
 import { EvvExceptionsBanner } from "./EvvExceptionsBanner";
-import {
-  ResponsiveDomainTabStrip,
-  DomainTabItem,
-} from "@/components/ui/ResponsiveDomainTabStrip";
 import { FormInput, FormSelect } from "@/components/ui/FormControls";
 
 type TabFilter = "ALL" | "SCHEDULED" | "COMPLETED" | "IN_PROGRESS" | "EXCEPTIONS";
@@ -82,18 +78,6 @@ export function EvvVisitsWorkspace() {
   }, []);
 
   const kpis = useMemo(() => calculateEvvKpis(visits), [visits]);
-
-  // Tab definitions for ResponsiveDomainTabStrip
-  const domainTabs: DomainTabItem<TabFilter>[] = useMemo(
-    () => [
-      { id: "ALL", label: "ALL VISITS", badge: String(kpis.totalVisits), minWidth: 130 },
-      { id: "IN_PROGRESS", label: "IN PROGRESS", badge: String(kpis.inProgress), minWidth: 140 },
-      { id: "COMPLETED", label: "COMPLETED", badge: String(kpis.completed), minWidth: 136 },
-      { id: "SCHEDULED", label: "SCHEDULED", badge: String(kpis.scheduled), minWidth: 132 },
-      { id: "EXCEPTIONS", label: "EXCEPTIONS", badge: String(kpis.exceptions), minWidth: 138 },
-    ],
-    [kpis]
-  );
 
   const handleTabChange = (tab: TabFilter) => {
     setActiveTab(tab);
@@ -388,16 +372,6 @@ export function EvvVisitsWorkspace() {
 
       {/* C. Visit Monitoring Workspace */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        {/* Dynamic Responsive Tab Strip */}
-        <div className="p-2 sm:p-3 border-b border-slate-100 bg-slate-50/40">
-          <ResponsiveDomainTabStrip<TabFilter>
-            tabs={domainTabs}
-            activeTab={activeTab}
-            onSelectTab={handleTabChange}
-            ariaLabel="EVV Visit Status Tabs"
-          />
-        </div>
-
         {/* Search & Filter Bar with Standardized Form Controls */}
         <div className="p-4 border-b border-slate-100 bg-slate-50/20 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
@@ -423,6 +397,21 @@ export function EvvVisitsWorkspace() {
 
           {/* Secondary Filters */}
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Visit Status Filter Dropdown */}
+            <div className="w-44">
+              <FormSelect
+                value={activeTab}
+                onChange={(e) => handleTabChange(e.target.value as TabFilter)}
+              >
+                <option value="ALL">All Visits ({kpis.totalVisits})</option>
+                <option value="IN_PROGRESS">In Progress ({kpis.inProgress})</option>
+                <option value="COMPLETED">Completed ({kpis.completed})</option>
+                <option value="SCHEDULED">Scheduled ({kpis.scheduled})</option>
+                <option value="EXCEPTIONS">Exceptions ({kpis.exceptions})</option>
+              </FormSelect>
+            </div>
+
+            {/* Service Filter Dropdown */}
             <div className="w-44">
               <FormSelect
                 value={selectedService}
@@ -440,6 +429,7 @@ export function EvvVisitsWorkspace() {
               </FormSelect>
             </div>
 
+            {/* Verification Status Filter Dropdown */}
             <div className="w-44">
               <FormSelect
                 value={selectedVerificationStatus}
@@ -458,6 +448,7 @@ export function EvvVisitsWorkspace() {
             </div>
 
             {(searchQuery ||
+              activeTab !== "ALL" ||
               selectedService !== "ALL" ||
               selectedVerificationStatus !== "ALL" ||
               activeExceptionType) && (
@@ -479,19 +470,16 @@ export function EvvVisitsWorkspace() {
               <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
                 <th className="py-3 px-4">Visit ID</th>
                 <th className="py-3 px-4">Caregiver</th>
-                <th className="py-3 px-4">Client</th>
-                <th className="py-3 px-4">Service</th>
                 <th className="py-3 px-4">Scheduled</th>
                 <th className="py-3 px-4">Actual Time</th>
                 <th className="py-3 px-4">Visit Status</th>
-                <th className="py-3 px-4">Verification</th>
                 <th className="py-3 px-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs text-slate-800">
               {paginatedVisits.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                     <p className="font-semibold text-sm text-slate-700">No visits match your criteria</p>
                     <p className="text-xs text-slate-400 mt-1">
@@ -523,12 +511,12 @@ export function EvvVisitsWorkspace() {
                       className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
                       {/* Visit ID */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-xs text-slate-900 whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-medium text-xs text-slate-600 whitespace-nowrap">
                         {visit.id}
                       </td>
 
                       {/* Caregiver Name (Single-line primary value) */}
-                      <td className="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-medium text-slate-600 whitespace-nowrap">
                         <Link
                           href={`/admin/caregivers/${visit.caregiverId}/`}
                           onClick={(e) => e.stopPropagation()}
@@ -538,40 +526,19 @@ export function EvvVisitsWorkspace() {
                         </Link>
                       </td>
 
-                      {/* Client Name (Single-line primary value) */}
-                      <td className="py-3.5 px-4 font-medium text-slate-800 whitespace-nowrap">
-                        <Link
-                          href={`/admin/clients/${visit.clientId}/`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="hover:text-[#3D6B22] hover:underline"
-                        >
-                          {visit.clientName}
-                        </Link>
-                      </td>
-
-                      {/* Service */}
-                      <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap">
-                        {visit.serviceName}
-                      </td>
-
                       {/* Scheduled Time */}
                       <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap font-medium">
                         {scheduledStr}
                       </td>
 
                       {/* Actual EVV Time */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-800">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-600">
                         {actualStr}
                       </td>
 
                       {/* Visit Status */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         {renderVisitStatusBadge(visit.visitStatus)}
-                      </td>
-
-                      {/* Verification Status */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        {renderVerificationStatusBadge(visit.verificationStatus)}
                       </td>
 
                       {/* Action */}
@@ -616,16 +583,13 @@ export function EvvVisitsWorkspace() {
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-xs text-slate-900">{visit.id}</span>
-                  <div className="flex items-center gap-1.5">
+                  <div>
                     {renderVisitStatusBadge(visit.visitStatus)}
-                    {renderVerificationStatusBadge(visit.verificationStatus)}
                   </div>
                 </div>
 
                 <div className="text-xs space-y-0.5">
                   <div className="font-bold text-slate-900">{visit.caregiverName}</div>
-                  <div className="text-slate-600">Client: {visit.clientName}</div>
-                  <div className="text-slate-500">{visit.serviceName}</div>
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">

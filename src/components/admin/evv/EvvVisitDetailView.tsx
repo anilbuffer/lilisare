@@ -368,6 +368,95 @@ export function EvvVisitDetailView({ visitId }: EvvVisitDetailViewProps) {
         </div>
       </div>
 
+      {/* Primary Triad Details: Client, Service & Verification (Moved from front table to dedicated details view) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
+        {/* 1. Client Card */}
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-4.5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
+          <div className="flex items-center justify-between text-xs mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Client Information
+            </span>
+            <Link
+              href={`/admin/clients/${visit.clientId}/`}
+              className="text-xs font-semibold text-[#3D6B22] hover:underline inline-flex items-center gap-1"
+            >
+              <span>Profile</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
+            {visit.clientName}
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-xs text-slate-500 font-mono">
+            <span>ID: {visit.clientId}</span>
+            <span>•</span>
+            <span>Medicaid: {visit.clientMedicaidId}</span>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2 truncate">
+            {visit.clientAddress}
+          </p>
+        </div>
+
+        {/* 2. Service Card */}
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-4.5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
+          <div className="flex items-center justify-between text-xs mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Service Information
+            </span>
+            <span className="font-mono text-[11px] font-semibold text-[#1E5622] bg-[#E8F2E4] px-2 py-0.5 rounded">
+              {visit.serviceCode}
+            </span>
+          </div>
+          <div className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
+            {visit.serviceName}
+          </div>
+          <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
+            <span>Payer: {visit.payerName}</span>
+            <span className="font-semibold text-slate-700">${visit.billRate.toFixed(2)}/hr</span>
+          </div>
+          <p className="text-[11px] text-slate-500 mt-2">
+            Authorization: <span className="font-mono font-medium text-slate-700">{visit.authorizationNumber}</span>
+          </p>
+        </div>
+
+        {/* 3. Verification Card */}
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-4.5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
+          <div className="flex items-center justify-between text-xs mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              EVV Verification
+            </span>
+            <span className="text-[11px] font-semibold text-slate-500">
+              {verifiedCount} / 6 Elements
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                visit.verificationStatus === "Verified"
+                  ? "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20"
+                  : visit.verificationStatus === "Exception"
+                  ? "bg-amber-100 text-amber-800 border-amber-300"
+                  : visit.verificationStatus === "Under Review"
+                  ? "bg-purple-50 text-purple-700 border-purple-200"
+                  : visit.verificationStatus === "Correction Required"
+                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                  : "bg-slate-100 text-slate-600 border-slate-200"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {visit.verificationStatus}
+            </span>
+          </div>
+          <div className="mt-2 text-xs text-slate-500 flex items-center justify-between">
+            <span>Capture: {visit.sixElements.locationOfService.verified ? "Mobile GPS" : "Flagged"}</span>
+            <span className="font-medium text-slate-600">{visit.sixElements.timeBeginsAndEnds.verified ? "Times Match" : "Discrepancy"}</span>
+          </div>
+          <p className="text-[11px] text-slate-400 mt-1">
+            21st Century Cures Act Compliant
+          </p>
+        </div>
+      </div>
+
       {/* Domain Navigation Tabs (Space-Aware Dynamic Responsive Tab Strip) */}
       <div className="bg-white rounded-xl border border-slate-200 p-2 sm:p-3 shadow-2xs">
         <ResponsiveDomainTabStrip<DetailDomainTab>

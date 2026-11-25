@@ -34,10 +34,13 @@ import {
   ArrowUp,
   ArrowDown,
   User,
+  Trash2,
 } from "lucide-react";
 import { CaregiverRecord } from "@/types/caregiver";
 import { getCaregiversFromStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
-import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
+import { subscribeToIntakeSync, deleteCaregiverFromStorage } from "@/lib/intake/intakeSync";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
+import { Modal } from "@/components/ui/Modal";
 import {
   SEED_ADMIN_CAREGIVERS,
   AdminCaregiverItem,
@@ -74,6 +77,7 @@ function getStatusStyle(status: string) {
 export function AdminCaregiverDirectory() {
   const router = useRouter();
   const pathname = usePathname();
+  const perms = usePortalPermissions();
 
   // View state: 'list' or 'grid' (default list per reference screenshot)
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -81,6 +85,7 @@ export function AdminCaregiverDirectory() {
   // Caregivers state
   const [items, setItems] = useState<AdminCaregiverItem[]>(SEED_ADMIN_CAREGIVERS);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AdminCaregiverItem | null>(null);
 
   // Sorting
   const [sortField, setSortField] = useState<"name" | "id">("name");
@@ -110,134 +115,103 @@ export function AdminCaregiverDirectory() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
-  // Sync with storage on mount
+  // Sync with storage on mount & live intake/admin events
   useEffect(() => {
     setIsLoaded(true);
-    try {
-      const stored = getCaregiversFromStorage();
-      if (Array.isArray(stored) && stored.length > 0) {
-        const mappedFromStorage: AdminCaregiverItem[] = stored.map((cg) => {
-          const seedMatch = SEED_ADMIN_CAREGIVERS.find(
-            (s) => s.id === cg.id || s.numericId === cg.id
-          );
-          const role =
-            seedMatch?.role ||
-            (cg.type === "Family Caregiver"
-              ? "Family Caregiver"
-              : cg.type === "Live-In Caregiver"
-                ? "Live-In Attendant"
-                : "Caregiver Specialist");
 
-          const rating = seedMatch?.rating || 4.9;
-          const complianceRate =
-            seedMatch?.complianceRate ||
-            (cg.verificationChecklist?.training === "Complete" ? 98 : 75);
-          const activePatients =
-            seedMatch?.activePatients ?? (cg.assignmentStatus === "Assigned" ? 1 : 0);
-
-          let mappedStatus: AdminCaregiverItem["status"] = "Active";
-          if (seedMatch?.status) {
-            mappedStatus = seedMatch.status;
-          } else if (cg.status === "Active") {
-            mappedStatus = "Active";
-          } else if (cg.status === "Onboarding" || cg.status === "Pending") {
-            mappedStatus = "Onboarding";
-          } else if (cg.status === "On Hold") {
-            mappedStatus = "On Hold";
-          } else {
-            mappedStatus = "Inactive";
-          }
-
-          const nameParts = cg.name.trim().split(" ");
-          const sortName =
-            seedMatch?.sortName ||
-            (nameParts.length > 1
-              ? `${nameParts[nameParts.length - 1]}, ${nameParts.slice(0, -1).join(" ")}`
-              : cg.name);
-
-          return {
-            id: cg.id,
-            numericId: seedMatch?.numericId || cg.id.replace(/\D/g, "") || "101",
-            name: cg.name,
-            sortName,
-            role,
-            status: mappedStatus,
-            extStatus: seedMatch?.extStatus || "Active",
-            administrator: seedMatch?.administrator || "Mackenzie Bertelsman",
-            gender: seedMatch?.gender || cg.personalInfo?.gender || "—",
-            classes: seedMatch?.classes || [role],
-            homePhone: seedMatch?.homePhone || cg.personalInfo?.secondaryPhone || "555-555-5555 (h)",
-            mobilePhone: seedMatch?.mobilePhone || cg.personalInfo?.phone || "555-555-5555 (m)",
-            rating,
-            complianceRate,
-            activePatients,
-            lastActive: seedMatch?.lastActive || "Today",
-            phone: cg.personalInfo?.phone || "(541) 555-0199",
-            email: cg.personalInfo?.email || seedMatch?.email || "caregiver@lilisare.health",
-            location:
-              seedMatch?.location ||
-              `${cg.personalInfo?.address?.street || "5525 Clovercrest Dr."}, ${cg.personalInfo?.address?.city || "Brentwood"}, ${cg.personalInfo?.address?.state || "TN"}`,
-            age: seedMatch?.age || 38,
-            branch: cg.branch || "Brentwood Hub",
-            classification: cg.employmentClassification || "W-2",
-          };
-        });
-
-        // Ensure all seed reference caregivers from Image 2 are present
-        const missingSeeds = SEED_ADMIN_CAREGIVERS.filter(
-          (s) => !mappedFromStorage.some((m) => m.id === s.id || m.numericId === s.numericId)
+    const buildAdminCaregiverItems = (stored: CaregiverRecord[]): AdminCaregiverItem[] => {
+      const mappedFromStorage: AdminCaregiverItem[] = stored.map((cg) => {
+        const seedMatch = SEED_ADMIN_CAREGIVERS.find(
+          (s) => s.id === cg.id || s.numericId === cg.id
         );
-        setItems([...mappedFromStorage, ...missingSeeds]);
-      } else {
+        const role =
+          seedMatch?.role ||
+          (cg.type === "Family Caregiver"
+            ? "Family Caregiver"
+            : cg.type === "Live-In Caregiver"
+              ? "Live-In Attendant"
+              : "Caregiver Specialist");
+
+        const rating = seedMatch?.rating || 4.9;
+        const complianceRate =
+          seedMatch?.complianceRate ||
+          (cg.verificationChecklist?.training === "Complete" ? 98 : 75);
+        const activePatients =
+          seedMatch?.activePatients ?? (cg.assignmentStatus === "Assigned" ? 1 : 0);
+
+        let mappedStatus: AdminCaregiverItem["status"] = "Active";
+        if (cg.status === "Active") mappedStatus = "Active";
+        else if (cg.status === "Onboarding" || cg.status === "Pending") mappedStatus = "Onboarding";
+        else if (cg.status === "On Hold") mappedStatus = "On Hold";
+        else if (cg.status === "Inactive") mappedStatus = "Inactive";
+        else if (seedMatch?.status) mappedStatus = seedMatch.status;
+
+        const nameParts = cg.name.trim().split(" ");
+        const sortName =
+          seedMatch?.sortName ||
+          (nameParts.length > 1
+            ? `${nameParts[nameParts.length - 1]}, ${nameParts.slice(0, -1).join(" ")}`
+            : cg.name);
+
+        return {
+          id: cg.id,
+          numericId: seedMatch?.numericId || cg.id.replace(/\D/g, "") || "101",
+          name: cg.name,
+          sortName,
+          role,
+          status: mappedStatus,
+          extStatus: seedMatch?.extStatus || (mappedStatus === "Active" ? "Active" : "In Review"),
+          administrator: seedMatch?.administrator || "LiliSare Care Ops",
+          gender: seedMatch?.gender || cg.personalInfo?.gender || "—",
+          classes: seedMatch?.classes || [role],
+          homePhone: seedMatch?.homePhone || cg.personalInfo?.secondaryPhone || "555-555-5555",
+          mobilePhone: seedMatch?.mobilePhone || cg.personalInfo?.phone || "555-555-5555",
+          rating,
+          complianceRate,
+          activePatients,
+          lastActive: seedMatch?.lastActive || "Today",
+          phone: cg.personalInfo?.phone || "(541) 555-0199",
+          email: cg.personalInfo?.email || seedMatch?.email || "caregiver@lilisare.health",
+          location:
+            seedMatch?.location ||
+            `${cg.personalInfo?.address?.street || "5525 Clovercrest Dr."}, ${cg.personalInfo?.address?.city || "Brentwood"}, ${cg.personalInfo?.address?.state || "TN"}`,
+          age: seedMatch?.age || 38,
+          branch: cg.branch || "Brentwood Hub",
+          classification: cg.employmentClassification || "W-2",
+        };
+      });
+
+      let deletedIds: string[] = [];
+      try {
+        const rawDel = localStorage.getItem("lilisare_deleted_admin_caregivers_v1");
+        if (rawDel) deletedIds = JSON.parse(rawDel);
+      } catch {
+        // ignore
+      }
+
+      const missingSeeds = SEED_ADMIN_CAREGIVERS.filter(
+        (s) =>
+          !deletedIds.includes(s.id) &&
+          !mappedFromStorage.some((m) => m.id === s.id || m.numericId === s.numericId)
+      );
+      return [...mappedFromStorage, ...missingSeeds];
+    };
+
+    const loadCaregivers = () => {
+      try {
+        const stored = getCaregiversFromStorage();
+        if (Array.isArray(stored) && stored.length > 0) {
+          setItems(buildAdminCaregiverItems(stored));
+        } else {
+          setItems(SEED_ADMIN_CAREGIVERS);
+        }
+      } catch {
         setItems(SEED_ADMIN_CAREGIVERS);
       }
-    } catch {
-      setItems(SEED_ADMIN_CAREGIVERS);
-    }
+    };
 
-    const unsubscribe = subscribeToIntakeSync(() => {
-      const freshStored = getCaregiversFromStorage();
-      if (Array.isArray(freshStored) && freshStored.length > 0) {
-        setItems((prev) => {
-          const newOnes = freshStored.filter((f) => !prev.some((p) => p.id === f.id));
-          if (newOnes.length === 0) return prev;
-          const mappedNew: AdminCaregiverItem[] = newOnes.map((cg) => {
-            const nameParts = cg.name.trim().split(" ");
-            const sortName =
-              nameParts.length > 1
-                ? `${nameParts[nameParts.length - 1]}, ${nameParts.slice(0, -1).join(" ")}`
-                : cg.name;
-            return {
-              id: cg.id,
-              numericId: cg.id.replace(/\D/g, "") || "101",
-              name: cg.name,
-              sortName,
-              role: cg.type || "Caregiver",
-              status: "Active",
-              extStatus: "Active",
-              administrator: "Mackenzie Bertelsman",
-              gender: cg.personalInfo?.gender || "—",
-              classes: [cg.type || "Certified Nurse Aide"],
-              homePhone: "555-555-5555 (h)",
-              mobilePhone: cg.personalInfo?.phone || "555-555-5555 (m)",
-              rating: 4.8,
-              complianceRate: 95,
-              activePatients: cg.assignmentStatus === "Assigned" ? 1 : 0,
-              lastActive: "Today",
-              phone: cg.personalInfo?.phone || "(541) 555-0199",
-              email: cg.personalInfo?.email || "caregiver@lilisare.health",
-              location: "5525 Clovercrest Dr. , Brentwood, TN, 37027",
-              age: 35,
-              branch: cg.branch || "Brentwood Hub",
-              classification: cg.employmentClassification || "W-2",
-            };
-          });
-          return [...mappedNew, ...prev];
-        });
-      }
-    });
-
-    return () => unsubscribe();
+    loadCaregivers();
+    return subscribeToIntakeSync(loadCaregivers);
   }, []);
 
   // Handle outside click for filter dropdowns
@@ -840,14 +814,25 @@ export function AdminCaregiverDirectory() {
 
                       {/* Actions */}
                       <td className="py-4 px-4 sm:px-6 text-right">
-                        <Link
-                          href={`/admin/caregivers/${cg.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-                        >
-                          <span>View Profile</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                        </Link>
+                        <div className="inline-flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <Link
+                            href={`/admin/caregivers/${cg.id}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                          >
+                            <span>View Profile</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                          </Link>
+                          {perms.caregivers.canDelete && (
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(cg)}
+                              title="Delete Caregiver (Agency Admin)"
+                              className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -1019,6 +1004,57 @@ export function AdminCaregiverDirectory() {
             }}
           />
         </>
+      )}
+      {/* Delete Caregiver Confirmation Modal (Agency Admin Only) */}
+      {perms.caregivers.canDelete && (
+        <Modal
+          isOpen={Boolean(deleteTarget)}
+          onClose={() => setDeleteTarget(null)}
+          title="Delete Caregiver Record"
+          description="Permanent deletion removes this caregiver across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{deleteTarget?.name}</strong> (
+            {deleteTarget?.id})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!deleteTarget) return;
+                deleteCaregiverFromStorage(deleteTarget.id);
+                try {
+                  const rawDel = localStorage.getItem("lilisare_deleted_admin_caregivers_v1");
+                  const prevDel: string[] = rawDel ? JSON.parse(rawDel) : [];
+                  if (!prevDel.includes(deleteTarget.id)) {
+                    localStorage.setItem(
+                      "lilisare_deleted_admin_caregivers_v1",
+                      JSON.stringify([...prevDel, deleteTarget.id])
+                    );
+                  }
+                } catch {
+                  // ignore
+                }
+                setItems((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+                toast.success(`Caregiver ${deleteTarget.name} removed.`);
+                setDeleteTarget(null);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

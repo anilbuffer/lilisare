@@ -29,6 +29,7 @@ import {
   saveIntakeInquiriesToStorage,
   getIntakeInquiriesFromStorage,
   convertInquiryToLiveEntities,
+  syncInquiryStageToAdmin,
 } from "@/lib/intake/intakeSync";
 
 interface InquiryManagementWorkspaceProps {
@@ -286,6 +287,7 @@ export function InquiryManagementWorkspace({
       );
       setItems(updated);
       saveIntakeInquiriesToStorage(updated);
+      syncInquiryStageToAdmin(inquiryId, targetStage);
       setActiveMenuId(null);
       toast.success(`Moved ${targetItem.familyName} to "${targetStage}"`);
     }

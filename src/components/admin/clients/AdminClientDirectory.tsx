@@ -24,10 +24,14 @@ import {
   ExternalLink,
   ShieldCheck,
   Home,
+  Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { ClientRecord } from "@/types/client";
 import { getClientsFromStorage } from "@/lib/clients/mockData";
-import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
+import { subscribeToIntakeSync, deleteClientFromStorage } from "@/lib/intake/intakeSync";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
+import { Modal } from "@/components/ui/Modal";
 
 // Unified Client Model with clinical diagnosis & risk level for Agency Admin
 export interface AdminClientItem {
@@ -42,28 +46,28 @@ export interface AdminClientItem {
   householdCode?: string;
 }
 
-// Reference clients matching the user's provided screenshots + existing LiliSare data
+// Reference metadata enrichment for synchronized LiliSare clients
 const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
   {
     id: "CL-1002",
-    name: "Eleanor Ruth Whitfield",
-    age: 78,
-    gender: "Female",
+    name: "Marcus Whitfield",
+    age: 72,
+    gender: "Male",
     status: "Active",
     riskLevel: "High Risk",
     primaryDiagnosis: "s/p right hip ORIF, early-stage vascular dementia",
-    householdName: "Whitfield Residence",
+    householdName: "Whitfield Household",
     householdCode: "HH-1002",
   },
   {
     id: "CL-1004",
-    name: "John Doe",
-    age: 76,
+    name: "Jackson Vance",
+    age: 6,
     gender: "Male",
-    status: "Hospitalized",
-    riskLevel: "High Risk",
-    primaryDiagnosis: "Post-Stroke Recovery",
-    householdName: "Doe Household",
+    status: "Onboarding",
+    riskLevel: "Medium Risk",
+    primaryDiagnosis: "Developmental Mobility Delay, Sensory Support",
+    householdName: "Vance Household",
     householdCode: "HH-1004",
   },
   {
@@ -156,6 +160,7 @@ function getInitials(name: string): string {
 
 export function AdminClientDirectory() {
   const router = useRouter();
+  const perms = usePortalPermissions();
 
   // View state: 'list' or 'grid'
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -163,6 +168,7 @@ export function AdminClientDirectory() {
   // Client items state
   const [items, setItems] = useState<AdminClientItem[]>(SEED_ADMIN_CLIENTS);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AdminClientItem | null>(null);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -182,92 +188,61 @@ export function AdminClientDirectory() {
   const statusDropdownRef = useRef<HTMLDivElement>(null);
   const riskDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Sync with storage and intake events
+  // Sync with live storage and intake events
   useEffect(() => {
     setIsLoaded(true);
-    try {
-      const stored = getClientsFromStorage();
-      if (Array.isArray(stored) && stored.length > 0) {
-        // Map stored records into admin presentation format
-        const mapped: AdminClientItem[] = stored.map((c) => {
-          // Check if seed has a diagnosis for this ID
-          const seedMatch = SEED_ADMIN_CLIENTS.find((s) => s.id === c.id);
-          const diagnosis =
-            seedMatch?.primaryDiagnosis ||
-            c.carePlan?.careNeeds?.[0] ||
-            c.carePlan?.program ||
-            "Comprehensive In-Home Support";
 
-          let risk: "High Risk" | "Medium Risk" | "Low Risk" = "Low Risk";
-          if (seedMatch) {
-            risk = seedMatch.riskLevel;
-          } else if (c.readiness?.overallScore && c.readiness.overallScore < 70) {
-            risk = "High Risk";
-          } else if (c.readiness?.documents === "Review needed" || c.status === "On Hold") {
-            risk = "Medium Risk";
-          }
+    const loadSyncedClients = () => {
+      try {
+        const stored = getClientsFromStorage();
+        if (Array.isArray(stored) && stored.length > 0) {
+          const mapped: AdminClientItem[] = stored.map((c) => {
+            const seedMatch = SEED_ADMIN_CLIENTS.find((s) => s.id === c.id);
+            const diagnosis =
+              seedMatch?.primaryDiagnosis ||
+              c.carePlan?.careNeeds?.[0] ||
+              c.carePlan?.program ||
+              "Comprehensive In-Home Support";
 
-          let mappedStatus: AdminClientItem["status"] = "Active";
-          if (seedMatch?.status) {
-            mappedStatus = seedMatch.status;
-          } else if (c.status === "Active") {
-            mappedStatus = "Active";
-          } else if (c.status === "Discharged") {
-            mappedStatus = "Discharged";
-          } else if (c.status === "Onboarding") {
-            mappedStatus = "Onboarding";
-          }
+            let risk: "High Risk" | "Medium Risk" | "Low Risk" = "Low Risk";
+            if (c.readiness?.overallScore && c.readiness.overallScore < 70) {
+              risk = "High Risk";
+            } else if (c.readiness?.documents === "Review needed" || c.status === "On Hold") {
+              risk = "Medium Risk";
+            } else if (seedMatch) {
+              risk = seedMatch.riskLevel;
+            }
 
-          return {
-            id: c.id,
-            name: c.name,
-            age: c.age || 65,
-            gender: c.gender || "Female",
-            status: mappedStatus,
-            riskLevel: risk,
-            primaryDiagnosis: diagnosis,
-            householdName: c.household?.name,
-            householdCode: c.household?.code,
-          };
-        });
+            let mappedStatus: AdminClientItem["status"] = "Active";
+            if (c.status === "Discharged") mappedStatus = "Discharged";
+            else if (c.status === "Onboarding") mappedStatus = "Onboarding";
+            else if (c.status === "On Hold") mappedStatus = "Hospitalized";
+            else if (c.status === "Active") mappedStatus = "Active";
+            else if (seedMatch?.status) mappedStatus = seedMatch.status;
 
-        // Ensure all reference items are present in case stored is partial
-        const missingSeeds = SEED_ADMIN_CLIENTS.filter(
-          (s) => !mapped.some((m) => m.id === s.id)
-        );
-        setItems([...mapped, ...missingSeeds]);
-      } else {
+            return {
+              id: c.id,
+              name: c.name,
+              age: c.age || 65,
+              gender: c.gender || "Female",
+              status: mappedStatus,
+              riskLevel: risk,
+              primaryDiagnosis: diagnosis,
+              householdName: c.household?.name,
+              householdCode: c.household?.code,
+            };
+          });
+          setItems(mapped);
+        } else {
+          setItems([]);
+        }
+      } catch {
         setItems(SEED_ADMIN_CLIENTS);
       }
-    } catch {
-      setItems(SEED_ADMIN_CLIENTS);
-    }
+    };
 
-    const unsubscribe = subscribeToIntakeSync(() => {
-      // Re-trigger load if intake converts a lead into a client
-      const freshStored = getClientsFromStorage();
-      if (Array.isArray(freshStored) && freshStored.length > 0) {
-        // preserve enriched items
-        setItems((prev) => {
-          const newOnes = freshStored.filter((f) => !prev.some((p) => p.id === f.id));
-          if (newOnes.length === 0) return prev;
-          const mappedNew: AdminClientItem[] = newOnes.map((c) => ({
-            id: c.id,
-            name: c.name,
-            age: c.age || 65,
-            gender: c.gender || "Female",
-            status: "Active",
-            riskLevel: "Medium Risk",
-            primaryDiagnosis: c.carePlan?.program || "Personal Care Assistance",
-            householdName: c.household?.name,
-            householdCode: c.household?.code,
-          }));
-          return [...mappedNew, ...prev];
-        });
-      }
-    });
-
-    return () => unsubscribe();
+    loadSyncedClients();
+    return subscribeToIntakeSync(loadSyncedClients);
   }, []);
 
   // Handle outside click to close dropdowns
@@ -424,8 +399,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("ACTIVE")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ACTIVE"
-              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-              : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -443,8 +418,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("HIGH_RISK")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HIGH_RISK"
-              ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
-              : "border-slate-200 shadow-2xs hover:border-rose-300 hover:shadow-md"
+            ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
+            : "border-slate-200 shadow-2xs hover:border-rose-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -462,8 +437,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("HOSPITALIZED")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HOSPITALIZED"
-              ? "border-amber-500 shadow-md ring-2 ring-amber-500/15"
-              : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
+            ? "border-amber-500 shadow-md ring-2 ring-amber-500/15"
+            : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -481,8 +456,8 @@ export function AdminClientDirectory() {
         <div
           onClick={() => handleKpiCardClick("COMPLETED")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "COMPLETED"
-              ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-              : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
@@ -786,14 +761,25 @@ export function AdminClientDirectory() {
 
                       {/* Actions */}
                       <td className="py-4 px-4 sm:px-6 text-right">
-                        <Link
-                          href={`/admin/clients/${client.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-                        >
-                          <span>View Profile</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                        </Link>
+                        <div className="inline-flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <Link
+                            href={`/admin/clients/${client.id}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                          >
+                            <span>View Profile</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                          </Link>
+                          {perms.clients.canDelete && (
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(client)}
+                              title="Delete Client (Agency Admin)"
+                              className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -992,6 +978,46 @@ export function AdminClientDirectory() {
             </button>
           </div>
         </div>
+      )}
+      {/* Delete Client Confirmation Modal (Agency Admin Only) */}
+      {perms.clients.canDelete && (
+        <Modal
+          isOpen={Boolean(deleteTarget)}
+          onClose={() => setDeleteTarget(null)}
+          title="Delete Client Record"
+          description="Permanent deletion removes this client across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{deleteTarget?.name}</strong> (
+            {deleteTarget?.id})? For clinical/operational closures, prefer{" "}
+            <strong>Discharge</strong> inside the client profile.
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!deleteTarget) return;
+                deleteClientFromStorage(deleteTarget.id);
+                setItems((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+                toast.success(`Client ${deleteTarget.name} removed.`);
+                setDeleteTarget(null);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

@@ -394,10 +394,10 @@ export function ClientContextualDrawer({
                 if (onEditClient) {
                   onEditClient(client);
                 } else {
-                  router.push(`/clients/${client.id}/edit`);
+                  router.push(`${getClientDetailPath(client.id)}/edit`);
                 }
               }}
-              className="flex items-center justify-center gap-1.5 bg-white border border-slate-300 hover:border-slate-400 text-slate-700 py-2.5 px-4 rounded-xl text-xs font-bold transition-colors"
+              className="flex items-center justify-center gap-1.5 bg-white border border-slate-300 hover:border-slate-400 text-slate-700 py-2.5 px-4 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               <Edit3 className="w-3.5 h-3.5 text-slate-500" />
               <span>Edit Client</span>

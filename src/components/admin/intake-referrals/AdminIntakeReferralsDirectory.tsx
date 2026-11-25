@@ -29,8 +29,15 @@ import {
   Calendar,
   RotateCcw,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/Modal";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
+import {
+  subscribeToIntakeSync,
+  deleteReferralAcrossStores,
+} from "@/lib/intake/intakeSync";
 import {
   AdminIntakeReferralItem,
   SEED_ADMIN_REFERRALS,
@@ -50,10 +57,12 @@ function getInitials(name: string): string {
 
 export function AdminIntakeReferralsDirectory() {
   const router = useRouter();
+  const perms = usePortalPermissions();
 
   // State
   const [items, setItems] =
     useState<AdminIntakeReferralItem[]>(SEED_ADMIN_REFERRALS);
+  const [deleteTarget, setDeleteTarget] = useState<AdminIntakeReferralItem | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -76,12 +85,16 @@ export function AdminIntakeReferralsDirectory() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Synchronize with local storage on mount
+  // Synchronize with local storage & cross-portal intake events
   useEffect(() => {
-    const stored = getAdminReferralsFromStorage();
-    if (stored && stored.length > 0) {
-      setItems(stored);
-    }
+    const load = () => {
+      const stored = getAdminReferralsFromStorage();
+      if (stored && stored.length > 0) {
+        setItems(stored);
+      }
+    };
+    load();
+    return subscribeToIntakeSync(load);
   }, []);
 
   // New Referral Form State
@@ -116,7 +129,7 @@ export function AdminIntakeReferralsDirectory() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // KPI Calculations
+  // KPI Calculations (Computed dynamically from synchronized records)
   const kpiData = useMemo(() => {
     const total = items.length;
     const assessmentCount = items.filter(
@@ -127,12 +140,17 @@ export function AdminIntakeReferralsDirectory() {
       (r) => r.status === "Ready for Staffing"
     ).length;
     const enrolledCount = items.filter((r) => r.status === "Enrolled").length;
+    const conversionRate = total > 0 ? `${((enrolledCount / total) * 100).toFixed(1)}%` : "0.0%";
+    const avgDaysVal =
+      total > 0
+        ? (items.reduce((sum, r) => sum + (r.daysInPipeline || 0), 0) / total).toFixed(1)
+        : "0.0";
 
     return {
-      total: 42, // Total historical/platform pipeline
-      conversionRate: "78.5%",
+      total,
+      conversionRate,
       assessmentCount,
-      avgDays: "5.4 days",
+      avgDays: `${avgDaysVal} days`,
       urgentCount,
       readyCount,
       enrolledCount,
@@ -429,11 +447,10 @@ export function AdminIntakeReferralsDirectory() {
               <button
                 type="button"
                 onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                  statusFilter !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                }`}
+                className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${statusFilter !== "ALL"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
+                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                  }`}
               >
                 <Filter className="w-3.5 h-3.5 text-slate-500" />
                 <span>
@@ -464,11 +481,10 @@ export function AdminIntakeReferralsDirectory() {
                         setCurrentPage(1);
                         setIsStatusDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${
-                        statusFilter === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
-                      }`}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${statusFilter === option.value
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
+                        }`}
                     >
                       <span>{option.label}</span>
                       {statusFilter === option.value && (
@@ -485,11 +501,10 @@ export function AdminIntakeReferralsDirectory() {
               <button
                 type="button"
                 onClick={() => setIsPriorityDropdownOpen(!isPriorityDropdownOpen)}
-                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${
-                  priorityFilter !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
+                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${priorityFilter !== "ALL"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
               >
                 <span>{priorityFilter === "ALL" ? "Risk Level" : priorityFilter}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
@@ -513,11 +528,10 @@ export function AdminIntakeReferralsDirectory() {
                         setCurrentPage(1);
                         setIsPriorityDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${
-                        priorityFilter === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
-                      }`}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${priorityFilter === option.value
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
+                        }`}
                     >
                       <span>{option.label}</span>
                       {priorityFilter === option.value && (
@@ -546,11 +560,10 @@ export function AdminIntakeReferralsDirectory() {
                 type="button"
                 onClick={() => setViewMode("list")}
                 title="List View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  viewMode === "list"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "list"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
               >
                 <ListIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">List</span>
@@ -559,11 +572,10 @@ export function AdminIntakeReferralsDirectory() {
                 type="button"
                 onClick={() => setViewMode("grid")}
                 title="Grid View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
-                }`}
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
               >
                 <LayoutGrid className="w-4 h-4" />
                 <span className="hidden sm:inline">Grid</span>
@@ -581,7 +593,7 @@ export function AdminIntakeReferralsDirectory() {
             <table className="w-full text-left text-xs whitespace-nowrap">
               <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold">
                 <tr>
-                  <th className="px-6 py-4">Patient</th>
+                  <th className="px-6 py-4">Client</th>
                   <th className="px-6 py-4">Requested Services</th>
                   <th className="px-6 py-4">Priority</th>
                   <th className="px-6 py-4">Status</th>
@@ -660,13 +672,25 @@ export function AdminIntakeReferralsDirectory() {
 
                     {/* Action */}
                     <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <Link
-                        href={`/admin/intake-referrals/${ref.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#E8F2E4] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#1E5622] rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-                      >
-                        <span>Review</span>
-                        <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
-                      </Link>
+                      <div className="inline-flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/admin/intake-referrals/${ref.id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#E8F2E4] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#1E5622] rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                        >
+                          <span>Review</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                        </Link>
+                        {perms.referrals.canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(ref)}
+                            title="Delete Referral (Agency Admin)"
+                            className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -959,6 +983,45 @@ export function AdminIntakeReferralsDirectory() {
             </form>
           </div>
         </div>
+      )}
+      {/* 07. Delete Referral Confirmation Modal (Agency Admin Only) */}
+      {perms.referrals.canDelete && (
+        <Modal
+          isOpen={Boolean(deleteTarget)}
+          onClose={() => setDeleteTarget(null)}
+          title="Delete Intake Referral"
+          description="Permanent deletion removes this referral across both Intake and Admin directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete referral{" "}
+            <strong className="text-slate-900">{deleteTarget?.patientName}</strong> (
+            {deleteTarget?.id})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!deleteTarget) return;
+                deleteReferralAcrossStores(deleteTarget.id);
+                setItems((prev) => prev.filter((r) => r.id !== deleteTarget.id));
+                toast.success(`Referral ${deleteTarget.id} deleted.`);
+                setDeleteTarget(null);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

@@ -28,9 +28,13 @@ import {
   RefreshCw,
   CalendarPlus,
   Check,
+  Trash2,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { Modal } from "@/components/ui/Modal";
 import { toast } from "sonner";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
+import { deleteHouseholdFromStorage } from "@/lib/intake/intakeSync";
 import { HouseholdContactFamilyModal } from "./modals/HouseholdContactFamilyModal";
 import { HouseholdScheduleVisitModal } from "./modals/HouseholdScheduleVisitModal";
 
@@ -46,7 +50,9 @@ export function HouseholdDetailView({
   backLabel = "Back to Households Hub",
 }: HouseholdDetailViewProps) {
   const router = useRouter();
+  const perms = usePortalPermissions();
   const [household, setHousehold] = useState<Household>(initialHousehold);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "overview" | "family" | "authorizations" | "evv" | "timeline"
   >("overview");
@@ -173,6 +179,12 @@ export function HouseholdDetailView({
   };
 
   const handleStatusChange = (newStatus: Household["authStatus"]) => {
+    if (!perms.households.canApproveAuthorization) {
+      toast.error("Service authorization status overrides require Agency Admin approval.");
+      setIsStatusDropdownOpen(false);
+      return;
+    }
+
     const updated = {
       ...household,
       authStatus: newStatus,
@@ -267,15 +279,28 @@ export function HouseholdDetailView({
             <span>Schedule Visit</span>
           </button>
 
-          {/* Authorizations Primary CTA */}
-          <Link
-            href="/billing/authorizations"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer whitespace-nowrap"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-white" />
-            <span>Manage Auth</span>
-            <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-          </Link>
+          {/* Authorizations Primary CTA (Agency Admin Only) */}
+          {perms.households.canApproveAuthorization && (
+            <Link
+              href="/admin/authorizations"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] active:scale-[0.98] transition-all rounded-xl shadow-[0_4px_16px_rgba(61,107,34,0.25)] hover:shadow-[0_6px_24px_rgba(61,107,34,0.35)] cursor-pointer whitespace-nowrap"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-white" />
+              <span>Manage Auth</span>
+              <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+            </Link>
+          )}
+
+          {perms.households.canDelete && (
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -517,7 +542,7 @@ export function HouseholdDetailView({
               </div>
               <div className="space-y-2.5">
                 <Link
-                  href={`/clients/${household.client.id}`}
+                  href={`${perms.baseRoutePrefix}/clients/${household.client.id}`}
                   className="flex items-center justify-between p-3 rounded-xl border border-slate-200/70 hover:border-[#3D6B22]/50 hover:bg-[#F2F8EE]/40 transition-all text-xs font-semibold text-slate-800 group cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
@@ -532,7 +557,7 @@ export function HouseholdDetailView({
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 transition-all" />
                 </Link>
                 <Link
-                  href={`/caregivers/${household.primaryCaregiver.id}`}
+                  href={`${perms.baseRoutePrefix}/caregivers/${household.primaryCaregiver.id}`}
                   className="flex items-center justify-between p-3 rounded-xl border border-slate-200/70 hover:border-[#3D6B22]/50 hover:bg-[#F2F8EE]/40 transition-all text-xs font-semibold text-slate-800 group cursor-pointer"
                 >
                   <div className="flex items-center gap-2.5">
@@ -589,7 +614,7 @@ export function HouseholdDetailView({
 
             <div className="pt-3 border-t border-slate-100">
               <Link
-                href={`/clients/${household.client.id}`}
+                href={`${perms.baseRoutePrefix}/clients/${household.client.id}`}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3D6B22] hover:underline"
               >
                 <span>View Dedicated Client Page</span>
@@ -632,7 +657,7 @@ export function HouseholdDetailView({
 
             <div className="pt-3 border-t border-slate-100">
               <Link
-                href={`/caregivers/${household.primaryCaregiver.id}`}
+                href={`${perms.baseRoutePrefix}/caregivers/${household.primaryCaregiver.id}`}
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3D6B22] hover:underline"
               >
                 <span>View Dedicated Caregiver Page</span>
@@ -824,6 +849,43 @@ export function HouseholdDetailView({
         household={household}
         onConfirmSchedule={handleConfirmSchedule}
       />
+
+      {perms.households.canDelete && (
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          title="Delete Household Unit"
+          description="Permanent deletion removes this household across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{household.name}</strong> ({household.code})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                deleteHouseholdFromStorage(household.id);
+                setIsDeleteModalOpen(false);
+                toast.success(`Household ${household.name} deleted.`);
+                router.push(backHref);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

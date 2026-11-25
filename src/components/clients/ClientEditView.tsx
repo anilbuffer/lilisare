@@ -29,6 +29,7 @@ import { MOCK_HOUSEHOLDS } from "@/lib/households/mockData";
 import { ClientRecord, CareArrangementType, ClientStatus } from "@/types/client";
 import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
 interface ClientEditViewProps {
   clientId: string;
@@ -37,6 +38,7 @@ interface ClientEditViewProps {
 
 export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEditViewProps) {
   const router = useRouter();
+  const perms = usePortalPermissions();
   const [client, setClient] = useState<ClientRecord | null>(null);
 
   // Form states
@@ -123,6 +125,11 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const safeStatus: ClientStatus =
+      !perms.clients.canDischarge && status === "Discharged"
+        ? client.status
+        : status;
+
     const updated: ClientRecord = {
       ...client,
       name,
@@ -130,7 +137,7 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
       dob,
       gender,
       primaryLanguage,
-      status,
+      status: safeStatus,
       careType,
       primaryContact: {
         ...client.primaryContact,
@@ -160,12 +167,14 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
           }
           : null,
       },
-      authorization: {
-        ...client.authorization,
-        authNumber,
-        expiryDate: authExpiry,
-        payer: payerName,
-      },
+      authorization: perms.clients.canEditAuthorization
+        ? {
+          ...client.authorization,
+          authNumber,
+          expiryDate: authExpiry,
+          payer: payerName,
+        }
+        : client.authorization,
       updatedAtRelative: "Just now",
       activity: [
         {
@@ -271,7 +280,9 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
                 <option value="Active">Active (Receiving Care)</option>
                 <option value="Onboarding">Onboarding (Setup in Progress)</option>
                 <option value="On Hold">On Hold (Services Paused)</option>
-                <option value="Discharged">Discharged (Formally Ended)</option>
+                {perms.clients.canDischarge && (
+                  <option value="Discharged">Discharged (Formally Ended)</option>
+                )}
               </select>
             </div>
 
@@ -487,7 +498,9 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
               5. Service Authorization & Payer
             </h2>
-            <span className="text-xs text-slate-400 ">AUTHORIZATION</span>
+            <span className="text-xs text-slate-400">
+              {perms.clients.canEditAuthorization ? "AUTHORIZATION" : "READ-ONLY (ADMIN APPROVAL)"}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -496,8 +509,9 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
               <input
                 type="text"
                 value={authNumber}
+                disabled={!perms.clients.canEditAuthorization}
                 onChange={(e) => setAuthNumber(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 "
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -506,8 +520,9 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
               <input
                 type="text"
                 value={payerName}
+                disabled={!perms.clients.canEditAuthorization}
                 onChange={(e) => setPayerName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -516,8 +531,9 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
               <input
                 type="date"
                 value={authExpiry}
+                disabled={!perms.clients.canEditAuthorization}
                 onChange={(e) => setAuthExpiry(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed"
               />
             </div>
           </div>

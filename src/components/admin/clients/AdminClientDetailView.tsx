@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { getClientById, getClientsFromStorage, saveClientsToStorage } from "@/lib/clients/mockData";
 import { ClientRecord, ClientStatus } from "@/types/client";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import { toast } from "sonner";
 import { ClientContactFamilyModal } from "@/components/clients/modals/ClientContactFamilyModal";
 import { ClientScheduleVisitModal } from "@/components/clients/modals/ClientScheduleVisitModal";
@@ -140,17 +141,19 @@ export function AdminClientDetailView({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const perms = usePortalPermissions();
 
-  // Infer role from path or prop
+  // Infer role from prop, RBAC session, or path
   const currentRole: PortalRole = React.useMemo(() => {
     if (propUserRole) return propUserRole;
+    if (perms.isIntakeCoordinator) return "intake";
     if (pathname.includes("/intake") || baseBackPath.includes("/intake")) return "intake";
     if (pathname.includes("/scheduler") || baseBackPath.includes("/scheduler")) return "scheduler";
     if (pathname.includes("/billing") || baseBackPath.includes("/billing")) return "billing";
     if (pathname.includes("/clinical") || baseBackPath.includes("/clinical")) return "clinical";
     if (pathname.includes("/compliance") || baseBackPath.includes("/compliance")) return "compliance";
     return "admin";
-  }, [propUserRole, pathname, baseBackPath]);
+  }, [propUserRole, perms.isIntakeCoordinator, pathname, baseBackPath]);
 
   // Determine initial landing tab based on role
   const getDefaultTabForRole = (role: PortalRole): ClientDomainTab => {
@@ -729,6 +732,9 @@ export function AdminClientDetailView({
           <ClientMoreTab
             client={client}
             onUpdateClient={handleUpdateClient}
+            canDischarge={perms.clients.canDischarge}
+            canDelete={perms.clients.canDelete}
+            baseBackPath={baseBackPath}
           />
         )}
       </div>

@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
 import { toast } from "sonner";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
 export type ClientKanbanStage =
   | "Registration"
@@ -173,6 +174,7 @@ export function ClientManagementWorkspace({
   initialViewMode = "list",
 }: ClientManagementWorkspaceProps) {
   const router = useRouter();
+  const perms = usePortalPermissions();
 
   const [viewMode, setViewMode] = useState<"kanban" | "list">(initialViewMode);
   const [searchQuery, setSearchQuery] = useState("");
@@ -269,6 +271,12 @@ export function ClientManagementWorkspace({
   const handleMoveStage = (clientId: string, targetStage: ClientKanbanStage) => {
     const targetClient = clients.find((c) => c.id === clientId);
     if (!targetClient) return;
+
+    if (targetStage === "On Hold / Discharged" && !perms.clients.canDischarge) {
+      toast.error("Client discharge and case closure require Agency Admin approval.");
+      setActiveMenuId(null);
+      return;
+    }
 
     const currentStage = resolveClientStage(targetClient, stageOverrides);
     if (currentStage === targetStage) return;

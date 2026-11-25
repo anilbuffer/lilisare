@@ -35,8 +35,21 @@ import {
   Check,
   Info,
   CheckCircle,
+  Archive,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/Modal";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
+import {
+  convertInquiryToLiveEntities,
+  getIntakeInquiriesFromStorage,
+  archiveReferralAcrossStores,
+  deleteReferralAcrossStores,
+} from "@/lib/intake/intakeSync";
+import { getClientsFromStorage, saveClientsToStorage } from "@/lib/clients/mockData";
+import { getHouseholdsFromStorage, saveHouseholdsToStorage } from "@/lib/households/mockData";
+import { enrichClientWith17Domains } from "@/lib/clients/enterpriseClientEnricher";
 import {
   AdminIntakeReferralItem,
   ReferralStatus,
@@ -86,9 +99,11 @@ export function AdminIntakeReferralDetailView({
   referralId,
 }: AdminIntakeReferralDetailViewProps) {
   const router = useRouter();
+  const perms = usePortalPermissions();
   const [referral, setReferral] = useState<AdminIntakeReferralItem | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [noteCategory, setNoteCategory] = useState<
@@ -189,24 +204,232 @@ export function AdminIntakeReferralDetailView({
   };
 
   const handleConvertToClient = () => {
+    // Attempt synchronized conversion from matching Intake Inquiry first
+    const numericSuffix = referral.id.replace(/\D/g, "");
+    const inquiries = getIntakeInquiriesFromStorage();
+    const matchedInquiry = inquiries.find(
+      (inq) =>
+        inq.id.toLowerCase() === referral.id.toLowerCase() ||
+        (numericSuffix && inq.id.endsWith(`-${numericSuffix}`)) ||
+        inq.familyInfo.clientInfo.name.toLowerCase() === referral.patientName.toLowerCase()
+    );
+
+    let createdClientId = referral.clientId || `CL-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
+    let createdHouseholdCode = referral.householdCode || `HH-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
+
+    if (matchedInquiry && !matchedInquiry.onboardingStatus?.converted) {
+      const conv = convertInquiryToLiveEntities(matchedInquiry.id);
+      if (conv.success && conv.client && conv.household) {
+        createdClientId = conv.client.id;
+        createdHouseholdCode = conv.household.code;
+      }
+    } else {
+      const clients = getClientsFromStorage();
+      if (!clients.some((c) => c.id.toLowerCase() === createdClientId.toLowerCase())) {
+        const nameParts = referral.patientName.trim().split(/\s+/);
+        const firstName = nameParts[0] || "Client";
+        const lastName = nameParts.slice(1).join(" ") || "Recipient";
+        const newClient = enrichClientWith17Domains({
+          id: createdClientId,
+          firstName,
+          lastName,
+          name: referral.patientName,
+          preferredName: firstName,
+          dob: "1955-01-01",
+          age: referral.age || 70,
+          gender: referral.gender || "Female",
+          primaryLanguage: "English",
+          status: "Active",
+          careType: "Family Care",
+          household: {
+            id: createdHouseholdCode.toLowerCase(),
+            code: createdHouseholdCode,
+            name: `${lastName} Household`,
+            address: referral.address,
+            city: referral.city,
+            state: "PA",
+            zip: referral.zip,
+            phone: referral.phone,
+            totalMembersCount: 2,
+          },
+          primaryContact: {
+            name: referral.referralSourceContact || referral.patientName,
+            relationship: "Primary Contact",
+            phone: referral.phone,
+            email: referral.email,
+            preferredMethod: "Phone",
+          },
+          emergencyContact: {
+            name: referral.referralSourceContact || "Family Contact",
+            relationship: "Guardian / POA",
+            phone: referral.phone,
+          },
+          assignedCareTeam: {
+            primaryCaregiver: null,
+            familyContact: {
+              id: `FC-${numericSuffix || "100"}`,
+              name: referral.referralSourceContact || referral.patientName,
+              relationship: "Primary Family Contact",
+              phone: referral.phone,
+              email: referral.email,
+            },
+            onboardingCoordinator: {
+              id: "OC-ADMIN",
+              name: referral.assignedCoordinator,
+              email: "intake@lilisare.com",
+              phone: referral.phone,
+            },
+          },
+          readiness: {
+            clientProfile: "Complete",
+            careArrangement: "Pending",
+            documents: referral.insuranceVerified ? "Verified" : "Review needed",
+            authorization: referral.insuranceVerified ? "Verified" : "Pending",
+            overallScore: 80,
+          },
+          carePlan: {
+            program: referral.program,
+            approvedServices: referral.requestedServices,
+            authorizedWeeklyHours: referral.estimatedHoursPerWeek || 25,
+            scheduledWeeklyHours: 0,
+            hoursUsedThisWeek: 0,
+            effectiveDate: new Date().toISOString().slice(0, 10),
+            reviewDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+            needsReview: false,
+            frequency: "Weekly",
+            careNeeds: referral.requestedServices,
+            specialInstructions: referral.triageNotes,
+            mobilityNotes: referral.primaryDiagnosis,
+            dietaryRestrictions: "None",
+            allergies: [],
+            adlSupportNeeds: ["Personal Care"],
+          },
+          authorization: {
+            authNumber: `AUTH-${numericSuffix || "8841"}`,
+            payer: referral.payerName,
+            status: referral.insuranceVerified ? "Verified" : "Pending Renewal",
+            startDate: new Date().toISOString().slice(0, 10),
+            expiryDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+            daysUntilExpiry: 180,
+            totalUnitsApproved: (referral.estimatedHoursPerWeek || 25) * 24,
+            unitsUsed: 0,
+            unitsRemaining: (referral.estimatedHoursPerWeek || 25) * 24,
+            weeklyHourCap: referral.estimatedHoursPerWeek || 25,
+            caseManagerName: referral.assignedCoordinator || "Assigned Case Manager",
+            caseManagerAgency: referral.payerName || "State Medicaid DHS",
+          },
+          documents: [],
+          householdMembers: [],
+          activity: [],
+          attentionItems: [],
+          updatedAt: new Date().toISOString(),
+          updatedAtRelative: "Just now",
+        });
+        saveClientsToStorage([newClient, ...clients]);
+      }
+
+      const households = getHouseholdsFromStorage();
+      if (!households.some((h) => h.code.toLowerCase() === createdHouseholdCode.toLowerCase())) {
+        const lastName = referral.patientName.trim().split(/\s+/).pop() || "Family";
+        saveHouseholdsToStorage([
+          {
+            id: createdHouseholdCode.toLowerCase(),
+            code: createdHouseholdCode,
+            name: `${lastName} Household`,
+            address: referral.address,
+            city: referral.city,
+            state: "PA",
+            zip: referral.zip,
+            phone: referral.phone,
+            program: referral.program,
+            caseManager: {
+              name: referral.assignedCoordinator,
+              agency: referral.payerName,
+              email: "casemanager@lilisare.com",
+              phone: referral.phone,
+            },
+            client: {
+              id: createdClientId,
+              name: referral.patientName,
+              role: "client",
+              relationship: "Care Recipient",
+              status: "Active",
+              phone: referral.phone,
+              email: referral.email,
+            },
+            primaryCaregiver: {
+              id: "CG-PENDING",
+              name: "Caregiver Assignment Pending",
+              role: "caregiver",
+              relationship: "Pending Match",
+              status: "Onboarding",
+              phone: referral.phone,
+              email: referral.email,
+            },
+            authorizedHoursPerWeek: referral.estimatedHoursPerWeek || 25,
+            scheduledHoursPerWeek: 0,
+            authStatus: referral.insuranceVerified ? "Approved" : "Pending Review",
+            authExpiry: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+            triJourneyStatus: {
+              clientStage: "Authorized",
+              caregiverStage: "Registered",
+              opsStage: "Coordination",
+            },
+            evvComplianceRate: 0,
+            lastVisitDate: "Not Started",
+          },
+          ...households,
+        ]);
+      }
+    }
+
     const all = getAdminReferralsFromStorage();
     const updated = all.map((r) =>
-      r.id === referral.id ? { ...r, status: "Enrolled" as ReferralStatus } : r
+      r.id === referral.id
+        ? {
+          ...r,
+          status: "Enrolled" as ReferralStatus,
+          clientId: createdClientId,
+          householdCode: createdHouseholdCode,
+        }
+        : r
     );
     saveAdminReferralsToStorage(updated);
-    setReferral({ ...referral, status: "Enrolled" });
-    toast.success(`${referral.patientName} successfully admitted as Active Client`);
+    setReferral({
+      ...referral,
+      status: "Enrolled",
+      clientId: createdClientId,
+      householdCode: createdHouseholdCode,
+    });
+    toast.success(`${referral.patientName} admitted & synced to Client (${createdClientId}) and Household (${createdHouseholdCode})`);
 
     setNotesList((prev) => [
       {
-        author: "Agency Executive",
-        role: "Agency Administrator",
+        author: perms.actorName,
+        role: perms.roleLabel,
         time: "Just now",
         category: "Coordination",
-        text: "Client admitted into active home care service roster. Household profile and care schedule initiated.",
+        text: `Client admitted into active home care roster (${createdClientId}) and linked to Household ${createdHouseholdCode}.`,
       },
       ...prev,
     ]);
+  };
+
+  const handleArchiveReferral = () => {
+    archiveReferralAcrossStores(referral.id, `Archived by ${perms.roleLabel}`);
+    setReferral({ ...referral, status: "Archived" });
+    toast.success(`Referral ${referral.id} archived.`);
+  };
+
+  const handleDeleteReferral = () => {
+    if (!perms.referrals.canDelete) {
+      toast.error("Permanent deletion is restricted to Agency Administrators.");
+      return;
+    }
+    deleteReferralAcrossStores(referral.id);
+    setIsDeleteModalOpen(false);
+    toast.success(`Referral ${referral.id} permanently deleted.`);
+    router.push("/admin/intake-referrals");
   };
 
   const handleAddNote = (e: React.FormEvent) => {
@@ -324,6 +547,30 @@ export function AdminIntakeReferralDetailView({
             )}
           </div>
 
+          {/* Archive Referral (Intake & Admin) */}
+          {perms.referrals.canArchive && referral.status !== "Archived" && referral.status !== "Enrolled" && (
+            <button
+              type="button"
+              onClick={handleArchiveReferral}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <Archive className="w-3.5 h-3.5 text-slate-400" />
+              <span>Archive</span>
+            </button>
+          )}
+
+          {/* Delete Referral (Agency Admin Only) */}
+          {perms.referrals.canDelete && (
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete</span>
+            </button>
+          )}
+
           {/* Admit to Client CTA */}
           {referral.status !== "Enrolled" ? (
             <button
@@ -376,7 +623,7 @@ export function AdminIntakeReferralDetailView({
             {/* Card 1: Patient Demographics */}
             <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-normal text-slate-400">Patient Demographics</span>
+                <span className="text-xs font-normal text-slate-400">Client Demographics</span>
                 <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
                   <User className="w-4 h-4" />
                 </div>
@@ -1277,6 +1524,38 @@ export function AdminIntakeReferralDetailView({
             ))}
           </div>
         </div>
+      )}
+
+      {perms.referrals.canDelete && (
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          title="Delete Intake Referral"
+          description="Permanent deletion removes this referral across both Intake and Admin directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete referral{" "}
+            <strong className="text-slate-900">{referral.patientName}</strong> ({referral.id})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteReferral}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

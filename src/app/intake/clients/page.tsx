@@ -147,7 +147,7 @@ export default function IntakeClientsPage() {
           <div className="relative" ref={addMenuRef}>
             <button
               onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-bold hover:bg-teal-700 shadow-sm hover:shadow transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3D6B22] text-white rounded-xl text-xs font-bold hover:bg-[#345C1D] shadow-md shadow-[#3D6B22]/20 active:scale-95 transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Register Client</span>

@@ -1,11 +1,15 @@
 import { redirect } from "next/navigation";
-import { mockPatients } from "@/lib/patients/mockData";
+import { INITIAL_CLIENTS } from "@/lib/clients/mockData";
 
-export default async function IntakePatientRedirectPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function IntakePatientRedirectPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const resolvedParams = await params;
-  redirect(`/patients/${resolvedParams.id}`);
+  redirect(`/intake/clients/${resolvedParams.id}`);
 }
 
 export function generateStaticParams() {
-  return Object.keys(mockPatients).map((id) => ({ id }));
+  return INITIAL_CLIENTS.map((c) => ({ id: c.id }));
 }

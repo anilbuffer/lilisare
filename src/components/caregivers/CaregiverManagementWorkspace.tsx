@@ -37,6 +37,7 @@ import {
 } from "@/types/caregiver";
 import { saveCaregiversToStorage } from "@/lib/caregivers/mockData";
 import { toast } from "sonner";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
 interface CaregiverManagementWorkspaceProps {
   caregivers: CaregiverRecord[];
@@ -187,6 +188,7 @@ export function CaregiverManagementWorkspace({
   initialViewMode = "list",
 }: CaregiverManagementWorkspaceProps) {
   const router = useRouter();
+  const perms = usePortalPermissions();
 
   // Internal mutable state for drag & drop or quick stage movements
   const [items, setItems] = useState<CaregiverRecord[]>(initialCaregivers);
@@ -331,6 +333,15 @@ export function CaregiverManagementWorkspace({
   const handleMoveStage = (caregiverId: string, targetStage: CaregiverPipelineStage) => {
     const targetItem = items.find((i) => i.id === caregiverId);
     if (!targetItem) return;
+
+    if (
+      (targetStage === "Hired & Onboarding" || targetStage === "Archived") &&
+      !perms.caregivers.canActivate
+    ) {
+      toast.error("Caregiver activation and archiving require Agency Admin approval.");
+      setActiveMenuId(null);
+      return;
+    }
 
     const currentNormalized = normalizeCaregiverStage(targetItem);
     if (currentNormalized === targetStage) return;

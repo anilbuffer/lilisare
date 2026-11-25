@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   MoreHorizontal,
   Clock,
@@ -13,19 +14,33 @@ import {
   ShieldCheck,
   FileText,
   CheckCircle2,
+  Lock,
+  Trash2,
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
 import { saveClientsToStorage, getClientsFromStorage } from "@/lib/clients/mockData";
+import { deleteClientFromStorage } from "@/lib/intake/intakeSync";
 
 interface ClientMoreTabProps {
   client: ClientRecord;
   onUpdateClient?: (updated: ClientRecord) => void;
+  canDischarge?: boolean;
+  canDelete?: boolean;
+  baseBackPath?: string;
 }
 
-export function ClientMoreTab({ client, onUpdateClient }: ClientMoreTabProps) {
+export function ClientMoreTab({
+  client,
+  onUpdateClient,
+  canDischarge = false,
+  canDelete = false,
+  baseBackPath = "/admin/clients",
+}: ClientMoreTabProps) {
+  const router = useRouter();
   const [isDischargeModalOpen, setIsDischargeModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dischargeReason, setDischargeReason] = useState("Transitioned to State Self-Directed Program");
   const [dischargeConfirmed, setDischargeConfirmed] = useState(false);
 
@@ -176,40 +191,111 @@ export function ClientMoreTab({ client, onUpdateClient }: ClientMoreTabProps) {
         </div>
       </div>
 
-      {/* Danger Zone / Case Lifecycle Management */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-rose-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-rose-100">
-          <div>
-            <h4 className="text-sm font-bold text-rose-900 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-600" />
-              <span>Case Lifecycle Governance (Agency Admin Only)</span>
-            </h4>
-            <p className="text-xs text-rose-700 font-medium">
-              Discharge, case transfer, and historical archiving operations
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-rose-50/40 p-4 rounded-xl border border-rose-100">
-          <div>
-            <div className="text-sm font-bold text-rose-950">
-              Discharge / Inactivate Client Case
-            </div>
-            <div className="text-xs text-rose-800 mt-0.5">
-              Permanently stops recurring shifts and releases authorized caregiver assignments.
+      {/* Danger Zone / Case Lifecycle Management (Agency Admin Only) */}
+      {canDischarge || canDelete ? (
+        <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-rose-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-rose-100">
+            <div>
+              <h4 className="text-sm font-bold text-rose-900 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                <span>Case Lifecycle Governance (Agency Admin Only)</span>
+              </h4>
+              <p className="text-xs text-rose-700 font-medium">
+                Discharge, case transfer, and historical archiving operations
+              </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsDischargeModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-rose-700 bg-white hover:bg-rose-50 border border-rose-300 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-          >
-            <Archive className="w-3.5 h-3.5" />
-            <span>Discharge Client</span>
-          </button>
+          {canDischarge && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-rose-50/40 p-4 rounded-xl border border-rose-100">
+              <div>
+                <div className="text-sm font-bold text-rose-950">
+                  Discharge / Inactivate Client Case
+                </div>
+                <div className="text-xs text-rose-800 mt-0.5">
+                  Permanently stops recurring shifts and releases authorized caregiver assignments.
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsDischargeModalOpen(true)}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-rose-700 bg-white hover:bg-rose-50 border border-rose-300 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+              >
+                <Archive className="w-3.5 h-3.5" />
+                <span>Discharge Client</span>
+              </button>
+            </div>
+          )}
+
+          {canDelete && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-rose-50/60 p-4 rounded-xl border border-rose-200">
+              <div>
+                <div className="text-sm font-bold text-rose-950">
+                  Permanently Delete Client Record
+                </div>
+                <div className="text-xs text-rose-800 mt-0.5">
+                  Removes this client record from the live agency directory. Use Discharge for audit retention.
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer shrink-0"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Client</span>
+              </button>
+            </div>
+          )}
         </div>
-      </div>
+      ) : (
+        <div className="bg-slate-50 rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 flex items-center gap-3 text-xs text-slate-600">
+          <Lock className="w-4 h-4 text-slate-400 shrink-0" />
+          <span>
+            <strong className="text-slate-800">Read-Only Lifecycle Controls:</strong> Client discharge and permanent record deletion are restricted to Agency Administrators.
+          </span>
+        </div>
+      )}
+
+      {/* Delete Client Confirmation Modal */}
+      {canDelete && (
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          title="Delete Client Record"
+          description="Permanent deletion removes this client across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{client.name}</strong> ({client.id})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                deleteClientFromStorage(client.id);
+                setIsDeleteModalOpen(false);
+                toast.success(`Client ${client.name} permanently deleted.`);
+                router.push(baseBackPath);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
+      )}
 
       {/* Discharge Client Confirmation Modal */}
       <Modal

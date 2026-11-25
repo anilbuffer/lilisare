@@ -32,15 +32,18 @@ import {
   Building2,
   Briefcase,
   Activity,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/Modal";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import {
   MOCK_HOUSEHOLDS,
   Household,
   getHouseholdsFromStorage,
   saveHouseholdsToStorage,
 } from "@/lib/households/mockData";
-import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
+import { subscribeToIntakeSync, deleteHouseholdFromStorage } from "@/lib/intake/intakeSync";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -52,10 +55,12 @@ function getInitials(name: string): string {
 
 export function AdminHouseholdDirectory() {
   const router = useRouter();
+  const perms = usePortalPermissions();
 
   // State
   const [householdsList, setHouseholdsList] =
     useState<Household[]>(MOCK_HOUSEHOLDS);
+  const [deleteTarget, setDeleteTarget] = useState<Household | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState("ALL");
@@ -110,7 +115,7 @@ export function AdminHouseholdDirectory() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Executive KPI calculations
+  // Executive KPI calculations (Computed dynamically from synchronized records)
   const kpiStats = useMemo(() => {
     const total = householdsList.length;
     const activeCareCount = householdsList.filter(
@@ -119,7 +124,12 @@ export function AdminHouseholdDirectory() {
     const expiringCount = householdsList.filter(
       (h) => h.authStatus === "Expiring Soon" || h.authStatus === "Pending Review"
     ).length;
-    const totalClients = total; // 1 client per primary household in sample
+    const totalClients = householdsList.filter((h) => Boolean(h.client?.name)).length;
+    const connectedCaregivers = householdsList.filter((h) => Boolean(h.primaryCaregiver?.name)).length;
+    const totalAuthorized = householdsList.reduce((acc, h) => acc + (h.authorizedHoursPerWeek || 0), 0);
+    const totalScheduled = householdsList.reduce((acc, h) => acc + (h.scheduledHoursPerWeek || 0), 0);
+    const authUtilization =
+      totalAuthorized > 0 ? `${Math.min(100, (totalScheduled / totalAuthorized) * 100).toFixed(1)}%` : "0.0%";
     const bottleneckCount = householdsList.filter(
       (h) => Boolean(h.triJourneyStatus.bottleneckMessage)
     ).length;
@@ -127,9 +137,9 @@ export function AdminHouseholdDirectory() {
     return {
       totalHouseholds: total,
       activeCareCount,
-      totalClients: totalClients + 6, // connected multi-client households
-      connectedCaregivers: total + 13,
-      authUtilization: "94.8%",
+      totalClients,
+      connectedCaregivers,
+      authUtilization,
       expiringCount,
       bottleneckCount,
     };
@@ -358,8 +368,8 @@ export function AdminHouseholdDirectory() {
                 type="button"
                 onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
                 className={`inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition-all cursor-pointer ${selectedStatus !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22]"
+                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                   }`}
               >
                 <Filter className="w-3.5 h-3.5 text-slate-500" />
@@ -392,8 +402,8 @@ export function AdminHouseholdDirectory() {
                         setIsStatusDropdownOpen(false);
                       }}
                       className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${selectedStatus === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
                         }`}
                     >
                       <span>{option.label}</span>
@@ -412,22 +422,22 @@ export function AdminHouseholdDirectory() {
                 type="button"
                 onClick={() => setIsProgramDropdownOpen(!isProgramDropdownOpen)}
                 className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${selectedProgram !== "ALL"
-                    ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
-                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
               >
                 <span>
                   {selectedProgram === "ALL"
                     ? "Program: All"
                     : selectedProgram === "Waiver"
-                    ? "Medicaid Waiver"
-                    : selectedProgram === "VA"
-                    ? "VA Care"
-                    : selectedProgram === "Private"
-                    ? "Private Pay"
-                    : selectedProgram === "CES"
-                    ? "CES Pediatric"
-                    : selectedProgram}
+                      ? "Medicaid Waiver"
+                      : selectedProgram === "VA"
+                        ? "VA Care"
+                        : selectedProgram === "Private"
+                          ? "Private Pay"
+                          : selectedProgram === "CES"
+                            ? "CES Pediatric"
+                            : selectedProgram}
                 </span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
@@ -453,8 +463,8 @@ export function AdminHouseholdDirectory() {
                         setIsProgramDropdownOpen(false);
                       }}
                       className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${selectedProgram === option.value
-                          ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                          : "text-slate-700 hover:bg-slate-50"
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
                         }`}
                     >
                       <span>{option.label}</span>
@@ -486,8 +496,8 @@ export function AdminHouseholdDirectory() {
                 onClick={() => setViewMode("list")}
                 title="List View"
                 className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "list"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
               >
                 <ListIcon className="w-4 h-4" />
@@ -498,8 +508,8 @@ export function AdminHouseholdDirectory() {
                 onClick={() => setViewMode("grid")}
                 title="Grid View"
                 className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
-                    ? "bg-white text-slate-900 shadow-2xs font-bold"
-                    : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
                   }`}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -584,13 +594,25 @@ export function AdminHouseholdDirectory() {
 
                     {/* Action */}
                     <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                      <Link
-                        href={`/admin/households/${hh.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#E8F2E4] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#1E5622] rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-                      >
-                        <span>Details</span>
-                        <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
-                      </Link>
+                      <div className="inline-flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/admin/households/${hh.id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-[#E8F2E4] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#1E5622] rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                        >
+                          <span>Details</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                        </Link>
+                        {perms.households.canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(hh)}
+                            title="Delete Household (Agency Admin)"
+                            className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -756,6 +778,45 @@ export function AdminHouseholdDirectory() {
           </button>
         </div>
       </div>
+      {/* Delete Household Confirmation Modal (Agency Admin Only) */}
+      {perms.households.canDelete && (
+        <Modal
+          isOpen={Boolean(deleteTarget)}
+          onClose={() => setDeleteTarget(null)}
+          title="Delete Household Unit"
+          description="Permanent deletion removes this household across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{deleteTarget?.name}</strong> (
+            {deleteTarget?.code})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!deleteTarget) return;
+                deleteHouseholdFromStorage(deleteTarget.id);
+                setHouseholdsList((prev) => prev.filter((h) => h.id !== deleteTarget.id));
+                toast.success(`Household ${deleteTarget.name} deleted.`);
+                setDeleteTarget(null);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -39,6 +39,7 @@ import {
 import { LILISARE_SERVICES } from "@/lib/services";
 import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
 import { toast } from "sonner";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
 export type HouseholdKanbanStage =
   | "Intake & Discovery"
@@ -169,6 +170,7 @@ export default function HouseholdsPage({
   baseDetailsPath = "/households",
 }: HouseholdsPageProps = {}) {
   const router = useRouter();
+  const perms = usePortalPermissions();
   const cleanBasePath = baseDetailsPath.replace(/\/$/, "");
 
   const [householdsList, setHouseholdsList] = useState<Household[]>(MOCK_HOUSEHOLDS);
@@ -274,6 +276,15 @@ export default function HouseholdsPage({
   const handleMoveStage = (householdId: string, targetStage: HouseholdKanbanStage) => {
     const targetHh = householdsList.find((h) => h.id === householdId);
     if (!targetHh) return;
+
+    if (
+      (targetStage === "Care Active" || targetStage === "On Hold / Inactive") &&
+      !perms.households.canApproveAuthorization
+    ) {
+      toast.error("Service authorization approval and household closure require Agency Admin review.");
+      setActiveMenuId(null);
+      return;
+    }
 
     const currentStage = resolveHouseholdStage(targetHh, stageOverrides);
     if (currentStage === targetStage) return;

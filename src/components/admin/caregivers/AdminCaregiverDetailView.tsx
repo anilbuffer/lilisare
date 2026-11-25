@@ -42,7 +42,11 @@ import {
   Heart,
   Tag,
   Smartphone,
+  Trash2,
 } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
+import { deleteCaregiverFromStorage } from "@/lib/intake/intakeSync";
 import {
   getAdminCaregiverProfileById,
   AdminCaregiverProfile,
@@ -154,6 +158,19 @@ export function AdminCaregiverDetailView({
   const [rawRecord, setRawRecord] = useState<CaregiverRecord | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(initialEditMode);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const perms = usePortalPermissions();
+
+  const allowedTabs = React.useMemo(
+    () =>
+      CAREGIVER_DETAIL_TABS.filter((tab) => {
+        if (!perms.caregivers.canViewPayDetails && (tab.id === "pay-details" || tab.id === "points" || tab.id === "myagency")) {
+          return false;
+        }
+        return true;
+      }),
+    [perms.caregivers.canViewPayDetails]
+  );
 
   // Modals
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -330,8 +347,8 @@ export function AdminCaregiverDetailView({
   const statusBadge = getStatusBadge(profile.status);
 
   // Split tabs into visible & overflow (More)
-  const visibleTabs = CAREGIVER_DETAIL_TABS.slice(0, visibleCount);
-  const overflowTabs = CAREGIVER_DETAIL_TABS.slice(visibleCount);
+  const visibleTabs = allowedTabs.slice(0, visibleCount);
+  const overflowTabs = allowedTabs.slice(visibleCount);
   const isOverflowActive = overflowTabs.some((t) => t.id === activeTab);
   const activeOverflowTab = overflowTabs.find((t) => t.id === activeTab);
 
@@ -410,6 +427,17 @@ export function AdminCaregiverDetailView({
             <MessageSquare className="w-4 h-4 text-slate-400" />
             <span>Send Message</span>
           </button>
+
+          {perms.caregivers.canDelete && (
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-all cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -603,6 +631,43 @@ export function AdminCaregiverDetailView({
             }}
           />
         </>
+      )}
+
+      {perms.caregivers.canDelete && (
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          title="Delete Caregiver Record"
+          description="Permanent deletion removes this caregiver across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{profile.name}</strong> ({profile.id})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                deleteCaregiverFromStorage(profile.id);
+                setIsDeleteModalOpen(false);
+                toast.success(`Caregiver ${profile.name} permanently deleted.`);
+                router.push("/admin/caregivers");
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   );

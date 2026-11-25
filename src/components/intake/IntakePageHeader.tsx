@@ -85,18 +85,18 @@ export function IntakePageHeader({
         {newReferralHref ? (
           <Link
             href={newReferralHref}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm shadow-[#1B3414]/25 hover:shadow-md active:scale-95 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white text-xs font-bold rounded-xl shadow-md shadow-[#3D6B22]/20 active:scale-95 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-[#93C573]" />
+            <Plus className="w-4 h-4 text-white" />
             <span>New Referral</span>
           </Link>
         ) : (
           <button
             type="button"
             onClick={onNewReferral}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm shadow-[#1B3414]/25 hover:shadow-md active:scale-95 transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white text-xs font-bold rounded-xl shadow-md shadow-[#3D6B22]/20 active:scale-95 transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-[#93C573]" />
+            <Plus className="w-4 h-4 text-white" />
             <span>New Referral</span>
           </button>
         )}

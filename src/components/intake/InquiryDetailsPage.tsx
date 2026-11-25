@@ -30,10 +30,22 @@ import {
   Check,
   FileSpreadsheet,
   Users,
+  Archive,
+  Trash2,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Modal } from "@/components/ui/Modal";
 import { toast } from "sonner";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
+import {
+  getIntakeInquiriesFromStorage,
+  saveIntakeInquiriesToStorage,
+  convertInquiryToLiveEntities,
+  syncInquiryStageToAdmin,
+  archiveReferralAcrossStores,
+  deleteReferralAcrossStores,
+} from "@/lib/intake/intakeSync";
 import { ContactFamilyModal } from "./modals/ContactFamilyModal";
 import { ScheduleAssessmentModal } from "./modals/ScheduleAssessmentModal";
 import { AssignCoordinatorModal } from "./modals/AssignCoordinatorModal";
@@ -73,6 +85,7 @@ export function InquiryDetailsPage({
   backLabel = "Back to Pipeline & Inquiries",
 }: InquiryDetailsPageProps) {
   const router = useRouter();
+  const perms = usePortalPermissions();
   const [inquiry, setInquiry] = useState<InquiryRecord>(initialInquiry);
   const [activeTab, setActiveTab] = useState<"overview" | "care" | "documents" | "timeline">("overview");
   const [newNote, setNewNote] = useState("");
@@ -83,6 +96,26 @@ export function InquiryDetailsPage({
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isConvertModalOpen, setIsConvertModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    const all = getIntakeInquiriesFromStorage();
+    const live = all.find((i) => i.id.toLowerCase() === initialInquiry.id.toLowerCase());
+    if (live) setInquiry(live);
+  }, [initialInquiry.id]);
+
+  const persistInquiry = (updater: (prev: InquiryRecord) => InquiryRecord) => {
+    setInquiry((prev) => {
+      const next = updater(prev);
+      const all = getIntakeInquiriesFromStorage();
+      const exists = all.some((i) => i.id.toLowerCase() === next.id.toLowerCase());
+      const updatedList = exists
+        ? all.map((i) => (i.id.toLowerCase() === next.id.toLowerCase() ? next : i))
+        : [next, ...all];
+      saveIntakeInquiriesToStorage(updatedList);
+      return next;
+    });
+  };
 
   const stageStyle = STAGE_STYLES[inquiry.stage] || STAGE_STYLES["New Lead"];
 
@@ -105,14 +138,14 @@ export function InquiryDetailsPage({
     e.preventDefault();
     if (!newNote.trim()) return;
 
-    setInquiry((prev) => ({
+    persistInquiry((prev) => ({
       ...prev,
       timeline: [
         {
           id: `t-${Date.now()}`,
           type: "note",
-          author: "Intake Coordinator",
-          authorRole: "Staff",
+          author: perms.actorName,
+          authorRole: perms.roleLabel,
           timestamp: "Just now",
           title: "Coordinator Note Added",
           details: newNote.trim(),
@@ -130,14 +163,14 @@ export function InquiryDetailsPage({
     type: "call" | "email" | "note",
     noteText: string
   ) => {
-    setInquiry((prev) => ({
+    persistInquiry((prev) => ({
       ...prev,
       timeline: [
         {
           id: `t-${Date.now()}`,
           type: type === "call" ? "call" : type === "email" ? "email" : "note",
-          author: "Intake Staff",
-          authorRole: "Staff",
+          author: perms.actorName,
+          authorRole: perms.roleLabel,
           timestamp: "Just now",
           title:
             type === "call"
@@ -162,7 +195,7 @@ export function InquiryDetailsPage({
       notes: string;
     }
   ) => {
-    setInquiry((prev) => ({
+    persistInquiry((prev) => ({
       ...prev,
       stage: "In Assessment",
       assessmentStatus: "Scheduled",
@@ -177,7 +210,7 @@ export function InquiryDetailsPage({
         {
           id: `t-${Date.now()}`,
           type: "assessment",
-          author: "Clinical Team",
+          author: perms.actorName,
           timestamp: "Just now",
           title: `${details.type} Scheduled`,
           details: `Date: ${details.scheduledDate} at ${details.scheduledTime} with ${details.assessor}. Notes: ${details.notes}`,
@@ -185,6 +218,7 @@ export function InquiryDetailsPage({
         ...prev.timeline,
       ],
     }));
+    syncInquiryStageToAdmin(inquiryId, "In Assessment");
   };
 
   const handleConfirmAssignment = (
@@ -192,7 +226,7 @@ export function InquiryDetailsPage({
     coordinatorName: string,
     role: string
   ) => {
-    setInquiry((prev) => ({
+    persistInquiry((prev) => ({
       ...prev,
       referralInfo: {
         ...prev.referralInfo,
@@ -207,7 +241,7 @@ export function InquiryDetailsPage({
         {
           id: `t-${Date.now()}`,
           type: "assignment",
-          author: "Admin User",
+          author: perms.actorName,
           timestamp: "Just now",
           title: `Assigned to ${coordinatorName}`,
           details: `Inquiry assigned to ${coordinatorName} (${role}).`,
@@ -218,14 +252,14 @@ export function InquiryDetailsPage({
   };
 
   const handleUpdateStatus = (newStage: InquiryStage) => {
-    setInquiry((prev) => ({
+    persistInquiry((prev) => ({
       ...prev,
       stage: newStage,
       timeline: [
         {
           id: `t-${Date.now()}`,
           type: "status_change",
-          author: "Admin User",
+          author: perms.actorName,
           timestamp: "Just now",
           title: `Stage Updated to ${newStage}`,
           details: `Inquiry status changed to ${newStage}.`,
@@ -233,12 +267,13 @@ export function InquiryDetailsPage({
         ...prev.timeline,
       ],
     }));
+    syncInquiryStageToAdmin(inquiry.id, newStage);
     setIsStatusDropdownOpen(false);
     toast.success(`Stage updated to ${newStage}`);
   };
 
   const handleToggleDocStatus = (docId: string) => {
-    setInquiry((prev) => {
+    persistInquiry((prev) => {
       const updatedDocs: DocumentItem[] = prev.documents.map((d) => {
         if (d.id === docId) {
           const nextStatus: DocumentItem["status"] =
@@ -257,29 +292,50 @@ export function InquiryDetailsPage({
   };
 
   const handleConfirmConversion = (inquiryId: string) => {
-    setInquiry((prev) => ({
-      ...prev,
-      stage: "Converted",
-      onboardingStatus: {
-        converted: true,
-        convertedAt: "Just now",
-        clientProfileId: `CLI-${Math.floor(9100 + Math.random() * 50)}`,
-        caregiverProfileId: prev.familyInfo.potentialCaregiver?.name ? `CG-${Math.floor(4500 + Math.random() * 50)}` : undefined,
-      },
-      timeline: [
-        {
-          id: `t-${Date.now()}`,
-          type: "status_change",
-          author: "Admin User",
-          timestamp: "Just now",
-          title: "Inquiry Converted to Onboarding",
-          details: "Transferred to Client Registration and Caregiver Onboarding workflows.",
+    const result = convertInquiryToLiveEntities(inquiryId);
+    if (result.success) {
+      const refreshed = getIntakeInquiriesFromStorage().find(
+        (i) => i.id.toLowerCase() === inquiryId.toLowerCase()
+      );
+      if (refreshed) {
+        setInquiry(refreshed);
+      }
+    } else {
+      persistInquiry((prev) => ({
+        ...prev,
+        stage: "Converted",
+        onboardingStatus: {
+          converted: true,
+          convertedAt: new Date().toISOString(),
+          clientProfileId: `CL-${Math.floor(1050 + Math.random() * 50)}`,
+          caregiverProfileId: prev.familyInfo.potentialCaregiver?.name
+            ? `CG-${Math.floor(2050 + Math.random() * 50)}`
+            : undefined,
         },
-        ...prev.timeline,
-      ],
-    }));
+      }));
+    }
     setIsConvertModalOpen(false);
-    toast.success(`${inquiry.familyName} converted to onboarding!`);
+    toast.success(`${inquiry.familyName} converted and synced across Client, Caregiver, and Household records!`);
+  };
+
+  const handleArchiveInquiry = () => {
+    archiveReferralAcrossStores(inquiry.id, `Archived by ${perms.roleLabel}`);
+    const refreshed = getIntakeInquiriesFromStorage().find(
+      (i) => i.id.toLowerCase() === inquiry.id.toLowerCase()
+    );
+    if (refreshed) setInquiry(refreshed);
+    toast.success(`Inquiry ${inquiry.id} archived and closed.`);
+  };
+
+  const handleDeleteInquiry = () => {
+    if (!perms.referrals.canDelete) {
+      toast.error("Permanent deletion is restricted to Agency Administrators.");
+      return;
+    }
+    deleteReferralAcrossStores(inquiry.id);
+    setIsDeleteModalOpen(false);
+    toast.success(`Inquiry ${inquiry.id} permanently removed.`);
+    router.push(backHref);
   };
 
   const missingDocsCount = inquiry.documents.filter((d) => d.status === "Missing").length;
@@ -364,13 +420,38 @@ export function InquiryDetailsPage({
             )}
           </div>
 
+          {/* Archive / Close Inquiry (Intake Coordinator & Admin) */}
+          {perms.referrals.canArchive && inquiry.stage !== "Closed" && inquiry.stage !== "Converted" && (
+            <button
+              type="button"
+              onClick={handleArchiveInquiry}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <Archive className="w-3.5 h-3.5 text-slate-400" />
+              <span>Archive</span>
+            </button>
+          )}
+
+          {/* Delete Inquiry (Agency Admin Only) */}
+          {perms.referrals.canDelete && (
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete</span>
+            </button>
+          )}
+
           {/* Convert to Onboarding Primary CTA */}
           <button
             type="button"
             onClick={() => setIsConvertModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] hover:shadow-[0_4px_12px_rgba(61,107,34,0.25)] cursor-pointer whitespace-nowrap"
+            disabled={inquiry.stage === "Converted"}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98] transition-all rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] hover:shadow-[0_4px_12px_rgba(61,107,34,0.25)] cursor-pointer whitespace-nowrap"
           >
-            <span>Convert to Onboarding</span>
+            <span>{inquiry.stage === "Converted" ? "Converted to Onboarding" : "Convert to Onboarding"}</span>
             <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />
           </button>
         </div>
@@ -946,6 +1027,39 @@ export function InquiryDetailsPage({
         inquiry={inquiry}
         onConfirmConversion={handleConfirmConversion}
       />
+
+      {perms.referrals.canDelete && (
+        <Modal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          title="Delete Inquiry Record"
+          description="Permanent deletion is restricted to Agency Administrators and cannot be undone."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{inquiry.familyName}</strong> ({inquiry.id})?
+            For routine closures, consider using <strong>Archive</strong> instead.
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteInquiry}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

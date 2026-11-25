@@ -1,13 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import React from "react";
-import { NewReferralFullPage } from "@/components/intake/NewReferralFullPage";
-
-export default function NewReferralRoutePage() {
-  return (
-    <NewReferralFullPage
-      backHref="/intake/pipeline/"
-      onSuccessRedirectHref="/intake/pipeline/"
-    />
-  );
+export default function IntakeNewReferralRedirectPage() {
+  redirect("/intake/pipeline/new");
 }

@@ -21,6 +21,7 @@ import { CaregiverRecord, CaregiverType, CaregiverStatus } from "@/types/caregiv
 import { getCaregiversFromStorage, saveCaregiversToStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
 import { getAdminCaregiverProfileById } from "@/lib/caregivers/adminCaregiversData";
 import { toast } from "sonner";
+import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
 interface CaregiverEditViewProps {
   caregiverId: string;
@@ -32,6 +33,7 @@ export function CaregiverEditView({
   baseBackPath = "/caregivers",
 }: CaregiverEditViewProps) {
   const router = useRouter();
+  const perms = usePortalPermissions();
   const [caregiver, setCaregiver] = useState<CaregiverRecord | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -210,13 +212,21 @@ export function CaregiverEditView({
     if (!caregiver) return;
 
     const all = getCaregiversFromStorage();
+    const safeStatus: CaregiverStatus =
+      !perms.caregivers.canActivate && (status === "Active" || status === "Inactive")
+        ? caregiver.status
+        : status;
+    const safeClassification = perms.caregivers.canEditEmployment
+      ? classification
+      : caregiver.employmentClassification;
+
     const updated: CaregiverRecord = {
       ...caregiver,
       name,
       type,
-      status,
+      status: safeStatus,
       branch,
-      employmentClassification: classification,
+      employmentClassification: safeClassification,
       personalInfo: {
         ...caregiver.personalInfo,
         preferredName,
@@ -358,11 +368,14 @@ export function CaregiverEditView({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block text-slate-600 font-medium mb-1">Status</label>
+                <label className="block text-slate-600 font-medium mb-1">
+                  Status {!perms.caregivers.canActivate && <span className="text-[10px] text-amber-700 font-semibold">(Activation requires Admin)</span>}
+                </label>
                 <select
                   value={status}
+                  disabled={!perms.caregivers.canActivate}
                   onChange={(e) => setStatus(e.target.value as CaregiverStatus)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22] disabled:opacity-60 disabled:cursor-not-allowed bg-white"
                 >
                   <option value="Active">Active</option>
                   <option value="Onboarding">Onboarding</option>
@@ -385,11 +398,14 @@ export function CaregiverEditView({
                 </select>
               </div>
               <div>
-                <label className="block text-slate-600 font-medium mb-1">Employment Classification</label>
+                <label className="block text-slate-600 font-medium mb-1">
+                  Employment Classification {!perms.caregivers.canEditEmployment && <span className="text-[10px] text-amber-700 font-semibold">(Admin Only)</span>}
+                </label>
                 <select
                   value={classification}
+                  disabled={!perms.caregivers.canEditEmployment}
                   onChange={(e) => setClassification(e.target.value as any)}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22]"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 text-slate-900 focus:outline-none focus:border-[#3D6B22] disabled:opacity-60 disabled:cursor-not-allowed bg-white"
                 >
                   <option value="W-2">W-2 Employed</option>
                   <option value="1099">1099 Contractor</option>

@@ -626,10 +626,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     }
 
     if (id === "dashboard") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/dashboard" : safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor" : safeUser?.role === "TRAINER" ? "/training-admin" : safeUser?.role === "HR" ? "/hr/dashboard" : safeUser?.role === "SCHEDULER" ? "/scheduler" : "/admin/dashboard";
-    if (id === "intake-referrals") return "/admin/intake-referrals";
-    if (id === "clients") return "/admin/clients";
+    if (id === "intake-referrals") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/pipeline" : "/admin/intake-referrals";
+    if (id === "clients") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/clients" : "/admin/clients";
     if (id === "caregivers") return safeUser?.role === "HR" ? "/hr/caregivers" : safeUser?.role === "SCHEDULER" ? "/scheduler/caregivers" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/caregivers" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/caregivers" : "/admin/caregivers";
-    if (id === "households") return "/admin/households";
+    if (id === "households") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/households" : "/admin/households";
     if (id === "authorizations") return "/admin/authorizations";
     if (id === "scheduling") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/schedule" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/scheduling" : "/admin/scheduling";
     if (id === "evv-visits") return "/admin/evv-visits";
@@ -654,13 +654,13 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (id === "billing-workspace") return "/admin/billing";
     if (id === "reports") return safeUser?.role === "BILLING_FINANCE_STAFF" ? "/billing/reports" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/reports" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/reports" : "/admin/reports";
     if (id === "messages") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/messages" : safeUser?.role === "CAREGIVER" ? "/caregiver/messages" : safeUser?.role === "HR" ? "/hr/messages" : safeUser?.role === "SCHEDULER" ? "/scheduler/messages" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/messages" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/messages" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/messages" : safeUser?.role === "TRAINER" ? "/training-admin/messages" : "/billing/messages";
-    if (id === "patients") return "/admin/clients";
+    if (id === "patients") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/clients" : "/admin/clients";
     if (id === "evv-monitoring") return "/admin/evv-visits";
     if (id === "qa") return safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/qa" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/qa" : "/quality-assurance";
     if (id === "visits") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/visits" : "/field-supervisor/visits";
     if (id === "incidents") return safeUser?.role === "CAREGIVER" ? "/caregiver/incidents" : safeUser?.role === "QA_COMPLIANCE_OFFICER" ? "/compliance/incidents" : safeUser?.role === "CLINICAL_SUPERVISOR_RN" ? "/clinical/incidents" : safeUser?.role === "FIELD_SUPERVISOR" ? "/field-supervisor/incidents" : "/incidents";
     if (id === "assessments") return safeUser?.role === "CAREGIVER" ? "/caregiver/assessments" : "/clinical/assessments";
-    if (id === "referrals") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/referrals" : "/referrals";
+    if (id === "referrals") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/pipeline" : "/admin/intake-referrals";
     if (id === "communications") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/communications" : "/admin/notifications";
     if (id === "overview") return "/portal";
     if (id === "care-plan") return "/portal/care-plan";

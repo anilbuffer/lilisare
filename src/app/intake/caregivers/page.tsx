@@ -79,7 +79,7 @@ export default function IntakeCaregiversPage() {
   }, []);
 
   const handleSelectCaregiver = (cg: CaregiverRecord) => {
-    router.push(`/caregivers/${cg.id}`);
+    router.push(`/intake/caregivers/${cg.id}`);
   };
 
   const handleCloseDrawer = () => {
@@ -147,9 +147,9 @@ export default function IntakeCaregiversPage() {
             <button
               type="button"
               onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#1B3414] hover:bg-[#274C1D] text-white text-xs font-bold rounded-xl shadow-sm transition-all shadow-[#1B3414]/25 hover:shadow-md active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#3D6B22] hover:bg-[#345C1D] text-white text-xs font-bold rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-[#93C573]" />
+              <Plus className="w-4 h-4 text-white" />
               <span>Add Caregiver</span>
               <ChevronDown className="w-3.5 h-3.5 text-white/80" />
             </button>
@@ -226,7 +226,7 @@ export default function IntakeCaregiversPage() {
         caregiver={selectedCaregiver}
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
-        onEditCaregiver={(cg) => router.push(`/caregivers/${cg.id}/edit`)}
+        onEditCaregiver={(cg) => router.push(`/intake/caregivers/${cg.id}/edit`)}
       />
     </div>
   );

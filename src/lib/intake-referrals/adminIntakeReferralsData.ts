@@ -40,17 +40,17 @@ export interface AdminIntakeReferralItem {
 export const SEED_ADMIN_REFERRALS: AdminIntakeReferralItem[] = [
   {
     id: "REF-2026-1042",
-    patientName: "Eleanor Ruth Whitfield",
-    age: 78,
-    gender: "Female",
-    phone: "(555) 234-8901",
-    email: "whitfield.family@example.com",
-    address: "214 Maple Ridge Lane",
+    patientName: "Marcus Whitfield",
+    age: 72,
+    gender: "Male",
+    phone: "(319) 555-3820",
+    email: "elena.whitfield@example.com",
+    address: "1248 Oakwood Drive",
     city: "Cedar Falls",
-    zip: "19087",
+    zip: "50613",
     referralSource: "Hospital Discharge (UPMC Mercy)",
     referralSourceContact: "Dr. Karen Vance, Discharge Navigator",
-    program: "Medicaid Waiver (CHC)",
+    program: "EBD Waiver (Elderly, Blind, and Disabled)",
     requestedServices: ["Skilled Nursing", "Home Health Aide", "Physical Therapy"],
     priority: "Urgent",
     status: "Clinical Assessment",
@@ -58,12 +58,12 @@ export const SEED_ADMIN_REFERRALS: AdminIntakeReferralItem[] = [
     daysInPipeline: 2,
     primaryDiagnosis: "s/p right hip ORIF, early-stage vascular dementia",
     triageNotes:
-      "Patient discharged after surgical hip repair. Non-weight bearing on right leg for 3 weeks. Urgent nursing assessment scheduled to verify home safety and transfer protocols.",
+      "Client discharged after surgical hip repair. Non-weight bearing on right leg for 3 weeks. Urgent nursing assessment scheduled to verify home safety and transfer protocols.",
     assignedCoordinator: "Maria Santos, BSN",
     insuranceVerified: true,
-    payerName: "UPMC Community HealthChoices",
+    payerName: "ElderBridge Care Network",
     targetStartDate: "Nov 26, 2026",
-    estimatedHoursPerWeek: 35,
+    estimatedHoursPerWeek: 32,
     householdCode: "HH-1002",
     clientId: "CL-1002",
   },
@@ -79,7 +79,7 @@ export const SEED_ADMIN_REFERRALS: AdminIntakeReferralItem[] = [
     zip: "97477",
     referralSource: "Pediatric Specialty Clinic",
     referralSourceContact: "Dr. Aris Thorne, MD",
-    program: "Pediatric Special Care (CES Waiver)",
+    program: "CES Waiver (Children’s Extensive Support)",
     requestedServices: ["Home Health Aide", "Occupational Therapy", "Companion Care"],
     priority: "High",
     status: "Documents & Auth",
@@ -88,7 +88,7 @@ export const SEED_ADMIN_REFERRALS: AdminIntakeReferralItem[] = [
     primaryDiagnosis: "Autism Spectrum Disorder (Level 2), Sensory Processing",
     triageNotes:
       "Awaiting final CMA state authorization package for 40 hrs/wk of specialized pediatric in-home aide assistance.",
-    assignedCoordinator: "David Kim, MSW",
+    assignedCoordinator: "Dana Jenkins, MSW",
     insuranceVerified: true,
     payerName: "State Medicaid Pediatric Waiver",
     targetStartDate: "Dec 01, 2026",
@@ -98,25 +98,25 @@ export const SEED_ADMIN_REFERRALS: AdminIntakeReferralItem[] = [
   },
   {
     id: "REF-2026-1040",
-    patientName: "John Doe",
-    age: 76,
+    patientName: "Jackson Vance",
+    age: 6,
     gender: "Male",
-    phone: "(555) 789-0123",
-    email: "john.doe.care@example.com",
-    address: "88 Oak Lane, Apt 4B",
-    city: "Springfield",
-    zip: "01103",
-    referralSource: "Area Agency on Aging (AAA)",
+    phone: "(541) 555-6677",
+    email: "kayla.vance@example.com",
+    address: "889 Silverleaf Road",
+    city: "Eugene",
+    zip: "97401",
+    referralSource: "Pediatric Care Coordination",
     referralSourceContact: "Mark Sullivan, Care Consultant",
-    program: "VA Community Care",
-    requestedServices: ["Home Health Aide", "Physical Therapy", "Dementia Support"],
+    program: "CHCBS Waiver",
+    requestedServices: ["Family Friend Care", "Sensory Support", "Respite Care"],
     priority: "Urgent",
     status: "New Referral",
     receivedDate: "Nov 23, 2026",
     daysInPipeline: 1,
-    primaryDiagnosis: "Post-Stroke Recovery, Left Hemiparesis",
+    primaryDiagnosis: "Developmental Mobility Delay, Sensory Support",
     triageNotes:
-      "Veteran recovering from ischemic stroke with mobility impairment. Requires aide assistance for ADLs and transfer support 6 days/week.",
+      "Client onboarding pending caregiver verification and initial home safety review.",
     assignedCoordinator: "Maria Santos, BSN",
     insuranceVerified: true,
     payerName: "VA Community Care Network (TriWest)",
@@ -299,6 +299,11 @@ export function saveAdminReferralsToStorage(referrals: AdminIntakeReferralItem[]
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(ADMIN_REFERRALS_STORAGE_KEY, JSON.stringify(referrals));
+    window.dispatchEvent(
+      new CustomEvent("lilisare_intake_sync", {
+        detail: { type: "admin_referrals", count: referrals.length, timestamp: Date.now() },
+      })
+    );
   } catch (err) {
     console.error("Failed to save admin referrals to localStorage", err);
   }

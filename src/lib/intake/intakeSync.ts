@@ -67,6 +67,7 @@ export function subscribeToIntakeSync(callback: () => void): () => void {
   const handleStorageChange = (e: StorageEvent) => {
     if (
       e.key === INTAKE_STORAGE_KEY ||
+      e.key === "lilisare_admin_referrals_v1" ||
       e.key === "lilisare_clients_records" ||
       e.key === "lilisare_households_data" ||
       e.key === "lilisare_caregivers_v1"
@@ -531,12 +532,207 @@ export function convertInquiryToLiveEntities(
 
   saveIntakeInquiriesToStorage(updatedInquiries);
 
+  // Also synchronize matching record in Agency Admin Referrals storage if present
+  try {
+    const adminRaw = localStorage.getItem("lilisare_admin_referrals_v1");
+    if (adminRaw) {
+      const adminList = JSON.parse(adminRaw);
+      if (Array.isArray(adminList)) {
+        const numericSuffix = inquiry.id.replace(/\D/g, "");
+        const updatedAdmin = adminList.map((ref: { id?: string; patientName?: string; status?: string }) => {
+          const matchesId =
+            ref.id?.toLowerCase() === inquiry.id.toLowerCase() ||
+            (numericSuffix && ref.id?.endsWith(`-${numericSuffix}`));
+          const matchesName =
+            ref.patientName?.toLowerCase() === inquiry.familyInfo.clientInfo.name.toLowerCase();
+          if (matchesId || matchesName) {
+            return {
+              ...ref,
+              status: "Enrolled",
+              clientId: newClientId,
+              householdCode: newHouseholdCode,
+            };
+          }
+          return ref;
+        });
+        localStorage.setItem("lilisare_admin_referrals_v1", JSON.stringify(updatedAdmin));
+        window.dispatchEvent(new CustomEvent(INTAKE_SYNC_EVENT, { detail: { timestamp: Date.now() } }));
+      }
+    }
+  } catch (err) {
+    console.error("Failed to sync conversion with admin referrals store", err);
+  }
+
   return {
     success: true,
     client: createdClient,
     caregiver: createdCaregiver,
     household: createdHousehold,
   };
+}
+
+/**
+ * Sync an Inquiry stage change from Intake Coordinator to Agency Admin Referrals store
+ */
+export function syncInquiryStageToAdmin(inquiryId: string, newStage: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const statusMap: Record<string, string> = {
+      "New Inquiry": "New Referral",
+      "New Lead": "New Referral",
+      "Contacted": "New Referral",
+      "Needs Discussion": "Clinical Assessment",
+      "In Assessment": "Clinical Assessment",
+      "CMA Coordination": "Documents & Auth",
+      "CM Coordination": "Documents & Auth",
+      "Family Decision": "Ready for Staffing",
+      "Converted": "Enrolled",
+      "Closed": "Archived",
+    };
+    const mappedStatus = statusMap[newStage] || "New Referral";
+    const adminRaw = localStorage.getItem("lilisare_admin_referrals_v1");
+    if (!adminRaw) return;
+    const adminList = JSON.parse(adminRaw);
+    if (!Array.isArray(adminList)) return;
+    const numericSuffix = inquiryId.replace(/\D/g, "");
+    const updated = adminList.map((ref: { id?: string }) => {
+      if (
+        ref.id?.toLowerCase() === inquiryId.toLowerCase() ||
+        (numericSuffix && ref.id?.endsWith(`-${numericSuffix}`))
+      ) {
+        return { ...ref, status: mappedStatus };
+      }
+      return ref;
+    });
+    localStorage.setItem("lilisare_admin_referrals_v1", JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent(INTAKE_SYNC_EVENT, { detail: { timestamp: Date.now() } }));
+  } catch (err) {
+    console.error("Failed to sync inquiry stage to admin referrals", err);
+  }
+}
+
+/**
+ * Archive (soft-close) an Inquiry/Referral across both stores (permitted for Intake Coordinator & Admin)
+ */
+export function archiveReferralAcrossStores(id: string, reason = "Archived by coordinator"): void {
+  if (typeof window === "undefined") return;
+  const numericSuffix = id.replace(/\D/g, "");
+
+  const inquiries = getIntakeInquiriesFromStorage();
+  const updatedInquiries = inquiries.map((inq) => {
+    if (
+      inq.id.toLowerCase() === id.toLowerCase() ||
+      (numericSuffix && inq.id.endsWith(`-${numericSuffix}`))
+    ) {
+      return {
+        ...inq,
+        stage: "Closed" as const,
+        timeline: [
+          {
+            id: `t-${Date.now()}`,
+            type: "status_change" as const,
+            author: "Intake Staff",
+            timestamp: "Just now",
+            title: "Inquiry Archived / Closed",
+            details: reason,
+          },
+          ...inq.timeline,
+        ],
+      };
+    }
+    return inq;
+  });
+  saveIntakeInquiriesToStorage(updatedInquiries);
+
+  try {
+    const adminRaw = localStorage.getItem("lilisare_admin_referrals_v1");
+    if (adminRaw) {
+      const adminList = JSON.parse(adminRaw);
+      if (Array.isArray(adminList)) {
+        const updatedAdmin = adminList.map((ref: { id?: string }) => {
+          if (
+            ref.id?.toLowerCase() === id.toLowerCase() ||
+            (numericSuffix && ref.id?.endsWith(`-${numericSuffix}`))
+          ) {
+            return { ...ref, status: "Archived" };
+          }
+          return ref;
+        });
+        localStorage.setItem("lilisare_admin_referrals_v1", JSON.stringify(updatedAdmin));
+        window.dispatchEvent(new CustomEvent(INTAKE_SYNC_EVENT, { detail: { timestamp: Date.now() } }));
+      }
+    }
+  } catch (err) {
+    console.error("Failed to archive admin referral", err);
+  }
+}
+
+/**
+ * Hard-delete a Referral/Inquiry across both stores (Agency Admin only)
+ */
+export function deleteReferralAcrossStores(id: string): void {
+  if (typeof window === "undefined") return;
+  const numericSuffix = id.replace(/\D/g, "");
+
+  const inquiries = getIntakeInquiriesFromStorage();
+  const filteredInquiries = inquiries.filter(
+    (inq) =>
+      inq.id.toLowerCase() !== id.toLowerCase() &&
+      !(numericSuffix && inq.id.endsWith(`-${numericSuffix}`))
+  );
+  saveIntakeInquiriesToStorage(filteredInquiries);
+
+  try {
+    const adminRaw = localStorage.getItem("lilisare_admin_referrals_v1");
+    if (adminRaw) {
+      const adminList = JSON.parse(adminRaw);
+      if (Array.isArray(adminList)) {
+        const filteredAdmin = adminList.filter(
+          (ref: { id?: string }) =>
+            ref.id?.toLowerCase() !== id.toLowerCase() &&
+            !(numericSuffix && ref.id?.endsWith(`-${numericSuffix}`))
+        );
+        localStorage.setItem("lilisare_admin_referrals_v1", JSON.stringify(filteredAdmin));
+        window.dispatchEvent(new CustomEvent(INTAKE_SYNC_EVENT, { detail: { timestamp: Date.now() } }));
+      }
+    }
+  } catch (err) {
+    console.error("Failed to delete admin referral", err);
+  }
+}
+
+/**
+ * Delete a Client record from live storage (Agency Admin only)
+ */
+export function deleteClientFromStorage(clientId: string): void {
+  if (typeof window === "undefined") return;
+  const clients = getClientsFromStorage();
+  const filtered = clients.filter((c) => c.id.toLowerCase() !== clientId.toLowerCase());
+  saveClientsToStorage(filtered);
+}
+
+/**
+ * Delete a Caregiver record from live storage (Agency Admin only)
+ */
+export function deleteCaregiverFromStorage(caregiverId: string): void {
+  if (typeof window === "undefined") return;
+  const caregivers = getCaregiversFromStorage();
+  const filtered = caregivers.filter((c) => c.id.toLowerCase() !== caregiverId.toLowerCase());
+  saveCaregiversToStorage(filtered);
+}
+
+/**
+ * Delete a Household record from live storage (Agency Admin only)
+ */
+export function deleteHouseholdFromStorage(householdId: string): void {
+  if (typeof window === "undefined") return;
+  const households = getHouseholdsFromStorage();
+  const filtered = households.filter(
+    (h) =>
+      h.id.toLowerCase() !== householdId.toLowerCase() &&
+      h.code.toLowerCase() !== householdId.toLowerCase()
+  );
+  saveHouseholdsToStorage(filtered);
 }
 
 /**

@@ -46,6 +46,7 @@ import {
 import { EvvKpiCards } from "./EvvKpiCards";
 import { EvvExceptionsBanner } from "./EvvExceptionsBanner";
 import { FormInput, FormSelect } from "@/components/ui/FormControls";
+import { Pagination } from "@/components/ui/Pagination";
 
 type TabFilter = "ALL" | "SCHEDULED" | "COMPLETED" | "IN_PROGRESS" | "EXCEPTIONS";
 
@@ -771,49 +772,18 @@ export function EvvVisitsWorkspace() {
       )}
 
       {/* =========================================================================
-          5. PAGINATION BAR (Matches /admin/clients/ style)
+          5. GLOBAL STANDARDIZED PAGINATION BAR
          ========================================================================= */}
       {filteredVisits.length > 0 && (
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 px-4 py-3.5 sm:px-6 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-          <div>
-            Showing <span className="font-bold text-slate-900">{Math.min((currentPage - 1) * pageSize + 1, filteredVisits.length)}</span> to{" "}
-            <span className="font-bold text-slate-900">{Math.min(currentPage * pageSize, filteredVisits.length)}</span> of{" "}
-            <span className="font-bold text-slate-900">{filteredVisits.length}</span> entries
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Previous</span>
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 5).map((pageNum) => (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentPage === pageNum
-                  ? "bg-[#3D6B22] text-white shadow-xs"
-                  : "text-slate-700 hover:bg-slate-100 border border-slate-200"
-                  }`}
-              >
-                {pageNum}
-              </button>
-            ))}
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <span>Next</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredVisits.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="entries"
+          variant="standalone-card"
+        />
       )}
     </div>
   );

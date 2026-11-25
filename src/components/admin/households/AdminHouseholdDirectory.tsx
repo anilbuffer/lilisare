@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
+import { Pagination } from "@/components/ui/Pagination";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import {
   MOCK_HOUSEHOLDS,
@@ -260,7 +261,7 @@ export function AdminHouseholdDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Total Households</span>
+            <span className="text-xs font-medium text-slate-500">Total Households</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <Home className="w-4 h-4" />
             </div>
@@ -273,7 +274,7 @@ export function AdminHouseholdDirectory() {
         {/* Card 2: Connected Clients */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Connected Clients</span>
+            <span className="text-xs font-medium text-slate-500">Connected Clients</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
               <Heart className="w-4 h-4" />
             </div>
@@ -286,7 +287,7 @@ export function AdminHouseholdDirectory() {
         {/* Card 3: Connected Caregivers */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Assigned Staff</span>
+            <span className="text-xs font-medium text-slate-500">Assigned Staff</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <Users className="w-4 h-4" />
             </div>
@@ -299,7 +300,7 @@ export function AdminHouseholdDirectory() {
         {/* Card 4: Auth Utilization Rate */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Auth Utilization</span>
+            <span className="text-xs font-medium text-slate-500">Auth Utilization</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
               <Activity className="w-4 h-4" />
             </div>
@@ -320,7 +321,7 @@ export function AdminHouseholdDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Action Alerts</span>
+            <span className="text-xs font-medium text-slate-500">Action Alerts</span>
             <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -752,40 +753,18 @@ export function AdminHouseholdDirectory() {
         </div>
       )}
 
-      {/* 05. Pagination Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-slate-100">
-        <div className="text-xs text-slate-500 font-medium">
-          Showing{" "}
-          <span className="font-bold text-slate-800">
-            {filteredHouseholds.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
-          </span>{" "}
-          to{" "}
-          <span className="font-bold text-slate-800">
-            {Math.min(currentPage * pageSize, filteredHouseholds.length)}
-          </span>{" "}
-          of <span className="font-bold text-slate-800">{filteredHouseholds.length}</span> households
-        </div>
-
-        <div className="flex items-center gap-2 self-center sm:self-auto">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="text-xs font-semibold text-slate-700 px-2">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      {/* 05. Global Standardized Pagination Bar */}
+      {filteredHouseholds.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredHouseholds.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="households"
+          className="pt-2 border-t border-slate-100"
+        />
+      )}
       {/* Delete Household Confirmation Modal (Agency Admin Only) */}
       {perms.households.canDelete && (
         <Modal

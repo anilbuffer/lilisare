@@ -73,7 +73,7 @@ export function ClientKpiStrip({
           >
             {/* Top row: Label & Animated Icon Container */}
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+              <span className="text-xs font-medium text-slate-500 tracking-tight truncate pr-1">
                 {kpi.label}
               </span>
               <div

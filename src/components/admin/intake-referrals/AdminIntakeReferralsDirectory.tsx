@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
+import { Pagination } from "@/components/ui/Pagination";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import {
   subscribeToIntakeSync,
@@ -333,7 +334,7 @@ export function AdminIntakeReferralsDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-700">Total Referrals</span>
+            <span className="text-xs font-medium text-slate-500">Total Referrals</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <FileText className="w-4 h-4" />
             </div>
@@ -346,7 +347,7 @@ export function AdminIntakeReferralsDirectory() {
         {/* Card 2: Conversion Rate */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-700">Conversion Rate</span>
+            <span className="text-xs font-medium text-slate-500">Conversion Rate</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
               <Sparkles className="w-4 h-4" />
             </div>
@@ -367,7 +368,7 @@ export function AdminIntakeReferralsDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-700">RN Assessments</span>
+            <span className="text-xs font-medium text-slate-500">RN Assessments</span>
             <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
               <Stethoscope className="w-4 h-4" />
             </div>
@@ -380,7 +381,7 @@ export function AdminIntakeReferralsDirectory() {
         {/* Card 4: Avg. Days to Onboard */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-700">Intake Velocity</span>
+            <span className="text-xs font-medium text-slate-500">Intake Velocity</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <Clock className="w-4 h-4" />
             </div>
@@ -401,7 +402,7 @@ export function AdminIntakeReferralsDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-slate-700">Urgent Triage</span>
+            <span className="text-xs font-medium text-slate-500">Urgent Triage</span>
             <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -826,40 +827,18 @@ export function AdminIntakeReferralsDirectory() {
         </div>
       )}
 
-      {/* 05. Pagination Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-slate-100">
-        <div className="text-xs text-slate-500 font-medium">
-          Showing{" "}
-          <span className="font-bold text-slate-800">
-            {filteredReferrals.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
-          </span>{" "}
-          to{" "}
-          <span className="font-bold text-slate-800">
-            {Math.min(currentPage * pageSize, filteredReferrals.length)}
-          </span>{" "}
-          of <span className="font-bold text-slate-800">{filteredReferrals.length}</span> referrals
-        </div>
-
-        <div className="flex items-center gap-2 self-center sm:self-auto">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="text-xs font-semibold text-slate-700 px-2">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+      {/* 05. Global Standardized Pagination Bar */}
+      {filteredReferrals.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredReferrals.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="referrals"
+          className="pt-2 border-t border-slate-100"
+        />
+      )}
 
       {/* 06. Add New Referral Modal */}
       {isAddModalOpen && (
@@ -976,7 +955,7 @@ export function AdminIntakeReferralsDirectory() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+                  className="inline-flex items-center justify-center px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-500 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1011,7 +990,7 @@ export function AdminIntakeReferralsDirectory() {
             <button
               type="button"
               onClick={() => setDeleteTarget(null)}
-              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+              className="px-4 py-2 text-xs font-medium text-slate-500 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
             >
               Cancel
             </button>

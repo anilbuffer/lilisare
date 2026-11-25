@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/components/ui/Card";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   AuthorizationRecord,
   AuthorizationStatus,
@@ -60,6 +61,10 @@ export default function AdminAuthorizationsPage() {
 
   // Evidence modal for quick document preview
   const [evidenceRecord, setEvidenceRecord] = useState<AuthorizationRecord | null>(null);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // Storage synchronization
   useEffect(() => {
@@ -144,6 +149,18 @@ export default function AdminAuthorizationsPage() {
       return true;
     });
   }, [records, activeTab, selectedPayer, selectedCareType, selectedStatus, searchQuery]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, selectedPayer, selectedCareType, selectedStatus, searchQuery]);
+
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
+  const paginatedRecords = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredRecords.slice(start, start + pageSize);
+  }, [filteredRecords, currentPage, pageSize]);
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 pb-20 animate-in fade-in duration-200">
@@ -259,7 +276,7 @@ export default function AdminAuthorizationsPage() {
         {/* Metric 1: Total Active Approvals */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-medium text-slate-500">
               Approved & Active
             </span>
             <div className="w-8 h-8 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
@@ -279,7 +296,7 @@ export default function AdminAuthorizationsPage() {
         {/* Metric 2: Remaining Approved Units */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-medium text-slate-500">
               Remaining Units
             </span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#3D6B22]">
@@ -299,7 +316,7 @@ export default function AdminAuthorizationsPage() {
         {/* Metric 3: Pending & Requested */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-medium text-slate-500">
               Pending Payer Decision
             </span>
             <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-700">
@@ -319,7 +336,7 @@ export default function AdminAuthorizationsPage() {
         {/* Metric 4: Expiring & Exhausted Alerts */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-medium text-slate-500">
               Renewal & Risk Queue
             </span>
             <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-700">
@@ -489,7 +506,7 @@ export default function AdminAuthorizationsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredRecords.map((record) => {
+                paginatedRecords.map((record) => {
                   const remaining = Math.max(0, record.unitsApproved - record.unitsUsed);
                   const burnRate = Math.round((record.unitsUsed / record.unitsApproved) * 100);
                   const isExhausted = remaining <= 30 || burnRate >= 90;
@@ -615,6 +632,19 @@ export default function AdminAuthorizationsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Global Standardized Pagination Bar */}
+        {filteredRecords.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredRecords.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            entryLabel="authorizations"
+            variant="table-footer"
+          />
+        )}
       </div>
 
       {/* ----------------------------------------------------------------- */}

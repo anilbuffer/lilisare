@@ -74,11 +74,11 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
           >
             <div className="flex items-start justify-between">
               <div>
-                <span className="text-[12px] font-semibold text-slate-500 block">
+                <span className="text-xs font-medium text-slate-500 block">
                   {card.label}
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className={`text-xl sm:text-2xl font-bold tracking-tight ${card.accent}`}>
+                  <span className={`text-lg sm:text-xl font-bold tracking-tight ${card.accent}`}>
                     {card.value}
                   </span>
                 </div>

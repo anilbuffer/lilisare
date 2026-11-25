@@ -32,6 +32,7 @@ import { getClientsFromStorage } from "@/lib/clients/mockData";
 import { subscribeToIntakeSync, deleteClientFromStorage } from "@/lib/intake/intakeSync";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import { Modal } from "@/components/ui/Modal";
+import { Pagination } from "@/components/ui/Pagination";
 
 // Unified Client Model with clinical diagnosis & risk level for Agency Admin
 export interface AdminClientItem {
@@ -385,7 +386,7 @@ export function AdminClientDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Total Clients</span>
+            <span className="text-xs font-medium text-slate-500">Total Clients</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <Users className="w-4 h-4" />
             </div>
@@ -404,7 +405,7 @@ export function AdminClientDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Active Care</span>
+            <span className="text-xs font-medium text-slate-500">Active Care</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
               <Heart className="w-4 h-4" />
             </div>
@@ -423,7 +424,7 @@ export function AdminClientDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">High Risk Alert</span>
+            <span className="text-xs font-medium text-slate-500">High Risk Alert</span>
             <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -442,7 +443,7 @@ export function AdminClientDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Hospitalized</span>
+            <span className="text-xs font-medium text-slate-500">Hospitalized</span>
             <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
               <Building2 className="w-4 h-4" />
             </div>
@@ -461,7 +462,7 @@ export function AdminClientDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-700">Care Completed</span>
+            <span className="text-xs font-medium text-slate-500">Care Completed</span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -935,49 +936,18 @@ export function AdminClientDirectory() {
       )}
 
       {/* =========================================================================
-          5. PAGINATION BAR (Max 10 entries per page)
+          5. GLOBAL STANDARDIZED PAGINATION BAR
          ========================================================================= */}
       {filteredClients.length > 0 && (
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 px-4 py-3.5 sm:px-6 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-          <div>
-            Showing <span className="font-bold text-slate-900">{Math.min((currentPage - 1) * pageSize + 1, filteredClients.length)}</span> to{" "}
-            <span className="font-bold text-slate-900">{Math.min(currentPage * pageSize, filteredClients.length)}</span> of{" "}
-            <span className="font-bold text-slate-900">{filteredClients.length}</span> entries
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Previous</span>
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentPage === pageNum
-                  ? "bg-[#3D6B22] text-white shadow-xs"
-                  : "text-slate-700 hover:bg-slate-100 border border-slate-200"
-                  }`}
-              >
-                {pageNum}
-              </button>
-            ))}
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <span>Next</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredClients.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="entries"
+          variant="standalone-card"
+        />
       )}
       {/* Delete Client Confirmation Modal (Agency Admin Only) */}
       {perms.clients.canDelete && (

@@ -45,6 +45,7 @@ import {
   SEED_ADMIN_CAREGIVERS,
   AdminCaregiverItem,
 } from "@/lib/caregivers/adminCaregiversData";
+import { Pagination } from "@/components/ui/Pagination";
 import { AdminCaregiverTopTabs } from "./AdminCaregiverTopTabs";
 import { CaregiverContactModal } from "@/components/caregivers/modals/CaregiverContactModal";
 import { CaregiverScheduleShiftModal } from "@/components/caregivers/modals/CaregiverScheduleShiftModal";
@@ -445,7 +446,7 @@ export function AdminCaregiverDirectory() {
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-xs font-semibold text-slate-500">Active Caregivers</p>
+              <p className="text-xs font-medium text-slate-500">Active Caregivers</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
                 {activeCount || 18}
               </p>
@@ -469,7 +470,7 @@ export function AdminCaregiverDirectory() {
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-xs font-semibold text-slate-500">Onboarding</p>
+              <p className="text-xs font-medium text-slate-500">Onboarding</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
                 {onboardingCount || 1}
               </p>
@@ -493,7 +494,7 @@ export function AdminCaregiverDirectory() {
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-xs font-semibold text-slate-500">Avg. Rating</p>
+              <p className="text-xs font-medium text-slate-500">Avg. Rating</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">{avgRating}</p>
             </div>
             <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
@@ -515,7 +516,7 @@ export function AdminCaregiverDirectory() {
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-xs font-semibold text-slate-500">Compliance Rate</p>
+              <p className="text-xs font-medium text-slate-500">Compliance Rate</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">98%</p>
             </div>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
@@ -950,41 +951,17 @@ export function AdminCaregiverDirectory() {
         </div>
       )}
 
-      {/* 06. Pagination Controls */}
-      {filteredCaregivers.length > pageSize && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-          <p className="text-xs font-medium text-slate-500">
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, filteredCaregivers.length)} of{" "}
-            {filteredCaregivers.length} caregivers
-          </p>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Previous</span>
-            </button>
-
-            <span className="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 rounded-lg">
-              {currentPage} / {totalPages}
-            </span>
-
-            <button
-              type="button"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-2xs"
-            >
-              <span>Next</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+      {/* 06. Global Pagination Controls */}
+      {filteredCaregivers.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredCaregivers.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="caregivers"
+          variant="standalone-card"
+        />
       )}
 
       {/* Action Modals */}

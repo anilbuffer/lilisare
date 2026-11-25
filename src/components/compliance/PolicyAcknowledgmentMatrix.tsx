@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { PolicyAcknowledgment, PolicySignerRecord } from "@/types/compliance";
 import { toast } from "sonner";
+import { Pagination } from "@/components/ui/Pagination";
 
 interface PolicyAcknowledgmentMatrixProps {
   policies: PolicyAcknowledgment[];
@@ -557,36 +558,18 @@ export function PolicyAcknowledgmentMatrix({ policies }: PolicyAcknowledgmentMat
               )}
             </div>
 
-            {/* Modal Footer with Pagination */}
-            <div className="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 shrink-0">
-              <div>
-                Showing <strong>{filteredSigners.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> to{" "}
-                <strong>{Math.min(currentPage * itemsPerPage, filteredSigners.length)}</strong> of{" "}
-                <strong>{filteredSigners.length}</strong> signers
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition-colors touch-manipulation"
-                  aria-label="Previous page"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="font-semibold text-slate-800">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 transition-colors touch-manipulation"
-                  aria-label="Next page"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
+            {/* Modal Footer with Global Standardized Pagination */}
+            {filteredSigners.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredSigners.length}
+                pageSize={itemsPerPage}
+                onPageChange={setCurrentPage}
+                entryLabel="signers"
+                className="p-3.5 sm:p-4 border-t border-slate-200 bg-slate-50"
+              />
+            )}
           </div>
         </div>,
         document.body

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   Search,
   Plus,
@@ -115,6 +116,18 @@ export default function HrCaregiversRosterPage() {
         return 0;
       });
   }, [allList, searchQuery, statusFilter, roleFilter, sortBy]);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, roleFilter, sortBy]);
+  const totalPages = Math.max(1, Math.ceil(filteredCaregivers.length / pageSize));
+  const paginatedCaregivers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredCaregivers.slice(start, start + pageSize);
+  }, [filteredCaregivers, currentPage, pageSize]);
 
   const handleStatusChangeConfirm = (
     newStatus: "Active" | "Leave of Absence" | "Terminated",
@@ -496,7 +509,7 @@ export default function HrCaregiversRosterPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {filteredCaregivers.map((cg) => {
+                {paginatedCaregivers.map((cg) => {
                   const isTerminated = cg.status === ("Terminated" as any) || cg.status === ("Inactive" as any);
                   const isLoa = cg.status === ("Leave of Absence" as any) || cg.status === ("On Leave" as any);
                   const initials = cg.name
@@ -643,6 +656,19 @@ export default function HrCaregiversRosterPage() {
               </tbody>
             </table>
           </div>
+        )}
+
+        {/* Global Standardized Pagination Bar */}
+        {filteredCaregivers.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredCaregivers.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            entryLabel="caregivers"
+            variant="table-footer"
+          />
         )}
       </div>
 

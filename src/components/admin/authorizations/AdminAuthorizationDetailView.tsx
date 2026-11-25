@@ -79,7 +79,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
 
   if (!record) {
     return (
-      <div className="w-full max-w-7xl mx-auto py-16 text-center text-slate-500">
+      <div className="w-full max-w-9xl mx-auto py-16 text-center text-slate-500">
         <ShieldCheck className="w-12 h-12 text-slate-300 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-slate-800">Authorization Record Not Found</h2>
         <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
@@ -157,7 +157,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
     : record.documents.filter((d) => d.type.toLowerCase().includes(docFilter.toLowerCase()));
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in duration-200">
+    <div className="w-full max-w-9xl mx-auto space-y-6 pb-20 animate-in fade-in duration-200">
       {/* ----------------------------------------------------------------- */}
       {/* 01. Breadcrumb & Back Link */}
       {/* ----------------------------------------------------------------- */}
@@ -267,7 +267,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               {record.unitsApproved.toLocaleString()}
             </span>
             <span className="text-xs font-medium text-slate-500">{record.unitMeasure}</span>
@@ -304,7 +304,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
           <div className="mt-2.5 flex items-baseline gap-2">
             <span
               className={cn(
-                "text-2xl sm:text-3xl font-extrabold tracking-tight",
+                "text-lg sm:text-xl font-bold tracking-tight",
                 isExhausted ? "text-rose-600" : "text-slate-900"
               )}
             >
@@ -329,7 +329,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               ${record.billRate.toFixed(2)}
             </span>
             <span className="text-xs font-medium text-slate-500">bill / unit</span>

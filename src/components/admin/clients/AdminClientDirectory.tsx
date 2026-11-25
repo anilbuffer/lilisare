@@ -358,7 +358,7 @@ export function AdminClientDirectory() {
          ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Clients Directory
           </h1>
         </div>
@@ -709,11 +709,11 @@ export function AdminClientDirectory() {
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
                           {/* Default Avatar (Initial Badge) */}
-                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0 shadow-2xs">
+                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-semibold text-xs shrink-0 shadow-2xs">
                             {initials}
                           </div>
                           <div>
-                            <div className="font-bold text-sm text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                            <div className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                               {client.name}
                             </div>
                           </div>
@@ -722,7 +722,7 @@ export function AdminClientDirectory() {
 
                       {/* Primary Diagnosis */}
                       <td className="py-4 px-4 sm:px-6">
-                        <p className="text-xs sm:text-sm text-slate-700 font-medium max-w-xs md:max-w-md truncate">
+                        <p className="text-xs text-slate-700 font-medium max-w-xs md:max-w-md truncate">
                           {client.primaryDiagnosis}
                         </p>
                       </td>
@@ -730,7 +730,7 @@ export function AdminClientDirectory() {
                       {/* Status */}
                       <td className="py-4 px-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${client.status === "Active"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${client.status === "Active"
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : client.status === "Hospitalized"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
@@ -748,7 +748,7 @@ export function AdminClientDirectory() {
                       {/* Risk Level */}
                       <td className="py-4 px-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${client.riskLevel === "High Risk"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${client.riskLevel === "High Risk"
                             ? "bg-rose-50 text-rose-700 border-rose-200"
                             : client.riskLevel === "Medium Risk"
                               ? "bg-amber-50 text-amber-700 border-amber-200"

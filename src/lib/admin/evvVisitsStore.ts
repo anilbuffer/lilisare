@@ -12,7 +12,7 @@ import { INITIAL_CLIENTS } from "@/lib/clients/mockData";
 import { INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
 import { LILISARE_SERVICES } from "@/lib/services";
 
-export const EVV_STORAGE_KEY = "lilisare_evv_visits_v1";
+export const EVV_STORAGE_KEY = "lilisare_evv_visits_v2";
 export const EVV_SYNC_EVENT = "lilisare_evv_visits_sync";
 
 export const DEMO_DATE = "2026-11-25";
@@ -1018,6 +1018,124 @@ function createInitialVisits(): EvvVisitRecord[] {
     });
     recordCounter++;
   }
+
+  // Additional Multi-Date Visits to support operational date filtering (Nov 23, 24, 26, 27)
+  const additionalDates = [
+    { date: "2026-11-24", count: 16, defaultStatus: "Completed" as const, defaultVerification: "Verified" as const },
+    { date: "2026-11-23", count: 12, defaultStatus: "Completed" as const, defaultVerification: "Verified" as const },
+    { date: "2026-11-26", count: 16, defaultStatus: "Scheduled" as const, defaultVerification: "Pending" as const },
+    { date: "2026-11-27", count: 12, defaultStatus: "Scheduled" as const, defaultVerification: "Pending" as const },
+  ];
+
+  additionalDates.forEach(({ date, count, defaultStatus, defaultVerification }) => {
+    for (let k = 0; k < count; k++) {
+      const cl = CLIENT_ROSTER[(recordCounter + k) % CLIENT_ROSTER.length];
+      const cg = CAREGIVER_ROSTER[(recordCounter + k) % CAREGIVER_ROSTER.length];
+      const svc = LILISARE_SERVICES[(recordCounter + k) % LILISARE_SERVICES.length];
+      const startHour = 8 + (k % 6);
+      const endHour = startHour + 4;
+      const startStr = `${String(startHour).padStart(2, "0")}:00`;
+      const endStr = `${String(endHour).padStart(2, "0")}:00`;
+
+      const isException = defaultStatus === "Completed" && k === 2;
+      const vStatus = isException ? "Exception" : defaultVerification;
+      const exceptionType = isException ? ("LOCATION_VERIFICATION" as const) : undefined;
+      const clockInActual = defaultStatus === "Completed" ? `${String(startHour).padStart(2, "0")}:03` : undefined;
+      const clockOutActual = defaultStatus === "Completed" ? `${String(endHour).padStart(2, "0")}:01` : undefined;
+
+      visits.push({
+        id: `EVV-2026-${String(recordCounter).padStart(3, "0")}`,
+        visitNumber: `#${500 + recordCounter}`,
+        date,
+        schedulingVisitId: `VIS-${1000 + recordCounter}`,
+        clientId: cl.id,
+        clientName: cl.name,
+        clientPhone: cl.phone,
+        clientAddress: cl.address,
+        clientMedicaidId: cl.medicaidId,
+        householdId: cl.householdId,
+        householdName: cl.householdName,
+        caregiverId: cg.id,
+        caregiverName: cg.name,
+        caregiverPhone: cg.phone,
+        caregiverRole: cg.role,
+        caregiverClassification: cg.classification,
+        serviceName: svc.name,
+        serviceCode: svc.code,
+        payerName: "Health First Colorado (Medicaid)",
+        authorizationNumber: `AUTH-CO-2026-${8000 + recordCounter}`,
+        authorizedHours: 20,
+        billRate: 34.0,
+        payRate: 22.0,
+        scheduledStartTime: startStr,
+        scheduledEndTime: endStr,
+        scheduledDurationHours: 4.0,
+        actualClockInTime: clockInActual,
+        actualClockOutTime: clockOutActual,
+        actualDurationHours: defaultStatus === "Completed" ? 4.0 : undefined,
+        visitStatus: defaultStatus,
+        verificationStatus: vStatus,
+        exceptionType,
+        exceptionTitle: isException ? "Location Discrepancy" : undefined,
+        exceptionDescription: isException ? "Clock-in recorded outside geofence buffer." : undefined,
+        geofenceRadiusFeet: 250,
+        clockInLocation: clockInActual
+          ? {
+              address: cl.address,
+              lat: 39.7392,
+              lng: -104.9903,
+              accuracyMeters: isException ? 240 : 6,
+              withinGeofence: !isException,
+              distanceFeet: isException ? 380 : 35,
+              timestamp: `${date} ${clockInActual}`,
+              method: "Mobile App GPS",
+            }
+          : undefined,
+        clockOutLocation: clockOutActual
+          ? {
+              address: cl.address,
+              lat: 39.7392,
+              lng: -104.9903,
+              accuracyMeters: 5,
+              withinGeofence: true,
+              distanceFeet: 30,
+              timestamp: `${date} ${clockOutActual}`,
+              method: "Mobile App GPS",
+            }
+          : undefined,
+        sixElements: {
+          serviceType: { verified: true, value: `${svc.code} - ${svc.name}` },
+          individualReceiving: { verified: true, value: `${cl.name} (${cl.medicaidId})` },
+          dateOfService: { verified: true, value: date },
+          locationOfService: { verified: !isException, value: cl.address },
+          individualProviding: { verified: true, value: `${cg.name} (${cg.id})` },
+          timeBeginsAndEnds: {
+            verified: defaultStatus === "Completed",
+            value: defaultStatus === "Completed" ? `${startStr} – ${endStr}` : `Scheduled: ${startStr} – ${endStr}`,
+          },
+        },
+        tasksCompleted: defaultStatus === "Completed" ? ["Personal Hygiene", "Meal Preparation"] : [],
+        careNotes: defaultStatus === "Completed" ? "Shift completed without client issues." : "Scheduled upcoming visit.",
+        clientSignatureCaptured: defaultStatus === "Completed",
+        billingReadiness: vStatus === "Verified" ? "Ready for Billing" : "Awaiting Verification",
+        payrollReadiness: vStatus === "Verified" ? "Ready for Payroll" : "Awaiting Verification",
+        aggregator: "Sandata",
+        aggregatorStatus: vStatus === "Verified" ? "Accepted" : "Pending Submission",
+        reviewNotes: [],
+        timeline: [
+          {
+            id: `t-${recordCounter}-1`,
+            timestamp: `${date} 08:00 AM`,
+            actor: "System Engine",
+            actorRole: "Scheduling Engine",
+            event: "Visit Scheduled",
+            details: `Shift created for ${date}.`,
+          },
+        ],
+      });
+      recordCounter++;
+    }
+  });
 
   return visits;
 }

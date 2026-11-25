@@ -235,7 +235,7 @@ export function AdminHouseholdDirectory() {
       {/* 01. Header & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Households Directory
           </h1>
         </div>
@@ -550,7 +550,7 @@ export function AdminHouseholdDirectory() {
                           <Home className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                          <div className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                             {hh.name}
                           </div>
                         </div>
@@ -559,7 +559,7 @@ export function AdminHouseholdDirectory() {
 
                     {/* Client */}
                     <td className="px-6 py-4">
-                      <div className="font-bold text-slate-800 text-xs">
+                      <div className="font-semibold text-slate-800 text-xs">
                         {hh.client.name}
                       </div>
                     </td>
@@ -574,7 +574,7 @@ export function AdminHouseholdDirectory() {
                     {/* Tri-Journey Status */}
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full border ${hh.authStatus === "Approved"
+                        className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full border ${hh.authStatus === "Approved"
                           ? "bg-[#E8F2E4] text-[#1E5622] border-[#3D6B22]/30"
                           : hh.authStatus === "Expiring Soon"
                             ? "bg-amber-50 text-amber-800 border-amber-200"
@@ -582,7 +582,7 @@ export function AdminHouseholdDirectory() {
                           }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${hh.authStatus === "Approved"
+                          className={`w-1.5 h-1.5 text-[11px] rounded-full ${hh.authStatus === "Approved"
                             ? "bg-[#3D6B22]"
                             : hh.authStatus === "Expiring Soon"
                               ? "bg-amber-500"

@@ -20,7 +20,7 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
       icon: Calendar,
       iconColor: "text-[#3D6B22]",
       iconBg: "bg-[#E8F2E4]",
-      activeRing: "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 shadow-md",
+      activeRing: "border-[#3D6B22] ring-1 ring-[#3D6B22]/20 shadow-md",
       accent: "text-slate-900",
     },
     {
@@ -31,7 +31,7 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
       icon: Clock,
       iconColor: "text-blue-600",
       iconBg: "bg-blue-50",
-      activeRing: "border-blue-500 ring-2 ring-blue-500/20 shadow-md",
+      activeRing: "border-blue-500 ring-1 ring-blue-500/20 shadow-md",
       accent: "text-blue-700",
     },
     {
@@ -42,7 +42,7 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
       icon: CheckCircle2,
       iconColor: "text-[#1E5622]",
       iconBg: "bg-[#E3F1D9]",
-      activeRing: "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 shadow-md",
+      activeRing: "border-[#3D6B22] ring-1 ring-[#3D6B22]/20 shadow-md",
       accent: "text-[#1E5622]",
     },
     {
@@ -53,7 +53,7 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
       icon: AlertTriangle,
       iconColor: "text-amber-600",
       iconBg: "bg-amber-50",
-      activeRing: "border-amber-500 ring-2 ring-amber-500/20 shadow-md",
+      activeRing: "border-amber-500 ring-1 ring-amber-500/20 shadow-md",
       accent: "text-amber-800",
     },
   ];
@@ -69,9 +69,8 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
             key={card.id}
             type="button"
             onClick={() => onSelectFilter(card.id)}
-            className={`text-left bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 cursor-pointer overflow-hidden ${
-              isActive ? `${card.activeRing} bg-slate-50/40` : ""
-            }`}
+            className={`text-left bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 cursor-pointer overflow-hidden ${isActive ? `${card.activeRing} bg-slate-50/40` : ""
+              }`}
           >
             <div className="flex items-start justify-between">
               <div>
@@ -79,14 +78,14 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
                   {card.label}
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${card.accent}`}>
+                  <span className={`text-lg sm:text-xl font-bold tracking-tight ${card.accent}`}>
                     {card.value}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium mt-1">{card.subtext}</p>
               </div>
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${card.iconBg} ${card.iconColor}`}>
-                <Icon className="w-5 h-5" />
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${card.iconBg} ${card.iconColor}`}>
+                <Icon className="w-4 h-4" />
               </div>
             </div>
           </button>

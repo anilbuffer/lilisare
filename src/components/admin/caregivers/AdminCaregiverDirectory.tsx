@@ -398,12 +398,9 @@ export function AdminCaregiverDirectory() {
       {/* 01. Header & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
         <div>
-          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Caregivers Directory
           </h1>
-          <p className="text-xs text-slate-500 font-medium mt-1">
-            Enterprise roster management, real-time EVV compliance, and clinical staffing
-          </p>
         </div>
 
         {/* Actions Bar & Connected Workflows */}
@@ -449,11 +446,11 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Active Caregivers</p>
-              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">
+              <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
                 {activeCount || 18}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -476,11 +473,11 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Onboarding</p>
-              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">
+              <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
                 {onboardingCount || 1}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
               <UserPlus className="w-4 h-4" />
             </div>
           </div>
@@ -503,9 +500,9 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Avg. Rating</p>
-              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">{avgRating}</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">{avgRating}</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             </div>
           </div>
@@ -526,9 +523,9 @@ export function AdminCaregiverDirectory() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold text-slate-500">Compliance Rate</p>
-              <p className="text-2xl sm:text-2xl font-bold text-slate-900 mt-1">98%</p>
+              <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">98%</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
@@ -771,11 +768,11 @@ export function AdminCaregiverDirectory() {
                       {/* Caregiver Name & Avatar */}
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0 shadow-2xs">
+                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-semibold text-xs shrink-0 shadow-2xs">
                             {initials}
                           </div>
                           <div>
-                            <div className="font-bold text-sm text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                            <div className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                               {cg.name}
                             </div>
                           </div>
@@ -784,7 +781,7 @@ export function AdminCaregiverDirectory() {
 
                       {/* Role / Class */}
                       <td className="py-4 px-4 sm:px-6">
-                        <p className="text-xs sm:text-sm text-slate-700 font-medium max-w-xs md:max-w-md truncate">
+                        <p className="text-xs text-slate-700 font-medium max-w-xs md:max-w-md truncate">
                           {roleDisplay}
                         </p>
                       </td>
@@ -792,7 +789,7 @@ export function AdminCaregiverDirectory() {
                       {/* Status */}
                       <td className="py-4 px-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${cg.status === "Active"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${cg.status === "Active"
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : cg.status === "Onboarding"
                               ? "bg-purple-50 text-purple-700 border-purple-200"
@@ -808,7 +805,7 @@ export function AdminCaregiverDirectory() {
                       {/* Compliance */}
                       <td className="py-4 px-4 sm:px-6 hidden sm:table-cell">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${(cg.complianceRate ?? 100) >= 90
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${(cg.complianceRate ?? 100) >= 90
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : (cg.complianceRate ?? 100) >= 75
                               ? "bg-amber-50 text-amber-700 border-amber-200"
@@ -821,7 +818,7 @@ export function AdminCaregiverDirectory() {
 
                       {/* Phone - Single Clean Phone (Hidden on mobile for responsiveness) */}
                       <td className="py-4 px-4 sm:px-6 hidden md:table-cell">
-                        <span className="text-xs sm:text-sm text-slate-600 ">
+                        <span className="text-xs text-slate-700 font-medium">
                           {singlePhone}
                         </span>
                       </td>

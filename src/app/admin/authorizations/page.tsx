@@ -193,7 +193,7 @@ export default function AdminAuthorizationsPage() {
       {showDistinctionBanner && (
         <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 text-xs text-slate-700 shadow-2xs relative">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0 mt-0.5">
+            <div className="w-8 h-8 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0 mt-0.5">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div className="space-y-0.5 pr-2">
@@ -262,12 +262,12 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Approved & Active
             </span>
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+            <div className="w-8 h-8 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               {kpis.totalActiveApproved}
             </span>
             <span className="text-xs font-medium text-slate-500">
@@ -282,12 +282,12 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Remaining Units
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#3D6B22]">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#3D6B22]">
               <Activity className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               {kpis.totalRemainingUnits.toLocaleString()}
             </span>
             <span className="text-xs font-medium text-slate-500">
@@ -302,12 +302,12 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Pending Payer Decision
             </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-700">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-700">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               {kpis.totalPendingRequests}
             </span>
             <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded">
@@ -322,12 +322,12 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Renewal & Risk Queue
             </span>
-            <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-700">
+            <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-700">
               <AlertOctagon className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
               {kpis.exhaustedOrCritical + kpis.expiringIn30Days}
             </span>
             <span className="text-xs font-semibold text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded">

@@ -404,7 +404,7 @@ export function AdminClientDetailView({
           <div className="flex flex-col gap-1.5">
             {/* Row 1: Client Name and ID pill */}
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                 {client.name}
               </h1>
               <span className=" font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg text-xs border border-slate-200/80">

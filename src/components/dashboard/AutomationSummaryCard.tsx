@@ -30,7 +30,7 @@ export function AutomationSummaryCard() {
         {/* 3 Metric Stats */}
         <div className="flex items-center gap-4 sm:gap-8 shrink-0">
           <div className="text-center sm:text-left">
-            <span className="text-2xl sm:text-3xl font-extrabold text-[#93C573] block leading-none">
+            <span className="text-lg sm:text-xl font-bold text-[#93C573] block leading-none">
               {metrics.automationSummary.tasksAutomatedThisWeek.toLocaleString()}
             </span>
             <span className="text-[11px] text-slate-300 mt-1 block">Tasks automated</span>
@@ -39,7 +39,7 @@ export function AutomationSummaryCard() {
           <div className="h-8 w-px bg-white/20 hidden sm:block" />
 
           <div className="text-center sm:text-left">
-            <span className="text-2xl sm:text-3xl font-extrabold text-amber-300 block leading-none">
+            <span className="text-lg sm:text-xl font-bold text-amber-300 block leading-none">
               {metrics.automationSummary.remindersSentThisWeek.toLocaleString()}
             </span>
             <span className="text-[11px] text-slate-300 mt-1 block">Reminders sent</span>
@@ -48,7 +48,7 @@ export function AutomationSummaryCard() {
           <div className="h-8 w-px bg-white/20 hidden sm:block" />
 
           <div className="text-center sm:text-left">
-            <span className="text-2xl sm:text-3xl font-extrabold text-emerald-300 block leading-none">
+            <span className="text-lg sm:text-xl font-bold text-emerald-300 block leading-none">
               {metrics.automationSummary.staffHoursSavedThisWeek}h
             </span>
             <span className="text-[11px] text-slate-300 mt-1 block">Staff hours saved</span>

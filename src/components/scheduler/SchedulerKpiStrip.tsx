@@ -167,10 +167,10 @@ export function SchedulerKpiStrip({
         <p className="text-[10px] sm:text-[11px] text-slate-500 mt-1 truncate">
           {evvCompliancePercent >= 95 ? "On target (≥95%)" : "Risk of billing hold"}
         </p>
-        
+
         {/* Progress Bar Gauge */}
         <div className="w-full h-1.5 bg-slate-100 rounded-full mt-2.5 overflow-hidden">
-          <motion.div 
+          <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${evvCompliancePercent}%` }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -220,7 +220,7 @@ export function SchedulerKpiStrip({
           </div>
         </div>
         <div className="flex items-baseline gap-2">
-          <Counter value={availabilityGapsCount} className="text-2xl sm:text-2xl font-bold text-slate-800" />
+          <Counter value={availabilityGapsCount} className="text-lg sm:text-xl font-bold text-slate-800" />
           <span className="text-xs font-semibold text-slate-600">Caregivers</span>
         </div>
         <p className="text-[11px] text-slate-500 font-medium mt-1">Under-scheduled this week</p>

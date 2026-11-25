@@ -24,6 +24,10 @@ import {
   Users,
   Building2,
   CalendarDays,
+  ArrowRight,
+  List as ListIcon,
+  LayoutGrid,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -45,20 +49,44 @@ import { FormInput, FormSelect } from "@/components/ui/FormControls";
 
 type TabFilter = "ALL" | "SCHEDULED" | "COMPLETED" | "IN_PROGRESS" | "EXCEPTIONS";
 
+function getInitials(name: string): string {
+  if (!name) return "CG";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function formatDateLabel(isoDate: string): string {
+  try {
+    const [y, m, d] = isoDate.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return isoDate;
+  }
+}
+
 export function EvvVisitsWorkspace() {
   const router = useRouter();
+  const dateInputRef = React.useRef<HTMLInputElement>(null);
   const [visits, setVisits] = useState<EvvVisitRecord[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>(DEMO_DATE);
+  const [selectedDateFilter, setSelectedDateFilter] = useState<"SPECIFIC" | "ALL">("SPECIFIC");
   const [activeTab, setActiveTab] = useState<TabFilter>("ALL");
   const [activeExceptionType, setActiveExceptionType] = useState<EvvExceptionType | "ALL" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedService, setSelectedService] = useState("ALL");
   const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("ALL");
-  const [selectedDateFilter, setSelectedDateFilter] = useState<"TODAY" | "ALL">("TODAY");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Pagination
+  // Pagination (Matches /admin/clients/ 10 entries per page standard)
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 15;
+  const pageSize = 10;
 
   // Load from storage and listen to sync events
   useEffect(() => {
@@ -77,7 +105,43 @@ export function EvvVisitsWorkspace() {
     }
   }, []);
 
-  const kpis = useMemo(() => calculateEvvKpis(visits), [visits]);
+  // Day Stepping Handlers
+  const handlePreviousDay = () => {
+    try {
+      const [y, m, d] = selectedDate.split("-").map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() - 1);
+      const prevIso = dt.toISOString().split("T")[0];
+      setSelectedDate(prevIso);
+      setSelectedDateFilter("SPECIFIC");
+      setCurrentPage(1);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleNextDay = () => {
+    try {
+      const [y, m, d] = selectedDate.split("-").map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() + 1);
+      const nextIso = dt.toISOString().split("T")[0];
+      setSelectedDate(nextIso);
+      setSelectedDateFilter("SPECIFIC");
+      setCurrentPage(1);
+    } catch {
+      // fallback
+    }
+  };
+
+  // Date-filtered pool of visits (e.g. today's 128 visits or all dates)
+  const dateFilteredVisits = useMemo(() => {
+    if (selectedDateFilter === "ALL") return visits;
+    return visits.filter((v) => v.date === selectedDate);
+  }, [visits, selectedDateFilter, selectedDate]);
+
+  // Recalculate KPIs based on date filter
+  const kpis = useMemo(() => calculateEvvKpis(dateFilteredVisits), [dateFilteredVisits]);
 
   const handleTabChange = (tab: TabFilter) => {
     setActiveTab(tab);
@@ -131,6 +195,8 @@ export function EvvVisitsWorkspace() {
     setSearchQuery("");
     setSelectedService("ALL");
     setSelectedVerificationStatus("ALL");
+    setSelectedDate(DEMO_DATE);
+    setSelectedDateFilter("SPECIFIC");
     setCurrentPage(1);
   };
 
@@ -143,9 +209,7 @@ export function EvvVisitsWorkspace() {
 
   // Filtering Logic
   const filteredVisits = useMemo(() => {
-    return visits.filter((v) => {
-      if (selectedDateFilter === "TODAY" && v.date !== DEMO_DATE) return false;
-
+    return dateFilteredVisits.filter((v) => {
       if (activeTab === "SCHEDULED" && v.visitStatus !== "Scheduled") return false;
       if (activeTab === "COMPLETED" && v.visitStatus !== "Completed") return false;
       if (activeTab === "IN_PROGRESS" && v.visitStatus !== "In Progress") return false;
@@ -183,8 +247,7 @@ export function EvvVisitsWorkspace() {
       return true;
     });
   }, [
-    visits,
-    selectedDateFilter,
+    dateFilteredVisits,
     activeTab,
     activeExceptionType,
     selectedService,
@@ -200,37 +263,33 @@ export function EvvVisitsWorkspace() {
 
   const renderVisitStatusBadge = (status: EvvVisitStatus) => {
     switch (status) {
-      case "In Progress":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
-            In Progress
-          </span>
-        );
       case "Completed":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
             Completed
+          </span>
+        );
+      case "In Progress":
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-blue-50 text-blue-700 border-blue-200">
+            In Progress
           </span>
         );
       case "Scheduled":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            <Clock className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-slate-100 text-slate-600 border-slate-200">
             Scheduled
           </span>
         );
       case "Missed":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-            <AlertTriangle className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-rose-50 text-rose-700 border-rose-200">
             Missed
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-slate-100 text-slate-700 border-slate-200">
             {status}
           </span>
         );
@@ -287,7 +346,7 @@ export function EvvVisitsWorkspace() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-5 pb-16">
+    <div className="w-full max-w-9xl mx-auto space-y-5 pb-16">
 
       {/* A. Page Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -301,22 +360,68 @@ export function EvvVisitsWorkspace() {
 
         {/* Date Filter & Action Buttons */}
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          {/* Today / Demo Date Switcher */}
-          <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-2xs">
+          {/* Functional Date Filter & Day Stepper */}
+          <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-2xs gap-0.5">
+            {/* Previous Day */}
             <button
               type="button"
-              onClick={() => {
-                setSelectedDateFilter("TODAY");
-                setCurrentPage(1);
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${selectedDateFilter === "TODAY"
-                ? "bg-[#3D6B22] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-                }`}
+              onClick={handlePreviousDay}
+              title="Previous Day"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
             >
-              <Calendar className="w-3.5 h-3.5" />
-              Today · Nov 25, 2026
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
+
+            {/* Date Button with Native Date Input Picker */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedDateFilter("SPECIFIC");
+                  dateInputRef.current?.showPicker?.();
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${selectedDateFilter === "SPECIFIC"
+                    ? "bg-[#3D6B22] text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                  }`}
+                title="Click to select date"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>
+                  {selectedDate === DEMO_DATE
+                    ? "Today · Nov 25, 2026"
+                    : formatDateLabel(selectedDate)}
+                </span>
+              </button>
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setSelectedDate(e.target.value);
+                    setSelectedDateFilter("SPECIFIC");
+                    setCurrentPage(1);
+                  }
+                }}
+                className="absolute inset-0 opacity-0 pointer-events-none w-full h-full"
+                tabIndex={-1}
+              />
+            </div>
+
+            {/* Next Day */}
+            <button
+              type="button"
+              onClick={handleNextDay}
+              title="Next Day"
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+
+            <div className="h-4 w-px bg-slate-200 mx-1" />
+
+            {/* All Dates Button */}
             <button
               type="button"
               onClick={() => {
@@ -324,8 +429,8 @@ export function EvvVisitsWorkspace() {
                 setCurrentPage(1);
               }}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${selectedDateFilter === "ALL"
-                ? "bg-[#3D6B22] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
                 }`}
             >
               All Dates
@@ -365,40 +470,47 @@ export function EvvVisitsWorkspace() {
 
       {/* D. Exception Monitoring Section */}
       <EvvExceptionsBanner
-        visits={visits}
+        visits={dateFilteredVisits}
         activeExceptionType={activeExceptionType}
         onSelectExceptionType={handleExceptionTypeSelect}
       />
 
-      {/* C. Visit Monitoring Workspace */}
-      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        {/* Search & Filter Bar with Standardized Form Controls */}
-        <div className="p-4 border-b border-slate-100 bg-slate-50/20 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <FormInput
-              placeholder="Search caregiver, client or visit ID..."
+      {/* =========================================================================
+          3. SEARCH, DROPDOWN FILTERS & VIEW SWITCHER (Matches /admin/clients/ style)
+         ========================================================================= */}
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-3.5 sm:p-4 shadow-2xs">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              icon={<Search className="w-4 h-4" />}
+              placeholder="Search by caregiver, client or visit ID..."
+              className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentPage(1);
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
               >
-                <X className="w-3.5 h-3.5" />
+                Clear
               </button>
             )}
           </div>
 
-          {/* Secondary Filters */}
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* Controls: Visit Status Dropdown, Service Dropdown, Verification Dropdown, Reset, View Switcher */}
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
             {/* Visit Status Filter Dropdown */}
-            <div className="w-44">
+            <div className="w-40 sm:w-44">
               <FormSelect
                 value={activeTab}
                 onChange={(e) => handleTabChange(e.target.value as TabFilter)}
@@ -412,7 +524,7 @@ export function EvvVisitsWorkspace() {
             </div>
 
             {/* Service Filter Dropdown */}
-            <div className="w-44">
+            <div className="w-36 sm:w-40">
               <FormSelect
                 value={selectedService}
                 onChange={(e) => {
@@ -430,7 +542,7 @@ export function EvvVisitsWorkspace() {
             </div>
 
             {/* Verification Status Filter Dropdown */}
-            <div className="w-44">
+            <div className="w-36 sm:w-40">
               <FormSelect
                 value={selectedVerificationStatus}
                 onChange={(e) => {
@@ -447,6 +559,7 @@ export function EvvVisitsWorkspace() {
               </FormSelect>
             </div>
 
+            {/* Reset Filter Button if active */}
             {(searchQuery ||
               activeTab !== "ALL" ||
               selectedService !== "ALL" ||
@@ -455,47 +568,94 @@ export function EvvVisitsWorkspace() {
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                  title="Reset all filters"
+                  className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 cursor-pointer"
                 >
-                  Reset
+                  <RotateCcw className="w-4 h-4" />
                 </button>
               )}
+
+            {/* View Switcher: List vs Grid Toggle */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                title="List View"
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "list"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
+              >
+                <ListIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">List</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                title="Grid View"
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
+                  ? "bg-white text-slate-900 shadow-2xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
+                  }`}
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Clean Front List Table (Desktop & Tablet) */}
-        <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4">Visit ID</th>
-                <th className="py-3 px-4">Caregiver</th>
-                <th className="py-3 px-4">Scheduled</th>
-                <th className="py-3 px-4">Actual Time</th>
-                <th className="py-3 px-4">Visit Status</th>
-                <th className="py-3 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-xs text-slate-800">
-              {paginatedVisits.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
-                    <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="font-semibold text-sm text-slate-700">No visits match your criteria</p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      Try adjusting your search query, status tabs, or service filters.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleResetFilters}
-                      className="mt-3 inline-flex items-center px-3 py-1.5 text-xs font-semibold text-[#3D6B22] bg-[#3D6B22]/10 rounded-lg hover:bg-[#3D6B22]/20"
-                    >
-                      Clear All Filters
-                    </button>
-                  </td>
+      {/* =========================================================================
+          4. CONTENT AREA: LIST VIEW vs GRID VIEW (Matches /admin/clients/ style)
+         ========================================================================= */}
+      {filteredVisits.length === 0 ? (
+        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-12 text-center shadow-2xs">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
+            <Users className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-slate-800">No visits found</h3>
+          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            No records matched your search query or filter criteria. Try clearing filters to see all visits.
+          </p>
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+          >
+            Clear Filters
+          </button>
+        </div>
+      ) : viewMode === "list" ? (
+        /* LIST VIEW */
+        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Visit ID
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Caregiver
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    {selectedDateFilter === "ALL" ? "Date & Scheduled" : "Scheduled"}
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Actual Time
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                paginatedVisits.map((visit) => {
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {paginatedVisits.map((visit) => {
+                  const initials = getInitials(visit.caregiverName);
                   const scheduledStr = `${formatTimeDisplay(visit.scheduledStartTime)} – ${formatTimeDisplay(
                     visit.scheduledEndTime
                   )}`;
@@ -508,149 +668,194 @@ export function EvvVisitsWorkspace() {
                     <tr
                       key={visit.id}
                       onClick={() => router.push(`/admin/evv-visits/${visit.id}/`)}
-                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                      className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
                     >
                       {/* Visit ID */}
-                      <td className="py-3.5 px-4 font-medium text-xs text-slate-600 whitespace-nowrap">
-                        {visit.id}
+                      <td className="py-4 px-4 sm:px-6">
+                        <span className="font-medium text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                          {visit.id}
+                        </span>
                       </td>
 
-                      {/* Caregiver Name (Single-line primary value) */}
-                      <td className="py-3.5 px-4 font-medium text-slate-600 whitespace-nowrap">
-                        <Link
-                          href={`/admin/caregivers/${visit.caregiverId}/`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="hover:text-[#3D6B22] hover:underline"
-                        >
-                          {visit.caregiverName}
-                        </Link>
+                      {/* Caregiver with Avatar Initials */}
+                      <td className="py-4 px-4 sm:px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0 shadow-2xs">
+                            {initials}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-xs text-slate-800 group-hover:text-[#3D6B22] transition-colors">
+                              {visit.caregiverName}
+                            </div>
+                          </div>
+                        </div>
                       </td>
 
                       {/* Scheduled Time */}
-                      <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap font-medium">
-                        {scheduledStr}
+                      <td className="py-4 px-4 sm:px-6">
+                        <p className="text-xs text-slate-800 font-medium">
+                          {selectedDateFilter === "ALL" && (
+                            <span className="block font-semibold text-slate-900 text-[11px] mb-0.5">
+                              {formatDateLabel(visit.date)}
+                            </span>
+                          )}
+                          {scheduledStr}
+                        </p>
                       </td>
 
-                      {/* Actual EVV Time */}
-                      <td className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-600">
-                        {actualStr}
+                      {/* Actual Time */}
+                      <td className="py-4 px-4 sm:px-6">
+                        <p className="text-xs text-slate-800 font-medium">
+                          {actualStr}
+                        </p>
                       </td>
 
-                      {/* Visit Status */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+                      {/* Status */}
+                      <td className="py-4 px-4 sm:px-6">
                         {renderVisitStatusBadge(visit.visitStatus)}
                       </td>
 
-                      {/* Action */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <Link
-                          href={`/admin/evv-visits/${visit.id}/`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-lg shadow-xs transition-all active:scale-95"
-                        >
-                          <span>Review</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
+                      {/* Actions */}
+                      <td className="py-4 px-4 sm:px-6 text-right">
+                        <div className="inline-flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          <Link
+                            href={`/admin/evv-visits/${visit.id}/`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                          >
+                            <span>Review Visit</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   );
-                })
-              )}
-            </tbody>
-          </table>
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
+      ) : (
+        /* GRID VIEW (Matches /admin/clients/ style) */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {paginatedVisits.map((visit) => {
+            const initials = getInitials(visit.caregiverName);
+            const scheduledStr = `${formatTimeDisplay(visit.scheduledStartTime)} – ${formatTimeDisplay(
+              visit.scheduledEndTime
+            )}`;
+            const actualStr = visit.actualClockInTime
+              ? `${formatTimeDisplay(visit.actualClockInTime)} – ${visit.actualClockOutTime ? formatTimeDisplay(visit.actualClockOutTime) : "In Progress"
+              }`
+              : "Not Started";
 
-        {/* Mobile Adaptive Cards View (Below sm viewport) */}
-        <div className="block sm:hidden divide-y divide-slate-100">
-          {paginatedVisits.length === 0 ? (
-            <div className="p-8 text-center text-slate-500">
-              <AlertTriangle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="font-semibold text-sm text-slate-700">No visits match your criteria</p>
-              <button
-                type="button"
-                onClick={handleResetFilters}
-                className="mt-3 inline-flex items-center px-3 py-1.5 text-xs font-semibold text-[#3D6B22] bg-[#3D6B22]/10 rounded-lg hover:bg-[#3D6B22]/20"
-              >
-                Clear All Filters
-              </button>
-            </div>
-          ) : (
-            paginatedVisits.map((visit) => (
+            return (
               <div
                 key={visit.id}
                 onClick={() => router.push(`/admin/evv-visits/${visit.id}/`)}
-                className="p-4 space-y-2 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between cursor-pointer group"
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-xs text-slate-900">{visit.id}</span>
-                  <div>
+                <div>
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-sm shrink-0 shadow-2xs">
+                        {initials}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                          {visit.caregiverName}
+                        </div>
+                        <p className="font-mono text-xs text-slate-400 font-medium mt-0.5">
+                          {visit.id}
+                        </p>
+                      </div>
+                    </div>
                     {renderVisitStatusBadge(visit.visitStatus)}
+                  </div>
+
+                  <div className="space-y-2.5 text-xs">
+                    <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                      <span className="text-slate-500 font-medium">
+                        {selectedDateFilter === "ALL" ? "Date & Scheduled" : "Scheduled"}
+                      </span>
+                      <span className="text-slate-800 font-semibold text-right">
+                        {selectedDateFilter === "ALL" && (
+                          <span className="block text-[11px] text-slate-500">
+                            {formatDateLabel(visit.date)}
+                          </span>
+                        )}
+                        {scheduledStr}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-1 border-b border-slate-100">
+                      <span className="text-slate-500 font-medium">Actual EVV</span>
+                      <span className="text-slate-800 font-semibold">{actualStr}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-xs space-y-0.5">
-                  <div className="font-bold text-slate-900">{visit.caregiverName}</div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                  <span>
-                    {formatTimeDisplay(visit.scheduledStartTime)} – {formatTimeDisplay(visit.scheduledEndTime)}
-                  </span>
+                <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
                   <Link
                     href={`/admin/evv-visits/${visit.id}/`}
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#3D6B22] hover:underline"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] transition-colors"
                   >
-                    <span>View Detail</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <span>Review Visit</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
+                  <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200/60 font-mono">
+                    Shift {visit.visitNumber}
+                  </span>
                 </div>
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
+      )}
 
-        {/* Pagination & Summary Footer */}
-        <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      {/* =========================================================================
+          5. PAGINATION BAR (Matches /admin/clients/ style)
+         ========================================================================= */}
+      {filteredVisits.length > 0 && (
+        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 px-4 py-3.5 sm:px-6 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <div>
-            Showing{" "}
-            <span className="font-semibold text-slate-800">
-              {filteredVisits.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
-            </span>{" "}
-            to{" "}
-            <span className="font-semibold text-slate-800">
-              {Math.min(currentPage * pageSize, filteredVisits.length)}
-            </span>{" "}
-            of <span className="font-semibold text-slate-800">{filteredVisits.length}</span> visits
+            Showing <span className="font-bold text-slate-900">{Math.min((currentPage - 1) * pageSize + 1, filteredVisits.length)}</span> to{" "}
+            <span className="font-bold text-slate-900">{Math.min(currentPage * pageSize, filteredVisits.length)}</span> of{" "}
+            <span className="font-bold text-slate-900">{filteredVisits.length}</span> entries
           </div>
 
           <div className="flex items-center gap-1.5">
             <button
-              type="button"
-              disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              title="Previous Page"
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-1 cursor-pointer"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Previous</span>
             </button>
 
-            <span className="px-3 py-1 text-xs font-semibold text-slate-700 bg-slate-100 rounded-lg">
-              Page {currentPage} of {totalPages}
-            </span>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 5).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentPage === pageNum
+                  ? "bg-[#3D6B22] text-white shadow-xs"
+                  : "text-slate-700 hover:bg-slate-100 border border-slate-200"
+                  }`}
+              >
+                {pageNum}
+              </button>
+            ))}
 
             <button
-              type="button"
-              disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              title="Next Page"
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-1 cursor-pointer"
             >
-              <ChevronRight className="w-4 h-4" />
+              <span>Next</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

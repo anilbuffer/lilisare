@@ -308,7 +308,7 @@ export function AdminIntakeReferralsDirectory() {
       {/* 01. Header & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-2xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Intake & Referrals Directory
           </h1>
         </div>
@@ -611,11 +611,11 @@ export function AdminIntakeReferralsDirectory() {
                     {/* Patient info */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-semibold text-xs flex items-center justify-center shrink-0">
                           {getInitials(ref.patientName)}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                          <div className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                             {ref.patientName}
                           </div>
                         </div>
@@ -628,7 +628,7 @@ export function AdminIntakeReferralsDirectory() {
                         {ref.requestedServices.map((svc, idx) => (
                           <span
                             key={idx}
-                            className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20"
+                            className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20"
                           >
                             {svc}
                           </span>
@@ -656,7 +656,7 @@ export function AdminIntakeReferralsDirectory() {
                     {/* Status */}
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full border ${ref.status === "Enrolled"
+                        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${ref.status === "Enrolled"
                           ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                           : ref.status === "Ready for Staffing"
                             ? "bg-teal-50 text-teal-800 border-teal-200"

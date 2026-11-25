@@ -509,7 +509,7 @@ export default function HouseholdsPage({
 
               {/* Metric Value & Hover Glow Arrow */}
               <div className="flex items-baseline justify-between mt-1">
-                <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 group-hover:text-[#3D6B22] transition-colors">
                   {kpi.value}
                 </span>
                 <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />

@@ -171,7 +171,7 @@ export function CareNotesTemplatesWorkspace() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-slate-50/50 pb-16">
+    <div className="w-full">
       <CareNotesSubNav
         title="Note Templates"
         description="Design and manage structured care note layouts, required fields, and caregiver guidance across programs."
@@ -209,11 +209,10 @@ export function CareNotesTemplatesWorkspace() {
                 <div
                   key={tmpl.id}
                   onClick={() => setSelectedTemplate(tmpl)}
-                  className={`p-4 sm:p-5 rounded-xl lg:rounded-2xl border transition-all cursor-pointer bg-white ${
-                    isSelected
-                      ? "border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/20"
-                      : "border-slate-200 hover:border-slate-300 shadow-2xs"
-                  }`}
+                  className={`p-4 sm:p-5 rounded-xl lg:rounded-2xl border transition-all cursor-pointer bg-white ${isSelected
+                    ? "border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/20"
+                    : "border-slate-200 hover:border-slate-300 shadow-2xs"
+                    }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
@@ -334,9 +333,6 @@ export function CareNotesTemplatesWorkspace() {
                   <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                     {editingId ? "Edit Note Template" : "Create Care Note Template"}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Structure documentation sections for caregiver mobile app and admin auditing
-                  </p>
                 </div>
               </div>
               <button
@@ -385,7 +381,7 @@ export function CareNotesTemplatesWorkspace() {
                       placeholder="Code (e.g. T1019)"
                       value={serviceCode}
                       onChange={(e) => setServiceCode(e.target.value)}
-                      className="w-28 px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-mono"
+                      className="w-24 px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-mono"
                     />
                     <input
                       type="text"
@@ -393,7 +389,7 @@ export function CareNotesTemplatesWorkspace() {
                       placeholder="Category"
                       value={serviceCategory}
                       onChange={(e) => setServiceCategory(e.target.value)}
-                      className="flex-1 px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm"
+                      className="w-full flex-1 px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm"
                     />
                   </div>
                 </div>

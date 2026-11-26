@@ -116,7 +116,7 @@ export function CareNotesReviewQueueWorkspace() {
   };
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-5 pb-16 px-4 sm:px-6 lg:px-8 pt-2 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
       <CareNotesSubNav
         title="CareNotes Review Queue"
         description="Priority operational queue for Agency Admin to review, audit, and verify submitted caregiver documentation."
@@ -129,11 +129,10 @@ export function CareNotesReviewQueueWorkspace() {
             setSelectedPriority("all");
             setSelectedReviewerFilter("all");
           }}
-          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-            selectedPriority === "all" && selectedReviewerFilter === "all"
-              ? "bg-white border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/20"
-              : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
-          }`}
+          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${selectedPriority === "all" && selectedReviewerFilter === "all"
+            ? "bg-white border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/20"
+            : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
+            }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
             <span>Pending Review</span>
@@ -145,11 +144,10 @@ export function CareNotesReviewQueueWorkspace() {
 
         <button
           onClick={() => setSelectedPriority("high")}
-          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-            selectedPriority === "high"
-              ? "bg-white border-rose-500 shadow-sm ring-1 ring-rose-500/20"
-              : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
-          }`}
+          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${selectedPriority === "high"
+            ? "bg-white border-rose-500 shadow-sm ring-1 ring-rose-500/20"
+            : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
+            }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
             <span>High / Urgent Priority</span>
@@ -161,11 +159,10 @@ export function CareNotesReviewQueueWorkspace() {
 
         <button
           onClick={() => setSelectedReviewerFilter("me")}
-          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-            selectedReviewerFilter === "me"
-              ? "bg-white border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/20"
-              : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
-          }`}
+          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${selectedReviewerFilter === "me"
+            ? "bg-white border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/20"
+            : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
+            }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
             <span>Assigned to Me</span>
@@ -177,11 +174,10 @@ export function CareNotesReviewQueueWorkspace() {
 
         <button
           onClick={() => setSelectedReviewerFilter("unassigned")}
-          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-            selectedReviewerFilter === "unassigned"
-              ? "bg-white border-amber-500 shadow-sm ring-1 ring-amber-500/20"
-              : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
-          }`}
+          className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${selectedReviewerFilter === "unassigned"
+            ? "bg-white border-amber-500 shadow-sm ring-1 ring-amber-500/20"
+            : "bg-white border-slate-200 hover:border-slate-300 shadow-2xs"
+            }`}
         >
           <div className="flex items-center justify-between text-xs text-slate-500 font-semibold mb-1">
             <span>Unassigned</span>

@@ -150,7 +150,7 @@ export function CareNotesRulesWorkspace() {
   }, [rules, statusFilter, programFilter, searchTerm]);
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-5 pb-16 px-4 sm:px-6 lg:px-8 pt-2 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
       <CareNotesSubNav
         title="Documentation Rules"
         description="Configure required note sections, clinical thresholds, and documentation SLAs as state and program requirements evolve."
@@ -270,24 +270,22 @@ export function CareNotesRulesWorkspace() {
                   </td>
                   <td className="py-4 px-4 sm:px-6 whitespace-nowrap">
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        rule.requirementType === "required"
-                          ? "bg-rose-50 text-rose-700 border border-rose-200"
-                          : rule.requirementType === "conditional"
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${rule.requirementType === "required"
+                        ? "bg-rose-50 text-rose-700 border border-rose-200"
+                        : rule.requirementType === "conditional"
                           ? "bg-amber-50 text-amber-800 border border-amber-200"
                           : "bg-slate-100 text-slate-600 border border-slate-200"
-                      }`}
+                        }`}
                     >
                       {rule.requirementType}
                     </span>
                   </td>
                   <td className="py-4 px-4 sm:px-6 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
-                        rule.status === "active"
-                          ? "bg-emerald-50 text-[#008f5a] border border-emerald-200"
-                          : "bg-slate-100 text-slate-600 border border-slate-200"
-                      }`}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${rule.status === "active"
+                        ? "bg-emerald-50 text-[#008f5a] border border-emerald-200"
+                        : "bg-slate-100 text-slate-600 border border-slate-200"
+                        }`}
                     >
                       {rule.status === "active" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
                       {rule.status}
@@ -324,9 +322,6 @@ export function CareNotesRulesWorkspace() {
                   <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
                     {editingRule ? `Edit Rule: ${editingRule.id}` : "Configure Documentation Rule"}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Define mandatory care documentation requirements and validation thresholds
-                  </p>
                 </div>
               </div>
               <button
@@ -383,7 +378,7 @@ export function CareNotesRulesWorkspace() {
                       placeholder="Category (e.g. Personal Care)"
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
-                      className="flex-1 px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm"
+                      className="w-full flex-1 px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm"
                     />
                   </div>
                 </div>

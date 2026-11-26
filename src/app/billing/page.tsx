@@ -32,7 +32,7 @@ export default function BillingDashboard() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="w-full space-y-6"
+      className="w-full space-y-6 mb-4"
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

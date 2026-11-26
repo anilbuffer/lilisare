@@ -127,7 +127,7 @@ export function CareNotesSubNav({
   ];
 
   return (
-    <div className="w-full space-y-4 pt-1 mb-2">
+    <div className="w-full space-y-6 mb-4">
       {/* 01. Standard Page Header (Natural page flow, not fixed header) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -180,19 +180,17 @@ export function CareNotesSubNav({
             <Link
               key={tab.id}
               href={tab.href}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${
-                tab.active
-                  ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20 font-bold"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-              }`}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${tab.active
+                ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20 font-bold"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                }`}
             >
               <Icon className={`w-4 h-4 ${tab.active ? "text-white" : "text-slate-500"}`} />
               <span>{tab.label}</span>
               {tab.badge !== undefined && (
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                    tab.active ? "bg-white/20 text-white" : tab.badgeColor || "bg-slate-200 text-slate-700"
-                  }`}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${tab.active ? "bg-white/20 text-white" : tab.badgeColor || "bg-slate-200 text-slate-700"
+                    }`}
                 >
                   {tab.badge}
                 </span>

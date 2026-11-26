@@ -193,7 +193,7 @@ export function CareNotesAllWorkspace() {
   ];
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-5 pb-16 px-4 sm:px-6 lg:px-8 pt-2 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
       <CareNotesSubNav
         title="All Care Notes"
         description="Search and manage care documentation submitted across your agency."
@@ -201,31 +201,6 @@ export function CareNotesAllWorkspace() {
 
       {/* Search & Filter Card with Status Pills */}
       <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs space-y-4">
-        {/* Status Pills Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setCurrentPage(1);
-              }}
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${activeTab === tab.id
-                  ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20 font-bold"
-                  : "bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/80"
-                }`}
-            >
-              <span>{tab.label}</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeTab === tab.id ? "bg-white/20 text-white" : "bg-white text-slate-600 border border-slate-200"
-                  }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-
         {/* Dropdowns & Search Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           {/* Search Input (2 cols) */}
@@ -327,6 +302,7 @@ export function CareNotesAllWorkspace() {
           </div>
         </div>
 
+
         {/* Active filter count & clear actions */}
         <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
           <div className="flex items-center gap-2 text-slate-500 font-medium">
@@ -350,6 +326,32 @@ export function CareNotesAllWorkspace() {
               Clear all filters
             </button>
           )}
+        </div>
+
+
+        {/* Status Pills Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setCurrentPage(1);
+              }}
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${activeTab === tab.id
+                ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20 font-bold"
+                : "bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/80"
+                }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeTab === tab.id ? "bg-white/20 text-white" : "bg-white text-slate-600 border border-slate-200"
+                  }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 

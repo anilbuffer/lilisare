@@ -68,7 +68,7 @@ export function CareNotesOverviewWorkspace() {
   const recentNotes = filteredNotes.slice(0, 6);
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-6 pb-16 px-4 sm:px-6 lg:px-8 pt-2 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Sub-Navigation Header & Standalone Tabs Bar */}
       <CareNotesSubNav
         title="CareNotes"

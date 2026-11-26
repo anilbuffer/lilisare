@@ -116,13 +116,13 @@ export function CareNotesReportsWorkspace() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-slate-50/50 pb-16">
+    <div className="w-full">
       <CareNotesSubNav
         title="Quality & Reports"
         description="Agency-wide care documentation compliance monitoring, review velocity, and caregiver quality metrics."
       />
 
-      <div className="max-w-9xl mx-auto space-y-5 px-4 sm:px-6 lg:px-8 pt-2 animate-in fade-in duration-300">
+      <div className="max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
         {/* Filter Bar with Office, Program and Date Range */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-700">

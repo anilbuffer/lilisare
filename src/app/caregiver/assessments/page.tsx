@@ -7,7 +7,7 @@ import { AssessmentForm } from "@/components/clinical/AssessmentForm";
 export default function CaregiverDailyAssessmentPage() {
   return (
     <CaregiverLayout>
-      <div className="w-full space-y-6">
+      <div className="w-full space-y-6 mb-4">
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="mb-6 border-b border-slate-100 pb-4">
             <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Daily Assessment</h2>

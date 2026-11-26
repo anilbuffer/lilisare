@@ -29,10 +29,10 @@ export default function BillingWorkspace() {
         variants={containerVariants}
         initial="hidden"
         animate="show"
-        className="w-full space-y-6"
+        className="w-full space-y-6 mb-4"
       >
         <BillingHeader />
-        
+
         <PreBillingScrubGate />
 
         <FinancialSummaryStrip />
@@ -50,9 +50,9 @@ export default function BillingWorkspace() {
       </motion.div>
 
       {selectedClaim && (
-        <ClaimDetailPanel 
-          claim={selectedClaim} 
-          onClose={() => setSelectedClaim(null)} 
+        <ClaimDetailPanel
+          claim={selectedClaim}
+          onClose={() => setSelectedClaim(null)}
         />
       )}
     </>

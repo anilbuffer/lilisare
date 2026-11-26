@@ -65,13 +65,13 @@ export function CareNotesAuditWorkspace() {
   }, [events, actionFilter, roleFilter, searchTerm]);
 
   return (
-    <div className="w-full min-h-screen bg-slate-50/50 pb-16">
+    <div className="w-full">
       <CareNotesSubNav
         title="Documentation Audit Trail"
         description="Immutable, tamper-evident log of all care note submissions, review decisions, corrections, escalations, and rule modifications."
       />
 
-      <div className="max-w-9xl mx-auto space-y-5 px-4 sm:px-6 lg:px-8 pt-2 animate-in fade-in duration-300">
+      <div className="max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
         {/* Compliance Notice Banner */}
         <div className="p-4 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">

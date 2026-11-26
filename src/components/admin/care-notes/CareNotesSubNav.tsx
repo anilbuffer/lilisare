@@ -54,7 +54,6 @@ const MORE_BUTTON_MIN_WIDTH = 96;
 
 export function CareNotesSubNav({
   title = "CareNotes",
-  description = "Monitor care documentation, review submitted notes and manage documentation quality across your agency.",
   activeTab: controlledActiveTab,
   onTabChange,
 }: CareNotesSubNavProps) {
@@ -276,11 +275,7 @@ export function CareNotesSubNav({
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">{title}</h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-[#3D6B22] border border-emerald-200/80">
-              Agency Admin
-            </span>
           </div>
-          <p className="text-xs sm:text-[13px] text-slate-500 font-medium mt-0.5">{description}</p>
         </div>
 
         {/* Header Actions */}
@@ -367,19 +362,17 @@ export function CareNotesSubNav({
                 key={tab.id}
                 type="button"
                 onClick={() => handleSelectTab(tab.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shrink-0 cursor-pointer ${
-                  isActive
-                    ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20 font-bold"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shrink-0 cursor-pointer ${isActive
+                  ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20 font-bold"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`} />
                 <span>{tab.label}</span>
                 {tab.badge !== undefined && (
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      isActive ? "bg-white/20 text-white" : tab.badgeColor || "bg-slate-200 text-slate-700"
-                    }`}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive ? "bg-white/20 text-white" : tab.badgeColor || "bg-slate-200 text-slate-700"
+                      }`}
                   >
                     {tab.badge}
                   </span>
@@ -399,13 +392,12 @@ export function CareNotesSubNav({
               <button
                 type="button"
                 onClick={() => setIsMoreOpen(!isMoreOpen)}
-                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight inline-flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                  isOverflowActive
-                    ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
-                    : isMoreOpen
+                className={`px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold tracking-tight inline-flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${isOverflowActive
+                  ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
+                  : isMoreOpen
                     ? "bg-slate-100 text-slate-900 border border-slate-300"
                     : "text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:text-slate-900"
-                }`}
+                  }`}
                 aria-expanded={isMoreOpen}
                 aria-label="More care notes tabs"
               >
@@ -438,11 +430,10 @@ export function CareNotesSubNav({
                           key={tab.id}
                           type="button"
                           onClick={() => handleSelectTab(tab.id)}
-                          className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-xl text-left transition-colors cursor-pointer ${
-                            isTabActive
-                              ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
-                              : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                          }`}
+                          className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-xl text-left transition-colors cursor-pointer ${isTabActive
+                            ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                            : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                            }`}
                         >
                           <div className="flex items-center gap-2.5">
                             <Icon className={`w-4 h-4 ${isTabActive ? "text-[#3D6B22]" : "text-slate-400"}`} />
@@ -450,9 +441,8 @@ export function CareNotesSubNav({
                           </div>
                           {tab.badge !== undefined && (
                             <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                tab.badgeColor || "bg-slate-200 text-slate-700"
-                              }`}
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${tab.badgeColor || "bg-slate-200 text-slate-700"
+                                }`}
                             >
                               {tab.badge}
                             </span>

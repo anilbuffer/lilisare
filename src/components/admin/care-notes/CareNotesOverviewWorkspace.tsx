@@ -81,7 +81,6 @@ export function CareNotesOverviewWorkspace({
       {!hideSubNav && (
         <CareNotesSubNav
           title="CareNotes"
-          description="Monitor care documentation, review submitted notes and manage documentation quality across your agency."
           activeTab="overview"
           onTabChange={onTabChange}
         />

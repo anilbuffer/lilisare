@@ -18,8 +18,8 @@ import {
 } from "@/types/evvVisit";
 import { INITIAL_REALTIME_VISITS, getVisitsFromStorage } from "@/lib/scheduling/schedulingStore";
 
-export const EVV_STORAGE_KEY = "lilisare_evv_visits_v5";
-export const EVV_SUBMISSIONS_KEY = "lilisare_evv_submissions_v2";
+export const EVV_STORAGE_KEY = "lilisare_evv_visits_v6";
+export const EVV_SUBMISSIONS_KEY = "lilisare_evv_submissions_v3";
 export const EVV_RULES_KEY = "lilisare_evv_rules_v2";
 export const EVV_BATCHES_KEY = "lilisare_evv_batches_v1";
 export const EVV_SYNC_EVENT = "lilisare_evv_visits_sync";
@@ -1037,7 +1037,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // 10:00 - 14:00, Actual: 10:01 - 14:02 (+1m / +2m -> WITHIN TOLERANCE)
   // Scenario A & F: Verified, Cleared for Billing, Cleared for Payroll
   visits.push({
-    id: "EVV-2026-001",
+    id: "EVV-2026-401",
     visitNumber: "#401",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1011",
@@ -1129,7 +1129,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     aggregatorSubmissionId: "SUB-2026-9810",
     reviewNotes: [
       {
-        id: "rn-001-1",
+        id: "rn-401-1",
         reviewerName: "System Audit Engine",
         reviewerRole: "Automated Compliance",
         timestamp: "2026-11-25 02:05 PM",
@@ -1139,7 +1139,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
     timeline: [
       {
-        id: "t-001-1",
+        id: "t-401-1",
         timestamp: "2026-11-25 10:01 AM",
         actor: "Rahul Sharma",
         actorRole: "Caregiver (Mobile GPS)",
@@ -1148,7 +1148,7 @@ function createInitialVisits(): EvvVisitRecord[] {
         badgeType: "success",
       },
       {
-        id: "t-001-2",
+        id: "t-401-2",
         timestamp: "2026-11-25 02:02 PM",
         actor: "Rahul Sharma",
         actorRole: "Caregiver (Mobile GPS)",
@@ -1157,7 +1157,7 @@ function createInitialVisits(): EvvVisitRecord[] {
         badgeType: "success",
       },
       {
-        id: "t-001-3",
+        id: "t-401-3",
         timestamp: "2026-11-25 02:15 PM",
         actor: "EVV Aggregator Engine",
         actorRole: "State Gateway",
@@ -1172,7 +1172,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // In progress, Scheduled 09:00 - 13:00, Actual 08:58 - In Progress
   // Scenario B: Missing clock-out (>2 hrs overdue), Exception
   visits.push({
-    id: "EVV-2026-002",
+    id: "EVV-2026-402",
     visitNumber: "#402",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1012",
@@ -1254,7 +1254,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     assignedReviewer: "Dana Jenkins, MSW",
     reviewNotes: [
       {
-        id: "rn-002-1",
+        id: "rn-402-1",
         reviewerName: "Dana Jenkins, MSW",
         reviewerRole: "Agency Operations Admin",
         timestamp: "2026-11-25 01:45 PM",
@@ -1264,7 +1264,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
     timeline: [
       {
-        id: "t-002-1",
+        id: "t-402-1",
         timestamp: "2026-11-25 08:58 AM",
         actor: "Priya Patel",
         actorRole: "Caregiver (Mobile GPS)",
@@ -1273,7 +1273,7 @@ function createInitialVisits(): EvvVisitRecord[] {
         badgeType: "info",
       },
       {
-        id: "t-002-2",
+        id: "t-402-2",
         timestamp: "2026-11-25 01:15 PM",
         actor: "EVV Monitoring Engine",
         actorRole: "Automated Compliance",
@@ -1289,7 +1289,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // Scenario C & F: Location issue (GPS recorded 1,480 ft outside geofence).
   // Note: Time variance is within tolerance, so exception is strictly location!
   visits.push({
-    id: "EVV-2026-003",
+    id: "EVV-2026-403",
     visitNumber: "#403",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1013",
@@ -1391,7 +1391,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     assignedReviewer: "Carlos Mendez, RN",
     reviewNotes: [
       {
-        id: "rn-003-1",
+        id: "rn-403-1",
         reviewerName: "Carlos Mendez, RN",
         reviewerRole: "Clinical Supervisor",
         timestamp: "2026-11-25 09:10 AM",
@@ -1401,7 +1401,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
     timeline: [
       {
-        id: "t-003-1",
+        id: "t-403-1",
         timestamp: "2026-11-25 08:31 AM",
         actor: "David Wilson",
         actorRole: "Caregiver (Mobile GPS)",
@@ -1410,7 +1410,7 @@ function createInitialVisits(): EvvVisitRecord[] {
         badgeType: "warning",
       },
       {
-        id: "t-003-2",
+        id: "t-403-2",
         timestamp: "2026-11-25 11:33 AM",
         actor: "David Wilson",
         actorRole: "Caregiver (Mobile GPS)",
@@ -1425,7 +1425,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // 08:00 - 16:00, Actual: 08:00 - 16:00 (Telephony IVR)
   // Verified, Cleared for Billing
   visits.push({
-    id: "EVV-2026-004",
+    id: "EVV-2026-404",
     visitNumber: "#404",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1008",
@@ -1511,7 +1511,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     reviewNotes: [],
     timeline: [
       {
-        id: "t-004-1",
+        id: "t-404-1",
         timestamp: "2026-11-25 08:00 AM",
         actor: "Clara Jenkins",
         actorRole: "Caregiver (Telephony IVR)",
@@ -1520,7 +1520,7 @@ function createInitialVisits(): EvvVisitRecord[] {
         badgeType: "success",
       },
       {
-        id: "t-004-2",
+        id: "t-404-2",
         timestamp: "2026-11-25 04:00 PM",
         actor: "Clara Jenkins",
         actorRole: "Caregiver (Telephony IVR)",
@@ -1534,7 +1534,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // 5. Illustrative Record 5: Marcus Vance, Client Sophia Patel
   // Fixed Device / FOB Token
   visits.push({
-    id: "EVV-2026-005",
+    id: "EVV-2026-405",
     visitNumber: "#405",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1009",
@@ -1620,7 +1620,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     reviewNotes: [],
     timeline: [
       {
-        id: "t-005-1",
+        id: "t-405-1",
         timestamp: "2026-11-25 07:02 AM",
         actor: "Marcus Vance",
         actorRole: "Caregiver (Fixed Device)",
@@ -1635,7 +1635,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // 09:00 - 13:00, Actual: 09:00 - 15:30 (+2.5 hrs unauthorized overtime)
   // Scenario: Duration mismatch exception, Blocked for billing & payroll review
   visits.push({
-    id: "EVV-2026-006",
+    id: "EVV-2026-406",
     visitNumber: "#406",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1010",
@@ -1733,7 +1733,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     assignedReviewer: "Marcus Vance",
     reviewNotes: [
       {
-        id: "rn-006-1",
+        id: "rn-406-1",
         reviewerName: "Marcus Vance",
         reviewerRole: "Lead Dispatcher & Scheduler",
         timestamp: "2026-11-25 03:45 PM",
@@ -1749,7 +1749,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // Scenario D & F: Patient verification missing (signature missing)
   // Note: Consistent tolerance: 1-2m variance is NOT the exception reason!
   visits.push({
-    id: "EVV-2026-007",
+    id: "EVV-2026-407",
     visitNumber: "#407",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1010",
@@ -1844,7 +1844,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     assignedReviewer: "Sarah Alverez",
     reviewNotes: [
       {
-        id: "rn-007-1",
+        id: "rn-407-1",
         reviewerName: "Sarah Alverez",
         reviewerRole: "Billing & Compliance Auditor",
         timestamp: "2026-11-25 04:15 PM",
@@ -1863,7 +1863,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // Correction submitted by Maya Lin for clock-in: 10:30 AM (Reason: Mobile app crashed on arrival).
   // Status: Completed, Verification: Correction Required
   visits.push({
-    id: "EVV-2026-008",
+    id: "EVV-2026-408",
     visitNumber: "#408",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1014",
@@ -1950,8 +1950,8 @@ function createInitialVisits(): EvvVisitRecord[] {
     assignedReviewer: "Dana Jenkins, MSW",
     corrections: [
       {
-        id: "cor-008-1",
-        visitId: "EVV-2026-008",
+        id: "cor-408-1",
+        visitId: "EVV-2026-408",
         fieldChanged: "actualClockInTime",
         originalValue: "[Omitted / App Crash]",
         correctedValue: "10:30 AM",
@@ -1963,7 +1963,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
     reviewNotes: [
       {
-        id: "rn-008-1",
+        id: "rn-408-1",
         reviewerName: "Dana Jenkins, MSW",
         reviewerRole: "Agency Operations Admin",
         timestamp: "2026-11-25 02:45 PM",
@@ -1975,7 +1975,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
     timeline: [
       {
-        id: "t-008-1",
+        id: "t-408-1",
         timestamp: "2026-11-25 02:32 PM",
         actor: "Maya Lin",
         actorRole: "Caregiver (Mobile GPS)",
@@ -1984,7 +1984,7 @@ function createInitialVisits(): EvvVisitRecord[] {
         badgeType: "info",
       },
       {
-        id: "t-008-2",
+        id: "t-408-2",
         timestamp: "2026-11-25 02:35 PM",
         actor: "Maya Lin",
         actorRole: "Caregiver (Portal Correction)",
@@ -2000,7 +2000,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // Scenario C & F: Location accuracy low (GPS accuracy +/-95m due to basement apartment reception)
   // Time variance is within tolerance, so exception is strictly location accuracy!
   visits.push({
-    id: "EVV-2026-009",
+    id: "EVV-2026-409",
     visitNumber: "#409",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1015",
@@ -2098,7 +2098,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     assignedReviewer: "Carlos Mendez, RN",
     reviewNotes: [
       {
-        id: "rn-009-1",
+        id: "rn-409-1",
         reviewerName: "Carlos Mendez, RN",
         reviewerRole: "Clinical Supervisor",
         timestamp: "2026-11-25 08:30 AM",
@@ -2114,7 +2114,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // 10. Record 10: Hannah Abbott, Client Beatrice Hall
   // In progress
   visits.push({
-    id: "EVV-2026-010",
+    id: "EVV-2026-410",
     visitNumber: "#410",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1016",
@@ -2197,7 +2197,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // Completed visit, but Aggregator status is REJECTED (Medicaid ID mismatch in state registry).
   // Demonstrates independent readiness: Billing is Blocked, while Payroll is Cleared for Payroll!
   visits.push({
-    id: "EVV-2026-011",
+    id: "EVV-2026-411",
     visitNumber: "#411",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1017",
@@ -2296,7 +2296,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     assignedReviewer: "Sarah Alverez",
     reviewNotes: [
       {
-        id: "rn-011-1",
+        id: "rn-411-1",
         reviewerName: "Sarah Alverez",
         reviewerRole: "Billing & Compliance Auditor",
         timestamp: "2026-11-25 05:25 PM",
@@ -2308,7 +2308,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
     timeline: [
       {
-        id: "t-011-1",
+        id: "t-411-1",
         timestamp: "2026-11-25 05:15 PM",
         actor: "EVV Aggregator Engine",
         actorRole: "State Gateway",
@@ -2322,7 +2322,7 @@ function createInitialVisits(): EvvVisitRecord[] {
   // 12. Record 12: Carlos Mendez, Client Diana Ross
   // Scheduled visit (Upcoming later today)
   visits.push({
-    id: "EVV-2026-012",
+    id: "EVV-2026-412",
     visitNumber: "#412",
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1018",
@@ -2383,7 +2383,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     reviewNotes: [],
     timeline: [
       {
-        id: "t-012-1",
+        id: "t-412-1",
         timestamp: "2026-11-25 08:00 AM",
         actor: "System Engine",
         actorRole: "Scheduling Engine",
@@ -2402,7 +2402,7 @@ export const INITIAL_EVV_VISITS: EvvVisitRecord[] = createInitialVisits();
 export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   {
     id: "SUB-2026-9810",
-    visitId: "EVV-2026-001",
+    visitId: "EVV-2026-401",
     clientName: "John Smith",
     caregiverName: "Rahul Sharma",
     serviceName: "Personal Care (T1019)",
@@ -2430,7 +2430,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   },
   {
     id: "SUB-2026-9811",
-    visitId: "EVV-2026-003",
+    visitId: "EVV-2026-403",
     clientName: "Emily Jones",
     caregiverName: "David Wilson",
     serviceName: "Personal Care (T1019)",
@@ -2455,7 +2455,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   },
   {
     id: "SUB-2026-9812",
-    visitId: "EVV-2026-004",
+    visitId: "EVV-2026-404",
     clientName: "Raymond Chen",
     caregiverName: "Clara Jenkins",
     serviceName: "Companion Care (S5125)",
@@ -2477,7 +2477,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   },
   {
     id: "SUB-2026-9813",
-    visitId: "EVV-2026-005",
+    visitId: "EVV-2026-405",
     clientName: "Sophia Patel",
     caregiverName: "Marcus Vance",
     serviceName: "CES Waiver (CES-WVR)",
@@ -2499,7 +2499,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   },
   {
     id: "SUB-2026-9814",
-    visitId: "EVV-2026-006",
+    visitId: "EVV-2026-406",
     clientName: "Evelyn Foster",
     caregiverName: "Elena Rostova",
     serviceName: "Homemaker (S5130)",
@@ -2516,7 +2516,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   },
   {
     id: "SUB-2026-9815",
-    visitId: "EVV-2026-011",
+    visitId: "EVV-2026-411",
     clientName: "Walter White",
     caregiverName: "Jesse Pinkman",
     serviceName: "Companion Care (S5125)",
@@ -2538,7 +2538,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   },
   {
     id: "SUB-2026-9816",
-    visitId: "EVV-2026-008",
+    visitId: "EVV-2026-408",
     clientName: "Grace Hopper",
     caregiverName: "Maya Lin",
     serviceName: "Companion Care (S5125)",
@@ -2560,7 +2560,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   },
   {
     id: "SUB-2026-9817",
-    visitId: "EVV-2026-009",
+    visitId: "EVV-2026-409",
     clientName: "Arthur Dent",
     caregiverName: "James Chen",
     serviceName: "Homemaker (S5130)",
@@ -2588,7 +2588,21 @@ export function getEvvVisitsFromStorage(): EvvVisitRecord[] {
       localStorage.setItem(EVV_STORAGE_KEY, JSON.stringify(INITIAL_EVV_VISITS));
       return INITIAL_EVV_VISITS;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      localStorage.setItem(EVV_STORAGE_KEY, JSON.stringify(INITIAL_EVV_VISITS));
+      return INITIAL_EVV_VISITS;
+    }
+    // Deduplicate visits by id defensively
+    const seen = new Set<string>();
+    const deduped: EvvVisitRecord[] = [];
+    for (const v of parsed) {
+      if (v && v.id && !seen.has(v.id)) {
+        seen.add(v.id);
+        deduped.push(v);
+      }
+    }
+    return deduped;
   } catch (err) {
     console.error("Error reading EVV visits from localStorage", err);
     return INITIAL_EVV_VISITS;

@@ -13,7 +13,6 @@ import {
   ExternalLink,
   FileText,
   FileWarning,
-  Flag,
   History,
   Lock,
   Paperclip,
@@ -59,13 +58,11 @@ import {
   VisitDeliveryMethod,
 } from "@/types/clinicalSupervisory";
 import {
-  ClinicalAvatarName,
   ClinicalReviewStatusBadge,
   ClinicalVisitStatusBadge,
   DeliveryMethodBadge,
   DocumentationStatusBadge,
   PriorityBadge,
-  RequirementStatusBadge,
 } from "./ClinicalBadges";
 import {
   ResponsiveDomainTabStrip,

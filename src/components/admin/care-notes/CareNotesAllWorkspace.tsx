@@ -373,19 +373,20 @@ export function CareNotesAllWorkspace({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Note ID</th>
-                <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client</th>
-                <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Caregiver</th>
-                <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Service</th>
-                <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Date of Service</th>
-                <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Review Status</th>
-                <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Note ID</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Caregiver</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Service</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Date of Service</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Review Status</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Quality</th>
+                <th className="py-3.5 px-4 sm:px-5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginatedNotes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                  <td colSpan={8} className="py-12 text-center text-slate-500">
                     <div className="max-w-xs mx-auto space-y-2">
                       <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400 mb-2">
                         <Search className="w-6 h-6" />
@@ -409,7 +410,7 @@ export function CareNotesAllWorkspace({
                     className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
                   >
                     {/* Note ID */}
-                    <td className="py-4 px-4 sm:px-6 whitespace-nowrap">
+                    <td className="py-4 px-4 sm:px-5 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/80 group-hover:text-[#3D6B22] group-hover:border-[#3D6B22]/30 transition-colors">
                           {note.id}
@@ -423,7 +424,7 @@ export function CareNotesAllWorkspace({
                     </td>
 
                     {/* Client */}
-                    <td className="py-4 px-4 sm:px-6">
+                    <td className="py-4 px-4 sm:px-5">
                       <div className="flex items-center gap-2.5">
                         <div className="w-6 h-6 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-[10px] shrink-0 shadow-2xs">
                           {getInitials(note.clientName)}
@@ -435,7 +436,7 @@ export function CareNotesAllWorkspace({
                     </td>
 
                     {/* Caregiver */}
-                    <td className="py-4 px-4 sm:px-6">
+                    <td className="py-4 px-4 sm:px-5">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-600 font-bold text-[10px] shrink-0">
                           {getInitials(note.caregiverName)}
@@ -447,7 +448,7 @@ export function CareNotesAllWorkspace({
                     </td>
 
                     {/* Service */}
-                    <td className="py-4 px-4 sm:px-6 text-xs text-slate-700 font-medium whitespace-nowrap">
+                    <td className="py-4 px-4 sm:px-5 text-xs text-slate-700 font-medium whitespace-nowrap">
                       <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded border border-slate-200 mr-2">
                         {note.serviceCode}
                       </span>
@@ -455,23 +456,25 @@ export function CareNotesAllWorkspace({
                     </td>
 
                     {/* Date of Service */}
-                    <td className="py-4 px-4 sm:px-6 text-xs text-slate-600 whitespace-nowrap font-medium">
+                    <td className="py-4 px-4 sm:px-5 text-xs text-slate-600 whitespace-nowrap font-medium">
                       {note.serviceDate}
                     </td>
 
-                    {/* Review Status & Quality */}
-                    <td className="py-4 px-4 sm:px-6 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <CareNoteStatusBadge status={note.reviewStatus} />
-                        <CareNoteQualityIndicator
-                          status={note.qualityStatus}
-                          issueCount={note.qualityIssues?.length}
-                        />
-                      </div>
+                    {/* Review Status */}
+                    <td className="py-4 px-4 sm:px-5 whitespace-nowrap">
+                      <CareNoteStatusBadge status={note.reviewStatus} />
+                    </td>
+
+                    {/* Quality Check */}
+                    <td className="py-4 px-4 sm:px-5 whitespace-nowrap">
+                      <CareNoteQualityIndicator
+                        status={note.qualityStatus}
+                        issueCount={note.qualityIssues?.length}
+                      />
                     </td>
 
                     {/* Actions */}
-                    <td className="py-4 px-4 sm:px-6 text-right whitespace-nowrap">
+                    <td className="py-4 px-4 sm:px-5 text-right whitespace-nowrap">
                       <Link
                         href={`/admin/care-notes/${note.id}`}
                         onClick={(e) => e.stopPropagation()}

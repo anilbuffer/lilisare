@@ -10,6 +10,8 @@ import {
   CareNoteRule,
 } from "@/types/careNotes";
 import {
+  INITIAL_CARE_NOTES,
+  INITIAL_CARE_NOTE_RULES,
   getCareNoteById,
   getCareNoteRulesFromStorage,
   CARE_NOTES_SYNC_EVENT,
@@ -70,8 +72,10 @@ function getInitials(name: string): string {
 export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps) {
   const router = useRouter();
 
-  const [note, setNote] = useState<CareNote | null>(null);
-  const [rules, setRules] = useState<CareNoteRule[]>([]);
+  const [note, setNote] = useState<CareNote | null>(
+    () => INITIAL_CARE_NOTES.find((n) => n.id === noteId) || null
+  );
+  const [rules, setRules] = useState<CareNoteRule[]>(INITIAL_CARE_NOTE_RULES);
   const [activeTab, setActiveTab] = useState<"note" | "history" | "compare">("note");
 
   // Modal States
@@ -302,16 +306,15 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
                 hasIncompleteSections
                   ? "Approval blocked: Missing or incomplete documentation sections"
                   : hasOpenClinicalFlag
-                  ? "Approval blocked: Unresolved clinical escalation requires RN sign-off"
-                  : "Approve care note"
+                    ? "Approval blocked: Unresolved clinical escalation requires RN sign-off"
+                    : "Approve care note"
               }
-              className={`inline-flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all cursor-pointer ${
-                note.reviewStatus === "approved"
-                  ? "bg-emerald-50 text-[#008f5a] border border-emerald-200 cursor-default"
-                  : hasIncompleteSections || hasOpenClinicalFlag
+              className={`inline-flex items-center gap-2 px-5 py-2 text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all cursor-pointer ${note.reviewStatus === "approved"
+                ? "bg-emerald-50 text-[#008f5a] border border-emerald-200 cursor-default"
+                : hasIncompleteSections || hasOpenClinicalFlag
                   ? "bg-slate-200 text-slate-400 border border-slate-200 cursor-not-allowed shadow-none"
                   : "text-white bg-[#3D6B22] hover:bg-[#345C1D] shadow-[#3D6B22]/20 hover:shadow-md active:scale-95"
-              }`}
+                }`}
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>{note.reviewStatus === "approved" ? "Approved" : "Approve Note"}</span>
@@ -326,7 +329,7 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Dedicated Card 1: Caregiver */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-medium uppercase tracking-wider mb-2">
             <Heart className="w-3.5 h-3.5 text-rose-500" /> Caregiver
           </div>
           <div className="font-bold text-slate-900 text-sm sm:text-base">{note.caregiverName}</div>
@@ -338,7 +341,7 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
 
         {/* Dedicated Card 2: Date of Service */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-medium uppercase tracking-wider mb-2">
             <Calendar className="w-3.5 h-3.5 text-[#3D6B22]" /> Date of Service
           </div>
           <div className="font-bold text-slate-900 text-sm sm:text-base">{note.serviceDate}</div>
@@ -352,7 +355,7 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
 
         {/* Dedicated Card 3: Visit */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-medium uppercase tracking-wider mb-2">
             <MapPin className="w-3.5 h-3.5 text-amber-500" /> Visit & EVV
           </div>
           <div className="font-bold text-slate-900 text-sm sm:text-base font-mono">{note.visitId}</div>
@@ -367,7 +370,7 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
 
         {/* Dedicated Card 4: Client Profile */}
         <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
-          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-bold uppercase tracking-wider mb-2">
+          <div className="flex items-center gap-2 text-slate-400 text-[11px] font-medium uppercase tracking-wider mb-2">
             <User className="w-3.5 h-3.5 text-[#3D6B22]" /> Client Profile
           </div>
           <div className="font-bold text-slate-900 text-sm sm:text-base">{note.clientName}</div>
@@ -510,42 +513,42 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
       </div>
 
       {/* =========================================================================
-          02. VIEW SWITCHER TABS (Matching Tab Strip)
+          02. VIEW SWITCHER TABS (Consistent with CareNotes Pill Tab Bar)
          ========================================================================= */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs px-4 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] p-1.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={() => setActiveTab("note")}
-            className={`py-3 px-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "note"
-                ? "border-[#3D6B22] text-[#3D6B22] bg-[#3D6B22]/5"
-                : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300"
-            }`}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === "note"
+              ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
+              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              }`}
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className={`w-3.5 h-3.5 ${activeTab === "note" ? "text-white" : "text-slate-500"}`} />
             <span>CURRENT NOTE CONTENT</span>
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab("history")}
-            className={`py-3 px-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "history"
-                ? "border-[#3D6B22] text-[#3D6B22] bg-[#3D6B22]/5"
-                : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300"
-            }`}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === "history"
+              ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
+              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              }`}
           >
-            <History className="w-3.5 h-3.5" />
+            <History className={`w-3.5 h-3.5 ${activeTab === "history" ? "text-white" : "text-slate-500"}`} />
             <span>VERSION HISTORY ({note.versions?.length || 1})</span>
           </button>
           {note.versions && note.versions.length > 0 && (
             <button
+              type="button"
               onClick={() => setActiveTab("compare")}
-              className={`py-3 px-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === "compare"
-                  ? "border-[#3D6B22] text-[#3D6B22] bg-[#3D6B22]/5"
-                  : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300"
-              }`}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === "compare"
+                ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                }`}
             >
-              <SplitSquareVertical className="w-3.5 h-3.5" />
+              <SplitSquareVertical className={`w-3.5 h-3.5 ${activeTab === "compare" ? "text-white" : "text-slate-500"}`} />
               <span>COMPARE VERSIONS (DIFF)</span>
             </button>
           )}
@@ -553,8 +556,9 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
 
         {/* Caregiver simulation button (Demonstrating Release 2 / Resubmission lifecycle) */}
         <button
+          type="button"
           onClick={() => setIsResubmitSimulationModalOpen(true)}
-          className="text-xs font-bold text-slate-600 hover:text-[#3D6B22] flex items-center gap-1.5 py-1.5 px-3 rounded-lg hover:bg-slate-100 transition-colors shrink-0 cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-xl transition-all shrink-0 cursor-pointer"
           title="Simulate caregiver resubmitting amended note"
         >
           <Layers className="w-3.5 h-3.5 text-[#3D6B22]" />
@@ -566,154 +570,465 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
           04. MAIN DETAIL LAYOUT
          ========================================================================= */}
       {/* Tab 1: Current Note Content with Completeness Sidebar */}
-      {activeTab === "note" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left 2 Cols: Document-like Care Note Content */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 sm:p-7 space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div>
-                  <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
-                    Caregiver Submitted Documentation
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                    Authored by <strong className="text-slate-800">{note.caregiverName}</strong> on {note.submittedAt || "Unsubmitted draft"}
-                  </p>
-                </div>
-                <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50 px-3 py-1 rounded-xl border border-slate-200">
-                  Template: {note.serviceCode}
-                </span>
-              </div>
+      {activeTab === "note" && (() => {
+        const verifiedCount = note.sections.filter((s) => s.completionStatus === "complete").length;
+        const totalSections = note.sections.length;
+        const completenessPct = totalSections > 0 ? Math.round((verifiedCount / totalSections) * 100) : 100;
+        const openFlags = note.flags.filter((f) => f.status === "open");
 
-              {/* Open Flags / Alerts Banner */}
-              {note.flags.filter((f) => f.status === "open").length > 0 && (
-                <div className="space-y-2.5">
-                  {note.flags
-                    .filter((f) => f.status === "open")
-                    .map((flag) => (
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left 8 Cols: Caregiver Submitted Documentation */}
+            <div className="lg:col-span-8 space-y-6">
+              <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-6">
+                {/* Card Header with Standard Emerald Icon Badge */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                  <div className="flex items-start sm:items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                        Caregiver Submitted Documentation
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                        Authored by <strong className="text-slate-800">{note.caregiverName}</strong> • Submitted{" "}
+                        {note.submittedAt || "Unsubmitted draft"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                    <span className="font-mono text-xs font-bold bg-[#3D6B22]/10 text-[#3D6B22] px-2.5 py-1 rounded-lg border border-[#3D6B22]/20">
+                      Template: {note.serviceCode}
+                    </span>
+                    <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200/80">
+                      v{note.currentVersion}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Open Flags / Alerts Banner */}
+                {openFlags.length > 0 && (
+                  <div className="space-y-2.5">
+                    {openFlags.map((flag) => (
                       <div
                         key={flag.id}
-                        className={`p-4 rounded-xl border flex items-start justify-between gap-3 ${
-                          flag.flagType === "clinical"
-                            ? "bg-purple-50/80 border-purple-200 text-purple-950"
-                            : "bg-rose-50/80 border-rose-200 text-rose-950"
-                        }`}
+                        className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-start justify-between gap-3 ${flag.flagType === "clinical"
+                          ? "bg-purple-50/80 border-purple-200 text-purple-950"
+                          : "bg-rose-50/80 border-rose-200 text-rose-950"
+                          }`}
                       >
                         <div className="flex items-start gap-3">
-                          <ShieldAlert
-                            className={`w-5 h-5 shrink-0 mt-0.5 ${
-                              flag.flagType === "clinical" ? "text-purple-600" : "text-rose-600"
-                            }`}
-                          />
+                          <div
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${flag.flagType === "clinical"
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-rose-100 text-rose-700"
+                              }`}
+                          >
+                            <ShieldAlert className="w-4 h-4" />
+                          </div>
                           <div>
                             <div className="text-xs font-bold sm:text-sm">
                               {flag.flagType === "clinical" ? "Clinical Supervisory Flag" : "Compliance Flag"}: {flag.reason}
                             </div>
-                            <p className="text-xs text-slate-600 mt-1 font-medium">{flag.notes}</p>
-                            <div className="text-[11px] text-slate-400 mt-1.5 font-medium">
-                              Flagged by {flag.flaggedBy} on {flag.flaggedAt}
+                            <p className="text-xs text-slate-600 mt-1 font-medium leading-relaxed">{flag.notes}</p>
+                            <div className="text-[11px] text-slate-500 mt-1.5 font-medium">
+                              Flagged by {flag.flaggedBy} • {flag.flaggedAt}
                             </div>
                           </div>
                         </div>
                         <button
+                          type="button"
                           onClick={() => {
                             resolveCareNoteFlag(note.id, flag.id, "Resolved by Agency Admin inspection", adminActor);
                             toast.success("Flag resolved");
                             reloadData();
                           }}
-                          className="text-xs font-bold px-3 py-1.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 shrink-0 cursor-pointer shadow-2xs"
+                          className="inline-flex items-center justify-center px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shrink-0 cursor-pointer shadow-2xs transition-all self-start"
                         >
                           Resolve Flag
                         </button>
                       </div>
                     ))}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {/* Note Sections (Clean Document Viewer) */}
-              {note.sections.map((sec, idx) => (
-                <div
-                  key={sec.id}
-                  className={`p-5 rounded-2xl border transition-all ${
-                    sec.completionStatus === "missing"
-                      ? "bg-rose-50/40 border-rose-200"
-                      : sec.completionStatus === "incomplete"
-                      ? "bg-amber-50/30 border-amber-200"
-                      : "bg-slate-50/40 border-slate-200/80"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-6 h-6 rounded-full bg-slate-200/80 text-slate-800 text-xs font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900">{sec.sectionTitle}</h3>
-                      {sec.required && (
-                        <span className="text-[10px] font-bold text-rose-600 uppercase tracking-wider bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
-                          Mandatory
-                        </span>
-                      )}
-                    </div>
-
-                    {sec.completionStatus === "complete" ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#008f5a] bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#00d084]" /> Complete
-                      </span>
-                    ) : sec.completionStatus === "missing" ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded-full border border-rose-200/80">
-                        <AlertCircle className="w-3.5 h-3.5 text-rose-600" /> Missing
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200/80">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Incomplete
-                      </span>
-                    )}
+                {/* Document Sections Section Header */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      Care Documentation Sections ({totalSections})
+                    </h3>
+                    <div className="h-px bg-slate-100 flex-1" />
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {verifiedCount} of {totalSections} sections verified
+                    </span>
                   </div>
 
-                  {/* Submitted Content Narrative */}
-                  {sec.content ? (
-                    <div className="text-xs sm:text-sm text-slate-800 leading-relaxed bg-white p-4 rounded-xl border border-slate-100 font-sans whitespace-pre-line shadow-2xs">
-                      {sec.content}
-                    </div>
-                  ) : (
-                    <div className="p-4 bg-rose-50/70 rounded-xl border border-rose-200 text-xs text-rose-700 font-medium italic">
-                      No documentation entered for this required section. Caregiver correction required.
-                    </div>
-                  )}
+                  {/* Note Sections (Structured LiliSare Document Viewer) */}
+                  <div className="space-y-4">
+                    {note.sections.map((sec, idx) => (
+                      <div
+                        key={sec.id}
+                        className={`p-4 sm:p-5 rounded-xl border transition-all space-y-3 ${sec.completionStatus === "missing"
+                          ? "bg-rose-50/40 border-rose-200"
+                          : sec.completionStatus === "incomplete"
+                            ? "bg-amber-50/35 border-amber-200"
+                            : "bg-slate-50/40 border-slate-200/90 hover:border-slate-300"
+                          }`}
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <span
+                              className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 border ${sec.completionStatus === "missing"
+                                ? "bg-rose-100 text-rose-700 border-rose-200"
+                                : sec.completionStatus === "incomplete"
+                                  ? "bg-amber-100 text-amber-800 border-amber-200"
+                                  : "bg-[#3D6B22]/10 text-[#3D6B22] border-[#3D6B22]/20"
+                                }`}
+                            >
+                              {idx + 1}
+                            </span>
+                            <h4 className="text-sm font-bold text-slate-900 tracking-tight">{sec.sectionTitle}</h4>
+                            {sec.required ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80 uppercase tracking-wider">
+                                Mandatory
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                                Optional
+                              </span>
+                            )}
+                          </div>
 
-                  {/* Validation Feedback Messages */}
-                  {sec.validationMessages && sec.validationMessages.length > 0 && (
-                    <div className="mt-2.5 space-y-1">
-                      {sec.validationMessages.map((msg, mIdx) => (
+                          <div className="flex items-center gap-2">
+                            {sec.completionStatus !== "complete" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCorrectionSections([sec.sectionKey]);
+                                  setIsCorrectionModalOpen(true);
+                                }}
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300/80 transition-colors cursor-pointer"
+                              >
+                                Request Fix
+                              </button>
+                            )}
+
+                            {sec.completionStatus === "complete" ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-[#008f5a] border border-emerald-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#00d084]" />
+                                Verified Complete
+                              </span>
+                            ) : sec.completionStatus === "missing" ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-rose-700 border border-rose-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                Missing Entry
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-amber-700 border border-amber-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                Needs Clarification
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Submitted Content Narrative */}
+                        {sec.content ? (
+                          <div className="text-xs text-slate-800 leading-relaxed bg-white p-4 rounded-xl border border-slate-200/80 font-sans whitespace-pre-line shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                            {sec.content}
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-white rounded-xl border border-rose-200 text-xs text-rose-700 font-medium flex items-center gap-2 italic">
+                            <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                            <span>No documentation entered for this required section. Caregiver correction required.</span>
+                          </div>
+                        )}
+
+                        {/* Validation Feedback Messages */}
+                        {sec.validationMessages && sec.validationMessages.length > 0 && (
+                          <div className="space-y-1.5">
+                            {sec.validationMessages.map((msg, mIdx) => (
+                              <div
+                                key={mIdx}
+                                className="px-3 py-2 rounded-lg bg-rose-50 border border-rose-200/80 text-xs text-rose-700 flex items-start gap-2 font-medium"
+                              >
+                                <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                                <span>{msg}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Reviewer Action Trail & Notes */}
+                {note.reviews && note.reviews.length > 0 && (
+                  <div className="pt-2 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                        Reviewer Notes &amp; Action Trail ({note.reviews.length})
+                      </h4>
+                      <div className="h-px bg-slate-100 flex-1" />
+                    </div>
+                    <div className="space-y-2.5">
+                      {note.reviews.map((rev) => (
                         <div
-                          key={mIdx}
-                          className="text-xs text-rose-600 flex items-center gap-1.5 font-medium"
+                          key={rev.id}
+                          className="p-4 bg-slate-50/70 rounded-xl border border-slate-200/90 text-xs space-y-1.5"
                         >
-                          <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                          {msg}
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900">{rev.reviewerName}</span>
+                              <span className="text-[11px] text-slate-500 bg-white px-2 py-0.5 rounded-md border border-slate-200 font-medium">
+                                {rev.reviewerRole}
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-slate-400 font-medium">{rev.reviewedAt}</span>
+                          </div>
+                          <p className="text-slate-700 font-medium leading-relaxed">
+                            {rev.reviewNotes || "Status updated"}
+                          </p>
                         </div>
                       ))}
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                )}
 
-              {/* Reviewer Action Trail & Notes */}
-              {note.reviews && note.reviews.length > 0 && (
-                <div className="pt-5 border-t border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                    Reviewer Notes & Action Trail
-                  </h4>
-                  <div className="space-y-2.5">
-                    {note.reviews.map((rev) => (
-                      <div key={rev.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-bold text-slate-900 text-xs sm:text-sm">
-                            {rev.reviewerName} <span className="text-slate-400 font-normal">({rev.reviewerRole})</span>
-                          </span>
-                          <span className="text-[11px] text-slate-400 font-medium">{rev.reviewedAt}</span>
+                {/* Caregiver Authorship Governance Footer */}
+                <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 text-slate-500 font-medium">
+                    <ShieldCheck className="w-4 h-4 text-[#3D6B22] shrink-0" />
+                    <span>
+                      Read-only caregiver submission — Admin audits quality without silently altering caregiver text.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("history")}
+                    className="font-bold text-[#3D6B22] hover:text-[#345C1D] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
+                  >
+                    View Version History (v{note.currentVersion}) <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right 4 Cols: Documentation Completeness & Applicable Rule Panel */}
+            <div className="lg:col-span-4 space-y-6">
+              {/* Completeness Panel */}
+              <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-5">
+                {/* Header matching Caregiver Submitted Documentation */}
+                <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+                      <ClipboardCheck className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                        Documentation Completeness
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">
+                        Validation score &amp; section checklist
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Bar & Verification Readiness */}
+                <div className="p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-800">
+                      {verifiedCount} / {totalSections} Sections Verified
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${completenessPct === 100
+                        ? "bg-emerald-50 text-[#008f5a] border-emerald-200"
+                        : "bg-amber-50 text-amber-800 border-amber-200"
+                        }`}
+                    >
+                      {completenessPct}%
+                    </span>
+                  </div>
+
+                  <div className="h-2 w-full rounded-full bg-slate-200/80 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${completenessPct === 100
+                        ? "bg-[#3D6B22]"
+                        : completenessPct >= 50
+                          ? "bg-amber-500"
+                          : "bg-rose-500"
+                        }`}
+                      style={{ width: `${completenessPct}%` }}
+                    />
+                  </div>
+
+                  <div
+                    className={`text-[11px] font-semibold flex items-center gap-1.5 ${hasIncompleteSections || hasOpenClinicalFlag ? "text-rose-700" : "text-[#008f5a]"
+                      }`}
+                  >
+                    {hasIncompleteSections ? (
+                      <>
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>Approval blocked until missing sections are corrected</span>
+                      </>
+                    ) : hasOpenClinicalFlag ? (
+                      <>
+                        <ShieldAlert className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                        <span className="text-purple-800">Awaiting Clinical RN sign-off for open flag</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>All mandatory documentation checks passed</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Structured Checklist Rows */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                      Section Verification Checklist
+                    </span>
+                    <div className="h-px bg-slate-100 flex-1" />
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200/80 divide-y divide-slate-100 bg-white overflow-hidden">
+                    {note.sections.map((sec) => (
+                      <div
+                        key={sec.id}
+                        className="p-3 flex items-center justify-between gap-2.5 text-xs hover:bg-slate-50/70 transition-colors"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-semibold text-slate-800 truncate">{sec.sectionTitle}</div>
+                          <div className="text-[11px] text-slate-400 font-medium">
+                            {sec.required ? "Mandatory Field" : "Optional Field"}
+                          </div>
                         </div>
-                        <p className="text-slate-700 font-medium">{rev.reviewNotes || "Status updated"}</p>
+                        {sec.completionStatus === "complete" ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-50 text-[#008f5a] border border-emerald-200/80 shrink-0">
+                            <Check className="w-3 h-3" /> Pass
+                          </span>
+                        ) : sec.completionStatus === "missing" ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80 shrink-0">
+                            <X className="w-3 h-3" /> Missing
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200/80 shrink-0">
+                            <AlertTriangle className="w-3 h-3" /> Incomplete
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Connected Journey Mini Integrity Row */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      EVV Telemetry
+                    </div>
+                    <div
+                      className={`text-xs font-bold flex items-center gap-1.5 ${note.evvStatus === "verified" ? "text-[#008f5a]" : "text-amber-700"
+                        }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${note.evvStatus === "verified" ? "bg-[#00d084]" : "bg-amber-500"
+                          }`}
+                      />
+                      <span className="capitalize">{note.evvStatus || "Verified"}</span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Filing SLA
+                    </div>
+                    <div
+                      className={`text-xs font-bold flex items-center gap-1.5 ${note.isOverdue ? "text-rose-700" : "text-slate-800"
+                        }`}
+                    >
+                      <Clock className={`w-3.5 h-3.5 ${note.isOverdue ? "text-rose-600" : "text-[#3D6B22]"}`} />
+                      <span>{note.isOverdue ? "SLA Overdue" : "Within 24h"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Applicable Rule Details */}
+                {applicableRule && (
+                  <div className="pt-1 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                        Applicable Documentation Rule
+                      </span>
+                      <Link
+                        href="/admin/care-notes?tab=rules"
+                        className="text-[11px] font-bold text-[#3D6B22] hover:underline inline-flex items-center gap-0.5"
+                      >
+                        Rules <ChevronRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                    <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/90 text-xs space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-slate-900">{applicableRule.requirementName}</span>
+                        <span className="font-mono text-[10px] font-bold bg-white text-slate-600 px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                          {applicableRule.id}
+                        </span>
+                      </div>
+                      <p className="text-slate-600 text-[11px] leading-relaxed">
+                        {applicableRule.requirementDescription}
+                      </p>
+                      {applicableRule.validationInstructions && (
+                        <div className="p-2.5 bg-amber-50/80 rounded-lg border border-amber-200/80 text-[11px] text-amber-900 font-medium leading-relaxed">
+                          <strong className="font-bold">Audit Guidance:</strong> {applicableRule.validationInstructions}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Correction Status Card */}
+              {note.corrections && note.corrections.length > 0 && (
+                <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-4">
+                  <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-slate-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-700 flex items-center justify-center shrink-0">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+                        Correction Workflow
+                      </h3>
+                    </div>
+                    <CareNoteStatusBadge status={note.correctionStatus} type="correction" />
+                  </div>
+                  <div className="space-y-3">
+                    {note.corrections.map((c) => (
+                      <div
+                        key={c.id}
+                        className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/90 text-xs space-y-2"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-bold text-slate-900">{c.reason}</span>
+                          <span className="text-[10px] text-slate-400 font-medium shrink-0">{c.requestedAt}</span>
+                        </div>
+                        <p className="text-slate-600 text-xs leading-relaxed">{c.caregiverInstructions}</p>
+                        <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                          <span>
+                            Requested by <strong className="text-slate-700">{c.requestedBy}</strong>
+                          </span>
+                          {c.resubmittedAt && (
+                            <span className="text-[#008f5a] font-bold">
+                              Resubmitted: {c.resubmittedAt}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -721,90 +1036,8 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
               )}
             </div>
           </div>
-
-          {/* Right Col: Documentation Completeness & Applicable Rule Panel */}
-          <div className="space-y-4">
-            {/* Completeness Panel */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-5 sm:p-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
-                  Documentation Completeness
-                </h3>
-                <span className="text-xs font-bold text-[#3D6B22]">
-                  {note.sections.filter((s) => s.completionStatus === "complete").length} / {note.sections.length} Verified
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {note.sections.map((sec) => (
-                  <div key={sec.id} className="flex items-start justify-between gap-2 text-xs">
-                    <div>
-                      <span className="font-semibold text-slate-800">{sec.sectionTitle}</span>
-                      {sec.required && <span className="text-slate-400 ml-1">(Mandatory)</span>}
-                    </div>
-                    {sec.completionStatus === "complete" ? (
-                      <span className="text-[#008f5a] font-bold flex items-center gap-1 shrink-0">
-                        <Check className="w-3.5 h-3.5" /> Pass
-                      </span>
-                    ) : (
-                      <span className="text-rose-600 font-bold flex items-center gap-1 shrink-0">
-                        <X className="w-3.5 h-3.5" /> Deficient
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Applicable Rule Details */}
-              {applicableRule && (
-                <div className="pt-4 border-t border-slate-100 space-y-2">
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Applicable Documentation Rule
-                  </div>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-                    <div className="font-bold text-slate-900 mb-1">{applicableRule.requirementName}</div>
-                    <p className="text-slate-600 text-[11px] leading-relaxed mb-2.5">
-                      {applicableRule.requirementDescription}
-                    </p>
-                    {applicableRule.validationInstructions && (
-                      <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-200/80 text-[11px] text-amber-900 font-medium">
-                        <strong>Audit Rule:</strong> {applicableRule.validationInstructions}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Correction Status Card */}
-            {note.corrections && note.corrections.length > 0 && (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-5 sm:p-6 space-y-3.5">
-                <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Correction Workflow</h3>
-                  <CareNoteStatusBadge status={note.correctionStatus} type="correction" />
-                </div>
-                {note.corrections.map((c) => (
-                  <div key={c.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5">
-                    <div className="flex items-center justify-between font-bold text-slate-900">
-                      <span>{c.reason}</span>
-                      <span className="text-[10px] text-slate-400 font-normal">{c.requestedAt}</span>
-                    </div>
-                    <p className="text-slate-600 text-xs">{c.caregiverInstructions}</p>
-                    <div className="text-[11px] text-slate-500 font-medium pt-1">
-                      Requested by: <strong>{c.requestedBy}</strong>
-                    </div>
-                    {c.resubmittedAt && (
-                      <div className="text-[11px] text-[#008f5a] font-semibold pt-1">
-                        Resubmitted: {c.resubmittedAt}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Tab 2: Full Version History */}
       {activeTab === "history" && (

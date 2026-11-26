@@ -7,7 +7,7 @@ import {
   CareNoteQualityStatus,
   CareNoteCorrectionStatus,
 } from "@/types/careNotes";
-import { CheckCircle2, Clock, AlertTriangle, RefreshCw, AlertCircle, ShieldAlert, Sparkles } from "lucide-react";
+import { CheckCircle2, Clock, AlertTriangle, RefreshCw, ShieldAlert } from "lucide-react";
 
 interface StatusBadgeProps {
   status: CareNoteReviewStatus | CareNoteSubmissionStatus | CareNoteCorrectionStatus | string;
@@ -126,42 +126,61 @@ export function CareNoteQualityIndicator({ status, issueCount = 0 }: QualityIndi
   switch (status) {
     case "complete":
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-[#008f5a] border border-emerald-200/80">
-          <CheckCircle2 className="w-3 h-3 text-[#00d084]" />
+        <span
+          title="Documentation Quality Check"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-[#008f5a] border border-emerald-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00d084] shrink-0" />
           Complete
         </span>
       );
     case "missing_required":
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80">
-          <AlertCircle className="w-3 h-3 text-rose-600" />
-          Missing Required Info
+        <span
+          title="Documentation Quality Check"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-rose-700 border border-rose-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+          Missing Required
         </span>
       );
     case "incomplete":
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">
-          <AlertTriangle className="w-3 h-3 text-amber-600" />
+        <span
+          title="Documentation Quality Check"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-amber-700 border border-amber-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
           Incomplete
         </span>
       );
     case "review_required":
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">
-          <Clock className="w-3 h-3 text-blue-500" />
+        <span
+          title="Documentation Quality Check"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-blue-700 border border-blue-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
           Review Required
         </span>
       );
     case "flagged":
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80">
-          <ShieldAlert className="w-3 h-3 text-rose-600" />
+        <span
+          title="Documentation Quality Check"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-rose-700 border border-rose-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse shrink-0" />
           Flagged {issueCount > 0 ? `(${issueCount})` : ""}
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/80">
+        <span
+          title="Documentation Quality Check"
+          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-white text-slate-700 border border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
           {status}
         </span>
       );

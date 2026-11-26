@@ -1318,17 +1318,23 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
                                   <button
                                     type="button"
                                     onClick={() => setSelectedVisitId(visit.id)}
-                                    className={`w-full text-left px-2 py-1 rounded-full border text-[10px] font-semibold flex items-center justify-between gap-1.5 transition-all cursor-pointer ${pal.pillBg
-                                      } ${pal.pillBorder} ${pal.pillText} ${pal.pillHover
-                                      } ${isSelected
-                                        ? "ring-2 ring-[#3D6B22] ring-offset-1 shadow-sm scale-[1.01]"
-                                        : "shadow-2xs"
-                                      } ${visit.isRemoved ? "opacity-55 line-through" : ""}`}
-                                  >
-                                    <span className="inline-flex items-center gap-1 min-w-0 truncate">
-                                      {hasConflict && (
-                                        <AlertCircle className="w-3 h-3 shrink-0 opacity-90" />
-                                      )}
+                                      className={`w-full text-left px-2 py-1 rounded-full border text-[10px] font-semibold flex items-center justify-between gap-1.5 transition-all cursor-pointer ${visit.visitCategory === "Clinical & Supervisory"
+                                        ? "bg-purple-50 border-purple-300 text-purple-900 hover:bg-purple-100/80"
+                                        : `${pal.pillBg} ${pal.pillBorder} ${pal.pillText} ${pal.pillHover}`
+                                        } ${isSelected
+                                          ? "ring-2 ring-[#3D6B22] ring-offset-1 shadow-sm scale-[1.01]"
+                                          : "shadow-2xs"
+                                        } ${visit.isRemoved ? "opacity-55 line-through" : ""}`}
+                                    >
+                                      <span className="inline-flex items-center gap-1 min-w-0 truncate">
+                                        {visit.visitCategory === "Clinical & Supervisory" && (
+                                          <span className="px-1 py-0.2 rounded bg-purple-600 text-white text-[8px] font-extrabold uppercase shrink-0">
+                                            RN/SUP
+                                          </span>
+                                        )}
+                                        {hasConflict && (
+                                          <AlertCircle className="w-3 h-3 shrink-0 opacity-90" />
+                                        )}
                                       <span className="truncate">
                                         {formatCompactTime(
                                           visit.startTime,

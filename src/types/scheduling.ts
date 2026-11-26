@@ -107,6 +107,12 @@ export interface RealTimeVisit {
   internalNotes: string;
   broadcasts: VisitBroadcastRecord[];
   auditTrail: VisitAuditEntry[];
+
+  // Clinical & Supervisory Linkage (distinguishes clinical visits from routine caregiver shifts)
+  visitCategory?: "Caregiver Shift" | "Clinical & Supervisory";
+  clinicalVisitId?: string;
+  clinicalVisitType?: string;
+  clinicalDeliveryMethod?: "In-home" | "Virtual" | "Other approved method";
 }
 
 export interface CaregiverMatchScore {

@@ -444,6 +444,15 @@ export function VisitDetailFullPage({
               <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#3D6B22] border border-emerald-200/80">
                 {visit.serviceCode} · {visit.serviceName}
               </span>
+              {visit.visitCategory === "Clinical & Supervisory" && (
+                <Link
+                  href={visit.clinicalVisitId ? `/admin/clinical/${visit.clinicalVisitId}/` : "/admin/clinical/"}
+                  className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors"
+                >
+                  <span>Clinical & Supervisory Record</span>
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+              )}
               <span className="text-slate-300">•</span>
               <span className="text-xs font-medium text-slate-500">
                 {visit.householdName}

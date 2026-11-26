@@ -254,6 +254,14 @@ export function VisitInspectorDrawer({
                 <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
                   {draft.id} · {draft.shiftNumber}
                 </span>
+                {draft.visitCategory === "Clinical & Supervisory" && (
+                  <Link
+                    href={draft.clinicalVisitId ? `/admin/clinical/${draft.clinicalVisitId}/` : "/admin/clinical/"}
+                    className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 transition-colors"
+                  >
+                    Clinical & Supervisory ({draft.clinicalDeliveryMethod || "In-home"}) ↗
+                  </Link>
+                )}
               </div>
               <p className="text-xs text-slate-500 font-medium mt-0.5 truncate">
                 {draft.clientName} · {draft.householdName}

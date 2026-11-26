@@ -84,7 +84,7 @@ export default function CaregiverAvailabilityPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 flex flex-col justify-center p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <UserCheck className="w-5 h-5" />
             </div>
             <div>
@@ -95,7 +95,7 @@ export default function CaregiverAvailabilityPage() {
         </Card>
         <Card className="bg-gradient-to-br from-slate-50 to-white border border-slate-200 flex flex-col justify-center p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center">
               <UserX className="w-5 h-5" />
             </div>
             <div>
@@ -106,7 +106,7 @@ export default function CaregiverAvailabilityPage() {
         </Card>
         <Card className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 flex flex-col justify-center p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
             <div>
@@ -117,7 +117,7 @@ export default function CaregiverAvailabilityPage() {
         </Card>
         <Card className="bg-gradient-to-br from-amber-50 to-white border border-amber-100 flex flex-col justify-center p-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
               <Calendar className="w-5 h-5" />
             </div>
             <div>
@@ -161,7 +161,7 @@ export default function CaregiverAvailabilityPage() {
                   <tr key={cg.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-xs">
+                        <div className="w-6 h-6 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-xs">
                           {cg.name.substring(0, 2).toUpperCase()}
                         </div>
                         <div>

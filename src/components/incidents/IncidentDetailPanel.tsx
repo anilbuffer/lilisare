@@ -163,7 +163,7 @@ export function IncidentDetailPanel({ incident, onClose }: IncidentDetailPanelPr
                 <div className="space-y-3">
                   {incident.peopleInvolved.map((person, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
+                      <div className="w-6 h-6 rounded-full overflow-hidden shrink-0">
                         {person.avatar ? (
                           <img src={person.avatar} alt={person.name} className="w-full h-full object-cover bg-slate-100" />
                         ) : (

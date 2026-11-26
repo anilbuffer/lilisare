@@ -44,13 +44,13 @@ export function DetailsPane({ conversation, onClose, isOpen }: DetailsPaneProps)
           <p className="text-sm text-slate-500 mb-4">{primaryParticipant.role}</p>
 
           <div className="flex justify-center gap-3">
-            <button className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
+            <button className="w-6 h-6 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
               <Phone className="w-4 h-4" />
             </button>
-            <button className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
+            <button className="w-6 h-6 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
               <Mail className="w-4 h-4" />
             </button>
-            <button className="w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
+            <button className="w-6 h-6 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
               <User className="w-4 h-4" />
             </button>
           </div>

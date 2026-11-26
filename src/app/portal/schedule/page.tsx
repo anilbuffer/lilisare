@@ -139,10 +139,10 @@ export default function PortalSchedulePage() {
                         <img
                           src={getCaregiverPhoto(visit.caregiverName)}
                           alt={visit.caregiverName}
-                          className="w-8 h-8 rounded-full object-cover border border-slate-200"
+                          className="w-6 h-6 rounded-full object-cover border border-slate-200"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-medium text-slate-600 border border-slate-200 text-xs shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center font-medium text-slate-600 border border-slate-200 text-xs shrink-0">
                           {visit.caregiverName.charAt(0)}
                         </div>
                       )}

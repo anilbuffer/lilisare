@@ -79,7 +79,7 @@ export function HybridCarePlanWorkspace({ patientId, templateId, initialMode, on
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 shrink-0">
         <div className="flex items-center gap-3 md:gap-4">
-          <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold tracking-wider shrink-0">
+          <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold tracking-wider shrink-0">
             EH
           </div>
           <div className="flex-1 min-w-0">
@@ -137,7 +137,7 @@ export function HybridCarePlanWorkspace({ patientId, templateId, initialMode, on
               <div className="hidden md:flex p-4 border-b border-slate-100 bg-slate-50/50 flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center">
                       <Mic className="w-4 h-4" />
                     </div>
                     <span className="font-semibold text-sm text-slate-700">Audio Recording</span>
@@ -148,7 +148,7 @@ export function HybridCarePlanWorkspace({ patientId, templateId, initialMode, on
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setIsPlaying(!isPlaying)}
-                    className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-800 transition-colors shrink-0"
+                    className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-800 transition-colors shrink-0"
                   >
                     {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
                   </button>

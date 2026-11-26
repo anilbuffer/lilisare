@@ -38,7 +38,7 @@ export default function PortalBillingPage() {
         {/* Current Balance */}
         <div className="md:col-span-2 bg-white rounded-2xl p-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-border-subtle">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <Receipt className="w-5 h-5" />
             </div>
             <div>

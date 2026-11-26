@@ -105,7 +105,7 @@ export function ConversationListPane({
                 <div className="flex gap-3.5 items-start">
                   {/* Premium Avatar */}
                   <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-slate-200 to-slate-100 group-hover:from-brand-teal/20 group-hover:to-brand-teal/10 transition-colors">
+                    <div className="w-6 h-6 rounded-full p-[2px] bg-gradient-to-tr from-slate-200 to-slate-100 group-hover:from-brand-teal/20 group-hover:to-brand-teal/10 transition-colors">
                       {primaryParticipant.avatar ? (
                         <img
                           src={primaryParticipant.avatar}

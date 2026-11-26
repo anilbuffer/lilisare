@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal shrink-0">
+                <div className="w-6 h-6 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal shrink-0">
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
@@ -62,7 +62,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
@@ -72,7 +72,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
+                <div className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
                   <Briefcase className="w-5 h-5" />
                 </div>
                 <div>

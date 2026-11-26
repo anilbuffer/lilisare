@@ -78,8 +78,8 @@ export default function PortalOverviewPage() {
             )}
           </div>
           <p className="text-text-secondary text-sm max-w-2xl">
-            {isClient 
-              ? "Here's what's happening today." 
+            {isClient
+              ? "Here's what's happening today."
               : `Viewing care details for ${portalUser.relationship === "Daughter" ? "your dad" : portalUser.clientName}.`}
           </p>
         </motion.div>
@@ -231,7 +231,7 @@ export default function PortalOverviewPage() {
                 >
                   <div className="flex items-start gap-4">
                     <div className={clsx(
-                      "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border",
+                      "w-6 h-6 rounded-full flex items-center justify-center shrink-0 border",
                       isVisit && "bg-emerald-100 border-emerald-200 text-emerald-600",
                       isCarePlan && "bg-blue-100 border-blue-200 text-blue-600",
                       isIncident && "bg-amber-100 border-amber-200 text-amber-600"
@@ -284,7 +284,7 @@ export default function PortalOverviewPage() {
                         <Clock className="w-[14px] h-[14px]" /> {visit.time}
                       </div>
                       <div className="flex items-center gap-2 pt-1">
-                        <div className="w-8 h-8 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center text-[12px] font-medium border border-slate-100">
+                        <div className="w-6 h-6 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center text-[12px] font-medium border border-slate-100">
                           {visit.caregiverName.charAt(0)}
                         </div>
                         <span className="text-[12px] text-slate-700">{visit.caregiverName}</span>
@@ -307,9 +307,9 @@ export default function PortalOverviewPage() {
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       {member.photo ? (
-                        <img src={member.photo} alt={member.name} className="w-10 h-10 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                        <img src={member.photo} alt={member.name} className="w-6 h-6 rounded-full object-cover transition-transform duration-200 group-hover:scale-105" />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-medium transition-transform duration-200 group-hover:scale-105 border border-slate-200">
+                        <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-medium transition-transform duration-200 group-hover:scale-105 border border-slate-200">
                           {member.name.charAt(0)}
                         </div>
                       )}

@@ -111,7 +111,7 @@ export function CalendarView({ viewMode, shifts, caregivers, onShiftClick }: Cal
       {/* Conflict Detection Banner */}
       {conflicts.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-3 shadow-sm animate-in fade-in">
-          <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
             <AlertTriangle className="w-4 h-4" />
           </div>
           <div>

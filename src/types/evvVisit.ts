@@ -217,6 +217,30 @@ export interface EvvVisitRecord {
   corrections?: EvvCorrection[];
   reviewNotes: EvvReviewNote[];
   timeline: EvvTimelineEvent[];
+
+  // Display helpers for standardized front lists
+  displayId?: string;
+  visitStatusBadge?: string;
+  timeDisplay?: string;
+  timeScheduledDisplay?: string;
+  caregiverInitials?: string;
+  clientInitials?: string;
+  issueBadge?: string;
+  complianceStatus?: "Exception" | "Verified" | "Resolved";
+  billingStatusBadge?: "Hold" | "Cleared" | "Billed" | "Pending Review";
+  payrollStatusBadge?: "Pending Review" | "Approved" | "Hold" | "Processed";
+  aggregatorStatusBadge?: "Pending" | "Accepted" | "Not Submitted" | "Rejected" | "Submitted";
+}
+
+export interface EvvBatchRecord {
+  id: string; // e.g. "SUB-8921"
+  aggregator: string; // e.g. "NY HHAeXchange"
+  state: string;
+  aggregatorName: string;
+  timestamp: string; // e.g. "Today, 10:15 AM"
+  visitsIncluded: number;
+  status: "Accepted" | "Partial Rejection (3)" | "Pending";
+  payloadJson?: string;
 }
 
 export interface EvvExceptionRecord {
@@ -284,6 +308,16 @@ export interface EvvToleranceRule {
   effectiveDate: string;
   isActive: boolean;
   description?: string;
+
+  // State connector & Payer tolerance rule fields (Screenshot 6)
+  stateCode?: string;
+  statePayerName?: string;
+  aggregatorName?: string;
+  timeToleranceMinutes?: number;
+  geofenceRadiusFeet?: number;
+  gpsRequirement?: "Required" | "Optional" | "Not Applicable";
+  signatureRequirement?: "Required" | "Optional" | "Not Applicable";
+  voiceRequirement?: "Required" | "Optional" | "Not Applicable";
 }
 
 export interface EvvReviewer {

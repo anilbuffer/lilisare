@@ -52,7 +52,7 @@ export function SecuritySettings() {
         {/* MFA Section */}
         <div className="bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden flex flex-col lg:flex-row justify-between gap-4">
           <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-brand-teal/10 flex items-center justify-center shrink-0">
               <Smartphone className="w-5 h-5 text-brand-teal" />
             </div>
             <div>
@@ -72,7 +72,7 @@ export function SecuritySettings() {
         {/* Session Management */}
         <div className="bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden flex flex-col gap-4">
           <div className="flex gap-4 items-start">
-            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5 text-amber-600" />
             </div>
             <div className="flex-1">
@@ -97,7 +97,7 @@ export function SecuritySettings() {
         {/* Password Requirements */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative flex flex-col items-start gap-4">
           <div className="flex gap-3 items-center">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
               <Key className="w-4 h-4 text-indigo-800" />
             </div>
             <h4 className="text-sm font-semibold text-slate-800 mb-0">Password Policy</h4>
@@ -128,7 +128,7 @@ export function SecuritySettings() {
 
         {/* Security Breach Workflow */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden flex flex-col lg:flex-row gap-4">
-          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-5 h-5 text-red-600" />
           </div>
           <div className="flex-1">
@@ -154,7 +154,7 @@ export function SecuritySettings() {
         onClose={() => setIsUpdatePwdModalOpen(false)}
         title="Update Password"
         description="Enforces 90-day rotation and strict 12-char minimum policy."
-        icon={<div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0"><Key className="w-5 h-5 text-indigo-600" /></div>}
+        icon={<div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center shrink-0"><Key className="w-5 h-5 text-indigo-600" /></div>}
         maxWidth="lg"
       >
         <form onSubmit={handleUpdatePassword} className="space-y-2.5">

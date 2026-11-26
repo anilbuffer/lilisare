@@ -131,9 +131,9 @@ export function ActiveThreadPane({ conversation, onToggleDetails, showDetails, o
                             className="w-full flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg text-left transition-colors"
                           >
                             {contact.avatar ? (
-                              <img src={contact.avatar} alt={contact.name} className="w-8 h-8 rounded-full object-cover" />
+                              <img src={contact.avatar} alt={contact.name} className="w-6 h-6 rounded-full object-cover" />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs shrink-0">
+                              <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs shrink-0">
                                 {contact.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                               </div>
                             )}
@@ -296,9 +296,9 @@ export function ActiveThreadPane({ conversation, onToggleDetails, showDetails, o
           )}
           <div className="relative">
             {primaryParticipant.avatar ? (
-              <img src={primaryParticipant.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
+              <img src={primaryParticipant.avatar} alt="Avatar" className="w-6 h-6 rounded-full" />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm">
+              <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-sm">
                 {primaryParticipant.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
               </div>
             )}
@@ -405,9 +405,9 @@ export function ActiveThreadPane({ conversation, onToggleDetails, showDetails, o
             <div key={msg.id} className={clsx("flex gap-3", isMe ? "justify-end" : "justify-start")}>
               {!isMe && (
                 sender?.avatar ? (
-                  <img src={sender.avatar} alt="" className="w-8 h-8 rounded-full mt-auto shrink-0" />
+                  <img src={sender.avatar} alt="" className="w-6 h-6 rounded-full mt-auto shrink-0" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs mt-auto shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs mt-auto shrink-0">
                     {sender?.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                   </div>
                 )

@@ -605,7 +605,7 @@ export function UsersTab() {
               <Card key={user.id} className="p-4 space-y-3 relative">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-xs shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-xs shrink-0">
                       {user.name
                         .split(" ")
                         .map((n) => n[0])

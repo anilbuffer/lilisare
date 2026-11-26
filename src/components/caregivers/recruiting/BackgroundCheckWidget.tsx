@@ -28,7 +28,7 @@ export function BackgroundCheckWidget({ onRunChecks, onViewDetails }: Background
         {/* Checkr / Sterling */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
               <CheckCircle className="w-4 h-4 text-emerald-600" />
             </div>
             <div>
@@ -44,7 +44,7 @@ export function BackgroundCheckWidget({ onRunChecks, onViewDetails }: Background
         {/* OIG / SAM Exclusion List */}
         <div className="flex items-start justify-between border-b border-slate-100 pb-4">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
               <Clock className="w-4 h-4 text-amber-600" />
             </div>
             <div>
@@ -60,7 +60,7 @@ export function BackgroundCheckWidget({ onRunChecks, onViewDetails }: Background
         {/* State Registry */}
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+            <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
               <ShieldAlert className="w-4 h-4 text-red-600" />
             </div>
             <div>

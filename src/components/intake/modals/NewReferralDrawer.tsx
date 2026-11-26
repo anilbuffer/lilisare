@@ -224,7 +224,7 @@ export function NewReferralDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-[#FFFFFF] border border-[#D5DFDA] flex items-center justify-center text-[#74877C] hover:text-[#111C16] hover:bg-[#EEF2F0] transition-colors cursor-pointer"
+            className="w-6 h-6 rounded-full bg-[#FFFFFF] border border-[#D5DFDA] flex items-center justify-center text-[#74877C] hover:text-[#111C16] hover:bg-[#EEF2F0] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>

@@ -69,9 +69,9 @@ export function AuditList() {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     {audit.avatarUrl ? (
-                      <img src={audit.avatarUrl} alt={audit.subjectName} className="w-8 h-8 rounded-full object-cover bg-slate-100" />
+                      <img src={audit.avatarUrl} alt={audit.subjectName} className="w-6 h-6 rounded-full object-cover bg-slate-100" />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-semibold text-xs shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-semibold text-xs shrink-0">
                         {audit.subjectName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                       </div>
                     )}

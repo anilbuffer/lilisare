@@ -520,7 +520,7 @@ export default function AdminAuthorizationsPage() {
                       {/* 1. Patient */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0">
+                          <div className="w-6 h-6 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0">
                             {record.clientName.charAt(0)}
                           </div>
                           <div>

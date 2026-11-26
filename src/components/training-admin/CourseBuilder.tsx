@@ -80,7 +80,7 @@ export function CourseBuilder() {
             <div className="space-y-3">
               {modules.map((m, i) => (
                 <div key={m.id} className="flex items-center px-3 py-2 lg:px-4 lg:py-3 border border-slate-200 rounded-xl hover:border-brand-teal/50 transition-colors cursor-pointer group">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 mr-3 group-hover:bg-brand-teal/10 group-hover:text-brand-teal transition-colors">
+                  <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 mr-3 group-hover:bg-brand-teal/10 group-hover:text-brand-teal transition-colors">
                     {m.type === 'video' ? <Video className="w-4 h-4" /> : m.type === 'pdf' ? <FileText className="w-4 h-4" /> : <PlayCircle className="w-4 h-4" />}
                   </div>
                   <div className="flex-1">
@@ -164,7 +164,7 @@ export function CourseBuilder() {
                 onClick={() => handleAddModule('video')}
                 className="flex flex-col items-center justify-center gap-2 py-2 lg:py-4 border border-dashed border-slate-200 rounded-xl hover:border-brand-teal hover:bg-brand-teal/5 text-slate-500 hover:text-brand-teal transition-colors group"
               >
-                <div className="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-white flex items-center justify-center shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+                <div className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-white flex items-center justify-center shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
                   <Video className="w-4 h-4" />
                 </div>
                 <span className="text-xs lg:text-sm font-medium">Add Video</span>
@@ -173,7 +173,7 @@ export function CourseBuilder() {
                 onClick={() => handleAddModule('pdf')}
                 className="flex flex-col items-center justify-center gap-2 py-2 lg:py-4 border border-dashed border-slate-200 rounded-xl hover:border-brand-teal hover:bg-brand-teal/5 text-slate-500 hover:text-brand-teal transition-colors group"
               >
-                <div className="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-white flex items-center justify-center shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+                <div className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-white flex items-center justify-center shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
                   <FileText className="w-4 h-4" />
                 </div>
                 <span className="text-xs lg:text-sm font-medium">Add PDF/Doc</span>
@@ -182,7 +182,7 @@ export function CourseBuilder() {
                 href="/training-admin/quizzes"
                 className="flex flex-col items-center justify-center gap-2 py-2 lg:py-4 border border-dashed border-slate-200 rounded-xl hover:border-brand-teal hover:bg-brand-teal/5 text-slate-500 hover:text-brand-teal transition-colors group"
               >
-                <div className="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-white flex items-center justify-center shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+                <div className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-white flex items-center justify-center shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
                   <CheckSquare className="w-4 h-4" />
                 </div>
                 <span className="text-xs lg:text-sm font-medium">Add Quiz</span>

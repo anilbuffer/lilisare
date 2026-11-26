@@ -96,7 +96,7 @@ export default function VisitDetailsPage() {
                 {timelineSteps.map((step, idx) => (
                   <div key={idx} className="flex flex-row sm:flex-col items-center gap-4 sm:gap-2 text-center group">
                     <div className={clsx(
-                      "w-10 h-10 rounded-full flex items-center justify-center border-4 transition-colors shrink-0",
+                      "w-6 h-6 rounded-full flex items-center justify-center border-4 transition-colors shrink-0",
                       step.completed ? "bg-brand-teal border-white text-white shadow-md" : "bg-slate-100 border-white text-slate-300"
                     )}>
                       {step.completed ? <Check className="w-5 h-5" /> : <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />}

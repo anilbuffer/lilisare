@@ -73,7 +73,7 @@ export function UserAuditModal({
         {targetUser && (
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-sm">
+              <div className="w-6 h-6 rounded-full bg-brand-teal/10 text-brand-teal flex items-center justify-center font-bold text-sm">
                 {targetUser.name
                   .split(" ")
                   .map((n) => n[0])

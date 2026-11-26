@@ -642,7 +642,7 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
   if (!isHydrated) {
     return (
       <div className="w-full max-w-[1600px] mx-auto py-16 text-center text-slate-500">
-        <div className="w-8 h-8 rounded-full border-2 border-[#3D6B22] border-t-transparent animate-spin mx-auto mb-2" />
+        <div className="w-6 h-6 rounded-full border-2 border-[#3D6B22] border-t-transparent animate-spin mx-auto mb-2" />
         <p className="text-xs font-semibold">Synchronizing Real-Time Scheduling Grid...</p>
       </div>
     );

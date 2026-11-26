@@ -121,7 +121,7 @@ export function InquiryEditView({
   if (!isMounted) {
     return (
       <div className="w-full max-w-5xl mx-auto py-16 text-center text-slate-500">
-        <div className="w-8 h-8 rounded-full border-2 border-[#3D6B22] border-t-transparent animate-spin mx-auto mb-2" />
+        <div className="w-6 h-6 rounded-full border-2 border-[#3D6B22] border-t-transparent animate-spin mx-auto mb-2" />
         <p className="font-semibold text-xs text-slate-600">Loading Inquiry Editor...</p>
       </div>
     );
@@ -181,10 +181,10 @@ export function InquiryEditView({
         },
         potentialCaregiver: caregiverName.trim()
           ? {
-              ...inquiry.familyInfo.potentialCaregiver,
-              name: caregiverName.trim(),
-              relationship: caregiverRelationship.trim() || "Family Caregiver",
-            }
+            ...inquiry.familyInfo.potentialCaregiver,
+            name: caregiverName.trim(),
+            relationship: caregiverRelationship.trim() || "Family Caregiver",
+          }
           : undefined,
       },
       referralInfo: {

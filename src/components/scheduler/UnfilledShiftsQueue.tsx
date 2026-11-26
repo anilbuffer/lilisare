@@ -181,7 +181,7 @@ export function UnfilledShiftsQueue({ shifts: initialShifts, onAssign }: Unfille
                             )}
                           >
                             <div className="flex items-center gap-2 min-w-0 pr-1">
-                              <div className="w-8 h-8 rounded-full bg-slate-700 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                              <div className="w-6 h-6 rounded-full bg-slate-700 text-white font-bold text-xs flex items-center justify-center shrink-0">
                                 {cg.name.split(" ").map((n) => n[0]).join("")}
                               </div>
                               <div className="min-w-0 relative group">

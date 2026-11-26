@@ -212,7 +212,7 @@ export function ReferralDetailPanel({ referral, onClose, onUpdate }: ReferralDet
                 <div className="bg-white border border-slate-200 rounded-xl p-4">
                   <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Coordinator</h3>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-100 border-2 border-white shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex items-center justify-center text-slate-600 font-medium">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 border-2 border-white shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex items-center justify-center text-slate-600 font-medium">
                       {referral.assignedCoordinator.name.charAt(0)}
                     </div>
                     <div>
@@ -372,7 +372,7 @@ export function ReferralDetailPanel({ referral, onClose, onUpdate }: ReferralDet
                   ) : (
                     referral.communications.map(comm => (
                       <div key={comm.id} className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 mt-1">
+                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 shrink-0 mt-1">
                           {comm.type === "call" ? <Phone className="w-4 h-4" /> :
                             comm.type === "email" ? <Mail className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                         </div>
@@ -386,7 +386,7 @@ export function ReferralDetailPanel({ referral, onClose, onUpdate }: ReferralDet
                           {/* Recording Player (Mock) */}
                           {comm.recordingUrl && (
                             <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-2 flex items-center gap-3">
-                              <button className="w-8 h-8 rounded-full bg-brand-teal text-white flex items-center justify-center hover:bg-teal-600 transition-colors shrink-0">
+                              <button className="w-6 h-6 rounded-full bg-brand-teal text-white flex items-center justify-center hover:bg-teal-600 transition-colors shrink-0">
                                 <Play className="w-4 h-4 ml-0.5" />
                               </button>
                               <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">

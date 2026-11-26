@@ -110,7 +110,7 @@ export default function RecurringPatternsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 lg:mb-6">
         <Card className="bg-gradient-to-br from-indigo-50 to-white px-4 py-3 border border-indigo-100 flex flex-col justify-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
               <PlayCircle className="w-5 h-5" />
             </div>
             <div>
@@ -121,7 +121,7 @@ export default function RecurringPatternsPage() {
         </Card>
         <Card className="bg-gradient-to-br from-emerald-50 to-white px-4 py-3 border border-emerald-100 flex flex-col justify-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
@@ -132,7 +132,7 @@ export default function RecurringPatternsPage() {
         </Card>
         <Card className="bg-gradient-to-br from-amber-50 to-white px-4 py-3 border border-amber-100 flex flex-col justify-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>

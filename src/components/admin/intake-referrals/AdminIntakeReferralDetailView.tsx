@@ -179,7 +179,7 @@ export function AdminIntakeReferralDetailView({
   if (!isMounted) {
     return (
       <div className="w-full max-w-7xl mx-auto py-16 text-center text-slate-500">
-        <div className="w-8 h-8 rounded-full border-2 border-[#3D6B22] border-t-transparent animate-spin mx-auto mb-2" />
+        <div className="w-6 h-6 rounded-full border-2 border-[#3D6B22] border-t-transparent animate-spin mx-auto mb-2" />
         <p className="font-semibold text-xs text-slate-600">Loading Referral Profile...</p>
       </div>
     );
@@ -513,10 +513,10 @@ export function AdminIntakeReferralDetailView({
             <div className="absolute -bottom-1 -right-1">
               <span
                 className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-xs border-2 border-white ${referral.priority === "Urgent"
-                    ? "bg-rose-600"
-                    : referral.priority === "High"
-                      ? "bg-amber-500"
-                      : "bg-[#3D6B22]"
+                  ? "bg-rose-600"
+                  : referral.priority === "High"
+                    ? "bg-amber-500"
+                    : "bg-[#3D6B22]"
                   }`}
               >
                 {referral.priority}
@@ -571,8 +571,8 @@ export function AdminIntakeReferralDetailView({
                     type="button"
                     onClick={() => handleUpdateStatus(stg)}
                     className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${referral.status === stg
-                        ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
-                        : "text-slate-800"
+                      ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
+                      : "text-slate-800"
                       }`}
                   >
                     <span>{stg}</span>
@@ -1120,8 +1120,8 @@ export function AdminIntakeReferralDetailView({
                   type="button"
                   onClick={() => setNoteFilter(flt)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${noteFilter === flt
-                      ? "bg-[#3D6B22] text-white shadow-2xs"
-                      : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/70"
+                    ? "bg-[#3D6B22] text-white shadow-2xs"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/70"
                     }`}
                 >
                   {flt}
@@ -1143,8 +1143,8 @@ export function AdminIntakeReferralDetailView({
                     type="button"
                     onClick={() => setNoteCategory(cat)}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${noteCategory === cat
-                        ? "bg-[#3D6B22] text-white shadow-2xs"
-                        : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                      ? "bg-[#3D6B22] text-white shadow-2xs"
+                      : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
                       }`}
                   >
                     {cat}

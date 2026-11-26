@@ -20,7 +20,7 @@ function SmartRNModal({ isOpen, onClose, referral, onConfirm }: { isOpen: boolea
 
         <div className="space-y-3 mb-6">
           <div className="p-3 bg-teal-50 border border-teal-100 rounded-xl flex items-start gap-3 cursor-pointer hover:bg-teal-100 transition-colors" onClick={() => onConfirm("Jane Doe, RN")}>
-            <div className="w-8 h-8 rounded-full bg-brand-teal text-white flex items-center justify-center font-bold shrink-0">JD</div>
+            <div className="w-6 h-6 rounded-full bg-brand-teal text-white flex items-center justify-center font-bold shrink-0">JD</div>
             <div>
               <div className="flex items-center gap-2">
                 <h4 className="font-semibold text-teal-900">Jane Doe, RN</h4>
@@ -30,7 +30,7 @@ function SmartRNModal({ isOpen, onClose, referral, onConfirm }: { isOpen: boolea
             </div>
           </div>
           <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-start gap-3 cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => onConfirm("Mike Smith, RN")}>
-            <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold shrink-0">MS</div>
+            <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold shrink-0">MS</div>
             <div>
               <h4 className="font-semibold text-slate-700">Mike Smith, RN</h4>
               <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1"><MapPin className="w-3 h-3" /> 5.1 miles away (Est. 15 mins)</p>
@@ -106,7 +106,7 @@ function ReferralCard({ referral, onClick, onDragStart }: ReferralCardProps) {
           </div>
           <p className="text-xs text-text-secondary">{referral.source} • {referral.daysInStage}d in stage</p>
         </div>
-        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-medium text-slate-600 shrink-0">
+        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-medium text-slate-600 shrink-0">
           {referral.clientInitials}
         </div>
       </div>

@@ -935,15 +935,15 @@ export function OnboardingList({ activeKpiFilter = "all", onSelectKpiFilter }: O
                     >
                       <div className="flex items-center gap-3">
                         {doc.status === "completed" ? (
-                          <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                          <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
                             <CheckCircle2 className="w-5 h-5" />
                           </div>
                         ) : doc.status === "missing" ? (
-                          <div className="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center text-rose-600">
+                          <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center text-rose-600">
                             <AlertCircle className="w-5 h-5" />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                          <div className="w-6 h-6 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
                             <Clock className="w-5 h-5" />
                           </div>
                         )}

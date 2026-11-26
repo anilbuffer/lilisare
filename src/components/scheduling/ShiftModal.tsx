@@ -139,7 +139,7 @@ export function ShiftModal({
                     {suggestedCaregivers.map((cg, idx) => (
                       <div key={cg.id} className="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between hover:border-brand-teal/50 transition-colors">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500">
+                          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500">
                             {cg.name.substring(0, 2).toUpperCase()}
                           </div>
                           <div>

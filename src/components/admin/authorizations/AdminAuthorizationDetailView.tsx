@@ -634,7 +634,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
 
             <div className="space-y-4 text-xs">
               <div className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-100">
-                <div className="w-10 h-10 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0">
+                <div className="w-6 h-6 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0">
                   {record.caseManagerName.charAt(0)}
                 </div>
                 <div>

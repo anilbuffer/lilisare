@@ -42,7 +42,7 @@ export function ESignatureFlow({ isOpen, onClose, documentName, onSuccess }: ESi
             >
               <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50/50">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-brand-teal/10 flex items-center justify-center">
                     <FileText className="w-5 h-5 text-brand-teal" />
                   </div>
                   <div>
@@ -70,8 +70,8 @@ export function ESignatureFlow({ isOpen, onClose, documentName, onSuccess }: ESi
                     </div>
 
                     <label className="flex items-start gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={agreed}
                         onChange={(e) => setAgreed(e.target.checked)}
                         className="mt-1 w-4 h-4 text-brand-teal rounded border-slate-300 focus:ring-brand-teal"
@@ -101,16 +101,16 @@ export function ESignatureFlow({ isOpen, onClose, documentName, onSuccess }: ESi
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal text-lg font-medium"
                       />
                     </div>
-                    
+
                     <div className="p-6 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 flex flex-col items-center justify-center min-h-[120px]">
-                       {signature ? (
-                         <div className="font-[Caveat,cursive] text-4xl text-slate-800 opacity-80">{signature}</div>
-                       ) : (
-                         <div className="text-slate-400 text-sm font-medium flex items-center gap-2">
-                           <AlertCircle className="w-4 h-4" />
-                           Signature preview will appear here
-                         </div>
-                       )}
+                      {signature ? (
+                        <div className="font-[Caveat,cursive] text-4xl text-slate-800 opacity-80">{signature}</div>
+                      ) : (
+                        <div className="text-slate-400 text-sm font-medium flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4" />
+                          Signature preview will appear here
+                        </div>
+                      )}
                     </div>
 
                     <button

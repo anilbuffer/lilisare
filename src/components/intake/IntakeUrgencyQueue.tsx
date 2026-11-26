@@ -269,19 +269,19 @@ export function IntakeUrgencyQueue() {
                     <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-200 px-2 py-0.5 rounded-full">Call Connected</span>
                   </div>
                   <div className="flex gap-2">
-                    <div className="w-8 h-8 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0 font-semibold text-xs">You</div>
+                    <div className="w-6 h-6 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0 font-semibold text-xs">You</div>
                     <div className="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-sm text-slate-700 shadow-[0_4px_20px_rgba(0,0,0,0.04)] leading-relaxed">
                       Hi, this is James from LiliSare. I'm calling about the hospital discharge pending for {inquiries.find(i => i.id === activeCallId)?.name?.split(" ")[0]}.
                     </div>
                   </div>
                   <div className="flex gap-2 flex-row-reverse">
-                    <div className="w-8 h-8 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0 font-semibold text-[10px] uppercase">{inquiries.find(i => i.id === activeCallId)?.name?.substring(0, 2)}</div>
+                    <div className="w-6 h-6 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0 font-semibold text-[10px] uppercase">{inquiries.find(i => i.id === activeCallId)?.name?.substring(0, 2)}</div>
                     <div className="bg-blue-600 text-white p-2.5 rounded-2xl rounded-tr-sm text-sm shadow-[0_4px_20px_rgba(0,0,0,0.04)] leading-relaxed">
                       Oh, hello James. Yes, we are waiting for the transport now. The discharge papers are ready.
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <div className="w-8 h-8 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0 font-semibold text-xs">You</div>
+                    <div className="w-6 h-6 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0 font-semibold text-xs">You</div>
                     <div className="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-sm text-slate-700 shadow-[0_4px_20px_rgba(0,0,0,0.04)] flex items-center gap-2">
                       <span className="flex gap-1 h-3 items-center">
                         <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce"></span>

@@ -63,7 +63,7 @@ export function NotificationsCenter() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full bg-white border border-border-subtle text-slate-500 hover:bg-slate-50 transition-colors shadow-[0_6px_32px_rgba(0,0,0,0.06)]"
       >
@@ -79,13 +79,13 @@ export function NotificationsCenter() {
               4 New
             </span>
           </div>
-          
+
           <div className="max-h-[400px] overflow-y-auto divide-y divide-slate-100">
             {notifications.map(notif => {
               const Icon = notif.icon;
               return (
                 <div key={notif.id} className="p-4 hover:bg-slate-50 transition-colors cursor-pointer flex gap-3 group">
-                  <div className={`w-10 h-10 rounded-full ${notif.bg} flex items-center justify-center shrink-0`}>
+                  <div className={`w-6 h-6 rounded-full ${notif.bg} flex items-center justify-center shrink-0`}>
                     <Icon className={`w-5 h-5 ${notif.color}`} />
                   </div>
                   <div className="flex-1">

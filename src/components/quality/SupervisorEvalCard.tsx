@@ -25,7 +25,7 @@ export function SupervisorEvalCard() {
         <div className="p-4 rounded-xl border border-border-subtle bg-slate-50/50 hover:border-border-subtle transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <Avatar fallback="M" className="w-10 h-10 rounded-full bg-slate-100" />
+              <Avatar fallback="M" className="w-6 h-6 rounded-full bg-slate-100" />
               <div>
                 <div className="text-sm font-medium text-text-primary">Marcus Johnson</div>
                 <div className="text-xs text-text-secondary">Caregiver</div>
@@ -58,7 +58,7 @@ export function SupervisorEvalCard() {
         <div className="py-4 px-4 bg-white backdrop-blur-xl rounded-2xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-colors">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <Avatar fallback="S" className="w-10 h-10 rounded-full bg-slate-100" />
+              <Avatar fallback="S" className="w-6 h-6 rounded-full bg-slate-100" />
               <div>
                 <div className="text-sm font-medium text-text-primary">Sarah Thompson</div>
                 <div className="text-xs text-text-secondary">RN Supervisor</div>
@@ -107,7 +107,7 @@ export function SupervisorEvalCard() {
           <div className="p-4 rounded-xl border border-border-subtle bg-slate-50/50 hover:border-border-subtle transition-colors">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <Avatar fallback="M" className="w-10 h-10 rounded-full bg-slate-100" />
+                <Avatar fallback="M" className="w-6 h-6 rounded-full bg-slate-100" />
                 <div>
                   <div className="text-sm font-medium text-text-primary">Marcus Johnson</div>
                   <div className="text-xs text-text-secondary">Caregiver</div>
@@ -136,7 +136,7 @@ export function SupervisorEvalCard() {
           <div className="p-4 rounded-xl border border-border-subtle bg-slate-50/50 hover:border-border-subtle transition-colors">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <Avatar fallback="S" className="w-10 h-10 rounded-full bg-slate-100" />
+                <Avatar fallback="S" className="w-6 h-6 rounded-full bg-slate-100" />
                 <div>
                   <div className="text-sm font-medium text-text-primary">Sarah Thompson</div>
                   <div className="text-xs text-text-secondary">RN Supervisor</div>

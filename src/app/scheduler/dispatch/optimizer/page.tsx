@@ -180,7 +180,7 @@ export default function SchedulerTrackerPage() {
                   className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#0f172a]/90 backdrop-blur-md border border-slate-700 p-4 rounded-xl shadow-2xl z-40 flex flex-col gap-3 max-w-[500px] w-full"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700">
+                    <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center shrink-0 border border-slate-700">
                       <span className="text-xl">🤖</span>
                     </div>
                     <div className="text-sm font-medium text-slate-200 leading-snug">

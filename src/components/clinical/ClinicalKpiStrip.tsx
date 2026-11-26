@@ -79,7 +79,7 @@ export function ClinicalKpiStrip() {
             )}
             <div className="flex justify-between items-center mb-2">
               <span className="text-xs font-medium text-slate-600 leading-tight pr-2">{kpi.label}</span>
-              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", kpi.bg, kpi.color)}>
+              <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110", kpi.bg, kpi.color)}>
                 <Icon className="w-4 h-4" />
               </div>
             </div>

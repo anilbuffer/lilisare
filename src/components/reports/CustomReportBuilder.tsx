@@ -73,7 +73,7 @@ export function CustomReportBuilder() {
                   `}
                   disabled={!isPast && !isActive}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0
                     ${isActive ? "bg-brand-teal text-white" :
                       isPast ? "bg-white border border-slate-200 text-slate-600 shadow-[0_6px_32px_rgba(0,0,0,0.06)]" : "bg-slate-100 border border-slate-200/50 text-slate-400"}
                   `}>

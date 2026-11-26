@@ -302,7 +302,7 @@ export default function SettingsPage() {
                 {members.map((member) => (
                   <div key={member.id} className="p-4 rounded-xl border border-slate-200 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3.5">
-                      <Avatar name={member.name} size="md" className="w-10 h-10 rounded-full font-bold shrink-0" />
+                      <Avatar name={member.name} size="md" className="w-6 h-6 rounded-full font-bold shrink-0" />
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-xs text-gray-900">{member.name}</span>

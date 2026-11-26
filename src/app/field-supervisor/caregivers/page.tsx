@@ -64,7 +64,7 @@ export default function ScopedCaregiversPage() {
                     : "hover:bg-slate-50 border border-slate-200"
                 )}
               >
-                <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-200 shrink-0 overflow-hidden">
+                <div className="w-6 h-6 rounded-full bg-slate-200 border border-slate-200 shrink-0 overflow-hidden">
                   {cg.avatarUrl ? (
                     <img src={cg.avatarUrl} alt={cg.name} className="w-full h-full object-cover" />
                   ) : (

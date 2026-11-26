@@ -190,7 +190,7 @@ export function CaregiverNoteListTab({ profile }: CaregiverNoteListTabProps) {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 text-[#3D6B22] font-bold text-xs flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-[#3D6B22] font-bold text-xs flex items-center justify-center shrink-0">
                   {note.author.slice(0, 2).toUpperCase()}
                 </div>
                 <div>

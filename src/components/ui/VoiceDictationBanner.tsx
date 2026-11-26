@@ -69,7 +69,7 @@ export function VoiceDictationBanner({
           if (recognitionRef.current) {
             try {
               recognitionRef.current.stop();
-            } catch (_) {}
+            } catch (_) { }
           }
         }, 3200);
 
@@ -97,11 +97,10 @@ export function VoiceDictationBanner({
     >
       <div className="flex items-center gap-3">
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all ${
-            isRecording
-              ? "bg-rose-100 text-rose-600 border border-rose-300 animate-pulse shadow-sm"
-              : "bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20"
-          }`}
+          className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${isRecording
+            ? "bg-rose-100 text-rose-600 border border-rose-300 animate-pulse shadow-sm"
+            : "bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20"
+            }`}
         >
           <Mic className="w-5 h-5" />
         </div>
@@ -129,11 +128,10 @@ export function VoiceDictationBanner({
         type="button"
         onClick={startDictation}
         disabled={isRecording}
-        className={`shrink-0 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] border cursor-pointer flex items-center justify-center gap-2 ${
-          isRecording
-            ? "bg-rose-50 text-rose-600 border-rose-300 shadow-[0_4px_16px_rgba(225,29,72,0.12)] cursor-not-allowed"
-            : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
-        }`}
+        className={`shrink-0 px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] border cursor-pointer flex items-center justify-center gap-2 ${isRecording
+          ? "bg-rose-50 text-rose-600 border-rose-300 shadow-[0_4px_16px_rgba(225,29,72,0.12)] cursor-not-allowed"
+          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
+          }`}
       >
         {isRecording ? (
           <>

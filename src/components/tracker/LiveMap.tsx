@@ -285,7 +285,7 @@ export function LiveMap({
 
               {/* Inner Icon Container */}
               <div className={clsx(
-                "relative w-8 h-8 rounded-full flex items-center justify-center shadow-xl border-2 z-10",
+                "relative w-6 h-6 rounded-full flex items-center justify-center shadow-xl border-2 z-10",
                 isOffline ? "bg-[#475569] border-[#cbd5e1]" : "bg-[#10b981] border-white",
                 isSelected && `ring-2 ring-white scale-110`
               )}>

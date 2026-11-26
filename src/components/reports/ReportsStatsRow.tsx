@@ -21,7 +21,7 @@ export function ReportsStatsRow() {
           <div key={idx} className="bg-white backdrop-blur-xl rounded-2xl px-5 py-4 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-brand-teal/60 transition-all duration-300 relative overflow-hidden group">
             <div className="flex justify-between items-center mb-4">
               <span className="text-sm font-medium text-slate-500 leading-tight pr-2">{kpi.label}</span>
-              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0", kpi.bg, kpi.color)}>
+              <div className={cn("w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0", kpi.bg, kpi.color)}>
                 <Icon className="w-5 h-5" />
               </div>
             </div>

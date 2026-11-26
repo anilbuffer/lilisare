@@ -156,11 +156,10 @@ export function ClientAttributesTab({ client, onUpdateClient }: ClientAttributes
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                    selectedCategory === cat
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer ${selectedCategory === cat
                       ? "bg-[#3D6B22] text-white shadow-2xs"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>
@@ -241,13 +240,12 @@ export function ClientAttributesTab({ client, onUpdateClient }: ClientAttributes
                     {/* Active Status Badge indicator */}
                     <div className="hidden sm:block shrink-0 pl-2">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          item.selected === "Yes"
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${item.selected === "Yes"
                             ? "bg-emerald-50 text-[#3D6B22] border border-emerald-200"
                             : item.selected === "Preferred"
-                            ? "bg-amber-50 text-amber-700 border border-amber-200"
-                            : "bg-slate-100 text-slate-500"
-                        }`}
+                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                              : "bg-slate-100 text-slate-500"
+                          }`}
                       >
                         {item.selected}
                       </span>
@@ -266,7 +264,7 @@ export function ClientAttributesTab({ client, onUpdateClient }: ClientAttributes
             <div className="relative bg-white rounded-xl lg:rounded-2xl p-5 border border-emerald-200/80 shadow-[0_4px_16px_rgba(61,107,34,0.06)] space-y-3 animate-in fade-in">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0">
                     <Sparkles className="w-4 h-4 text-[#3D6B22]" />
                   </div>
                   <div>

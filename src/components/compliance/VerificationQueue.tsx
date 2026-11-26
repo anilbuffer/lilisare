@@ -82,12 +82,12 @@ export function VerificationQueue({ items: initialItems }: VerificationQueueProp
                       <>
                         <button
                           onClick={() => handleApprove(item.id, item.caregiver.name)}
-                          className="w-8 h-8 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-500 border border-slate-200 hover:border-emerald-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 flex items-center justify-center active:scale-95" title="Approve">
+                          className="w-6 h-6 rounded-full bg-slate-50 hover:bg-emerald-50 text-slate-400 hover:text-emerald-500 border border-slate-200 hover:border-emerald-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 flex items-center justify-center active:scale-95" title="Approve">
                           <Check className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleReject(item.id, item.caregiver.name)}
-                          className="w-8 h-8 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 flex items-center justify-center active:scale-95" title="Reject">
+                          className="w-6 h-6 rounded-full bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 border border-slate-200 hover:border-red-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-200 flex items-center justify-center active:scale-95" title="Reject">
                           <X className="w-4 h-4" />
                         </button>
                       </>

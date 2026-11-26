@@ -68,7 +68,7 @@ export default function RecruitingPage() {
   return (
     <Suspense fallback={
       <div className="p-12 text-center flex flex-col items-center justify-center space-y-3">
-        <div className="w-8 h-8 rounded-full border-3 border-brand-teal border-t-transparent animate-spin" />
+        <div className="w-6 h-6 rounded-full border-3 border-brand-teal border-t-transparent animate-spin" />
         <p className="text-slate-500 text-xs font-semibold">Loading Recruiting Pipeline...</p>
       </div>
     }>

@@ -69,7 +69,7 @@ export function ExceptionDetailPanel({ exception, onClose, onResolve }: Exceptio
             {/* Summary */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden shrink-0">
+                <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden shrink-0">
                   {exception.caregiver.avatarUrl ? (
                     <img src={exception.caregiver.avatarUrl} alt={exception.caregiver.name} className="w-full h-full object-cover bg-slate-100" />
                   ) : (

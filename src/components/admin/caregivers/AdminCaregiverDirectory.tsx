@@ -759,7 +759,7 @@ export function AdminCaregiverDirectory() {
                       {/* Caregiver Name & Avatar */}
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-semibold text-xs shrink-0 shadow-2xs">
+                          <div className="w-6 h-6 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-semibold text-xs shrink-0 shadow-2xs">
                             {initials}
                           </div>
                           <div>
@@ -856,7 +856,7 @@ export function AdminCaregiverDirectory() {
                 <div>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs sm:text-sm flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs sm:text-sm flex items-center justify-center shrink-0">
                         {getInitials(cg.name)}
                       </div>
                       <div>

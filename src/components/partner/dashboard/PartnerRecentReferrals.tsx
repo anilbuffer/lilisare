@@ -56,7 +56,7 @@ export function PartnerRecentReferrals() {
               <tr key={ref.id} className="hover:bg-slate-50/50 transition-colors cursor-pointer group">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 whitespace-nowrap">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 whitespace-nowrap">
                       {ref.patientInitials}
                     </div>
                     <div>

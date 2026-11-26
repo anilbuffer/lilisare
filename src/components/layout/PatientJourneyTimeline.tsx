@@ -67,7 +67,7 @@ export function PatientJourneyTimeline() {
           className="bg-gradient-to-r from-brand-teal to-teal-700 p-4 flex items-center justify-between text-white hover:brightness-110 transition-all"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
+            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm">
               EW
             </div>
             <div className="text-left">
@@ -88,7 +88,7 @@ export function PatientJourneyTimeline() {
             >
               <div className="p-5 bg-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar relative">
                 <div className="absolute left-[33px] top-6 bottom-6 w-0.5 bg-slate-200 rounded-full" />
-                
+
                 <div className="space-y-6 relative">
                   {journeySteps.map((step, idx) => {
                     const Icon = step.icon;
@@ -112,7 +112,7 @@ export function PatientJourneyTimeline() {
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="pb-1">
                           <h4 className={clsx(
                             "text-sm font-bold leading-tight mb-0.5",
@@ -126,8 +126,8 @@ export function PatientJourneyTimeline() {
                           <div className={clsx(
                             "text-xs leading-relaxed p-2.5 rounded-xl border",
                             step.status === "completed" ? "bg-white border-slate-200 text-slate-600" :
-                            step.status === "upcoming" ? "bg-brand-teal/5 border-brand-teal/20 text-teal-800" :
-                            "bg-slate-100 border-transparent text-slate-500"
+                              step.status === "upcoming" ? "bg-brand-teal/5 border-brand-teal/20 text-teal-800" :
+                                "bg-slate-100 border-transparent text-slate-500"
                           )}>
                             {step.description}
                           </div>

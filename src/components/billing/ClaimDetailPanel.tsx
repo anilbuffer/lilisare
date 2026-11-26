@@ -53,7 +53,7 @@ export function ClaimDetailPanel({ claim, onClose }: ClaimDetailPanelProps) {
             <div>
               <div className="text-xs font-medium text-slate-400 mb-2">Patient Information</div>
               <div className="bg-slate-50 px-4 py-3 rounded-xl border border-slate-100 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal font-bold text-sm uppercase">
+                <div className="w-6 h-6 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal font-bold text-sm uppercase">
                   {initials}
                 </div>
                 <div>

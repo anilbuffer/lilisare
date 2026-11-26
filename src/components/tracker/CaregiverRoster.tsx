@@ -136,7 +136,7 @@ export function CaregiverRoster({
                   >
                     <div className="flex items-start gap-2">
                       <div className="relative">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-600 shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-xs font-semibold text-slate-600 shrink-0">
                           {cg.avatar}
                         </div>
                         {cg.status === "Active" && (

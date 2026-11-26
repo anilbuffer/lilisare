@@ -48,7 +48,7 @@ export function IncidentsKpiStrip() {
           >
             <div className="flex justify-between items-center mb-3">
               <span className="text-[12px] font-medium text-text-secondary leading-tight pr-2">{kpi.label}</span>
-              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shrink-0", kpi.bg, kpi.color)}>
+              <div className={cn("w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shrink-0", kpi.bg, kpi.color)}>
                 <Icon className="w-4 h-4" />
               </div>
             </div>

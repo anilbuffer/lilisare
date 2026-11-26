@@ -110,7 +110,7 @@ export function WorkflowStepper({ workflow }: WorkflowStepperProps) {
 
           return (
             <div key={stageName} className="flex flex-col items-center w-24 relative group">
-              <div className={cn("w-8 h-8 rounded-full border-2 flex items-center justify-center mb-2 z-10 transition-all duration-500", nodeColor)}>
+              <div className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center mb-2 z-10 transition-all duration-500", nodeColor)}>
                 {isCompleted ? <Check className="w-4 h-4" /> : <span className="text-xs font-semibold">{index + 1}</span>}
               </div>
 

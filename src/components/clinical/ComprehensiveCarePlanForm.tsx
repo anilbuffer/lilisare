@@ -434,7 +434,7 @@ export function ComprehensiveCarePlanForm({
                   <div className="space-y-3">
                     {needsList.map((priority, idx) => (
                       <div key={idx} className="flex flex-col md:flex-row gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center shrink-0">{priority}</div>
+                        <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center shrink-0">{priority}</div>
                         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                           <input type="text" className="p-2 text-xs border border-slate-200 rounded-lg" placeholder="Problem / Care Need" />
                           <input type="text" className="p-2 text-xs border border-slate-200 rounded-lg" placeholder="Supporting Evidence" />

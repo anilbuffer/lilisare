@@ -57,7 +57,7 @@ export function MyTeamSnapshot() {
             </div>
             <Link
               href={`/field-supervisor/caregivers?id=${member.id}`}
-              className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-brand-teal group-hover:text-white group-hover:border-brand-teal transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] shrink-0"
+              className="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-brand-teal group-hover:text-white group-hover:border-brand-teal transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] shrink-0"
             >
               <ArrowRight className="w-4 h-4" />
             </Link>

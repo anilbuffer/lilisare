@@ -21,32 +21,30 @@ export function AltEVVCertification({ status }: { status: StateConfig['altEvvSta
       </h3>
       <div className="relative">
         <div className="absolute top-5 left-0 w-full h-[3px] bg-slate-100 rounded-full z-0" />
-        <div 
-          className="absolute top-5 left-0 h-[3px] bg-brand-teal rounded-full z-0 transition-all duration-700 ease-in-out" 
+        <div
+          className="absolute top-5 left-0 h-[3px] bg-brand-teal rounded-full z-0 transition-all duration-700 ease-in-out"
           style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
         />
-        
+
         <div className="relative z-10 flex justify-between">
           {steps.map((step, idx) => {
             const isCompleted = idx < currentStepIndex;
             const isCurrent = idx === currentStepIndex;
-            
+
             return (
               <div key={step.value} className="flex flex-col items-center w-24">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] bg-white transition-all duration-500 shadow-sm ${
-                  isCompleted ? "border-brand-teal bg-brand-teal text-white shadow-brand-teal/20" :
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-[3px] bg-white transition-all duration-500 shadow-sm ${isCompleted ? "border-brand-teal bg-brand-teal text-white shadow-brand-teal/20" :
                   isCurrent ? "border-brand-teal text-brand-teal shadow-brand-teal/20" :
-                  "border-slate-200 text-slate-300 shadow-transparent"
-                }`}>
-                  {isCompleted ? <Check className="w-5 h-5" /> : 
-                   isCurrent && step.value === 'Testing' ? <Loader2 className="w-5 h-5 animate-spin" /> :
-                   isCurrent ? <Circle className="w-4 h-4 fill-current" /> :
-                   <Circle className="w-3 h-3" />}
+                    "border-slate-200 text-slate-300 shadow-transparent"
+                  }`}>
+                  {isCompleted ? <Check className="w-5 h-5" /> :
+                    isCurrent && step.value === 'Testing' ? <Loader2 className="w-5 h-5 animate-spin" /> :
+                      isCurrent ? <Circle className="w-4 h-4 fill-current" /> :
+                        <Circle className="w-3 h-3" />}
                 </div>
-                <span className={`text-[11px] mt-3 font-semibold text-center leading-tight tracking-wide uppercase ${
-                  isCompleted ? "text-brand-teal" : 
+                <span className={`text-[11px] mt-3 font-semibold text-center leading-tight tracking-wide uppercase ${isCompleted ? "text-brand-teal" :
                   isCurrent ? "text-slate-900" : "text-slate-400"
-                }`}>
+                  }`}>
                   {step.label}
                 </span>
               </div>
@@ -54,7 +52,7 @@ export function AltEVVCertification({ status }: { status: StateConfig['altEvvSta
           })}
         </div>
       </div>
-      
+
       {status === 'Not Started' && (
         <div className="mt-6 flex justify-end">
           <button className="bg-brand-teal text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-brand-teal/90 transition-colors shadow-sm shadow-brand-teal/20">

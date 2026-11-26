@@ -167,7 +167,7 @@ export default function PortalMessagesPage() {
                   )}
                   <div className="flex gap-3.5 items-start">
                     <div className="relative shrink-0">
-                      <div className="w-10 h-10 rounded-full p-[2px] bg-gradient-to-tr from-slate-200 to-slate-100 group-hover:from-brand-teal/20 group-hover:to-brand-teal/10 transition-colors">
+                      <div className="w-6 h-6 rounded-full p-[2px] bg-gradient-to-tr from-slate-200 to-slate-100 group-hover:from-brand-teal/20 group-hover:to-brand-teal/10 transition-colors">
                         {thread.photo ? (
                           <img src={thread.photo} alt={thread.careTeamMember} className="w-full h-full rounded-full object-cover border border-white" />
                         ) : (
@@ -214,9 +214,9 @@ export default function PortalMessagesPage() {
                 </button>
                 <div className="relative">
                   {activeThread.photo ? (
-                    <img src={activeThread.photo} alt={activeThread.careTeamMember} className="w-10 h-10 rounded-full object-cover" />
+                    <img src={activeThread.photo} alt={activeThread.careTeamMember} className="w-6 h-6 rounded-full object-cover" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-medium text-slate-600">
+                    <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center font-medium text-slate-600">
                       {activeThread.careTeamMember.charAt(0)}
                     </div>
                   )}
@@ -249,9 +249,9 @@ export default function PortalMessagesPage() {
                     <div key={idx} className={clsx("flex gap-3", msg.isOwn ? "justify-end" : "justify-start")}>
                       {!msg.isOwn && (
                         activeThread.photo ? (
-                          <img src={activeThread.photo} alt="" className="w-8 h-8 rounded-full mt-auto shrink-0" />
+                          <img src={activeThread.photo} alt="" className="w-6 h-6 rounded-full mt-auto shrink-0" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full mt-auto shrink-0 bg-slate-100 flex items-center justify-center font-medium text-slate-600 text-xs">
+                          <div className="w-6 h-6 rounded-full mt-auto shrink-0 bg-slate-100 flex items-center justify-center font-medium text-slate-600 text-xs">
                             {activeThread.careTeamMember.charAt(0)}
                           </div>
                         )
@@ -390,9 +390,9 @@ export default function PortalMessagesPage() {
                     className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-slate-100 hover:border-slate-100 text-left"
                   >
                     {member.photo ? (
-                      <img src={member.photo} alt={member.name} className="w-10 h-10 rounded-full object-cover shadow-sm" />
+                      <img src={member.photo} alt={member.name} className="w-6 h-6 rounded-full object-cover shadow-sm" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-medium text-slate-600 shadow-sm shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center font-medium text-slate-600 shadow-sm shrink-0">
                         {member.name.charAt(0)}
                       </div>
                     )}

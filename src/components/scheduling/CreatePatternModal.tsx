@@ -26,7 +26,7 @@ export function CreatePatternModal({ isOpen, onClose, pattern }: CreatePatternMo
     if (pattern) {
       setAutoBroadcast(pattern.autoBroadcast);
       setPatientName(pattern.patientName);
-      
+
       // Basic parsing of rule like "Mon / Wed / Fri • 9:00 AM - 1:00 PM"
       const days = DAYS_OF_WEEK.filter(d => pattern.rule.includes(d));
       setSelectedDays(days.length > 0 ? days : []);
@@ -67,7 +67,7 @@ export function CreatePatternModal({ isOpen, onClose, pattern }: CreatePatternMo
       onClose={onClose}
       title={pattern ? "Edit Recurring Pattern" : "Create Recurring Pattern"}
       description="Pattern generator creates slots tied to the patient's authorized care plan."
-      icon={<div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal"><Repeat className="w-4 h-4" /></div>}
+      icon={<div className="w-6 h-6 rounded-full bg-brand-teal/10 flex items-center justify-center text-brand-teal"><Repeat className="w-4 h-4" /></div>}
       maxWidth="xl"
       footer={footer}
     >
@@ -78,8 +78,8 @@ export function CreatePatternModal({ isOpen, onClose, pattern }: CreatePatternMo
             <User className="w-4 h-4 text-slate-400" /> Patient
           </label>
           <div className="relative group">
-            <select 
-              value={patientName} 
+            <select
+              value={patientName}
               onChange={(e) => setPatientName(e.target.value)}
               className="w-full appearance-none bg-slate-50 hover:bg-slate-100/50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all font-medium cursor-pointer"
             >

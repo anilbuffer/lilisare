@@ -59,7 +59,7 @@ export function CurriculumList({ course, progress }: CurriculumListProps) {
                 className={`w-full flex items-center justify-between p-4 transition-all duration-300 text-left ${isExpanded ? 'bg-slate-50' : 'hover:bg-slate-50/80'}`}
               >
                 <div className="flex items-start gap-4">
-                  <div className={`mt-0.5 flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm transition-colors duration-300 ${isExpanded ? 'bg-brand-teal text-white shadow-md' : 'bg-slate-100 text-slate-500 group-hover/module:bg-brand-teal/10 group-hover/module:text-brand-teal'}`}>
+                  <div className={`mt-0.5 flex items-center justify-center w-6 h-6 rounded-full font-bold text-sm transition-colors duration-300 ${isExpanded ? 'bg-brand-teal text-white shadow-md' : 'bg-slate-100 text-slate-500 group-hover/module:bg-brand-teal/10 group-hover/module:text-brand-teal'}`}>
                     {mIdx + 1}
                   </div>
                   <div>
@@ -71,7 +71,7 @@ export function CurriculumList({ course, progress }: CurriculumListProps) {
                     </div>
                   </div>
                 </div>
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${isExpanded ? 'bg-brand-teal/10 text-brand-teal' : 'bg-slate-50 text-slate-400 group-hover/module:bg-slate-200'}`}>
+                <div className={`flex items-center justify-center w-6 h-6 rounded-full transition-all duration-300 ${isExpanded ? 'bg-brand-teal/10 text-brand-teal' : 'bg-slate-50 text-slate-400 group-hover/module:bg-slate-200'}`}>
                   <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                 </div>
               </button>
@@ -86,7 +86,7 @@ export function CurriculumList({ course, progress }: CurriculumListProps) {
                         const lessonIndex = allLessons.findIndex(l => l.id === lesson.id);
                         const prevLesson = lessonIndex > 0 ? allLessons[lessonIndex - 1] : null;
                         const isPreviousCompleted = prevLesson ? progress?.lessons.find(l => l.lessonId === prevLesson.id)?.status === "completed" : true;
-                        
+
                         const lessonProgress = progress?.lessons.find(l => l.lessonId === lesson.id);
                         const isCompleted = lessonProgress?.status === "completed";
                         const isLocked = !isPreviousCompleted && !!progress;
@@ -101,7 +101,7 @@ export function CurriculumList({ course, progress }: CurriculumListProps) {
                             {/* Card */}
                             <div className="flex items-center justify-between pl-4 pr-4 py-3 bg-white rounded-xl border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] transition-all cursor-pointer">
                               <div className="flex items-center gap-4">
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${isLocked ? 'bg-slate-50' : 'bg-brand-teal/10'}`}>
+                                <div className={`flex items-center justify-center w-6 h-6 rounded-full transition-colors ${isLocked ? 'bg-slate-50' : 'bg-brand-teal/10'}`}>
                                   {isCompleted ? (
                                     <>
                                       <CheckCircle2 className="w-5 h-5 text-brand-teal group-hover/lesson:hidden" />
@@ -173,7 +173,7 @@ export function CurriculumList({ course, progress }: CurriculumListProps) {
                     <CheckCircle2 className="w-4 h-4 fill-green-600 text-white" />
                     Score: {progress.quizScore}%
                   </span>
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 ${isQuizExpanded ? 'bg-brand-teal/10 text-brand-teal' : 'bg-slate-50 text-slate-400 group-hover/quiz:bg-slate-200'}`}>
+                  <div className={`flex items-center justify-center w-6 h-6 rounded-full transition-all duration-300 ${isQuizExpanded ? 'bg-brand-teal/10 text-brand-teal' : 'bg-slate-50 text-slate-400 group-hover/quiz:bg-slate-200'}`}>
                     <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isQuizExpanded ? 'rotate-180' : ''}`} />
                   </div>
                 </div>

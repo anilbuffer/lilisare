@@ -1385,7 +1385,7 @@ export default function HrPayrollPage() {
                   </div>
 
                   <div className="bg-amber-50 px-4 py-2.5 rounded-xl border border-amber-200 flex items-start gap-3 text-[13px] text-amber-900 font-medium shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
-                    <div className="w-8 h-8 rounded-full bg-amber-200 flex items-center justify-center shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center shrink-0">
                       <Lock className="w-4 h-4 text-amber-800" />
                     </div>
                     <span className="mt-1">

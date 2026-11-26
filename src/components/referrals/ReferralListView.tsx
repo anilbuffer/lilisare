@@ -26,14 +26,14 @@ export function ReferralListView({ referrals, onReferralClick }: ReferralListVie
           </thead>
           <tbody className="divide-y divide-slate-100">
             {referrals.map(referral => (
-              <tr 
-                key={referral.id} 
+              <tr
+                key={referral.id}
                 onClick={() => onReferralClick(referral)}
                 className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
               >
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center text-sm font-bold text-brand-teal shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-brand-teal/10 flex items-center justify-center text-sm font-bold text-brand-teal shrink-0">
                       {referral.clientInitials}
                     </div>
                     <div>
@@ -91,7 +91,7 @@ export function ReferralListView({ referrals, onReferralClick }: ReferralListVie
                 </td>
               </tr>
             ))}
-            
+
             {referrals.length === 0 && (
               <tr>
                 <td colSpan={7} className="p-8 text-center text-slate-500">

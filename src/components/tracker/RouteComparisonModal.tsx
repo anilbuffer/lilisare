@@ -84,8 +84,8 @@ export function RouteComparisonModal({ isOpen, onClose, visit, caregivers, onAss
               <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
                 <div className="grid grid-cols-2 gap-6">
                   {recommendations.map((rec, i) => (
-                    <div 
-                      key={rec.caregiverId} 
+                    <div
+                      key={rec.caregiverId}
                       className={clsx(
                         "bg-white rounded-xl border p-5 flex flex-col relative overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
                         rec.isBestFit ? "border-brand-teal/50 ring-1 ring-brand-teal/20" : "border-slate-200"
@@ -99,7 +99,7 @@ export function RouteComparisonModal({ isOpen, onClose, visit, caregivers, onAss
 
                       {/* Caregiver Info */}
                       <div className="flex items-start gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
                           <User className="w-5 h-5 text-slate-400" />
                         </div>
                         <div>
@@ -169,8 +169,8 @@ export function RouteComparisonModal({ isOpen, onClose, visit, caregivers, onAss
                         }}
                         className={clsx(
                           "w-full py-3 rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2",
-                          rec.isBestFit 
-                            ? "bg-brand-teal text-white hover:bg-teal-600 shadow-brand-teal/20" 
+                          rec.isBestFit
+                            ? "bg-brand-teal text-white hover:bg-teal-600 shadow-brand-teal/20"
                             : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
                         )}
                       >

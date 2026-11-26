@@ -166,27 +166,24 @@ export function CaregiverAttributesTab({
                   <button
                     type="button"
                     onClick={() => setFilterMode("all")}
-                    className={`px-2 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${
-                      filterMode === "all" ? "bg-white text-slate-900 shadow-2xs font-bold" : "text-slate-500 hover:text-slate-800"
-                    }`}
+                    className={`px-2 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${filterMode === "all" ? "bg-white text-slate-900 shadow-2xs font-bold" : "text-slate-500 hover:text-slate-800"
+                      }`}
                   >
                     All
                   </button>
                   <button
                     type="button"
                     onClick={() => setFilterMode("yes")}
-                    className={`px-2 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${
-                      filterMode === "yes" ? "bg-emerald-100 text-emerald-800 font-bold" : "text-slate-500 hover:text-slate-800"
-                    }`}
+                    className={`px-2 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${filterMode === "yes" ? "bg-emerald-100 text-emerald-800 font-bold" : "text-slate-500 hover:text-slate-800"
+                      }`}
                   >
                     Yes
                   </button>
                   <button
                     type="button"
                     onClick={() => setFilterMode("no")}
-                    className={`px-2 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${
-                      filterMode === "no" ? "bg-amber-100 text-amber-800 font-bold" : "text-slate-500 hover:text-slate-800"
-                    }`}
+                    className={`px-2 py-0.5 rounded-lg font-medium transition-colors cursor-pointer ${filterMode === "no" ? "bg-amber-100 text-amber-800 font-bold" : "text-slate-500 hover:text-slate-800"
+                      }`}
                   >
                     No
                   </button>
@@ -259,7 +256,7 @@ export function CaregiverAttributesTab({
               </button>
 
               <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 text-[#3D6B22] font-bold text-xs flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-[#3D6B22] font-bold text-xs flex items-center justify-center shrink-0">
                   CA
                 </div>
                 <div>

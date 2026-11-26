@@ -546,7 +546,7 @@ export function AdminHouseholdDirectory() {
                     {/* Household info */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#1E5622] font-bold text-xs flex items-center justify-center shrink-0">
                           <Home className="w-4 h-4" />
                         </div>
                         <div>

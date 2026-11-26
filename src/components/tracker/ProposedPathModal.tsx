@@ -69,7 +69,7 @@ export function ProposedPathModal({ isOpen, onClose, onApply }: ProposedPathModa
                 {/* Metrics Banner */}
                 <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 mb-4 flex items-center justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center border border-emerald-200">
+                    <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center border border-emerald-200">
                       <Clock className="w-5 h-5 text-emerald-600" />
                     </div>
                     <div>

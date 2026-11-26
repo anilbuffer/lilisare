@@ -350,7 +350,7 @@ export function ComplianceItemTracker({ items }: ComplianceItemTrackerProps) {
                   <h4 className="text-sm font-semibold text-slate-900 mb-3">Verification History</h4>
                   <div className="space-y-4">
                     <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-brand-teal/20 text-brand-teal flex items-center justify-center shrink-0">
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <div>

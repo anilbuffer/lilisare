@@ -37,7 +37,7 @@ export function ExceptionRow({ exception, onClick, index }: ExceptionRowProps) {
     >
       {/* Caregiver & Patient */}
       <div className="flex-[1.5] min-w-[200px] flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden shrink-0 border border-slate-100">
+        <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden shrink-0 border border-slate-100">
           {exception.caregiver.avatarUrl ? (
             <img src={exception.caregiver.avatarUrl} alt={exception.caregiver.name} className="w-full h-full object-cover bg-slate-100" />
           ) : (

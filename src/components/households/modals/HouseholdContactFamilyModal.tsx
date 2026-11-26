@@ -61,7 +61,7 @@ export function HouseholdContactFamilyModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+            className="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -79,8 +79,8 @@ export function HouseholdContactFamilyModal({
                 type="button"
                 onClick={() => setTargetContact("caregiver")}
                 className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${targetContact === "caregiver"
-                    ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#3D6B22] font-bold"
-                    : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-50"
+                  ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#3D6B22] font-bold"
+                  : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-50"
                   }`}
               >
                 <span className="block text-xs">{household.primaryCaregiver.name}</span>
@@ -90,8 +90,8 @@ export function HouseholdContactFamilyModal({
                 type="button"
                 onClick={() => setTargetContact("client")}
                 className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${targetContact === "client"
-                    ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#3D6B22] font-bold"
-                    : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-50"
+                  ? "border-[#3D6B22] bg-[#3D6B22]/5 text-[#3D6B22] font-bold"
+                  : "border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-50"
                   }`}
               >
                 <span className="block text-xs">{household.client.name}</span>
@@ -134,8 +134,8 @@ export function HouseholdContactFamilyModal({
                   key={opt.id}
                   onClick={() => setCommType(opt.id as any)}
                   className={`py-2 px-3 rounded-xl border text-center font-semibold transition-colors cursor-pointer ${commType === opt.id
-                      ? "border-[#3D6B22] bg-[#3D6B22] text-white shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
-                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    ? "border-[#3D6B22] bg-[#3D6B22] text-white shadow-[0_2px_8px_rgba(61,107,34,0.25)]"
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                     }`}
                 >
                   {opt.label}

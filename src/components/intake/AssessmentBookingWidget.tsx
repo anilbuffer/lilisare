@@ -141,7 +141,7 @@ export function AssessmentBookingWidget() {
                     <div className="flex flex-wrap items-center gap-2 mt-2 2xl:mt-0 w-full 2xl:w-auto">
                       <button
                         onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(a.address)}`, '_blank')}
-                        className="flex items-center justify-center bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 w-8 h-8 rounded-full transition-colors group relative shrink-0"
+                        className="flex items-center justify-center bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 w-6 h-6 rounded-full transition-colors group relative shrink-0"
                         title="View Route Map"
                       >
                         <Map className="w-4 h-4" />

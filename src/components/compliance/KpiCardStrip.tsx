@@ -65,7 +65,7 @@ export function KpiCardStrip({ data }: KpiCardStripProps) {
         >
           <div className="flex items-start justify-between mb-2">
             <h3 className="text-xs font-medium text-slate-500">{card.title}</h3>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${card.bg}`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${card.bg}`}>
               <card.icon className={`w-4 h-4 ${card.color}`} />
             </div>
           </div>

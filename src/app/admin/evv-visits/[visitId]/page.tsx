@@ -31,7 +31,8 @@ export default async function AdminEvvVisitDetailPage({ params }: PageProps) {
 
 export function generateStaticParams() {
   const evvIds = INITIAL_EVV_VISITS.map((v) => v.id);
+  const ewIds = INITIAL_EVV_VISITS.map((v) => v.displayId || v.visitNumber).filter(Boolean) as string[];
   const realtimeIds = INITIAL_REALTIME_VISITS.map((v) => v.id);
-  const allIds = Array.from(new Set(["[visitId]", "default", ...evvIds, ...realtimeIds]));
+  const allIds = Array.from(new Set(["[visitId]", "default", ...evvIds, ...ewIds, ...realtimeIds]));
   return allIds.map((visitId) => ({ visitId }));
 }

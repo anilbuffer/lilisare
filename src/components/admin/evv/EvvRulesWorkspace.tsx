@@ -1,52 +1,54 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
+  Send,
+  Layers,
   Sliders,
-  Plus,
-  ShieldCheck,
+  ChevronDown,
   CheckCircle2,
   Clock,
-  AlertTriangle,
-  Layers,
-  Info,
-  X,
-  Edit2,
-  ToggleLeft,
-  ToggleRight,
-  ArrowRight,
+  ShieldCheck,
+  Plus,
+  Save,
+  Check,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { EvvToleranceRule } from "@/types/evvVisit";
 import {
   getEvvRulesFromStorage,
   saveEvvRule,
-  toggleEvvRule,
+  deleteEvvRule,
   EVV_SYNC_EVENT,
 } from "@/lib/admin/evvVisitsStore";
 import { EvvSubNav } from "./EvvSubNav";
+import { EvvToleranceRuleModal } from "./EvvToleranceRuleModal";
 
 export function EvvRulesWorkspace() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState(
+    searchParams.get("jurisdiction") || "All Jurisdictions"
+  );
+  const [selectedDateFilter, setSelectedDateFilter] = useState(
+    searchParams.get("dateRange") || "Today & Recent"
+  );
+
+  useEffect(() => {
+    const j = searchParams.get("jurisdiction") || "All Jurisdictions";
+    const d = searchParams.get("dateRange") || "Today & Recent";
+    setSelectedJurisdiction(j);
+    setSelectedDateFilter(d);
+  }, [searchParams]);
+
   const [rules, setRules] = useState<EvvToleranceRule[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingRule, setEditingRule] = useState<EvvToleranceRule | null>(null);
-
-  // Form fields
-  const [ruleName, setRuleName] = useState("");
-  const [payer, setPayer] = useState("Health First Colorado (Medicaid)");
-  const [program, setProgram] = useState("HCBS-EBD");
-  const [serviceCode, setServiceCode] = useState("ALL");
-  const [serviceName, setServiceName] = useState("All Covered Services");
-  const [clockInTolerance, setClockInTolerance] = useState(10);
-  const [clockOutTolerance, setClockOutTolerance] = useState(10);
-  const [earlyArrival, setEarlyArrival] = useState<"Allow" | "Allow within Grace" | "Flag for Review" | "Round to Schedule">("Allow within Grace");
-  const [lateArrival, setLateArrival] = useState<"Allow within Grace" | "Require Reason" | "Flag Exception">("Allow within Grace");
-  const [earlyDeparture, setEarlyDeparture] = useState<"Flag Exception" | "Allow within Grace" | "Require Supervisor Approval">("Require Supervisor Approval");
-  const [lateDeparture, setLateDeparture] = useState<"Allow within Grace" | "Require Overtime Approval" | "Flag Exception">("Allow within Grace");
-  const [reviewRequired, setReviewRequired] = useState(false);
-  const [approvalRequired, setApprovalRequired] = useState(false);
-  const [description, setDescription] = useState("");
+  const [ruleToEdit, setRuleToEdit] = useState<EvvToleranceRule | null>(null);
 
   const loadRules = () => {
     setRules(getEvvRulesFromStorage());
@@ -64,389 +66,282 @@ export function EvvRulesWorkspace() {
     }
   }, []);
 
-  const openAddModal = () => {
-    setEditingRule(null);
-    setRuleName("");
-    setPayer("Health First Colorado (Medicaid)");
-    setProgram("HCBS-EBD");
-    setServiceCode("ALL");
-    setServiceName("All Covered Services");
-    setClockInTolerance(10);
-    setClockOutTolerance(10);
-    setEarlyArrival("Allow within Grace" as any);
-    setLateArrival("Allow within Grace");
-    setEarlyDeparture("Require Supervisor Approval");
-    setLateDeparture("Allow within Grace");
-    setReviewRequired(false);
-    setApprovalRequired(false);
-    setDescription("");
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (r: EvvToleranceRule) => {
-    setEditingRule(r);
-    setRuleName(r.ruleName);
-    setPayer(r.payer);
-    setProgram(r.program);
-    setServiceCode(r.serviceCode);
-    setServiceName(r.serviceName);
-    setClockInTolerance(r.clockInToleranceMinutes);
-    setClockOutTolerance(r.clockOutToleranceMinutes);
-    setEarlyArrival(r.earlyArrivalHandling);
-    setLateArrival(r.lateArrivalHandling);
-    setEarlyDeparture(r.earlyDepartureHandling);
-    setLateDeparture(r.lateDepartureHandling);
-    setReviewRequired(r.reviewRequired);
-    setApprovalRequired(r.approvalRequired);
-    setDescription(r.description || "");
-    setIsModalOpen(true);
-  };
-
-  const handleToggle = (id: string) => {
-    toggleEvvRule(id);
-    toast.success("Rule Status Updated");
-    loadRules();
-  };
-
-  const handleSaveRule = () => {
-    if (!ruleName.trim()) {
-      toast.error("Rule name required");
-      return;
-    }
-
-    const newRule: EvvToleranceRule = {
-      id: editingRule ? editingRule.id : `RULE-${Date.now().toString().slice(-4)}`,
-      ruleName: ruleName.trim(),
-      payer,
-      program,
-      serviceCode,
-      serviceName,
-      clockInToleranceMinutes: Number(clockInTolerance),
-      clockOutToleranceMinutes: Number(clockOutTolerance),
-      earlyArrivalHandling: earlyArrival,
-      lateArrivalHandling: lateArrival,
-      earlyDepartureHandling: earlyDeparture,
-      lateDepartureHandling: lateDeparture,
-      reviewRequired,
-      approvalRequired,
-      effectiveDate: editingRule ? editingRule.effectiveDate : "2026-01-01",
-      isActive: editingRule ? editingRule.isActive : true,
-      description: description.trim(),
-    };
-
-    saveEvvRule(newRule);
-    toast.success(editingRule ? "Rule Updated" : "New EVV Rule Added", {
-      description: `Tolerance rule ${newRule.ruleName} saved.`,
+  const filteredRules = useMemo(() => {
+    if (selectedJurisdiction === "All Jurisdictions") return rules;
+    return rules.filter((r) => {
+      if (selectedJurisdiction === "Ohio Medicaid (ODM)") {
+        return r.stateCode === "OH" || r.payer?.includes("Ohio") || r.aggregatorName === "Sandata";
+      }
+      if (selectedJurisdiction === "NJ FamilyCare") {
+        return r.stateCode === "NJ" || r.payer?.includes("NJ") || r.aggregatorName === "HHAeXchange";
+      }
+      if (selectedJurisdiction === "Florida AHCA") {
+        return r.stateCode === "FL" || r.payer?.includes("Florida") || r.aggregatorName === "Netsmart";
+      }
+      if (selectedJurisdiction === "Private Pay / Commercial") {
+        return r.payer?.includes("Private") || r.payer?.includes("Commercial") || r.aggregatorName === "CareBridge";
+      }
+      return true;
     });
-    setIsModalOpen(false);
+  }, [rules, selectedJurisdiction]);
+
+  const handleToleranceChange = (ruleId: string, minutes: number) => {
+    const updated = rules.map((r) =>
+      r.id === ruleId
+        ? {
+            ...r,
+            timeToleranceMinutes: minutes,
+            clockInToleranceMinutes: minutes,
+            clockOutToleranceMinutes: minutes,
+          }
+        : r
+    );
+    setRules(updated);
+    const target = updated.find((r) => r.id === ruleId);
+    if (target) {
+      saveEvvRule(target);
+      toast.success("Tolerance Window Updated", {
+        description: `${target.statePayerName || target.ruleName} tolerance set to ±${minutes} min.`,
+      });
+    }
+  };
+
+  const handleOpenCreateModal = () => {
+    setRuleToEdit(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (rule: EvvToleranceRule, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRuleToEdit(rule);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveRule = (updatedRule: EvvToleranceRule) => {
+    saveEvvRule(updatedRule);
     loadRules();
+    toast.success(
+      ruleToEdit ? "EVV Tolerance Rule Updated" : "EVV Tolerance Rule Created",
+      {
+        description: `${updatedRule.ruleName} configured successfully for ${updatedRule.payer}.`,
+      }
+    );
+  };
+
+  const handleDeleteRule = (ruleId: string, ruleName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteEvvRule(ruleId);
+    loadRules();
+    toast.success("EVV Rule Removed", {
+      description: `${ruleName} has been deleted.`,
+    });
   };
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            EVV Rules &amp; Tolerances
-          </h1>
-        </div>
+    <div className="w-full max-w-9xl mx-auto space-y-6 animate-fade-in pb-12">
+      {/* Shared SubNav Header */}
+      <EvvSubNav
+        activeTabOverride="submissions"
+        exceptionCount={6}
+        totalVisitsCount={11}
+        selectedJurisdiction={selectedJurisdiction}
+        onJurisdictionChange={(j) => setSelectedJurisdiction(j)}
+        selectedDateFilter={selectedDateFilter}
+        onDateFilterChange={(d) => setSelectedDateFilter(d)}
+      />
 
-        <div className="flex items-center gap-2">
+      {/* Sub-Navigation Pills (Screenshot 4, 5, 6) */}
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
+        <Link
+          href="/admin/evv-visits/submissions?tab=readiness"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition-all cursor-pointer"
+        >
+          <Send className="w-3.5 h-3.5" />
+          <span>Visit Readiness & Holds</span>
+        </Link>
+
+        <Link
+          href="/admin/evv-visits/submissions?tab=batch"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 transition-all cursor-pointer"
+        >
+          <Layers className="w-3.5 h-3.5" />
+          <span>Batch Submissions</span>
+        </Link>
+
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#3D6B22] text-white border border-[#3D6B22] shadow-sm transition-all cursor-pointer"
+        >
+          <Sliders className="w-3.5 h-3.5" />
+          <span>Payer Tolerance & State Connectors</span>
+        </button>
+      </div>
+
+      {/* Main Rules Card (Screenshot 6) */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
+        {/* Header inside Card */}
+        <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+              Configurable Agency, Payer & State EVV Tolerance Rules
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 leading-relaxed max-w-4xl">
+              Small clock-in/out variances (1–2 min) within configured tolerance do not create exceptions. Evidence requirements adapt by jurisdiction and payer.
+            </p>
+          </div>
           <button
             type="button"
-            onClick={openAddModal}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3e6b2b] hover:bg-[#345c1d] rounded-xl shadow-md shadow-[#3e6b2b]/20 transition-all cursor-pointer"
+            onClick={handleOpenCreateModal}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Tolerance Rule</span>
+            <Plus className="w-4 h-4" />
+            <span>Create EVV Rule</span>
           </button>
         </div>
-      </div>
 
-      {/* Sub Navigation */}
-      <EvvSubNav />
-
-      {/* Explanatory Banner: Deterministic Consistency Guarantee */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl lg:rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 text-xs">
-        <Info className="w-5 h-5 text-[#3e6b2b] shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <h3 className="font-bold text-slate-900 text-sm">
-            Deterministic Grace Window Matching Policy
-          </h3>
-          <p className="text-slate-600 leading-relaxed">
-            Visits are evaluated deterministically against these rules by matching Payer, Program, and Service Code. If a shift variance falls within the configured tolerance (e.g. Rahul Sharma&apos;s +1m clock-in / +2m clock-out against the 10-minute Medicaid rule), it is automatically marked <strong>Verified</strong> and will not generate an artificial exception.
-          </p>
-          <p className="text-[11px] text-slate-400 font-medium">
-            Fallback Policy: Unmatched visits default to Agency Fallback Rule (10m grace, supervisor review on negative variance).
-          </p>
-        </div>
-      </div>
-
-      {/* Rules Table */}
-      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 z-20">
-              <tr>
-                <th className="py-3 px-3.5 whitespace-nowrap">Rule Name</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Payer</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Service Code</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Tolerance Window</th>
-                <th className="py-3 px-3.5 whitespace-nowrap">Status</th>
-                <th className="py-3 px-3.5 text-right whitespace-nowrap">Actions</th>
+        {/* Clean Front List Table */}
+        <div className="overflow-x-auto scrollbar-none">
+          <table className="w-full text-left border-collapse min-w-[760px]">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="py-3.5 pl-6 pr-3">STATE / PAYER</th>
+                <th className="py-3.5 px-3">AGGREGATOR</th>
+                <th className="py-3.5 px-3">TIME TOLERANCE</th>
+                <th className="py-3.5 px-3">GEOFENCE RADIUS</th>
+                <th className="py-3.5 px-3">GPS</th>
+                <th className="py-3.5 px-3">SIGNATURE</th>
+                <th className="py-3.5 px-3">VOICE (IVR)</th>
+                <th className="py-3.5 pr-6 pl-3 text-right w-32">ACTIONS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
-              {rules.map((rule) => (
-                <tr key={rule.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-3.5 whitespace-nowrap">
-                    <span className="font-semibold text-slate-900 block">{rule.ruleName}</span>
-                  </td>
+            <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+              {filteredRules.map((rule) => {
+                const tol = rule.timeToleranceMinutes || rule.clockInToleranceMinutes || 7;
+                return (
+                  <tr
+                    key={rule.id}
+                    className="hover:bg-slate-50/80 transition-colors"
+                  >
+                    {/* STATE / PAYER */}
+                    <td className="py-4 pl-6 pr-3">
+                      <div className="font-bold text-slate-900">
+                        {rule.stateCode || "OH"}
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-medium mt-0.5">
+                        {rule.statePayerName || rule.payer}
+                      </div>
+                    </td>
 
-                  <td className="py-3 px-3.5 whitespace-nowrap font-medium text-slate-700">
-                    {rule.payer}
-                  </td>
+                    {/* AGGREGATOR */}
+                    <td className="py-4 px-3 font-semibold text-slate-800">
+                      {rule.aggregatorName || "Sandata"}
+                    </td>
 
-                  <td className="py-3 px-3.5 whitespace-nowrap">
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono font-bold text-slate-700 text-[10px]">
-                      {rule.serviceCode}
-                    </span>
-                  </td>
+                    {/* TIME TOLERANCE (Interactive dropdown) */}
+                    <td className="py-4 px-3">
+                      <div className="relative inline-block">
+                        <select
+                          value={tol}
+                          onChange={(e) =>
+                            handleToleranceChange(rule.id, parseInt(e.target.value, 10))
+                          }
+                          className="appearance-none pl-3 pr-7 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-2xs cursor-pointer"
+                        >
+                          <option value={5}>±5 min</option>
+                          <option value={7}>±7 min</option>
+                          <option value={10}>±10 min</option>
+                          <option value={15}>±15 min</option>
+                          <option value={20}>±20 min</option>
+                        </select>
+                        <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      </div>
+                    </td>
 
-                  <td className="py-3 px-3.5 whitespace-nowrap">
-                    <span className="font-semibold text-[#3e6b2b]">
-                      ±{rule.clockInToleranceMinutes} mins
-                    </span>
-                  </td>
+                    {/* GEOFENCE RADIUS */}
+                    <td className="py-4 px-3 font-semibold text-slate-800">
+                      {rule.geofenceRadiusFeet || 150} ft
+                    </td>
 
-                  <td className="py-3 px-3.5 whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={() => handleToggle(rule.id)}
-                      className="inline-flex items-center gap-1.5 cursor-pointer"
-                      title="Toggle active status"
-                    >
-                      {rule.isActive ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          Active
+                    {/* GPS */}
+                    <td className="py-4 px-3">
+                      {rule.gpsRequirement === "Required" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                          Required
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500 border border-slate-200">
-                          Inactive
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-50 text-slate-500">
+                          Optional
                         </span>
                       )}
-                    </button>
-                  </td>
+                    </td>
 
-                  <td className="py-3 px-3.5 text-right whitespace-nowrap">
-                    <button
-                      type="button"
-                      onClick={() => openEditModal(rule)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-                    >
-                      <Edit2 className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Edit Rule</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    {/* SIGNATURE */}
+                    <td className="py-4 px-3">
+                      {rule.signatureRequirement === "Required" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                          Required
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-50 text-slate-500">
+                          Optional
+                        </span>
+                      )}
+                    </td>
+
+                    {/* VOICE (IVR) */}
+                    <td className="py-4 px-3">
+                      {rule.voiceRequirement === "Required" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                          Required
+                        </span>
+                      ) : rule.voiceRequirement === "Not Applicable" ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-400">
+                          Not Applicable
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-50 text-slate-500">
+                          Optional
+                        </span>
+                      )}
+                    </td>
+
+                    {/* ACTIONS */}
+                    <td className="py-4 pr-6 pl-3 text-right">
+                      <div className="inline-flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenEditModal(rule, e)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                          title="Edit EVV Rule"
+                        >
+                          <Pencil className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteRule(rule.id, rule.ruleName, e)}
+                          className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete Rule"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Add / Edit Rule Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#3e6b2b]/10 text-[#3e6b2b] flex items-center justify-center font-bold">
-                  <Sliders className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">
-                    {editingRule ? "Edit EVV Tolerance Rule" : "Create EVV Tolerance Rule"}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Define grace windows and review requirements by payer
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-700 p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3.5 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">
-                  Rule Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={ruleName}
-                  onChange={(e) => setRuleName(e.target.value)}
-                  placeholder="e.g., CES Waiver Strict 7-Minute Window"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Payer</label>
-                  <select
-                    value={payer}
-                    onChange={(e) => setPayer(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  >
-                    <option value="Health First Colorado (Medicaid)">Health First Colorado (Medicaid)</option>
-                    <option value="Commercial / Private Insurance">Commercial / Private Insurance</option>
-                    <option value="Veterans Care Coordination">Veterans Care Coordination</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Program</label>
-                  <select
-                    value={program}
-                    onChange={(e) => setProgram(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  >
-                    <option value="HCBS-EBD">HCBS-EBD</option>
-                    <option value="CES">CES Waiver</option>
-                    <option value="IHSS">IHSS</option>
-                    <option value="Private Duty">Private Duty</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Service Code</label>
-                  <input
-                    type="text"
-                    value={serviceCode}
-                    onChange={(e) => setServiceCode(e.target.value)}
-                    placeholder="e.g., T1019 or ALL"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Service Label</label>
-                  <input
-                    type="text"
-                    value={serviceName}
-                    onChange={(e) => setServiceName(e.target.value)}
-                    placeholder="e.g., Personal Care"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Clock-in Tolerance (Minutes)
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={60}
-                    value={clockInTolerance}
-                    onChange={(e) => setClockInTolerance(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">
-                    Clock-out Tolerance (Minutes)
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={60}
-                    value={clockOutTolerance}
-                    onChange={(e) => setClockOutTolerance(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Early Arrival</label>
-                  <select
-                    value={earlyArrival}
-                    onChange={(e) => setEarlyArrival(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  >
-                    <option value="Allow within Grace">Allow within Grace</option>
-                    <option value="Flag for Review">Flag for Review</option>
-                    <option value="Round to Schedule">Round to Schedule</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Late Departure</label>
-                  <select
-                    value={lateDeparture}
-                    onChange={(e) => setLateDeparture(e.target.value as any)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                  >
-                    <option value="Allow within Grace">Allow within Grace</option>
-                    <option value="Require Overtime Approval">Require Overtime Approval</option>
-                    <option value="Flag Exception">Flag Exception</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Rule Policy Notes</label>
-                <textarea
-                  rows={2}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Explain policy justification or contract basis..."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
-                />
-              </div>
-
-              <div className="flex items-center gap-3 pt-1">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={reviewRequired}
-                    onChange={(e) => setReviewRequired(e.target.checked)}
-                    className="rounded text-[#3e6b2b] h-4 w-4"
-                  />
-                  <span className="font-semibold text-slate-700">Require supervisor review on variance</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveRule}
-                className="px-4 py-2 text-xs font-bold text-white bg-[#3e6b2b] hover:bg-[#345c1d] rounded-xl shadow-md shadow-[#3e6b2b]/20"
-              >
-                Save Rule
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Create / Edit Tolerance Rule Modal */}
+      <EvvToleranceRuleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        ruleToEdit={ruleToEdit}
+        onSave={handleSaveRule}
+      />
     </div>
   );
 }

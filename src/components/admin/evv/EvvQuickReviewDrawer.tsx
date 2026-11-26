@@ -170,7 +170,7 @@ export function EvvQuickReviewDrawer({
         {/* Drawer Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 bg-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#3e6b2b]/10 border border-[#3e6b2b]/20 flex items-center justify-center text-[#3e6b2b]">
+            <div className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
@@ -405,7 +405,7 @@ export function EvvQuickReviewDrawer({
                   <select
                     value={selectedReasonCode}
                     onChange={(e) => setSelectedReasonCode(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3e6b2b]/20 focus:border-[#3e6b2b]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
                   >
                     <option value="">-- Select standard reason code --</option>
                     {EVV_REASON_CODES.map((rc) => (
@@ -423,7 +423,7 @@ export function EvvQuickReviewDrawer({
                   <select
                     value={selectedResolutionCode}
                     onChange={(e) => setSelectedResolutionCode(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3e6b2b]/20 focus:border-[#3e6b2b]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
                   >
                     <option value="">-- Select resolution code --</option>
                     {EVV_RESOLUTION_CODES.map((res) => (
@@ -443,7 +443,7 @@ export function EvvQuickReviewDrawer({
                     value={reviewerNotes}
                     onChange={(e) => setReviewerNotes(e.target.value)}
                     placeholder="Document audit notes, corroborated evidence, or supervisor sign-off..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3e6b2b]/20 focus:border-[#3e6b2b]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
                   />
                 </div>
 
@@ -461,7 +461,7 @@ export function EvvQuickReviewDrawer({
                         : "Approve minor variance within policy."
                     }
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#3e6b2b]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#3D6B22]" />
                     <span>Approve Minor Variance</span>
                   </button>
 
@@ -469,7 +469,7 @@ export function EvvQuickReviewDrawer({
                     type="button"
                     onClick={handleResolve}
                     disabled={isSubmitting}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#3e6b2b] hover:bg-[#345c1d] text-white font-bold rounded-xl text-xs shadow-md shadow-[#3e6b2b]/20 transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#3D6B22] hover:bg-[#345C1D] text-white font-bold rounded-xl text-xs shadow-md shadow-[#3D6B22]/20 transition-all cursor-pointer"
                   >
                     <span>Save & Mark Verified</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -493,7 +493,7 @@ export function EvvQuickReviewDrawer({
                     value={reviewerNotes}
                     onChange={(e) => setReviewerNotes(e.target.value)}
                     placeholder="Specify the missing event, clock discrepancy, or required paperwork..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3e6b2b]/20 focus:border-[#3e6b2b]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
                   />
                 </div>
                 <div className="flex justify-end pt-1">
@@ -560,7 +560,7 @@ export function EvvQuickReviewDrawer({
         <div className="p-4 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between shrink-0">
           <Link
             href={`/admin/evv-visits/${visit.id}/`}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3e6b2b] hover:text-[#345c1d] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] transition-colors"
           >
             <span>Open Full Visit Investigation Page</span>
             <ExternalLink className="w-3.5 h-3.5" />

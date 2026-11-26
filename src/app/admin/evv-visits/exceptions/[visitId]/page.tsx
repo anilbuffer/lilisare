@@ -26,7 +26,7 @@ export default async function AdminEvvExceptionDetailPage({ params }: PageProps)
     >
       <EvvVisitDetailView
         visitId={resolvedParams.visitId}
-        defaultTab="investigation"
+        defaultTab="details"
         backHref="/admin/evv-visits/exceptions/"
         backLabel="Back to Exceptions Queue"
       />
@@ -36,7 +36,8 @@ export default async function AdminEvvExceptionDetailPage({ params }: PageProps)
 
 export function generateStaticParams() {
   const evvIds = INITIAL_EVV_VISITS.map((v) => v.id);
+  const ewIds = INITIAL_EVV_VISITS.map((v) => v.displayId || v.visitNumber).filter(Boolean) as string[];
   const realtimeIds = INITIAL_REALTIME_VISITS.map((v) => v.id);
-  const allIds = Array.from(new Set(["[visitId]", "default", ...evvIds, ...realtimeIds]));
+  const allIds = Array.from(new Set(["[visitId]", "default", ...evvIds, ...ewIds, ...realtimeIds]));
   return allIds.map((visitId) => ({ visitId }));
 }

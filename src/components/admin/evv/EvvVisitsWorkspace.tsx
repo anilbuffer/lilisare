@@ -2,143 +2,83 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
   Filter,
-  Download,
-  RefreshCw,
-  Calendar,
   AlertTriangle,
   Clock,
   CheckCircle2,
-  ArrowUpDown,
-  FileText,
-  MapPin,
+  Send,
+  CreditCard,
+  TrendingUp,
+  Users,
+  ChevronRight,
   ExternalLink,
   ShieldCheck,
-  X,
-  Users,
-  Building2,
-  CalendarDays,
-  ArrowRight,
-  Sliders,
-  Check,
-  AlertCircle,
+  MapPin,
   Smartphone,
   PhoneCall,
-  Lock,
-  Layers,
-  ChevronDown,
+  Sliders,
+  DollarSign,
+  Info,
 } from "lucide-react";
-import { toast } from "sonner";
-import {
-  EvvVisitRecord,
-  EvvVisitStatus,
-  EvvVerificationStatus,
-  EvvAggregatorStatus,
-  EvvBillingReadiness,
-  EvvPayrollReadiness,
-  EvvCaptureMethod,
-  EvvExceptionType,
-} from "@/types/evvVisit";
+import { EvvVisitRecord } from "@/types/evvVisit";
 import {
   getEvvVisitsFromStorage,
-  calculateEvvKpis,
-  exportEvvVisitsCsv,
-  DEMO_DATE,
   EVV_SYNC_EVENT,
+  DEMO_DATE,
 } from "@/lib/admin/evvVisitsStore";
-import { EvvKpiCards } from "./EvvKpiCards";
 import { EvvSubNav } from "./EvvSubNav";
-import { EvvQuickReviewDrawer } from "./EvvQuickReviewDrawer";
 import { EvvBulkActionBar } from "./EvvBulkActionBar";
-
-type TabFilter =
-  | "ALL"
-  | "IN_PROGRESS"
-  | "PENDING_VERIFICATION"
-  | "EXCEPTIONS"
-  | "AGGREGATOR_ISSUES"
-  | "BILLING_READINESS";
-
-type SortField = "date" | "caregiver" | "client" | "service" | "status";
-type SortDirection = "asc" | "desc";
-
-function getInitials(name: string): string {
-  if (!name) return "CG";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-function formatTimeDisplay(timeStr?: string): string {
-  if (!timeStr) return "--:--";
-  const [hStr, mStr] = timeStr.split(":");
-  const h = parseInt(hStr, 10);
-  if (isNaN(h)) return timeStr;
-  const ampm = h >= 12 ? "PM" : "AM";
-  const formattedHour = h % 12 === 0 ? 12 : h % 12;
-  return `${formattedHour}:${mStr} ${ampm}`;
-}
 
 export function EvvVisitsWorkspace() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Core visits & loading state
+  // URL view state: overview vs visits
+  const initialView = searchParams.get("view") === "visits" ? "visits" : "overview";
+  const [activeView, setActiveView] = useState<"overview" | "visits">(initialView);
+
+  // SubNav Filters
+  const [selectedJurisdiction, setSelectedJurisdiction] = useState(
+    searchParams.get("jurisdiction") || "All Jurisdictions"
+  );
+  const [selectedDateFilter, setSelectedDateFilter] = useState(
+    searchParams.get("dateRange") || "Today & Recent"
+  );
+
+  useEffect(() => {
+    const v = searchParams.get("view");
+    if (v === "visits") {
+      setActiveView("visits");
+    } else if (v === "overview") {
+      setActiveView("overview");
+    }
+    const j = searchParams.get("jurisdiction") || "All Jurisdictions";
+    const d = searchParams.get("dateRange") || "Today & Recent";
+    setSelectedJurisdiction(j);
+    setSelectedDateFilter(d);
+  }, [searchParams]);
+
+  // Visits state
   const [visits, setVisits] = useState<EvvVisitRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncedTime, setLastSyncedTime] = useState("Today at 10:44 AM");
-
-  // Selection & bulk actions
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  // Drawer state
-  const [reviewDrawerVisit, setReviewDrawerVisit] = useState<EvvVisitRecord | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  // Tabs & KPIs
-  const [activeTab, setActiveTab] = useState<TabFilter>("ALL");
-  const [activeKpiFilter, setActiveKpiFilter] = useState("ALL");
-
-  // Filters
+  // Filters for "All Visits" grid
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState<string>(DEMO_DATE);
-  const [selectedDateMode, setSelectedDateMode] = useState<"SPECIFIC" | "ALL">("SPECIFIC");
-  const [selectedVisitStatus, setSelectedVisitStatus] = useState("ALL");
-  const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("ALL");
-  const [selectedService, setSelectedService] = useState("ALL");
-  const [selectedPayer, setSelectedPayer] = useState("ALL");
-  const [selectedCaptureMethod, setSelectedCaptureMethod] = useState("ALL");
-  const [selectedAggregatorStatus, setSelectedAggregatorStatus] = useState("ALL");
-  const [selectedBillingReadiness, setSelectedBillingReadiness] = useState("ALL");
-  const [selectedPayrollReadiness, setSelectedPayrollReadiness] = useState("ALL");
-  const [selectedExceptionType, setSelectedExceptionType] = useState("ALL");
+  const [selectedIssueFilter, setSelectedIssueFilter] = useState("ALL");
+  const [complianceFilter, setComplianceFilter] = useState("ALL");
+  const [visitStatusFilter, setVisitStatusFilter] = useState("ALL");
+  const [methodFilter, setMethodFilter] = useState("ALL");
+  const [billingHoldsOnly, setBillingHoldsOnly] = useState(false);
 
-  // Sorting
-  const [sortField, setSortField] = useState<SortField>("date");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-
-  // Pagination (10, 25, 50, 100)
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Load visits
   const loadVisits = () => {
-    setIsLoading(true);
-    const data = getEvvVisitsFromStorage();
-    setVisits(data);
-    setIsLoading(false);
+    setVisits(getEvvVisitsFromStorage());
   };
 
   useEffect(() => {
     loadVisits();
-
     if (typeof window !== "undefined") {
       window.addEventListener(EVV_SYNC_EVENT, loadVisits);
       window.addEventListener("storage", loadVisits);
@@ -149,238 +89,162 @@ export function EvvVisitsWorkspace() {
     }
   }, []);
 
-  // Sync / Refresh Simulation
-  const handleRefresh = () => {
-    setIsSyncing(true);
-    setTimeout(() => {
-      loadVisits();
-      setIsSyncing(false);
-      const nowStr = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-      setLastSyncedTime(`Today at ${nowStr}`);
-      toast.success("EVV Feeds Synchronized", {
-        description: "State Aggregator buffer, GPS telemetry, and IVR caller feeds updated.",
-      });
-    }, 500);
+  const handleTabChange = (view: "overview" | "visits") => {
+    setActiveView(view);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", view);
+    router.push(`/admin/evv-visits?${params.toString()}`);
   };
 
-  // Date-filtered pool for KPIs
-  const dateFilteredVisits = useMemo(() => {
-    if (selectedDateMode === "ALL") return visits;
-    return visits.filter((v) => v.date === selectedDate);
-  }, [visits, selectedDateMode, selectedDate]);
-
-  // Derived KPIs
-  const kpis = useMemo(() => calculateEvvKpis(dateFilteredVisits), [dateFilteredVisits]);
-
-  // KPI card selection handler
-  const handleKpiCardSelect = (filterId: string) => {
-    setActiveKpiFilter(filterId);
-    if (filterId === "ALL") {
-      setActiveTab("ALL");
-    } else if (filterId === "IN_PROGRESS") {
-      setActiveTab("IN_PROGRESS");
-    } else if (filterId === "PENDING_VERIFICATION") {
-      setActiveTab("PENDING_VERIFICATION");
-    } else if (filterId === "EXCEPTIONS") {
-      setActiveTab("EXCEPTIONS");
-    } else if (filterId === "CLEARED_BILLING") {
-      setActiveTab("BILLING_READINESS");
-      setSelectedBillingReadiness("Cleared for Billing");
-    } else if (filterId === "AGGREGATOR_REJECTED") {
-      setActiveTab("AGGREGATOR_ISSUES");
-      setSelectedAggregatorStatus("Rejected");
-    }
-    setCurrentPage(1);
-  };
-
-  // Tab change handler
-  const handleTabChange = (tab: TabFilter) => {
-    setActiveTab(tab);
-    setActiveKpiFilter(tab);
-    setCurrentPage(1);
-  };
-
-  // Reset all filters
-  const handleClearFilters = () => {
-    setActiveTab("ALL");
-    setActiveKpiFilter("ALL");
-    setSearchQuery("");
-    setSelectedDate(DEMO_DATE);
-    setSelectedDateMode("SPECIFIC");
-    setSelectedVisitStatus("ALL");
-    setSelectedVerificationStatus("ALL");
-    setSelectedService("ALL");
-    setSelectedPayer("ALL");
-    setSelectedCaptureMethod("ALL");
-    setSelectedAggregatorStatus("ALL");
-    setSelectedBillingReadiness("ALL");
-    setSelectedPayrollReadiness("ALL");
-    setSelectedExceptionType("ALL");
-    setCurrentPage(1);
-    toast.info("Filters Reset", { description: "Viewing all operational visits." });
-  };
-
-  // Unique options for filter dropdowns
-  const serviceOptions = useMemo(() => {
-    const set = new Set<string>();
-    visits.forEach((v) => v.serviceName && set.add(v.serviceName));
-    return Array.from(set).sort();
-  }, [visits]);
-
-  const payerOptions = useMemo(() => {
-    const set = new Set<string>();
-    visits.forEach((v) => v.payerName && set.add(v.payerName));
-    return Array.from(set).sort();
-  }, [visits]);
-
-  // Tab Counts
-  const tabCounts = useMemo(() => {
-    const inProgressCount = dateFilteredVisits.filter((v) => v.visitStatus === "In Progress").length;
-    const pendingVerificationCount = dateFilteredVisits.filter(
-      (v) => v.visitStatus === "Completed" && v.verificationStatus === "Pending"
-    ).length;
-    const exceptionsCount = dateFilteredVisits.filter(
-      (v) =>
-        v.verificationStatus === "Exception" ||
-        v.verificationStatus === "Under Review" ||
-        v.verificationStatus === "Correction Required"
-    ).length;
-    const aggregatorIssuesCount = dateFilteredVisits.filter(
-      (v) => v.aggregatorStatus === "Rejected" || v.aggregatorStatus === "Retry Required"
-    ).length;
-    const readyBillingCount = dateFilteredVisits.filter(
-      (v) => v.billingReadiness === "Cleared for Billing" || v.billingReadiness === "Ready for Review"
-    ).length;
-
-    return {
-      all: dateFilteredVisits.length,
-      inProgress: inProgressCount,
-      pendingVerification: pendingVerificationCount,
-      exceptions: exceptionsCount,
-      aggregatorIssues: aggregatorIssuesCount,
-      billingReadiness: readyBillingCount,
-    };
-  }, [dateFilteredVisits]);
-
-  // Filtering Logic
-  const filteredVisits = useMemo(() => {
-    return dateFilteredVisits.filter((v) => {
-      // 1. Tab filters
-      if (activeTab === "IN_PROGRESS" && v.visitStatus !== "In Progress") return false;
-      if (
-        activeTab === "PENDING_VERIFICATION" &&
-        !(v.visitStatus === "Completed" && v.verificationStatus === "Pending")
-      )
-        return false;
-      if (activeTab === "EXCEPTIONS") {
-        const isException =
-          v.verificationStatus === "Exception" ||
-          v.verificationStatus === "Under Review" ||
-          v.verificationStatus === "Correction Required";
-        if (!isException) return false;
+  // Base visits filtered by jurisdiction & date
+  const jurisdictionAndDateVisits = useMemo(() => {
+    return visits.filter((v) => {
+      // SubNav Jurisdiction Filter
+      if (selectedJurisdiction !== "All Jurisdictions") {
+        if (selectedJurisdiction === "Ohio Medicaid (ODM)") {
+          const isOh =
+            v.payerName?.includes("Ohio") ||
+            v.payerName?.includes("OH") ||
+            v.program?.includes("Ohio") ||
+            v.aggregator === "Sandata";
+          if (!isOh) return false;
+        } else if (selectedJurisdiction === "NJ FamilyCare") {
+          const isNj =
+            v.payerName?.includes("NJ") ||
+            v.payerName?.includes("New Jersey") ||
+            v.program?.includes("NJ") ||
+            v.aggregator === "HHAeXchange";
+          if (!isNj) return false;
+        } else if (selectedJurisdiction === "Florida AHCA") {
+          const isFl =
+            v.payerName?.includes("Florida") ||
+            v.payerName?.includes("FL") ||
+            v.program?.includes("Florida") ||
+            v.aggregator === "Netsmart";
+          if (!isFl) return false;
+        } else if (selectedJurisdiction === "Private Pay / Commercial") {
+          const isPvt =
+            v.payerName?.includes("Private") ||
+            v.payerName?.includes("Commercial") ||
+            v.program?.includes("Private") ||
+            v.aggregator === "CareBridge";
+          if (!isPvt) return false;
+        }
       }
-      if (
-        activeTab === "AGGREGATOR_ISSUES" &&
-        !(v.aggregatorStatus === "Rejected" || v.aggregatorStatus === "Retry Required")
-      )
-        return false;
-      if (
-        activeTab === "BILLING_READINESS" &&
-        !(v.billingReadiness === "Cleared for Billing" || v.billingReadiness === "Ready for Review")
-      )
-        return false;
 
-      // 2. Dropdown filters
-      if (selectedVisitStatus !== "ALL" && v.visitStatus !== selectedVisitStatus) return false;
-      if (
-        selectedVerificationStatus !== "ALL" &&
-        v.verificationStatus !== selectedVerificationStatus
-      )
-        return false;
-      if (selectedService !== "ALL" && v.serviceName !== selectedService) return false;
-      if (selectedPayer !== "ALL" && v.payerName !== selectedPayer) return false;
-      if (selectedCaptureMethod !== "ALL" && v.captureMethod !== selectedCaptureMethod)
-        return false;
-      if (selectedAggregatorStatus !== "ALL" && v.aggregatorStatus !== selectedAggregatorStatus)
-        return false;
-      if (selectedBillingReadiness !== "ALL" && v.billingReadiness !== selectedBillingReadiness)
-        return false;
-      if (selectedPayrollReadiness !== "ALL" && v.payrollReadiness !== selectedPayrollReadiness)
-        return false;
-      if (selectedExceptionType !== "ALL" && v.exceptionType !== selectedExceptionType)
-        return false;
-
-      // 3. Search query across Visit ID, Caregiver, Client, Service, Payer
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchesId =
-          v.id.toLowerCase().includes(q) || v.visitNumber.toLowerCase().includes(q);
-        const matchesCaregiver = v.caregiverName.toLowerCase().includes(q);
-        const matchesClient = v.clientName.toLowerCase().includes(q);
-        const matchesService =
-          v.serviceName.toLowerCase().includes(q) || v.serviceCode.toLowerCase().includes(q);
-        const matchesPayer = v.payerName.toLowerCase().includes(q);
-        if (!matchesId && !matchesCaregiver && !matchesClient && !matchesService && !matchesPayer) {
-          return false;
+      // SubNav Date Filter
+      if (selectedDateFilter !== "Today & Recent") {
+        if (selectedDateFilter === "Today (Nov 25, 2026)") {
+          const isToday =
+            v.date === DEMO_DATE || v.visitStatusBadge?.toLowerCase().includes("today");
+          if (!isToday) return false;
+        } else if (selectedDateFilter === "Yesterday (Nov 24, 2026)") {
+          const isYesterday =
+            v.date === "2026-11-24" || v.visitStatusBadge?.toLowerCase().includes("yesterday");
+          if (!isYesterday) return false;
         }
       }
 
       return true;
     });
+  }, [visits, selectedJurisdiction, selectedDateFilter]);
+
+  // Dynamic metrics derived from jurisdiction & date filtered visits
+  const totalMonitored = jurisdictionAndDateVisits.length;
+  const verifiedCount = jurisdictionAndDateVisits.filter((v) => v.complianceStatus === "Verified").length;
+  const resolvedCount = jurisdictionAndDateVisits.filter((v) => v.complianceStatus === "Resolved").length;
+  const compliantCount = verifiedCount + resolvedCount;
+  const exceptionVisitsInFilter = useMemo(() => {
+    return jurisdictionAndDateVisits.filter(
+      (v) => v.complianceStatus === "Exception" || Boolean(v.issueBadge)
+    );
+  }, [jurisdictionAndDateVisits]);
+  const activeExceptionCount = exceptionVisitsInFilter.length;
+  const complianceRate = totalMonitored > 0 ? Math.round((compliantCount / totalMonitored) * 100) : 0;
+  const aggregatorAcceptedCount = jurisdictionAndDateVisits.filter(
+    (v) => v.aggregatorStatusBadge === "Accepted"
+  ).length;
+  const payrollApprovedCount = jurisdictionAndDateVisits.filter(
+    (v) => v.payrollStatusBadge === "Approved" || v.payrollStatusBadge === "Processed"
+  ).length;
+  const billingHoldCount = jurisdictionAndDateVisits.filter(
+    (v) => v.billingStatusBadge === "Hold"
+  ).length;
+  const billingHoldExposure = jurisdictionAndDateVisits
+    .filter((v) => v.billingStatusBadge === "Hold")
+    .reduce((sum, v) => sum + (v.scheduledDurationHours || 4) * (v.billRate || 32), 0);
+  const openExceptionsHold = exceptionVisitsInFilter.reduce(
+    (sum, v) => sum + (v.scheduledDurationHours || 4) * (v.billRate || 32),
+    0
+  );
+  const aggregatorRejectionsHold = jurisdictionAndDateVisits
+    .filter((v) => v.aggregatorStatusBadge === "Rejected")
+    .reduce((sum, v) => sum + (v.scheduledDurationHours || 4) * (v.billRate || 32), 0);
+
+  // Filtered visits for the grid
+  const filteredVisits = useMemo(() => {
+    return jurisdictionAndDateVisits.filter((v) => {
+      if (billingHoldsOnly && v.billingStatusBadge !== "Hold") return false;
+
+      if (complianceFilter !== "ALL") {
+        if (complianceFilter === "Exception" && v.complianceStatus !== "Exception") return false;
+        if (complianceFilter === "Verified" && v.complianceStatus !== "Verified") return false;
+        if (complianceFilter === "Resolved" && v.complianceStatus !== "Resolved") return false;
+      }
+
+      if (visitStatusFilter !== "ALL") {
+        if (visitStatusFilter === "Completed" && v.visitStatus !== "Completed") return false;
+        if (visitStatusFilter === "In Progress" && v.visitStatus !== "In Progress") return false;
+        if (visitStatusFilter === "Scheduled" && v.visitStatus !== "Scheduled") return false;
+      }
+
+      if (methodFilter !== "ALL") {
+        if (methodFilter === "GPS" && v.captureMethod !== "Mobile GPS") return false;
+        if (methodFilter === "IVR" && v.captureMethod !== "Telephony / IVR") return false;
+        if (methodFilter === "Manual" && v.captureMethod !== "Manual Entry") return false;
+        if (methodFilter === "Fixed" && v.captureMethod !== "Fixed Device") return false;
+      }
+
+      if (selectedIssueFilter !== "ALL") {
+        if (selectedIssueFilter === "Location Mismatch" && v.issueBadge !== "Location Mismatch") return false;
+        if (selectedIssueFilter === "Missed In" && v.issueBadge !== "Missed In") return false;
+        if (selectedIssueFilter === "Missed Out" && v.issueBadge !== "Missed Out") return false;
+        if (selectedIssueFilter === "Missed Call" && v.issueBadge !== "Missed Call") return false;
+        if (selectedIssueFilter === "Time Variance" && v.issueBadge !== "Time Variance") return false;
+        if (selectedIssueFilter === "Verification Missing" && v.issueBadge !== "Verification Missing") return false;
+      }
+
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesId =
+          v.id.toLowerCase().includes(q) ||
+          v.visitNumber.toLowerCase().includes(q) ||
+          (v.displayId && v.displayId.toLowerCase().includes(q));
+        const matchesCaregiver = v.caregiverName.toLowerCase().includes(q);
+        const matchesClient = v.clientName.toLowerCase().includes(q);
+        const matchesIssue = v.issueBadge?.toLowerCase().includes(q) || v.exceptionReason?.toLowerCase().includes(q);
+        if (!matchesId && !matchesCaregiver && !matchesClient && !matchesIssue) return false;
+      }
+
+      return true;
+    });
   }, [
-    dateFilteredVisits,
-    activeTab,
-    selectedVisitStatus,
-    selectedVerificationStatus,
-    selectedService,
-    selectedPayer,
-    selectedCaptureMethod,
-    selectedAggregatorStatus,
-    selectedBillingReadiness,
-    selectedPayrollReadiness,
-    selectedExceptionType,
+    jurisdictionAndDateVisits,
     searchQuery,
+    selectedIssueFilter,
+    complianceFilter,
+    visitStatusFilter,
+    methodFilter,
+    billingHoldsOnly,
   ]);
 
-  // Sorting Logic
-  const sortedVisits = useMemo(() => {
-    return [...filteredVisits].sort((a, b) => {
-      let comparison = 0;
-      if (sortField === "date") {
-        comparison = a.date.localeCompare(b.date);
-      } else if (sortField === "caregiver") {
-        comparison = a.caregiverName.localeCompare(b.caregiverName);
-      } else if (sortField === "client") {
-        comparison = a.clientName.localeCompare(b.clientName);
-      } else if (sortField === "service") {
-        comparison = a.serviceName.localeCompare(b.serviceName);
-      } else if (sortField === "status") {
-        comparison = a.verificationStatus.localeCompare(b.verificationStatus);
-      }
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-  }, [filteredVisits, sortField, sortDirection]);
-
-  // Pagination Logic
-  const totalPages = Math.ceil(sortedVisits.length / pageSize) || 1;
-  const paginatedVisits = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return sortedVisits.slice(start, start + pageSize);
-  }, [sortedVisits, currentPage, pageSize]);
-
-  // Select all visible on current page
-  const handleSelectAllVisible = (checked: boolean) => {
+  const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const visibleIds = paginatedVisits.map((v) => v.id);
-      setSelectedIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+      setSelectedIds(filteredVisits.map((v) => v.id));
     } else {
-      const visibleIds = new Set(paginatedVisits.map((v) => v.id));
-      setSelectedIds((prev) => prev.filter((id) => !visibleIds.has(id)));
+      setSelectedIds([]);
     }
   };
-
-  const isAllVisibleSelected =
-    paginatedVisits.length > 0 && paginatedVisits.every((v) => selectedIds.includes(v.id));
 
   const handleToggleRow = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -389,701 +253,934 @@ export function EvvVisitsWorkspace() {
     );
   };
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
-
-  const openQuickReview = (v: EvvVisitRecord, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setReviewDrawerVisit(v);
-    setIsDrawerOpen(true);
-  };
-
-  // Helper status badge renderers
-  const renderVisitStatusBadge = (status: EvvVisitStatus) => {
-    switch (status) {
-      case "Completed":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
-            Completed
-          </span>
-        );
-      case "In Progress":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-blue-50 text-blue-700 border-blue-200">
-            In Progress
-          </span>
-        );
-      case "Scheduled":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-slate-100 text-slate-600 border-slate-200">
-            Scheduled
-          </span>
-        );
-      case "Missed":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-rose-50 text-rose-700 border-rose-200">
-            Missed
-          </span>
-        );
-      case "Cancelled":
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-slate-100 text-slate-500 border-slate-200">
-            Cancelled
-          </span>
-        );
-    }
-  };
-
-  const renderVerificationStatusBadge = (status: EvvVerificationStatus) => {
-    switch (status) {
-      case "Verified":
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#3e6b2b]/15 text-[#3e6b2b] border border-[#3e6b2b]/30">
-            <ShieldCheck className="w-3 h-3 text-[#3e6b2b]" />
-            Verified
-          </span>
-        );
-      case "Exception":
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-            <AlertTriangle className="w-3 h-3 text-amber-600" />
-            Exception
-          </span>
-        );
-      case "Under Review":
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-            <Clock className="w-3 h-3 text-purple-600" />
-            Under Review
-          </span>
-        );
-      case "Correction Required":
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-            <FileText className="w-3 h-3 text-rose-600" />
-            Correction Req.
-          </span>
-        );
-      case "Pending":
-      default:
-        return (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-            Pending
-          </span>
-        );
-    }
-  };
-
-  const renderAggregatorBadge = (status: EvvAggregatorStatus) => {
-    switch (status) {
-      case "Accepted":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Accepted
-          </span>
-        );
-      case "Rejected":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-            Rejected
-          </span>
-        );
-      case "Submitted":
-      case "Queued":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-            {status}
-          </span>
-        );
-      case "Retry Required":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-            Retry Req.
-          </span>
-        );
-      case "Acknowledgement Pending":
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-            Ack Pending
-          </span>
-        );
-      case "Not Submitted":
-      default:
-        return (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200">
-            Not Submitted
-          </span>
-        );
-    }
-  };
-
-  const renderReadinessBadge = (
-    label: string,
-    readiness: EvvBillingReadiness | EvvPayrollReadiness
-  ) => {
-    const isCleared = readiness === "Cleared for Billing" || readiness === "Cleared for Payroll";
-    const isBlocked = readiness === "Blocked";
-    const isReady = readiness === "Ready for Review";
-
-    return (
-      <div className="flex items-center gap-1.5 text-[10px]">
-        <span className="font-semibold text-slate-400 uppercase w-10 text-right">{label}:</span>
-        <span
-          className={`px-1.5 py-0.2 rounded font-bold ${isCleared
-            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-            : isBlocked
-              ? "bg-rose-50 text-rose-700 border border-rose-200/60"
-              : isReady
-                ? "bg-amber-50 text-amber-800 border border-amber-200/60"
-                : "bg-slate-50 text-slate-500 border border-slate-200/60"
-            }`}
-        >
-          {readiness}
+  // Helper for method badge style
+  const getMethodBadge = (v: EvvVisitRecord) => {
+    const method = v.captureMethod;
+    if (method === "Mobile GPS") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+          <MapPin className="w-3 h-3" />
+          GPS
         </span>
-      </div>
+      );
+    }
+    if (method === "Telephony / IVR") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+          <PhoneCall className="w-3 h-3" />
+          IVR
+        </span>
+      );
+    }
+    if (method === "Manual Entry") {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+          Manual
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+        Fixed
+      </span>
     );
   };
 
-  const renderCaptureMethodIcon = (method: EvvCaptureMethod) => {
-    switch (method) {
-      case "Mobile GPS":
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
-            <Smartphone className="w-3.5 h-3.5 text-blue-600" />
-            <span>Mobile GPS</span>
-          </span>
-        );
-      case "Telephony / IVR":
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
-            <PhoneCall className="w-3.5 h-3.5 text-purple-600" />
-            <span>IVR / Telephony</span>
-          </span>
-        );
-      case "Fixed Device":
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
-            <Lock className="w-3.5 h-3.5 text-amber-600" />
-            <span>Fixed FOB</span>
-          </span>
-        );
-      case "Manual Entry":
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
-            <FileText className="w-3.5 h-3.5 text-slate-500" />
-            <span>Manual Entry</span>
-          </span>
-        );
+  const getComplianceBadge = (status?: string) => {
+    if (status === "Exception") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+          Exception
+        </span>
+      );
     }
+    if (status === "Resolved") {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+          Resolved
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+        Verified
+      </span>
+    );
   };
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-6 animate-fade-in">
-      {/* =========================================================================
-          1. PAGE HEADER
-         ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            EVV Visits
-          </h1>
-        </div>
-
-        {/* Header Actions */}
-        <div className="flex items-center gap-2.5 self-start sm:self-auto">
-          <Link
-            href="/admin/evv-visits/rules"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer"
-          >
-            <Sliders className="w-3.5 h-3.5 text-slate-500" />
-            <span>Configure Rules</span>
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isSyncing}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer disabled:opacity-60"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isSyncing ? "animate-spin" : ""}`} />
-            <span>{isSyncing ? "Syncing..." : "Refresh"}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => exportEvvVisitsCsv(filteredVisits)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3e6b2b] hover:bg-[#345c1d] rounded-xl shadow-md shadow-[#3e6b2b]/20 transition-all cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Sub-navigation bar linking to Exceptions, Submissions, Rules */}
-      <EvvSubNav exceptionCount={kpis.exceptions} rejectedCount={kpis.aggregatorRejected} />
-
-      {/* =========================================================================
-          2. COMPACT 6-CARD KPI SUMMARY (Derived from real mock data)
-         ========================================================================= */}
-      <EvvKpiCards
-        kpis={kpis}
-        activeFilter={activeKpiFilter}
-        onSelectFilter={handleKpiCardSelect}
+    <div className="w-full max-w-9xl mx-auto space-y-6 animate-fade-in pb-12">
+      {/* Shared SubNav Header */}
+      <EvvSubNav
+        activeTabOverride={activeView === "overview" ? "overview" : "visits"}
+        onTabChange={handleTabChange}
+        exceptionCount={activeExceptionCount}
+        totalVisitsCount={totalMonitored}
+        selectedJurisdiction={selectedJurisdiction}
+        onJurisdictionChange={(j) => setSelectedJurisdiction(j)}
+        selectedDateFilter={selectedDateFilter}
+        onDateFilterChange={(d) => setSelectedDateFilter(d)}
       />
 
-      {/* =========================================================================
-          3. OPERATIONAL TABS (Segmented navigation with live counts)
-         ========================================================================= */}
-      <div className="bg-white p-1.5 rounded-xl sm:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-        {[
-          { id: "ALL", label: "All Visits", count: tabCounts.all },
-          { id: "IN_PROGRESS", label: "In Progress", count: tabCounts.inProgress },
-          { id: "PENDING_VERIFICATION", label: "Pending Verification", count: tabCounts.pendingVerification },
-          { id: "EXCEPTIONS", label: "Exceptions", count: tabCounts.exceptions, alert: tabCounts.exceptions > 0 },
-          { id: "AGGREGATOR_ISSUES", label: "Aggregator Issues", count: tabCounts.aggregatorIssues, alert: tabCounts.aggregatorIssues > 0 },
-          { id: "BILLING_READINESS", label: "Billing / Payroll Ready", count: tabCounts.billingReadiness },
-        ].map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => handleTabChange(tab.id as TabFilter)}
-              className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs rounded-xl transition-all whitespace-nowrap cursor-pointer ${isActive
-                ? "bg-[#3e6b2b] text-white font-bold shadow-sm shadow-[#3e6b2b]/25 border border-[#3e6b2b]"
-                : "bg-slate-50/80 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/70 font-semibold shadow-2xs"
-                }`}
-            >
-              <span>{tab.label}</span>
-              <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold border transition-colors ${isActive
-                  ? "bg-white/20 text-white border-white/30"
-                  : tab.alert
-                    ? "bg-amber-100 text-amber-800 border-amber-200"
-                    : "bg-white text-slate-700 border-slate-200"
-                  }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* VIEW 1: EVV OVERVIEW (Screenshot 1) */}
+      {activeView === "overview" && (
+        <div className="space-y-6">
+          {/* Top 4 KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: EVV Compliance (Clean White Card) */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold tracking-wider uppercase text-slate-500 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#3D6B22] animate-pulse" />
+                  EVV COMPLIANCE
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+                  <Clock className="w-4 h-4" />
+                </div>
+              </div>
 
-      {/* =========================================================================
-          4. COMPREHENSIVE FILTER TOOLBAR (Aligned directly with table columns)
-         ========================================================================= */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3.5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-3 text-xs">
-          {/* Search Query */}
-          <div className="sm:col-span-2 relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search by Visit ID, Caregiver, Client, Service code..."
-              className="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3e6b2b]/20 focus:border-[#3e6b2b] placeholder:text-slate-400 text-slate-800"
-            />
+              <div className="mt-4 mb-2">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                    {complianceRate}%
+                  </span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {verifiedCount} Ver • {resolvedCount} Res
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-slate-500 mt-2 font-medium">
+                  <span>{totalMonitored} active visits monitored</span>
+                  <span className="text-[#3D6B22] font-bold">↗</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Active Exceptions */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                  ACTIVE EXCEPTIONS
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+              </div>
+
+              <div className="mt-4 mb-2">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                    {activeExceptionCount}
+                  </span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                    Needs Review
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 mt-2 font-medium">
+                  Isolated by workflow type
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Aggregator Accepted */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                  AGGREGATOR ACCEPTED
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                  <Send className="w-4 h-4" />
+                </div>
+              </div>
+
+              <div className="mt-4 mb-2">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                    {aggregatorAcceptedCount}/{totalMonitored}
+                  </span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                    {jurisdictionAndDateVisits.filter((v) => v.billingStatusBadge === "Billed").length} Billed/Cleared
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 mt-2 font-medium truncate">
+                  Sandata • HHAeXchange • Netsmart
+                </div>
+              </div>
+            </div>
+
+            {/* Card 4: Payroll Approved */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                  PAYROLL APPROVED
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+              </div>
+
+              <div className="mt-4 mb-2">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                    {payrollApprovedCount}/{totalMonitored}
+                  </span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                    {billingHoldCount} Billing Holds
+                  </span>
+                </div>
+                <div className="text-xs text-slate-500 mt-2 font-medium">
+                  Independent payroll gate
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Date Selector */}
-          <div>
-            <select
-              value={selectedDateMode === "ALL" ? "ALL" : selectedDate}
-              onChange={(e) => {
-                if (e.target.value === "ALL") {
-                  setSelectedDateMode("ALL");
-                } else {
-                  setSelectedDateMode("SPECIFIC");
-                  setSelectedDate(e.target.value);
-                }
-                setCurrentPage(1);
-              }}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none text-slate-700"
-            >
-              <option value={DEMO_DATE}>Date: {DEMO_DATE} (Today)</option>
-              <option value="ALL">Date: All Service Dates</option>
-            </select>
-          </div>
+          {/* Middle Row: Trend, Donut, Billing Exposure */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* 7-Day Compliance Trend */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-slate-500" />
+                    7-Day Compliance Trend
+                  </h3>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    91.7% Avg
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mb-4">
+                  Compliant vs flagged visits (%)
+                </p>
 
-          {/* Service Type */}
-          <div>
-            <select
-              value={selectedService}
-              onChange={(e) => {
-                setSelectedService(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none text-slate-700 truncate"
-            >
-              <option value="ALL">Service: All Services</option>
-              {serviceOptions.map((svc) => (
-                <option key={svc} value={svc}>
-                  {svc}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* EVV Verification Status */}
-          <div>
-            <select
-              value={selectedVerificationStatus}
-              onChange={(e) => {
-                setSelectedVerificationStatus(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none text-slate-700"
-            >
-              <option value="ALL">Verification: All</option>
-              <option value="Verified">Verified</option>
-              <option value="Exception">Exception</option>
-              <option value="Under Review">Under Review</option>
-              <option value="Correction Required">Correction Required</option>
-              <option value="Pending">Pending</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Toolbar Footer with Clear Filters & Active Count */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
-          <div className="flex items-center gap-3">
-            <span>
-              Showing <strong className="text-slate-900 font-bold">{sortedVisits.length}</strong> of{" "}
-              {visits.length} operational visits
-            </span>
-            {(searchQuery ||
-              selectedVerificationStatus !== "ALL" ||
-              selectedService !== "ALL" ||
-              selectedDateMode === "ALL" ||
-              activeTab !== "ALL") && (
-                <button
-                  type="button"
-                  onClick={handleClearFilters}
-                  className="text-xs font-semibold text-[#3e6b2b] hover:underline cursor-pointer"
-                >
-                  Clear all filters
-                </button>
-              )}
-          </div>
-
-          {/* Page size selector */}
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-400">Rows per page:</span>
-            {[10, 25, 50, 100].map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => {
-                  setPageSize(size);
-                  setCurrentPage(1);
-                }}
-                className={`px-2 py-0.5 rounded text-[11px] font-bold ${pageSize === size
-                  ? "bg-[#3e6b2b] text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          5. MAIN OPERATIONAL EVV TABLE (Streamlined, zero horizontal scrolling)
-         ========================================================================= */}
-      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            {/* Sticky Table Header */}
-            <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 z-20 backdrop-blur-xs">
-              <tr>
-                <th className="py-3 px-3.5 w-10 text-center">
-                  <input
-                    type="checkbox"
-                    checked={isAllVisibleSelected}
-                    onChange={(e) => handleSelectAllVisible(e.target.checked)}
-                    className="rounded text-[#3e6b2b] focus:ring-[#3e6b2b] h-3.5 w-3.5 cursor-pointer"
-                  />
-                </th>
-
-                <th
-                  onClick={() => handleSort("date")}
-                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
-                >
-                  <div className="flex items-center gap-1">
-                    <span>Visit ID</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
-                </th>
-
-                <th className="py-3 px-3.5 whitespace-nowrap">Service Date &amp; Time</th>
-
-                <th
-                  onClick={() => handleSort("caregiver")}
-                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
-                >
-                  <div className="flex items-center gap-1">
-                    <span>Caregiver</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
-                </th>
-
-                <th
-                  onClick={() => handleSort("client")}
-                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
-                >
-                  <div className="flex items-center gap-1">
-                    <span>Client / Patient</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
-                </th>
-
-                <th
-                  onClick={() => handleSort("service")}
-                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
-                >
-                  <div className="flex items-center gap-1">
-                    <span>Service</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
-                </th>
-
-                <th
-                  onClick={() => handleSort("status")}
-                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
-                >
-                  <div className="flex items-center gap-1">
-                    <span>Verification Status</span>
-                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
-                  </div>
-                </th>
-
-                <th className="py-3 px-3.5 text-right whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-
-            {/* Table Body */}
-            <tbody className="divide-y divide-slate-100 text-xs">
-              {paginatedVisits.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-16 text-center text-slate-500">
-                    <div className="max-w-sm mx-auto space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 mx-auto">
-                        <AlertCircle className="w-6 h-6" />
-                      </div>
-                      <h3 className="font-bold text-slate-800 text-sm">No EVV records match filters</h3>
-                      <p className="text-xs text-slate-500">
-                        Try adjusting your query, clearing active filters, or changing the service date.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleClearFilters}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#3e6b2b] text-white font-semibold rounded-xl text-xs cursor-pointer shadow-md shadow-[#3e6b2b]/20 hover:bg-[#345c1d] transition-all"
-                      >
-                        Reset All Filters
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                paginatedVisits.map((visit) => {
-                  const isSelected = selectedIds.includes(visit.id);
-                  const initials = getInitials(visit.caregiverName);
-
-                  const actualDisplay = !visit.actualClockInTime
-                    ? `--:-- – ${visit.actualClockOutTime ? formatTimeDisplay(visit.actualClockOutTime) : "In Progress"}`
-                    : `${formatTimeDisplay(visit.actualClockInTime)} – ${visit.actualClockOutTime
-                      ? formatTimeDisplay(visit.actualClockOutTime)
-                      : "In Progress"
-                    }`;
-
-                  return (
-                    <tr
-                      key={visit.id}
-                      onClick={() => router.push(`/admin/evv-visits/${visit.id}/`)}
-                      className={`hover:bg-slate-50/80 transition-colors cursor-pointer group ${isSelected ? "bg-[#3e6b2b]/5" : ""
-                        }`}
-                    >
-                      {/* Checkbox */}
-                      <td
-                        className="py-3 px-3.5 text-center"
-                        onClick={(e) => handleToggleRow(visit.id, e)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => { }}
-                          className="rounded text-[#3e6b2b] focus:ring-[#3e6b2b] h-3.5 w-3.5 cursor-pointer"
+                {/* Stacked Bar Chart */}
+                <div className="h-44 flex items-end justify-between gap-2 pt-6 px-2 border-b border-slate-100">
+                  {[
+                    { day: "Thu", comp: 88, exc: 12 },
+                    { day: "Fri", comp: 93, exc: 7, active: true },
+                    { day: "Sat", comp: 96, exc: 4 },
+                    { day: "Sun", comp: 95, exc: 5 },
+                    { day: "Mon", comp: 92, exc: 8 },
+                    { day: "Tue", comp: 90, exc: 10 },
+                    { day: "Today", comp: 85, exc: 15 },
+                  ].map((bar) => (
+                    <div key={bar.day} className="flex-1 flex flex-col items-center h-full justify-end relative group">
+                      {bar.active && (
+                        <div className="absolute -top-6 bg-white border border-slate-200 text-slate-800 text-[10px] font-semibold px-2 py-1 rounded-md shadow-md whitespace-nowrap z-10 pointer-events-none">
+                          Fri Compliant: 93% • Exc: 7%
+                        </div>
+                      )}
+                      <div className="w-full max-w-[28px] flex flex-col items-center h-full justify-end rounded-t-md overflow-hidden">
+                        <div
+                          style={{ height: `${bar.exc}%` }}
+                          className="w-full bg-amber-400 hover:bg-amber-500 transition-colors"
                         />
-                      </td>
+                        <div
+                          style={{ height: `${bar.comp}%` }}
+                          className="w-full bg-emerald-400 hover:bg-emerald-500 transition-colors"
+                        />
+                      </div>
+                      <span className="text-[10px] font-semibold text-slate-500 mt-2">
+                        {bar.day}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-4 text-xs font-medium text-slate-500 mt-3">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
+                  Compliant
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-400" />
+                  Exceptions
+                </span>
+              </div>
+            </div>
 
-                      {/* Visit ID */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        <span className="font-mono font-bold text-slate-900 group-hover:text-[#3e6b2b] transition-colors">
-                          {visit.id}
-                        </span>
-                      </td>
+            {/* Exception Breakdown Donut */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-slate-500" />
+                    Exception Breakdown
+                  </h3>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    {activeExceptionCount} Total
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mb-4">
+                  Click a segment to filter Exceptions
+                </p>
 
-                      {/* Date & Time */}
-                      <td className="py-3 px-3.5 whitespace-nowrap text-slate-700">
-                        <span className="font-medium text-slate-900">{visit.date}</span>
-                        <span className="text-slate-400 mx-1.5">•</span>
-                        <span className="text-slate-600">{actualDisplay}</span>
-                      </td>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  {/* Circular visual donut */}
+                  <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      {/* Background circle */}
+                      <path
+                        className="text-slate-100"
+                        strokeWidth="3.8"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      {/* Segment 1: Compliant */}
+                      <path
+                        className="text-emerald-500"
+                        strokeDasharray={`${complianceRate}, 100`}
+                        strokeWidth="3.8"
+                        strokeLinecap="round"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      {/* Segment 2: Exceptions */}
+                      {complianceRate < 100 && (
+                        <path
+                          className="text-amber-500"
+                          strokeDasharray={`${100 - complianceRate}, 100`}
+                          strokeDashoffset={`-${complianceRate}`}
+                          strokeWidth="3.8"
+                          stroke="currentColor"
+                          fill="none"
+                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                      )}
+                    </svg>
+                    <div className="absolute text-center">
+                      <span className="text-lg font-extrabold text-slate-900 block leading-tight">
+                        {complianceRate}%
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                        COMPLIANT
+                      </span>
+                    </div>
+                  </div>
 
-                      {/* Caregiver */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3e6b2b] font-bold text-[10px] shrink-0">
-                            {initials}
-                          </div>
-                          <span className="font-semibold text-slate-900 group-hover:text-[#3e6b2b] transition-colors">
-                            {visit.caregiverName}
+                  {/* Legend list */}
+                  <div className="flex-1 space-y-1.5 text-xs font-medium text-slate-600">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                        Location Mismatch
+                      </span>
+                      <span className="font-bold text-slate-800">
+                        {jurisdictionAndDateVisits.filter((v) => v.issueBadge === "Location Mismatch").length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
+                        Missed Out
+                      </span>
+                      <span className="font-bold text-slate-800">
+                        {jurisdictionAndDateVisits.filter((v) => v.issueBadge === "Missed Out").length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                        Missed In
+                      </span>
+                      <span className="font-bold text-slate-800">
+                        {jurisdictionAndDateVisits.filter((v) => v.issueBadge === "Missed In").length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span className="w-2 h-2 rounded-full bg-red-600 shrink-0" />
+                        Missed Call
+                      </span>
+                      <span className="font-bold text-slate-800">
+                        {jurisdictionAndDateVisits.filter((v) => v.issueBadge === "Missed Call").length}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0" />
+                        Time Variance
+                      </span>
+                      <span className="font-bold text-slate-800">
+                        {jurisdictionAndDateVisits.filter((v) => v.issueBadge === "Time Variance").length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Billing Hold Exposure */}
+            <div className="bg-white rounded-2xl p-5 border border-rose-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between relative overflow-hidden">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-rose-500" />
+                    Billing Hold Exposure
+                  </h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 uppercase tracking-wider">
+                    PRE-CLAIM GATE
+                  </span>
+                </div>
+
+                <div className="mt-4">
+                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-rose-600 block">
+                    ${billingHoldExposure.toFixed(2)}
+                  </span>
+                  <p className="text-xs text-slate-500 font-medium mt-1">
+                    Held pending EVV resolution or aggregator acceptance
+                  </p>
+                </div>
+
+                <div className="mt-5 space-y-2.5 pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 font-medium">Open Exceptions</span>
+                    <span className="font-bold text-slate-900">${openExceptionsHold.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 font-medium">Aggregator Rejections</span>
+                    <span className="font-bold text-slate-900">${aggregatorRejectionsHold.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <Link
+                  href="/admin/evv-visits/exceptions"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition-all active:scale-95"
+                >
+                  <span>Review & Resolve Holds</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Row: Readiness, Coaching, Priority Queue */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Processing Readiness */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-slate-500" />
+                    Processing Readiness
+                  </h3>
+                  <Link
+                    href="/admin/evv-visits/submissions"
+                    className="text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] flex items-center gap-1"
+                  >
+                    Open Pipeline →
+                  </Link>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mb-4">
+                  EVV, Aggregator, Billing & Payroll
+                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-xs font-medium mb-1">
+                      <span className="flex items-center gap-1.5 text-slate-700">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        EVV Verified or Resolved
+                      </span>
+                      <span className="font-bold text-slate-900">
+                        {compliantCount}/{totalMonitored} ({complianceRate}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${complianceRate}%` }} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-medium mb-1">
+                      <span className="flex items-center gap-1.5 text-slate-700">
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        Aggregator Accepted
+                      </span>
+                      <span className="font-bold text-slate-900">
+                        {aggregatorAcceptedCount}/{totalMonitored} ({totalMonitored > 0 ? Math.round((aggregatorAcceptedCount / totalMonitored) * 100) : 0}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-500 rounded-full"
+                        style={{ width: `${totalMonitored > 0 ? Math.round((aggregatorAcceptedCount / totalMonitored) * 100) : 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-medium mb-1">
+                      <span className="flex items-center gap-1.5 text-slate-700">
+                        <span className="w-2 h-2 rounded-full bg-purple-500" />
+                        Billing Cleared / Billed
+                      </span>
+                      <span className="font-bold text-slate-900">
+                        {jurisdictionAndDateVisits.filter((v) => v.billingStatusBadge === "Billed").length}/{totalMonitored} ({totalMonitored > 0 ? Math.round((jurisdictionAndDateVisits.filter((v) => v.billingStatusBadge === "Billed").length / totalMonitored) * 100) : 0}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-purple-500 rounded-full"
+                        style={{ width: `${totalMonitored > 0 ? Math.round((jurisdictionAndDateVisits.filter((v) => v.billingStatusBadge === "Billed").length / totalMonitored) * 100) : 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-medium mb-1">
+                      <span className="flex items-center gap-1.5 text-slate-700">
+                        <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
+                        Payroll Approved / Processed
+                      </span>
+                      <span className="font-bold text-slate-900">
+                        {payrollApprovedCount}/{totalMonitored} ({totalMonitored > 0 ? Math.round((payrollApprovedCount / totalMonitored) * 100) : 0}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#3D6B22] rounded-full"
+                        style={{ width: `${totalMonitored > 0 ? Math.round((payrollApprovedCount / totalMonitored) * 100) : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Caregivers Needing Coaching */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-slate-500" />
+                    Caregivers Needing Coaching
+                  </h3>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                    3 Staff
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mb-4">
+                  Repeat EVV punch exceptions this period
+                </p>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
+                        SJ
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900">
+                          Sarah Jenkins <span className="text-[10px] text-slate-400 font-medium">CG-1085</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-medium">
+                          Primary issue: Missed Out
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                      6 EXCEPTIONS
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
+                        DK
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900">
+                          David Kim <span className="text-[10px] text-slate-400 font-medium">CG-1091</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-medium">
+                          Primary issue: Missed In
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                      4 EXCEPTIONS
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">
+                        PS
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-900">
+                          Priya Sharma <span className="text-[10px] text-slate-400 font-medium">CG-1084</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-medium">
+                          Primary issue: Location Mismatch
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                      2 EXCEPTIONS
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Priority Exception Queue */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-rose-500" />
+                    Priority Exception Queue
+                  </h3>
+                  <Link
+                    href="/admin/evv-visits/exceptions"
+                    className="text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] flex items-center gap-1"
+                  >
+                    View All →
+                  </Link>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mb-4">
+                  {activeExceptionCount} open exception{activeExceptionCount === 1 ? "" : "s"} requiring review
+                </p>
+
+                <div className="space-y-2.5">
+                  {exceptionVisitsInFilter.length === 0 ? (
+                    <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 text-center text-xs text-slate-500 font-medium">
+                      No open exceptions for selected filters.
+                    </div>
+                  ) : (
+                    exceptionVisitsInFilter.slice(0, 3).map((exc) => (
+                      <Link
+                        key={exc.id}
+                        href={`/admin/evv-visits/${exc.id}`}
+                        className="block p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 shadow-2xs hover:border-slate-300 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900">{exc.displayId || exc.id}</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                            {exc.issueBadge || "Exception"}
                           </span>
                         </div>
-                      </td>
-
-                      {/* Client / Patient */}
-                      <td className="py-3 px-3.5 whitespace-nowrap font-semibold text-slate-900">
-                        {visit.clientName}
-                      </td>
-
-                      {/* Service & Code */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        <span className="font-medium text-slate-800">
-                          {visit.serviceName}
-                        </span>
-                        <span className="ml-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">
-                          {visit.serviceCode}
-                        </span>
-                      </td>
-
-                      {/* Verification Status with Exception indicator */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          {renderVerificationStatusBadge(visit.verificationStatus)}
-                          {visit.exceptionReason && (
-                            <span
-                              title={visit.exceptionReason}
-                              className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100 text-amber-700"
-                            >
-                              <AlertTriangle className="w-2.5 h-2.5" />
-                            </span>
-                          )}
+                        <div className="text-xs font-semibold text-slate-700 mt-1">
+                          {exc.caregiverName} → {exc.clientName}
                         </div>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
-                        <div
-                          className="inline-flex items-center justify-end gap-1.5"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => openQuickReview(visit, e)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl text-xs shadow-2xs transition-all cursor-pointer"
-                          >
-                            <ShieldCheck className="w-3.5 h-3.5 text-[#3e6b2b]" />
-                            <span>Review</span>
-                          </button>
-                          <Link
-                            href={`/admin/evv-visits/${visit.id}/`}
-                            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
-                            title="Open full visit details"
-                          >
-                            <ArrowRight className="w-4 h-4" />
-                          </Link>
+                        <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                          {exc.exceptionReason || exc.exceptionTitle || "Pending guided resolution"}
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      )}
 
-        {/* Table Pagination Footer */}
-        {sortedVisits.length > 0 && (
-          <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <span className="text-slate-500 font-medium">
-              Page <strong className="text-slate-900 font-bold">{currentPage}</strong> of{" "}
-              {totalPages} ({sortedVisits.length} total entries)
-            </span>
+      {/* VIEW 2: ALL VISITS OPERATIONAL GRID (Screenshot 2) */}
+      {activeView === "visits" && (
+        <div className="space-y-4">
+          {/* Search, Filter Bar and Dropdowns */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              {/* Search input */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search Visit ID, caregiver, client, or issue..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
+                />
+              </div>
 
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              >
-                Previous
-              </button>
+              {/* Right Select Dropdowns */}
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={complianceFilter}
+                  onChange={(e) => setComplianceFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-2xs cursor-pointer"
+                >
+                  <option value="ALL">Compliance: All</option>
+                  <option value="Exception">Exception</option>
+                  <option value="Verified">Verified</option>
+                  <option value="Resolved">Resolved</option>
+                </select>
 
-              {Array.from({ length: Math.min(5, totalPages) }, (_, idx) => {
-                const pageNum = idx + 1;
+                <select
+                  value={visitStatusFilter}
+                  onChange={(e) => setVisitStatusFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-2xs cursor-pointer"
+                >
+                  <option value="ALL">Visit Status: All</option>
+                  <option value="Completed">Completed</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Scheduled">Scheduled</option>
+                </select>
+
+                <select
+                  value={methodFilter}
+                  onChange={(e) => setMethodFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-2xs cursor-pointer"
+                >
+                  <option value="ALL">Method: All</option>
+                  <option value="GPS">GPS</option>
+                  <option value="IVR">IVR</option>
+                  <option value="Manual">Manual</option>
+                  <option value="Fixed">Fixed</option>
+                </select>
+
+                <button
+                  type="button"
+                  onClick={() => setBillingHoldsOnly(!billingHoldsOnly)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${billingHoldsOnly
+                    ? "bg-rose-50 text-rose-700 border-rose-200"
+                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-white"
+                    }`}
+                >
+                  <Filter className="w-3 h-3" />
+                  <span>Billing Holds Only</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Issue Filter Pills Row */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-2 border-t border-slate-100">
+              {[
+                { id: "ALL", label: "All Issues", count: visits.length },
+                { id: "Location Mismatch", label: "Location Mismatch", count: 1 },
+                { id: "Missed In", label: "Missed In", count: 1 },
+                { id: "Missed Out", label: "Missed Out", count: 1 },
+                { id: "Missed Call", label: "Missed Call", count: 1 },
+                { id: "Time Variance", label: "Time Variance", count: 1 },
+                { id: "Verification Missing", label: "Verification Missing", count: 1 },
+              ].map((pill) => {
+                const isActive = selectedIssueFilter === pill.id;
                 return (
                   <button
-                    key={pageNum}
+                    key={pill.id}
                     type="button"
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`w-8 h-8 rounded-lg font-bold text-xs ${currentPage === pageNum
-                      ? "bg-[#3e6b2b] text-white"
-                      : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
+                    onClick={() => setSelectedIssueFilter(pill.id)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
+                      ? "bg-[#3D6B22] text-white shadow-xs font-bold"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
                       }`}
                   >
-                    {pageNum}
+                    <span>{pill.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive
+                        ? "bg-white/20 text-white"
+                        : pill.id !== "ALL"
+                          ? "bg-rose-100 text-rose-700"
+                          : "bg-slate-200 text-slate-700"
+                        }`}
+                    >
+                      {pill.count}
+                    </span>
                   </button>
                 );
               })}
-
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              >
-                Next
-              </button>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* =========================================================================
-          6. CONTEXTUAL BULK ACTIONS BAR (When records selected)
-         ========================================================================= */}
+          {/* Clean Front List Table without Horizontal Scroll */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
+            <div className="overflow-x-auto scrollbar-none">
+              <table className="w-full text-left border-collapse min-w-[760px]">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50/70 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <th className="py-3.5 pl-4 pr-2 w-10">
+                      <input
+                        type="checkbox"
+                        checked={
+                          filteredVisits.length > 0 &&
+                          selectedIds.length === filteredVisits.length
+                        }
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        className="rounded border-slate-300 text-[#3D6B22] focus:ring-[#3D6B22]/20 cursor-pointer"
+                      />
+                    </th>
+                    <th className="py-3.5 px-3 w-36">VISIT</th>
+                    <th className="py-3.5 px-3">CAREGIVER</th>
+                    <th className="py-3.5 px-3">CLIENT</th>
+                    <th className="py-3.5 px-3">TIME</th>
+                    <th className="py-3.5 px-3">EVV STATUS</th>
+                    <th className="py-3.5 pr-4 pl-3 text-right w-24">DETAILS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+                  {filteredVisits.map((visit) => {
+                    const isSelected = selectedIds.includes(visit.id);
+                    const isException = visit.complianceStatus === "Exception";
+                    const targetUrl = `/admin/evv-visits/${visit.id}`;
+
+                    return (
+                      <tr
+                        key={visit.id}
+                        onClick={() => router.push(targetUrl)}
+                        className={`hover:bg-slate-50/80 transition-colors cursor-pointer group ${isSelected ? "bg-slate-50" : ""
+                          }`}
+                      >
+                        {/* Checkbox */}
+                        <td
+                          className="py-3 pl-4 pr-2"
+                          onClick={(e) => handleToggleRow(visit.id, e)}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => { }}
+                            className="rounded border-slate-300 text-[#3D6B22] focus:ring-[#3D6B22]/20 cursor-pointer"
+                          />
+                        </td>
+
+                        {/* Visit ID & Visit Status badge */}
+                        <td className="py-3.5 px-3">
+                          <div className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                            {visit.displayId || visit.visitNumber || visit.id}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span
+                              className={`text-[10px] font-semibold px-1.5 py-0.2 rounded border ${visit.issueBadge === "Missed In" ||
+                                visit.issueBadge === "Missed Out" ||
+                                visit.issueBadge === "Missed Call"
+                                ? "bg-rose-50 text-rose-600 border-rose-200"
+                                : visit.visitStatus === "In Progress"
+                                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                                  : visit.visitStatus === "Scheduled"
+                                    ? "bg-slate-100 text-slate-600 border-slate-200"
+                                    : "bg-slate-100 text-slate-700 border-slate-200"
+                                }`}
+                            >
+                              {visit.issueBadge === "Missed In" ||
+                                visit.issueBadge === "Missed Out" ||
+                                visit.issueBadge === "Missed Call"
+                                ? "Incomplete"
+                                : visit.visitStatus === "Scheduled"
+                                  ? "Not Started"
+                                  : visit.visitStatus}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {visit.date === "2026-11-24" ||
+                                visit.visitStatusBadge?.toLowerCase().includes("yesterday")
+                                ? "Yesterday"
+                                : "Today"}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Caregiver */}
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0 border border-slate-200">
+                              {visit.caregiverInitials || visit.caregiverName.slice(0, 2).toUpperCase()}
+                            </div>
+                            <span className="font-semibold text-slate-900 truncate">
+                              {visit.caregiverName}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Client */}
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-700 font-bold text-[10px] flex items-center justify-center shrink-0 border border-blue-200">
+                              {visit.clientInitials || visit.clientName.slice(0, 2).toUpperCase()}
+                            </div>
+                            <span className="font-semibold text-slate-900 truncate">
+                              {visit.clientName}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Time */}
+                        <td className="py-3.5 px-3">
+                          <div className="font-semibold text-slate-800 text-xs">
+                            {visit.timeDisplay ? (
+                              visit.timeDisplay.includes("Missing") ? (
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  {visit.timeDisplay.split(" ").map((token, idx) =>
+                                    token === "Missing" || token === "In" || token === "Out" ? (
+                                      <span key={idx} className="text-rose-600 font-bold">
+                                        {token}
+                                      </span>
+                                    ) : (
+                                      <span key={idx}>{token}</span>
+                                    )
+                                  )}
+                                </div>
+                              ) : (
+                                visit.timeDisplay
+                              )
+                            ) : (
+                              `${visit.scheduledStartTime} - ${visit.scheduledEndTime}`
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-medium mt-0.5">
+                            {visit.timeScheduledDisplay || `Sched: ${visit.scheduledStartTime} - ${visit.scheduledEndTime}`}
+                          </div>
+                        </td>
+
+                        {/* EVV Status */}
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center gap-2">
+                            {getComplianceBadge(visit.complianceStatus)}
+                            {getMethodBadge(visit)}
+                          </div>
+                        </td>
+
+                        {/* Action Details */}
+                        <td className="py-3.5 pr-4 pl-3 text-right">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(targetUrl);
+                            }}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-2xs ${isException
+                              ? "bg-[#3D6B22] hover:bg-[#345C1D] text-white font-bold"
+                              : "bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 font-semibold"
+                              }`}
+                          >
+                            <span>{isException ? "Review" : "Details"}</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Table Footer */}
+            <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-500">
+              <div>
+                Showing <span className="font-bold text-slate-800">{filteredVisits.length}</span> of{" "}
+                <span className="font-bold text-slate-800">{visits.length}</span> visits
+              </div>
+              <div className="text-[11px] text-slate-400">
+                Select any visit row to open full verification, exception resolution, and readiness details.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Bulk Actions Bar (Shown when any table checkbox is checked) */}
       <EvvBulkActionBar
         selectedIds={selectedIds}
         allVisits={visits}
         onClearSelection={() => setSelectedIds([])}
         onActionComplete={loadVisits}
-      />
-
-      {/* =========================================================================
-          7. RIGHT-SIDE QUICK REVIEW & RESOLUTION DRAWER
-         ========================================================================= */}
-      <EvvQuickReviewDrawer
-        visit={reviewDrawerVisit}
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onUpdated={loadVisits}
       />
     </div>
   );

@@ -14,7 +14,8 @@ export type EvvAggregatorStatus =
   | "Accepted"
   | "Rejected"
   | "Acknowledgement Pending"
-  | "Retry Required";
+  | "Retry Required"
+  | "Pending";
 
 export type EvvBillingReadiness =
   | "Not Evaluated"
@@ -299,10 +300,10 @@ export interface EvvToleranceRule {
   serviceName: string;
   clockInToleranceMinutes: number;
   clockOutToleranceMinutes: number;
-  earlyArrivalHandling: "Allow" | "Allow within Grace" | "Flag for Review" | "Round to Schedule";
+  earlyArrivalHandling: "Allow" | "Allow within Grace" | "Flag for Review" | "Round to Schedule" | "Require Reason";
   lateArrivalHandling: "Allow within Grace" | "Require Reason" | "Flag Exception";
   earlyDepartureHandling: "Flag Exception" | "Allow within Grace" | "Require Supervisor Approval";
-  lateDepartureHandling: "Allow within Grace" | "Require Overtime Approval" | "Flag Exception";
+  lateDepartureHandling: "Allow within Grace" | "Require Supervisor Approval" | "Require Overtime Approval" | "Flag Exception";
   reviewRequired: boolean;
   approvalRequired: boolean;
   effectiveDate: string;

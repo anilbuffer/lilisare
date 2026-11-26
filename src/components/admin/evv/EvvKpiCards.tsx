@@ -25,9 +25,9 @@ export function EvvKpiCards({ kpis, activeFilter, onSelectFilter }: EvvKpiCardsP
       value: kpis.todaysVisits,
       subtext: "Scheduled for today",
       icon: Calendar,
-      iconColor: "text-[#3e6b2b]",
-      iconBg: "bg-[#3e6b2b]/10",
-      activeRing: "border-[#3e6b2b] ring-2 ring-[#3e6b2b]/20 shadow-md",
+      iconColor: "text-[#3D6B22]",
+      iconBg: "bg-[#3D6B22]/10",
+      activeRing: "border-[#3D6B22] ring-2 ring-[#3D6B22]/20 shadow-md",
       accent: "text-slate-900",
     },
     {

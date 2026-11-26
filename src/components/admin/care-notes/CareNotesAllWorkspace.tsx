@@ -56,7 +56,7 @@ export function CareNotesAllWorkspace({
   const initialTypeFilter = searchParams.get("type") || "all";
 
   const [notes, setNotes] = useState<CareNote[]>([]);
-  const [activeTab, setActiveTab] = useState<string>(initialStatusFilter);
+  const [activeTab, setActiveTab] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOffice, setSelectedOffice] = useState("All Offices");
   const [selectedProgram, setSelectedProgram] = useState("All Programs");

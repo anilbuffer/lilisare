@@ -16,6 +16,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import {
+  INITIAL_CARE_NOTES,
   getCareNotesFromStorage,
   getCareNotesKpiSummary,
   exportCareNotesCsv,
@@ -61,7 +62,7 @@ export function CareNotesSubNav({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [kpi, setKpi] = useState(() => getCareNotesKpiSummary());
+  const [kpi, setKpi] = useState(() => getCareNotesKpiSummary(INITIAL_CARE_NOTES));
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Determine active tab from prop, URL search param, or pathname
@@ -79,7 +80,7 @@ export function CareNotesSubNav({
     return "overview";
   }, [controlledActiveTab, searchParams, pathname]);
 
-  const [activeTabState, setActiveTabState] = useState<string>(derivedActiveTab);
+  const [activeTabState, setActiveTabState] = useState<string>(controlledActiveTab || "overview");
 
   useEffect(() => {
     setActiveTabState(derivedActiveTab);
@@ -89,6 +90,7 @@ export function CareNotesSubNav({
     const handleSync = () => {
       setKpi(getCareNotesKpiSummary());
     };
+    handleSync();
     window.addEventListener(CARE_NOTES_SYNC_EVENT, handleSync);
     return () => window.removeEventListener(CARE_NOTES_SYNC_EVENT, handleSync);
   }, []);

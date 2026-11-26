@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CareNote, CareNotesKpiSummary } from "@/types/careNotes";
 import {
+  INITIAL_CARE_NOTES,
   getCareNotesFromStorage,
   getCareNotesKpiSummary,
   CARE_NOTES_SYNC_EVENT,
@@ -49,7 +50,7 @@ export function CareNotesReviewQueueWorkspace({
 }: CareNotesReviewQueueWorkspaceProps = {}) {
   const router = useRouter();
   const [notes, setNotes] = useState<CareNote[]>([]);
-  const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary());
+  const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary(INITIAL_CARE_NOTES));
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPriority, setSelectedPriority] = useState("all");
   const [selectedReviewerFilter, setSelectedReviewerFilter] = useState("all");

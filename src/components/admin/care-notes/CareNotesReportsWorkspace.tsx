@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { CareNote, CareNotesKpiSummary } from "@/types/careNotes";
 import {
+  INITIAL_CARE_NOTES,
   getCareNotesFromStorage,
   getCareNotesKpiSummary,
   exportCareNotesCsv,
@@ -54,7 +55,7 @@ export function CareNotesReportsWorkspace({
   onTabChange,
 }: CareNotesReportsWorkspaceProps = {}) {
   const [notes, setNotes] = useState<CareNote[]>([]);
-  const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary());
+  const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary(INITIAL_CARE_NOTES));
   const [selectedOffice, setSelectedOffice] = useState("All Offices");
   const [selectedProgram, setSelectedProgram] = useState("All Programs");
   const [selectedDateRange, setSelectedDateRange] = useState("Last 30 Days");

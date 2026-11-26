@@ -8,6 +8,7 @@ import {
   CareNotesKpiSummary,
 } from "@/types/careNotes";
 import {
+  INITIAL_CARE_NOTES,
   getCareNotesFromStorage,
   getCareNotesKpiSummary,
   CARE_NOTES_SYNC_EVENT,
@@ -49,7 +50,7 @@ export function CareNotesOverviewWorkspace({
 }: CareNotesOverviewWorkspaceProps) {
   const router = useRouter();
   const [notes, setNotes] = useState<CareNote[]>([]);
-  const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary());
+  const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary(INITIAL_CARE_NOTES));
   const [selectedOffice, setSelectedOffice] = useState("All Offices");
   const [selectedProgram, setSelectedProgram] = useState("All Programs");
   const [selectedDateRange, setSelectedDateRange] = useState("Last 30 Days");
@@ -94,52 +95,54 @@ export function CareNotesOverviewWorkspace({
 
       {/* Mid Section: Activity Chart + Future AI & Quality Principles */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        <div className="lg:col-span-2">
-          <CareNotesActivityChart />
+        <div className="lg:col-span-2 h-full">
+          <CareNotesActivityChart className="h-full" />
         </div>
 
         {/* Core Product Principle & AI Release 2 Card */}
-        <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between">
-          <div className="max-h-[350px] overflow-y-auto pr-1 [scrollbar-width:thin]">
-            <div className="flex items-center gap-3 pb-3.5 mb-3.5 border-b border-slate-100">
-              <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
-                <Sparkles className="w-5 h-5" />
+        <div className="h-full bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between">
+          <div className="flex-1 flex flex-col">
+            <div className="flex items-center gap-3 pb-4 mb-4 border-b border-slate-100 min-h-[52px]">
+              <div className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
+                <Sparkles className="w-4.5 h-4.5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">AI & Care Quality Protocol</h3>
               </div>
             </div>
 
-            <div className="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80 mb-3.5 text-xs text-emerald-950 font-medium">
-              <p className="font-bold text-[#3D6B22] mb-1 flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#3D6B22]" /> Core Governance Principle
-              </p>
-              Caregiver creates and approves the final care note. Agency Admin reviews, audits and manages its quality and compliance. Admin never silently alters caregiver documentation.
-            </div>
+            <div className="flex-1 flex flex-col justify-between space-y-3.5">
+              <div className="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80 text-xs text-emerald-950 font-medium">
+                <p className="font-bold text-[#3D6B22] mb-1 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#3D6B22]" /> Core Governance Principle
+                </p>
+                Caregiver creates and approves the final care note. Agency Admin reviews, audits and manages its quality and compliance. Admin never silently alters caregiver documentation.
+              </div>
 
-            <div className="space-y-3 text-xs text-slate-600">
-              <div className="flex items-start gap-2.5">
-                <UserCheck className="w-4 h-4 text-[#3D6B22] shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-slate-900">Caregiver Voice Dictation:</span> Mobile app dictation assists caregivers in recording comprehensive notes.
+              <div className="space-y-3 text-xs text-slate-600">
+                <div className="flex items-start gap-2.5">
+                  <UserCheck className="w-4 h-4 text-[#3D6B22] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-slate-900">Caregiver Voice Dictation:</span> Mobile app dictation assists caregivers in recording comprehensive notes.
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-[#3D6B22] shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-slate-900">Configurable Pre-Validation:</span> Automated validation against program-specific documentation requirements.
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-[#3D6B22] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-slate-900">Configurable Pre-Validation:</span> Automated validation against program-specific documentation requirements.
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-[#3D6B22] shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-slate-900">Human Approval Safeguard:</span> No automatic AI sign-offs; every consequential action creates an audit event.
+                <div className="flex items-start gap-2.5">
+                  <Sparkles className="w-4 h-4 text-[#3D6B22] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-slate-900">Human Approval Safeguard:</span> No automatic AI sign-offs; every consequential action creates an audit event.
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-3.5 mt-4 border-t border-slate-100 flex items-center justify-between min-h-[44px]">
             <span className="text-[11px] font-medium text-slate-400">Documentation Engine v2.4</span>
             <button
               type="button"

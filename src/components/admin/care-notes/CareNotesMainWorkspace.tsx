@@ -21,10 +21,10 @@ export function CareNotesMainWorkspace({ initialTab = "overview" }: CareNotesMai
   const searchParams = useSearchParams();
   const urlTab = searchParams.get("tab");
 
-  const [activeTab, setActiveTab] = useState<string>(urlTab || initialTab || "overview");
+  const [activeTab, setActiveTab] = useState<string>(initialTab || "overview");
 
   useEffect(() => {
-    if (urlTab && urlTab !== activeTab) {
+    if (urlTab) {
       setActiveTab(urlTab);
     }
   }, [urlTab]);

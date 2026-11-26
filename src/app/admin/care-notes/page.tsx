@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { CareNotesOverviewWorkspace } from "@/components/admin/care-notes/CareNotesOverviewWorkspace";
+import { CareNotesMainWorkspace } from "@/components/admin/care-notes/CareNotesMainWorkspace";
 
 export const metadata = {
   title: "CareNotes Overview | LiliSphere Admin",
@@ -16,7 +16,7 @@ export default function AdminCareNotesPage() {
         </div>
       }
     >
-      <CareNotesOverviewWorkspace />
+      <CareNotesMainWorkspace initialTab="overview" />
     </Suspense>
   );
 }

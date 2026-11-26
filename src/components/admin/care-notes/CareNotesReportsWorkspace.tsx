@@ -44,7 +44,15 @@ function getInitials(name: string): string {
   return name.substring(0, 2).toUpperCase();
 }
 
-export function CareNotesReportsWorkspace() {
+interface CareNotesReportsWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesReportsWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesReportsWorkspaceProps = {}) {
   const [notes, setNotes] = useState<CareNote[]>([]);
   const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary());
   const [selectedOffice, setSelectedOffice] = useState("All Offices");
@@ -117,10 +125,14 @@ export function CareNotesReportsWorkspace() {
 
   return (
     <div className="w-full">
-      <CareNotesSubNav
-        title="Quality & Reports"
-        description="Agency-wide care documentation compliance monitoring, review velocity, and caregiver quality metrics."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="Quality & Reports"
+          description="Agency-wide care documentation compliance monitoring, review velocity, and caregiver quality metrics."
+          activeTab="reports"
+          onTabChange={onTabChange}
+        />
+      )}
 
       <div className="max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
         {/* Filter Bar with Office, Program and Date Range */}
@@ -233,7 +245,6 @@ export function CareNotesReportsWorkspace() {
           <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
             <div>
               <h3 className="text-base font-bold text-slate-900 tracking-tight">Documentation Quality Breakdown</h3>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">Proportion of complete vs deficient care notes</p>
 
               <div className="h-52 w-full mt-3">
                 <ResponsiveContainer width="100%" height="100%">
@@ -283,7 +294,6 @@ export function CareNotesReportsWorkspace() {
             <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">Documentation Velocity by Program</h3>
-                <p className="text-xs text-slate-500 font-medium">Submitted vs Approved vs Returned by waiver program</p>
               </div>
               <button
                 onClick={handleExport}
@@ -328,7 +338,6 @@ export function CareNotesReportsWorkspace() {
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">
                   Caregiver Documentation Quality Scorecard
                 </h3>
-                <p className="text-xs text-slate-500 font-medium">Individual caregiver submission volume and first-pass accuracy</p>
               </div>
             </div>
           </div>

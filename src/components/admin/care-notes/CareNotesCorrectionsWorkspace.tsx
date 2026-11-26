@@ -40,7 +40,15 @@ function getInitials(name: string): string {
   return name.substring(0, 2).toUpperCase();
 }
 
-export function CareNotesCorrectionsWorkspace() {
+interface CareNotesCorrectionsWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesCorrectionsWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesCorrectionsWorkspaceProps = {}) {
   const router = useRouter();
   const [notes, setNotes] = useState<CareNote[]>([]);
   const [activeTab, setActiveTab] = useState<"all" | "awaiting_caregiver" | "resubmitted" | "resolved">("all");
@@ -104,10 +112,14 @@ export function CareNotesCorrectionsWorkspace() {
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <CareNotesSubNav
-        title="Correction Requests"
-        description="Track notes returned to caregivers for amendment, missing section completion, and resubmission."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="Correction Requests"
+          description="Track notes returned to caregivers for amendment, missing section completion, and resubmission."
+          activeTab="corrections"
+          onTabChange={onTabChange}
+        />
+      )}
 
       {/* Summary Metric Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">

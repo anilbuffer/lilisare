@@ -38,7 +38,15 @@ function getInitials(name: string): string {
   return name.substring(0, 2).toUpperCase();
 }
 
-export function CareNotesReviewQueueWorkspace() {
+interface CareNotesReviewQueueWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesReviewQueueWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesReviewQueueWorkspaceProps = {}) {
   const router = useRouter();
   const [notes, setNotes] = useState<CareNote[]>([]);
   const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary());
@@ -117,10 +125,14 @@ export function CareNotesReviewQueueWorkspace() {
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <CareNotesSubNav
-        title="CareNotes Review Queue"
-        description="Priority operational queue for Agency Admin to review, audit, and verify submitted caregiver documentation."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="CareNotes Review Queue"
+          description="Priority operational queue for Agency Admin to review, audit, and verify submitted caregiver documentation."
+          activeTab="review"
+          onTabChange={onTabChange}
+        />
+      )}
 
       {/* Queue Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">

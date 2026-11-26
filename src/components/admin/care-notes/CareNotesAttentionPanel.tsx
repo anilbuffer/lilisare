@@ -15,9 +15,10 @@ import {
 
 interface CareNotesAttentionPanelProps {
   notes: CareNote[];
+  onTabChange?: (tabId: string) => void;
 }
 
-export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps) {
+export function CareNotesAttentionPanel({ notes, onTabChange }: CareNotesAttentionPanelProps) {
   // Aggregate attention items
   const awaitingReview = notes.filter((n) => n.reviewStatus === "pending_review" && !n.isMissing);
   const requiringCorrection = notes.filter(
@@ -47,6 +48,7 @@ export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps)
       icon: Stethoscope,
       description: "Vital sign variances or acute neurological flags routed for RN review",
       href: "/admin/care-notes/all?status=flagged&type=clinical",
+      tab: "all",
       badgeColor: "bg-purple-50 text-purple-700 border-purple-200/80",
     },
     {
@@ -57,6 +59,7 @@ export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps)
       icon: AlertCircle,
       description: "EVV shifts completed without care documentation exceeding 24h SLA",
       href: "/admin/care-notes/all?status=missing",
+      tab: "all",
       badgeColor: "bg-rose-50 text-rose-700 border-rose-200/80",
     },
     {
@@ -67,6 +70,7 @@ export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps)
       icon: AlertTriangle,
       description: "Returned notes waiting on caregiver amendments and resubmissions",
       href: "/admin/care-notes/corrections",
+      tab: "corrections",
       badgeColor: "bg-amber-50 text-amber-800 border-amber-200/80",
     },
     {
@@ -77,6 +81,7 @@ export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps)
       icon: Clock,
       description: "Caregiver-submitted notes awaiting first-pass documentation verification",
       href: "/admin/care-notes/review",
+      tab: "review",
       badgeColor: "bg-[#3D6B22]/10 text-[#3D6B22] border-[#3D6B22]/20",
     },
     {
@@ -87,6 +92,7 @@ export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps)
       icon: ShieldAlert,
       description: "Time duration discrepancies between note narrative and EVV GPS telemetry",
       href: "/admin/care-notes/all?status=flagged&type=compliance",
+      tab: "all",
       badgeColor: "bg-slate-100 text-slate-700 border-slate-200/80",
     },
   ];
@@ -107,7 +113,6 @@ export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps)
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Needs Attention</h2>
-            <p className="text-xs text-slate-500 font-medium">Prioritised documentation risks & operational bottlenecks</p>
           </div>
         </div>
         <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/80">
@@ -140,12 +145,22 @@ export function CareNotesAttentionPanel({ notes }: CareNotesAttentionPanelProps)
                 <span className="text-slate-400 font-medium">
                   Oldest: <span className="text-slate-700 font-semibold">{item.oldestDate}</span>
                 </span>
-                <Link
-                  href={item.href}
-                  className="inline-flex items-center gap-1 font-bold text-[#3D6B22] hover:text-[#345C1D] transition-colors"
-                >
-                  View Queue <ArrowRight className="w-3 h-3" />
-                </Link>
+                {onTabChange ? (
+                  <button
+                    type="button"
+                    onClick={() => onTabChange(item.tab)}
+                    className="inline-flex items-center gap-1 font-bold text-[#3D6B22] hover:text-[#345C1D] transition-colors cursor-pointer"
+                  >
+                    View Queue <ArrowRight className="w-3 h-3" />
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className="inline-flex items-center gap-1 font-bold text-[#3D6B22] hover:text-[#345C1D] transition-colors"
+                  >
+                    View Queue <ArrowRight className="w-3 h-3" />
+                  </Link>
+                )}
               </div>
             </div>
           );

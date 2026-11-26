@@ -24,7 +24,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export function CareNotesTemplatesWorkspace() {
+interface CareNotesTemplatesWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesTemplatesWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesTemplatesWorkspaceProps = {}) {
   const [templates, setTemplates] = useState<CareNoteTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<CareNoteTemplate | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -172,10 +180,14 @@ export function CareNotesTemplatesWorkspace() {
 
   return (
     <div className="w-full">
-      <CareNotesSubNav
-        title="Note Templates"
-        description="Design and manage structured care note layouts, required fields, and caregiver guidance across programs."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="Note Templates"
+          description="Design and manage structured care note layouts, required fields, and caregiver guidance across programs."
+          activeTab="templates"
+          onTabChange={onTabChange}
+        />
+      )}
 
       <div className="max-w-9xl mx-auto space-y-5 pb-16 px-4 sm:px-6 lg:px-8 pt-2 animate-in fade-in duration-300">
         {/* Top Header Controls */}

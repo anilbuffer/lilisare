@@ -29,7 +29,15 @@ function getInitials(name: string): string {
   return name.substring(0, 2).toUpperCase();
 }
 
-export function CareNotesAuditWorkspace() {
+interface CareNotesAuditWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesAuditWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesAuditWorkspaceProps = {}) {
   const [events, setEvents] = useState<CareNoteAuditEvent[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
@@ -66,10 +74,14 @@ export function CareNotesAuditWorkspace() {
 
   return (
     <div className="w-full">
-      <CareNotesSubNav
-        title="Documentation Audit Trail"
-        description="Immutable, tamper-evident log of all care note submissions, review decisions, corrections, escalations, and rule modifications."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="Documentation Audit Trail"
+          description="Immutable, tamper-evident log of all care note submissions, review decisions, corrections, escalations, and rule modifications."
+          activeTab="audit"
+          onTabChange={onTabChange}
+        />
+      )}
 
       <div className="max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
         {/* Compliance Notice Banner */}

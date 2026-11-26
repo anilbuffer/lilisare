@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { CareNotesAuditWorkspace } from "@/components/admin/care-notes/CareNotesAuditWorkspace";
+import { CareNotesMainWorkspace } from "@/components/admin/care-notes/CareNotesMainWorkspace";
 
 export const metadata = {
   title: "CareNotes Audit History | LiliSphere Admin",
@@ -16,7 +16,7 @@ export default function AdminCareNotesAuditPage() {
         </div>
       }
     >
-      <CareNotesAuditWorkspace />
+      <CareNotesMainWorkspace initialTab="audit" />
     </Suspense>
   );
 }

@@ -41,7 +41,15 @@ function getInitials(name: string): string {
   return name.substring(0, 2).toUpperCase();
 }
 
-export function CareNotesAllWorkspace() {
+interface CareNotesAllWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesAllWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesAllWorkspaceProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialStatusFilter = searchParams.get("status") || "all";
@@ -194,10 +202,14 @@ export function CareNotesAllWorkspace() {
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <CareNotesSubNav
-        title="All Care Notes"
-        description="Search and manage care documentation submitted across your agency."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="All Care Notes"
+          description="Search and manage care documentation submitted across your agency."
+          activeTab="all"
+          onTabChange={onTabChange}
+        />
+      )}
 
       {/* Search & Filter Card with Status Pills */}
       <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs space-y-4">

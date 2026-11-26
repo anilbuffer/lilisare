@@ -38,7 +38,15 @@ function getInitials(name: string): string {
   return name.substring(0, 2).toUpperCase();
 }
 
-export function CareNotesOverviewWorkspace() {
+interface CareNotesOverviewWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesOverviewWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesOverviewWorkspaceProps) {
   const router = useRouter();
   const [notes, setNotes] = useState<CareNote[]>([]);
   const [kpi, setKpi] = useState<CareNotesKpiSummary>(() => getCareNotesKpiSummary());
@@ -70,16 +78,20 @@ export function CareNotesOverviewWorkspace() {
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
       {/* Sub-Navigation Header & Standalone Tabs Bar */}
-      <CareNotesSubNav
-        title="CareNotes"
-        description="Monitor care documentation, review submitted notes and manage documentation quality across your agency."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="CareNotes"
+          description="Monitor care documentation, review submitted notes and manage documentation quality across your agency."
+          activeTab="overview"
+          onTabChange={onTabChange}
+        />
+      )}
 
       {/* KPI Summary Cards */}
-      <CareNotesKpiCards kpi={kpi} />
+      <CareNotesKpiCards kpi={kpi} onTabChange={onTabChange} />
 
       {/* Needs Attention Panel */}
-      <CareNotesAttentionPanel notes={filteredNotes} />
+      <CareNotesAttentionPanel notes={filteredNotes} onTabChange={onTabChange} />
 
       {/* Mid Section: Activity Chart + Future AI & Quality Principles */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
@@ -96,7 +108,6 @@ export function CareNotesOverviewWorkspace() {
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">AI & Care Quality Protocol</h3>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Release 2 Architecture</span>
               </div>
             </div>
 
@@ -131,12 +142,16 @@ export function CareNotesOverviewWorkspace() {
 
           <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
             <span className="text-[11px] font-medium text-slate-400">Documentation Engine v2.4</span>
-            <Link
-              href="/admin/care-notes/rules"
-              className="text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] inline-flex items-center gap-1 transition-colors"
+            <button
+              type="button"
+              onClick={() => {
+                if (onTabChange) onTabChange("rules");
+                else router.push("/admin/care-notes?tab=rules");
+              }}
+              className="text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] inline-flex items-center gap-1 transition-colors cursor-pointer"
             >
               Manage Documentation Rules <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -150,17 +165,20 @@ export function CareNotesOverviewWorkspace() {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 tracking-tight">Recent Care Notes</h3>
-              <p className="text-xs text-slate-500 font-medium">Latest documentation submissions and active reviews</p>
             </div>
           </div>
 
-          <Link
-            href="/admin/care-notes/all"
+          <button
+            type="button"
+            onClick={() => {
+              if (onTabChange) onTabChange("all");
+              else router.push("/admin/care-notes?tab=all");
+            }}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-[#3D6B22] bg-[#3D6B22]/10 hover:bg-[#3D6B22]/20 border border-[#3D6B22]/20 rounded-xl transition-all cursor-pointer"
           >
             <span>View All Notes ({filteredNotes.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          </button>
         </div>
 
         <div className="overflow-x-auto">

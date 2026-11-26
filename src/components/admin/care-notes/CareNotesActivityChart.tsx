@@ -62,7 +62,6 @@ export function CareNotesActivityChart({ className }: ActivityChartProps) {
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Documentation Activity Trends</h3>
-            <p className="text-xs text-slate-500 font-medium">Caregiver submissions vs. Admin audit throughput</p>
           </div>
         </div>
 
@@ -70,25 +69,22 @@ export function CareNotesActivityChart({ className }: ActivityChartProps) {
         <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 self-start sm:self-auto">
           <button
             onClick={() => setPeriod("7d")}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
-              period === "7d" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-            }`}
+            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${period === "7d" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+              }`}
           >
             7 Days
           </button>
           <button
             onClick={() => setPeriod("30d")}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
-              period === "30d" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-            }`}
+            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${period === "30d" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+              }`}
           >
             30 Days
           </button>
           <button
             onClick={() => setPeriod("90d")}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
-              period === "90d" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
-            }`}
+            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${period === "90d" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-600 hover:text-slate-900"
+              }`}
           >
             90 Days
           </button>

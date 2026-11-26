@@ -28,7 +28,15 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export function CareNotesRulesWorkspace() {
+interface CareNotesRulesWorkspaceProps {
+  hideSubNav?: boolean;
+  onTabChange?: (tabId: string) => void;
+}
+
+export function CareNotesRulesWorkspace({
+  hideSubNav = false,
+  onTabChange,
+}: CareNotesRulesWorkspaceProps = {}) {
   const [rules, setRules] = useState<CareNoteRule[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [programFilter, setProgramFilter] = useState("all");
@@ -151,10 +159,14 @@ export function CareNotesRulesWorkspace() {
 
   return (
     <div className="w-full max-w-9xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <CareNotesSubNav
-        title="Documentation Rules"
-        description="Configure required note sections, clinical thresholds, and documentation SLAs as state and program requirements evolve."
-      />
+      {!hideSubNav && (
+        <CareNotesSubNav
+          title="Documentation Rules"
+          description="Configure required note sections, clinical thresholds, and documentation SLAs as state and program requirements evolve."
+          activeTab="rules"
+          onTabChange={onTabChange}
+        />
+      )}
 
       {/* Top Summary Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">

@@ -333,7 +333,7 @@ export function EvvVisitsWorkspace() {
             {/* Card 1: EVV Compliance (Clean White Card) */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500 flex items-center gap-2">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#3D6B22] animate-pulse" />
                   EVV COMPLIANCE
                 </span>
@@ -344,7 +344,7 @@ export function EvvVisitsWorkspace() {
 
               <div className="mt-4 mb-2">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                  <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                     {complianceRate}%
                   </span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -361,7 +361,7 @@ export function EvvVisitsWorkspace() {
             {/* Card 2: Active Exceptions */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   ACTIVE EXCEPTIONS
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500">
@@ -371,7 +371,7 @@ export function EvvVisitsWorkspace() {
 
               <div className="mt-4 mb-2">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                  <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                     {activeExceptionCount}
                   </span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
@@ -387,7 +387,7 @@ export function EvvVisitsWorkspace() {
             {/* Card 3: Aggregator Accepted */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   AGGREGATOR ACCEPTED
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
@@ -397,7 +397,7 @@ export function EvvVisitsWorkspace() {
 
               <div className="mt-4 mb-2">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                  <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                     {aggregatorAcceptedCount}/{totalMonitored}
                   </span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
@@ -413,7 +413,7 @@ export function EvvVisitsWorkspace() {
             {/* Card 4: Payroll Approved */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   PAYROLL APPROVED
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
@@ -423,7 +423,7 @@ export function EvvVisitsWorkspace() {
 
               <div className="mt-4 mb-2">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                  <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                     {payrollApprovedCount}/{totalMonitored}
                   </span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">

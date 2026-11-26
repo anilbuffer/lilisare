@@ -257,7 +257,7 @@ export function NeedsYourAttentionCard() {
   };
 
   return (
-    <Card className="relative overflow-hidden">
+    <Card className="relative overflow-hidden p-0!">
       {/* Header Bar */}
       <div className="p-4 sm:px-6 sm:py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h3 className="text-base font-bold text-slate-900 tracking-tight">

@@ -304,7 +304,7 @@ export function EvvSubmissionsWorkspace() {
             {/* Card 1: Aggregator Accepted */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   AGGREGATOR ACCEPTED
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
@@ -322,7 +322,7 @@ export function EvvSubmissionsWorkspace() {
             {/* Card 2: Aggregator Rejections */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   AGGREGATOR REJECTIONS
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500">
@@ -342,7 +342,7 @@ export function EvvSubmissionsWorkspace() {
             {/* Card 3: Billing Holds */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   BILLING HOLDS
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
@@ -360,7 +360,7 @@ export function EvvSubmissionsWorkspace() {
             {/* Card 4: Payroll Pending */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   PAYROLL PENDING
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
@@ -368,7 +368,7 @@ export function EvvSubmissionsWorkspace() {
                 </div>
               </div>
               <div className="mt-4 mb-1">
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                   3
                 </span>
                 <p className="text-xs text-slate-500 font-medium mt-1">
@@ -611,7 +611,7 @@ export function EvvSubmissionsWorkspace() {
                                 e.stopPropagation();
                                 router.push(targetUrl);
                               }}
-                              className="inline-flex items-center gap-0.5 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-2xs bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 font-semibold"
                             >
                               <span>Details</span>
                               <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
@@ -636,7 +636,7 @@ export function EvvSubmissionsWorkspace() {
             {/* Accepted Rate */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   ACCEPTED RATE
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
@@ -644,7 +644,7 @@ export function EvvSubmissionsWorkspace() {
                 </div>
               </div>
               <div className="mt-4 mb-1">
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                   98.2%
                 </span>
               </div>
@@ -653,7 +653,7 @@ export function EvvSubmissionsWorkspace() {
             {/* Rejected Visits */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   REJECTED VISITS
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
@@ -661,7 +661,7 @@ export function EvvSubmissionsWorkspace() {
                 </div>
               </div>
               <div className="mt-4 mb-1">
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                   3
                 </span>
               </div>
@@ -670,7 +670,7 @@ export function EvvSubmissionsWorkspace() {
             {/* Total Submissions */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold tracking-wider uppercase text-slate-500">
+                <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   TOTAL SUBMISSIONS
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
@@ -678,7 +678,7 @@ export function EvvSubmissionsWorkspace() {
                 </div>
               </div>
               <div className="mt-4 mb-1">
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+                <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
                   423
                 </span>
               </div>

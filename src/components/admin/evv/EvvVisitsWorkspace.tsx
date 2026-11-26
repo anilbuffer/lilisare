@@ -13,7 +13,6 @@ import {
   Clock,
   CheckCircle2,
   ArrowUpDown,
-  Sparkles,
   FileText,
   MapPin,
   ExternalLink,
@@ -23,15 +22,24 @@ import {
   Building2,
   CalendarDays,
   ArrowRight,
-  List as ListIcon,
-  LayoutGrid,
-  RotateCcw,
+  Sliders,
+  Check,
+  AlertCircle,
+  Smartphone,
+  PhoneCall,
+  Lock,
+  Layers,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   EvvVisitRecord,
   EvvVisitStatus,
   EvvVerificationStatus,
+  EvvAggregatorStatus,
+  EvvBillingReadiness,
+  EvvPayrollReadiness,
+  EvvCaptureMethod,
   EvvExceptionType,
 } from "@/types/evvVisit";
 import {
@@ -42,11 +50,20 @@ import {
   EVV_SYNC_EVENT,
 } from "@/lib/admin/evvVisitsStore";
 import { EvvKpiCards } from "./EvvKpiCards";
-import { EvvExceptionsBanner } from "./EvvExceptionsBanner";
-import { FormInput, FormSelect } from "@/components/ui/FormControls";
-import { Pagination } from "@/components/ui/Pagination";
+import { EvvSubNav } from "./EvvSubNav";
+import { EvvQuickReviewDrawer } from "./EvvQuickReviewDrawer";
+import { EvvBulkActionBar } from "./EvvBulkActionBar";
 
-type TabFilter = "ALL" | "SCHEDULED" | "COMPLETED" | "IN_PROGRESS" | "EXCEPTIONS";
+type TabFilter =
+  | "ALL"
+  | "IN_PROGRESS"
+  | "PENDING_VERIFICATION"
+  | "EXCEPTIONS"
+  | "AGGREGATOR_ISSUES"
+  | "BILLING_READINESS";
+
+type SortField = "date" | "caregiver" | "client" | "service" | "status";
+type SortDirection = "asc" | "desc";
 
 function getInitials(name: string): string {
   if (!name) return "CG";
@@ -59,39 +76,67 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function formatDateLabel(isoDate: string): string {
-  try {
-    const [y, m, d] = isoDate.split("-").map(Number);
-    const dt = new Date(y, m - 1, d);
-    return dt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch {
-    return isoDate;
-  }
+function formatTimeDisplay(timeStr?: string): string {
+  if (!timeStr) return "--:--";
+  const [hStr, mStr] = timeStr.split(":");
+  const h = parseInt(hStr, 10);
+  if (isNaN(h)) return timeStr;
+  const ampm = h >= 12 ? "PM" : "AM";
+  const formattedHour = h % 12 === 0 ? 12 : h % 12;
+  return `${formattedHour}:${mStr} ${ampm}`;
 }
 
 export function EvvVisitsWorkspace() {
   const router = useRouter();
-  const dateInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Core visits & loading state
   const [visits, setVisits] = useState<EvvVisitRecord[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>(DEMO_DATE);
-  const [selectedDateFilter, setSelectedDateFilter] = useState<"SPECIFIC" | "ALL">("SPECIFIC");
-  const [activeTab, setActiveTab] = useState<TabFilter>("ALL");
-  const [activeExceptionType, setActiveExceptionType] = useState<EvvExceptionType | "ALL" | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedService, setSelectedService] = useState("ALL");
-  const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("ALL");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncedTime, setLastSyncedTime] = useState("Today at 10:44 AM");
 
-  // Pagination (Matches /admin/clients/ 10 entries per page standard)
+  // Selection & bulk actions
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  // Drawer state
+  const [reviewDrawerVisit, setReviewDrawerVisit] = useState<EvvVisitRecord | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Tabs & KPIs
+  const [activeTab, setActiveTab] = useState<TabFilter>("ALL");
+  const [activeKpiFilter, setActiveKpiFilter] = useState("ALL");
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string>(DEMO_DATE);
+  const [selectedDateMode, setSelectedDateMode] = useState<"SPECIFIC" | "ALL">("SPECIFIC");
+  const [selectedVisitStatus, setSelectedVisitStatus] = useState("ALL");
+  const [selectedVerificationStatus, setSelectedVerificationStatus] = useState("ALL");
+  const [selectedService, setSelectedService] = useState("ALL");
+  const [selectedPayer, setSelectedPayer] = useState("ALL");
+  const [selectedCaptureMethod, setSelectedCaptureMethod] = useState("ALL");
+  const [selectedAggregatorStatus, setSelectedAggregatorStatus] = useState("ALL");
+  const [selectedBillingReadiness, setSelectedBillingReadiness] = useState("ALL");
+  const [selectedPayrollReadiness, setSelectedPayrollReadiness] = useState("ALL");
+  const [selectedExceptionType, setSelectedExceptionType] = useState("ALL");
+
+  // Sorting
+  const [sortField, setSortField] = useState<SortField>("date");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  // Pagination (10, 25, 50, 100)
+  const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
 
-  // Load from storage and listen to sync events
+  // Load visits
+  const loadVisits = () => {
+    setIsLoading(true);
+    const data = getEvvVisitsFromStorage();
+    setVisits(data);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const loadVisits = () => {
-      setVisits(getEvvVisitsFromStorage());
-    };
     loadVisits();
 
     if (typeof window !== "undefined") {
@@ -104,87 +149,129 @@ export function EvvVisitsWorkspace() {
     }
   }, []);
 
-  // Day Stepping Handlers
-
-  // Date-filtered pool of visits (e.g. today's 128 visits or all dates)
-  const dateFilteredVisits = useMemo(() => {
-    if (selectedDateFilter === "ALL") return visits;
-    return visits.filter((v) => v.date === selectedDate);
-  }, [visits, selectedDateFilter, selectedDate]);
-
-  // Recalculate KPIs based on date filter
-  const kpis = useMemo(() => calculateEvvKpis(dateFilteredVisits), [dateFilteredVisits]);
-
-  const handleTabChange = (tab: TabFilter) => {
-    setActiveTab(tab);
-    setActiveExceptionType(null);
-    setCurrentPage(1);
-  };
-
-  const handleKpiCardSelect = (filterId: string) => {
-    if (filterId === "ALL") handleTabChange("ALL");
-    else if (filterId === "IN_PROGRESS") handleTabChange("IN_PROGRESS");
-    else if (filterId === "COMPLETED") handleTabChange("COMPLETED");
-    else if (filterId === "EXCEPTIONS") handleTabChange("EXCEPTIONS");
-  };
-
-  const handleExceptionTypeSelect = (type: EvvExceptionType | "ALL" | null) => {
-    setActiveExceptionType(type);
-    if (type) {
-      setActiveTab("EXCEPTIONS");
-    }
-    setCurrentPage(1);
-  };
-
   // Sync / Refresh Simulation
   const handleRefresh = () => {
     setIsSyncing(true);
     setTimeout(() => {
-      setVisits(getEvvVisitsFromStorage());
+      loadVisits();
       setIsSyncing(false);
-      toast.success("EVV aggregator feeds synchronized", {
-        description: "Colorado State (Sandata & HHAeXchange) aggregator feeds up to date.",
+      const nowStr = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+      setLastSyncedTime(`Today at ${nowStr}`);
+      toast.success("EVV Feeds Synchronized", {
+        description: "State Aggregator buffer, GPS telemetry, and IVR caller feeds updated.",
       });
-    }, 600);
+    }, 500);
   };
 
-  // CSV Export
-  const handleExport = () => {
-    try {
-      exportEvvVisitsCsv(filteredVisits);
-      toast.success("EVV visits exported", {
-        description: `Exported ${filteredVisits.length} records to CSV.`,
-      });
-    } catch {
-      toast.error("Failed to export EVV visits");
+  // Date-filtered pool for KPIs
+  const dateFilteredVisits = useMemo(() => {
+    if (selectedDateMode === "ALL") return visits;
+    return visits.filter((v) => v.date === selectedDate);
+  }, [visits, selectedDateMode, selectedDate]);
+
+  // Derived KPIs
+  const kpis = useMemo(() => calculateEvvKpis(dateFilteredVisits), [dateFilteredVisits]);
+
+  // KPI card selection handler
+  const handleKpiCardSelect = (filterId: string) => {
+    setActiveKpiFilter(filterId);
+    if (filterId === "ALL") {
+      setActiveTab("ALL");
+    } else if (filterId === "IN_PROGRESS") {
+      setActiveTab("IN_PROGRESS");
+    } else if (filterId === "PENDING_VERIFICATION") {
+      setActiveTab("PENDING_VERIFICATION");
+    } else if (filterId === "EXCEPTIONS") {
+      setActiveTab("EXCEPTIONS");
+    } else if (filterId === "CLEARED_BILLING") {
+      setActiveTab("BILLING_READINESS");
+      setSelectedBillingReadiness("Cleared for Billing");
+    } else if (filterId === "AGGREGATOR_REJECTED") {
+      setActiveTab("AGGREGATOR_ISSUES");
+      setSelectedAggregatorStatus("Rejected");
     }
-  };
-
-  // Reset Filters
-  const handleResetFilters = () => {
-    setActiveTab("ALL");
-    setActiveExceptionType(null);
-    setSearchQuery("");
-    setSelectedService("ALL");
-    setSelectedVerificationStatus("ALL");
-    setSelectedDate(DEMO_DATE);
-    setSelectedDateFilter("SPECIFIC");
     setCurrentPage(1);
   };
 
-  // Unique services for filter dropdown
+  // Tab change handler
+  const handleTabChange = (tab: TabFilter) => {
+    setActiveTab(tab);
+    setActiveKpiFilter(tab);
+    setCurrentPage(1);
+  };
+
+  // Reset all filters
+  const handleClearFilters = () => {
+    setActiveTab("ALL");
+    setActiveKpiFilter("ALL");
+    setSearchQuery("");
+    setSelectedDate(DEMO_DATE);
+    setSelectedDateMode("SPECIFIC");
+    setSelectedVisitStatus("ALL");
+    setSelectedVerificationStatus("ALL");
+    setSelectedService("ALL");
+    setSelectedPayer("ALL");
+    setSelectedCaptureMethod("ALL");
+    setSelectedAggregatorStatus("ALL");
+    setSelectedBillingReadiness("ALL");
+    setSelectedPayrollReadiness("ALL");
+    setSelectedExceptionType("ALL");
+    setCurrentPage(1);
+    toast.info("Filters Reset", { description: "Viewing all operational visits." });
+  };
+
+  // Unique options for filter dropdowns
   const serviceOptions = useMemo(() => {
     const set = new Set<string>();
-    visits.forEach((v) => set.add(v.serviceName));
+    visits.forEach((v) => v.serviceName && set.add(v.serviceName));
     return Array.from(set).sort();
   }, [visits]);
+
+  const payerOptions = useMemo(() => {
+    const set = new Set<string>();
+    visits.forEach((v) => v.payerName && set.add(v.payerName));
+    return Array.from(set).sort();
+  }, [visits]);
+
+  // Tab Counts
+  const tabCounts = useMemo(() => {
+    const inProgressCount = dateFilteredVisits.filter((v) => v.visitStatus === "In Progress").length;
+    const pendingVerificationCount = dateFilteredVisits.filter(
+      (v) => v.visitStatus === "Completed" && v.verificationStatus === "Pending"
+    ).length;
+    const exceptionsCount = dateFilteredVisits.filter(
+      (v) =>
+        v.verificationStatus === "Exception" ||
+        v.verificationStatus === "Under Review" ||
+        v.verificationStatus === "Correction Required"
+    ).length;
+    const aggregatorIssuesCount = dateFilteredVisits.filter(
+      (v) => v.aggregatorStatus === "Rejected" || v.aggregatorStatus === "Retry Required"
+    ).length;
+    const readyBillingCount = dateFilteredVisits.filter(
+      (v) => v.billingReadiness === "Cleared for Billing" || v.billingReadiness === "Ready for Review"
+    ).length;
+
+    return {
+      all: dateFilteredVisits.length,
+      inProgress: inProgressCount,
+      pendingVerification: pendingVerificationCount,
+      exceptions: exceptionsCount,
+      aggregatorIssues: aggregatorIssuesCount,
+      billingReadiness: readyBillingCount,
+    };
+  }, [dateFilteredVisits]);
 
   // Filtering Logic
   const filteredVisits = useMemo(() => {
     return dateFilteredVisits.filter((v) => {
-      if (activeTab === "SCHEDULED" && v.visitStatus !== "Scheduled") return false;
-      if (activeTab === "COMPLETED" && v.visitStatus !== "Completed") return false;
+      // 1. Tab filters
       if (activeTab === "IN_PROGRESS" && v.visitStatus !== "In Progress") return false;
+      if (
+        activeTab === "PENDING_VERIFICATION" &&
+        !(v.visitStatus === "Completed" && v.verificationStatus === "Pending")
+      )
+        return false;
       if (activeTab === "EXCEPTIONS") {
         const isException =
           v.verificationStatus === "Exception" ||
@@ -192,26 +279,48 @@ export function EvvVisitsWorkspace() {
           v.verificationStatus === "Correction Required";
         if (!isException) return false;
       }
+      if (
+        activeTab === "AGGREGATOR_ISSUES" &&
+        !(v.aggregatorStatus === "Rejected" || v.aggregatorStatus === "Retry Required")
+      )
+        return false;
+      if (
+        activeTab === "BILLING_READINESS" &&
+        !(v.billingReadiness === "Cleared for Billing" || v.billingReadiness === "Ready for Review")
+      )
+        return false;
 
-      if (activeExceptionType && activeExceptionType !== "ALL") {
-        if (v.exceptionType !== activeExceptionType) return false;
-      }
-
-      if (selectedService !== "ALL" && v.serviceName !== selectedService) return false;
-
+      // 2. Dropdown filters
+      if (selectedVisitStatus !== "ALL" && v.visitStatus !== selectedVisitStatus) return false;
       if (
         selectedVerificationStatus !== "ALL" &&
         v.verificationStatus !== selectedVerificationStatus
       )
         return false;
+      if (selectedService !== "ALL" && v.serviceName !== selectedService) return false;
+      if (selectedPayer !== "ALL" && v.payerName !== selectedPayer) return false;
+      if (selectedCaptureMethod !== "ALL" && v.captureMethod !== selectedCaptureMethod)
+        return false;
+      if (selectedAggregatorStatus !== "ALL" && v.aggregatorStatus !== selectedAggregatorStatus)
+        return false;
+      if (selectedBillingReadiness !== "ALL" && v.billingReadiness !== selectedBillingReadiness)
+        return false;
+      if (selectedPayrollReadiness !== "ALL" && v.payrollReadiness !== selectedPayrollReadiness)
+        return false;
+      if (selectedExceptionType !== "ALL" && v.exceptionType !== selectedExceptionType)
+        return false;
 
+      // 3. Search query across Visit ID, Caregiver, Client, Service, Payer
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
+        const matchesId =
+          v.id.toLowerCase().includes(q) || v.visitNumber.toLowerCase().includes(q);
         const matchesCaregiver = v.caregiverName.toLowerCase().includes(q);
         const matchesClient = v.clientName.toLowerCase().includes(q);
-        const matchesId = v.id.toLowerCase().includes(q) || v.visitNumber.toLowerCase().includes(q);
-        const matchesService = v.serviceName.toLowerCase().includes(q);
-        if (!matchesCaregiver && !matchesClient && !matchesId && !matchesService) {
+        const matchesService =
+          v.serviceName.toLowerCase().includes(q) || v.serviceCode.toLowerCase().includes(q);
+        const matchesPayer = v.payerName.toLowerCase().includes(q);
+        if (!matchesId && !matchesCaregiver && !matchesClient && !matchesService && !matchesPayer) {
           return false;
         }
       }
@@ -221,48 +330,111 @@ export function EvvVisitsWorkspace() {
   }, [
     dateFilteredVisits,
     activeTab,
-    activeExceptionType,
-    selectedService,
+    selectedVisitStatus,
     selectedVerificationStatus,
+    selectedService,
+    selectedPayer,
+    selectedCaptureMethod,
+    selectedAggregatorStatus,
+    selectedBillingReadiness,
+    selectedPayrollReadiness,
+    selectedExceptionType,
     searchQuery,
   ]);
 
-  const totalPages = Math.ceil(filteredVisits.length / pageSize) || 1;
+  // Sorting Logic
+  const sortedVisits = useMemo(() => {
+    return [...filteredVisits].sort((a, b) => {
+      let comparison = 0;
+      if (sortField === "date") {
+        comparison = a.date.localeCompare(b.date);
+      } else if (sortField === "caregiver") {
+        comparison = a.caregiverName.localeCompare(b.caregiverName);
+      } else if (sortField === "client") {
+        comparison = a.clientName.localeCompare(b.clientName);
+      } else if (sortField === "service") {
+        comparison = a.serviceName.localeCompare(b.serviceName);
+      } else if (sortField === "status") {
+        comparison = a.verificationStatus.localeCompare(b.verificationStatus);
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [filteredVisits, sortField, sortDirection]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(sortedVisits.length / pageSize) || 1;
   const paginatedVisits = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return filteredVisits.slice(start, start + pageSize);
-  }, [filteredVisits, currentPage, pageSize]);
+    return sortedVisits.slice(start, start + pageSize);
+  }, [sortedVisits, currentPage, pageSize]);
 
+  // Select all visible on current page
+  const handleSelectAllVisible = (checked: boolean) => {
+    if (checked) {
+      const visibleIds = paginatedVisits.map((v) => v.id);
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...visibleIds])));
+    } else {
+      const visibleIds = new Set(paginatedVisits.map((v) => v.id));
+      setSelectedIds((prev) => prev.filter((id) => !visibleIds.has(id)));
+    }
+  };
+
+  const isAllVisibleSelected =
+    paginatedVisits.length > 0 && paginatedVisits.every((v) => selectedIds.includes(v.id));
+
+  const handleToggleRow = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const openQuickReview = (v: EvvVisitRecord, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setReviewDrawerVisit(v);
+    setIsDrawerOpen(true);
+  };
+
+  // Helper status badge renderers
   const renderVisitStatusBadge = (status: EvvVisitStatus) => {
     switch (status) {
       case "Completed":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-emerald-50 text-emerald-700 border-emerald-200">
             Completed
           </span>
         );
       case "In Progress":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-blue-50 text-blue-700 border-blue-200">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-blue-50 text-blue-700 border-blue-200">
             In Progress
           </span>
         );
       case "Scheduled":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-slate-100 text-slate-600 border-slate-200">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-slate-100 text-slate-600 border-slate-200">
             Scheduled
           </span>
         );
       case "Missed":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-rose-50 text-rose-700 border-rose-200">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-rose-50 text-rose-700 border-rose-200">
             Missed
           </span>
         );
-      default:
+      case "Cancelled":
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border bg-slate-100 text-slate-700 border-slate-200">
-            {status}
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-slate-100 text-slate-500 border-slate-200">
+            Cancelled
           </span>
         );
     }
@@ -272,167 +444,248 @@ export function EvvVisitsWorkspace() {
     switch (status) {
       case "Verified":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#E3F1D9] text-[#1E5622] border border-[#1E5622]/20">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#1E5622]" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#3e6b2b]/15 text-[#3e6b2b] border border-[#3e6b2b]/30">
+            <ShieldCheck className="w-3 h-3 text-[#3e6b2b]" />
             Verified
           </span>
         );
       case "Exception":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+            <AlertTriangle className="w-3 h-3 text-amber-600" />
             Exception
           </span>
         );
       case "Under Review":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-            <Clock className="w-3.5 h-3.5 text-purple-600" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+            <Clock className="w-3 h-3 text-purple-600" />
             Under Review
           </span>
         );
       case "Correction Required":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-            <FileText className="w-3.5 h-3.5 text-rose-600" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            <FileText className="w-3 h-3 text-rose-600" />
             Correction Req.
           </span>
         );
       case "Pending":
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
             Pending
           </span>
         );
     }
   };
 
-  const formatTimeDisplay = (time24?: string) => {
-    if (!time24) return "—";
-    const [h, m] = time24.split(":").map(Number);
-    if (isNaN(h) || isNaN(m)) return time24;
-    const ampm = h >= 12 ? "PM" : "AM";
-    const h12 = h % 12 === 0 ? 12 : h % 12;
-    return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+  const renderAggregatorBadge = (status: EvvAggregatorStatus) => {
+    switch (status) {
+      case "Accepted":
+        return (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Accepted
+          </span>
+        );
+      case "Rejected":
+        return (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            Rejected
+          </span>
+        );
+      case "Submitted":
+      case "Queued":
+        return (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+            {status}
+          </span>
+        );
+      case "Retry Required":
+        return (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+            Retry Req.
+          </span>
+        );
+      case "Acknowledgement Pending":
+        return (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+            Ack Pending
+          </span>
+        );
+      case "Not Submitted":
+      default:
+        return (
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-50 text-slate-500 border border-slate-200">
+            Not Submitted
+          </span>
+        );
+    }
+  };
+
+  const renderReadinessBadge = (
+    label: string,
+    readiness: EvvBillingReadiness | EvvPayrollReadiness
+  ) => {
+    const isCleared = readiness === "Cleared for Billing" || readiness === "Cleared for Payroll";
+    const isBlocked = readiness === "Blocked";
+    const isReady = readiness === "Ready for Review";
+
+    return (
+      <div className="flex items-center gap-1.5 text-[10px]">
+        <span className="font-semibold text-slate-400 uppercase w-10 text-right">{label}:</span>
+        <span
+          className={`px-1.5 py-0.2 rounded font-bold ${isCleared
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+            : isBlocked
+              ? "bg-rose-50 text-rose-700 border border-rose-200/60"
+              : isReady
+                ? "bg-amber-50 text-amber-800 border border-amber-200/60"
+                : "bg-slate-50 text-slate-500 border border-slate-200/60"
+            }`}
+        >
+          {readiness}
+        </span>
+      </div>
+    );
+  };
+
+  const renderCaptureMethodIcon = (method: EvvCaptureMethod) => {
+    switch (method) {
+      case "Mobile GPS":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
+            <Smartphone className="w-3.5 h-3.5 text-blue-600" />
+            <span>Mobile GPS</span>
+          </span>
+        );
+      case "Telephony / IVR":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
+            <PhoneCall className="w-3.5 h-3.5 text-purple-600" />
+            <span>IVR / Telephony</span>
+          </span>
+        );
+      case "Fixed Device":
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
+            <Lock className="w-3.5 h-3.5 text-amber-600" />
+            <span>Fixed FOB</span>
+          </span>
+        );
+      case "Manual Entry":
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] text-slate-700 font-medium">
+            <FileText className="w-3.5 h-3.5 text-slate-500" />
+            <span>Manual Entry</span>
+          </span>
+        );
+    }
   };
 
   return (
-    <div className="w-full max-w-9xl mx-auto space-y-5 pb-16">
-
-      {/* A. Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="w-full max-w-9xl mx-auto space-y-6 animate-fade-in">
+      {/* =========================================================================
+          1. PAGE HEADER
+         ========================================================================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-              EVV Visits & Monitoring
-            </h1>
-          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            EVV Visits
+          </h1>
         </div>
 
-        {/* Date Filter & Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          {/* Functional Date Filter (Pill container matching LiliSare standards) */}
-          <div className="flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-2xs">
-            {/* Date Button with Native Date Input Picker */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedDateFilter("SPECIFIC");
-                  dateInputRef.current?.showPicker?.();
-                }}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-full transition-all cursor-pointer ${selectedDateFilter === "SPECIFIC"
-                  ? "bg-[#3D6B22] text-white shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-                  }`}
-                title="Click to select date"
-              >
-                <Calendar className="w-3.5 h-3.5" />
-                <span>
-                  {selectedDate === DEMO_DATE
-                    ? "Today · Nov 25, 2026"
-                    : formatDateLabel(selectedDate)}
-                </span>
-              </button>
-              <input
-                ref={dateInputRef}
-                type="date"
-                value={selectedDate}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setSelectedDate(e.target.value);
-                    setSelectedDateFilter("SPECIFIC");
-                    setCurrentPage(1);
-                  }
-                }}
-                className="absolute inset-0 opacity-0 pointer-events-none w-full h-full"
-                tabIndex={-1}
-              />
-            </div>
+        {/* Header Actions */}
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <Link
+            href="/admin/evv-visits/rules"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer"
+          >
+            <Sliders className="w-3.5 h-3.5 text-slate-500" />
+            <span>Configure Rules</span>
+          </Link>
 
-            {/* All Dates Button */}
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedDateFilter("ALL");
-                setCurrentPage(1);
-              }}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${selectedDateFilter === "ALL"
-                ? "bg-[#3D6B22] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-                }`}
-            >
-              All Dates
-            </button>
-          </div>
-
-          {/* Sync / Refresh */}
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isSyncing}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer disabled:opacity-50"
-            title="Sync EVV Feeds"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin text-[#3D6B22]" : ""}`} />
-            <span className="hidden sm:inline">Sync Feeds</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isSyncing ? "animate-spin" : ""}`} />
+            <span>{isSyncing ? "Syncing..." : "Refresh"}</span>
           </button>
 
-          {/* Export Report */}
           <button
             type="button"
-            onClick={handleExport}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
+            onClick={() => exportEvvVisitsCsv(filteredVisits)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3e6b2b] hover:bg-[#345c1d] rounded-xl shadow-md shadow-[#3e6b2b]/20 transition-all cursor-pointer"
           >
-            <Download className="w-4 h-4" />
-            <span>Export EVV</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
 
-      {/* B. Summary KPI Cards */}
+      {/* Sub-navigation bar linking to Exceptions, Submissions, Rules */}
+      <EvvSubNav exceptionCount={kpis.exceptions} rejectedCount={kpis.aggregatorRejected} />
+
+      {/* =========================================================================
+          2. COMPACT 6-CARD KPI SUMMARY (Derived from real mock data)
+         ========================================================================= */}
       <EvvKpiCards
         kpis={kpis}
-        activeFilter={activeTab}
+        activeFilter={activeKpiFilter}
         onSelectFilter={handleKpiCardSelect}
       />
 
-      {/* D. Exception Monitoring Section */}
-      <EvvExceptionsBanner
-        visits={dateFilteredVisits}
-        activeExceptionType={activeExceptionType}
-        onSelectExceptionType={handleExceptionTypeSelect}
-      />
+      {/* =========================================================================
+          3. OPERATIONAL TABS (Segmented navigation with live counts)
+         ========================================================================= */}
+      <div className="bg-white p-1.5 rounded-xl sm:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+        {[
+          { id: "ALL", label: "All Visits", count: tabCounts.all },
+          { id: "IN_PROGRESS", label: "In Progress", count: tabCounts.inProgress },
+          { id: "PENDING_VERIFICATION", label: "Pending Verification", count: tabCounts.pendingVerification },
+          { id: "EXCEPTIONS", label: "Exceptions", count: tabCounts.exceptions, alert: tabCounts.exceptions > 0 },
+          { id: "AGGREGATOR_ISSUES", label: "Aggregator Issues", count: tabCounts.aggregatorIssues, alert: tabCounts.aggregatorIssues > 0 },
+          { id: "BILLING_READINESS", label: "Billing / Payroll Ready", count: tabCounts.billingReadiness },
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => handleTabChange(tab.id as TabFilter)}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs rounded-xl transition-all whitespace-nowrap cursor-pointer ${isActive
+                ? "bg-[#3e6b2b] text-white font-bold shadow-sm shadow-[#3e6b2b]/25 border border-[#3e6b2b]"
+                : "bg-slate-50/80 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/70 font-semibold shadow-2xs"
+                }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold border transition-colors ${isActive
+                  ? "bg-white/20 text-white border-white/30"
+                  : tab.alert
+                    ? "bg-amber-100 text-amber-800 border-amber-200"
+                    : "bg-white text-slate-700 border-slate-200"
+                  }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* =========================================================================
-          3. SEARCH, DROPDOWN FILTERS & VIEW SWITCHER (Matches /admin/clients/ style)
+          4. COMPREHENSIVE FILTER TOOLBAR (Aligned directly with table columns)
          ========================================================================= */}
-      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-3.5 sm:p-4 shadow-2xs">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-3 text-xs">
+          {/* Search Query */}
+          <div className="sm:col-span-2 relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
@@ -440,349 +693,398 @@ export function EvvVisitsWorkspace() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search by caregiver, client or visit ID..."
-              className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
+              placeholder="Search by Visit ID, Caregiver, Client, Service code..."
+              className="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3e6b2b]/20 focus:border-[#3e6b2b] placeholder:text-slate-400 text-slate-800"
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setCurrentPage(1);
-                }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-medium cursor-pointer"
-              >
-                Clear
-              </button>
-            )}
           </div>
 
-          {/* Controls: Visit Status Dropdown, Service Dropdown, Verification Dropdown, Reset, View Switcher */}
-          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-            {/* Visit Status Filter Dropdown */}
-            <div className="w-40 sm:w-44">
-              <FormSelect
-                value={activeTab}
-                onChange={(e) => handleTabChange(e.target.value as TabFilter)}
-              >
-                <option value="ALL">All Visits ({kpis.totalVisits})</option>
-                <option value="IN_PROGRESS">In Progress ({kpis.inProgress})</option>
-                <option value="COMPLETED">Completed ({kpis.completed})</option>
-                <option value="SCHEDULED">Scheduled ({kpis.scheduled})</option>
-                <option value="EXCEPTIONS">Exceptions ({kpis.exceptions})</option>
-              </FormSelect>
-            </div>
+          {/* Date Selector */}
+          <div>
+            <select
+              value={selectedDateMode === "ALL" ? "ALL" : selectedDate}
+              onChange={(e) => {
+                if (e.target.value === "ALL") {
+                  setSelectedDateMode("ALL");
+                } else {
+                  setSelectedDateMode("SPECIFIC");
+                  setSelectedDate(e.target.value);
+                }
+                setCurrentPage(1);
+              }}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none text-slate-700"
+            >
+              <option value={DEMO_DATE}>Date: {DEMO_DATE} (Today)</option>
+              <option value="ALL">Date: All Service Dates</option>
+            </select>
+          </div>
 
-            {/* Service Filter Dropdown */}
-            <div className="w-36 sm:w-40">
-              <FormSelect
-                value={selectedService}
-                onChange={(e) => {
-                  setSelectedService(e.target.value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="ALL">All Services</option>
-                {serviceOptions.map((svc) => (
-                  <option key={svc} value={svc}>
-                    {svc}
-                  </option>
-                ))}
-              </FormSelect>
-            </div>
+          {/* Service Type */}
+          <div>
+            <select
+              value={selectedService}
+              onChange={(e) => {
+                setSelectedService(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none text-slate-700 truncate"
+            >
+              <option value="ALL">Service: All Services</option>
+              {serviceOptions.map((svc) => (
+                <option key={svc} value={svc}>
+                  {svc}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            {/* Verification Status Filter Dropdown */}
-            <div className="w-36 sm:w-40">
-              <FormSelect
-                value={selectedVerificationStatus}
-                onChange={(e) => {
-                  setSelectedVerificationStatus(e.target.value);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="ALL">All Verifications</option>
-                <option value="Verified">Verified</option>
-                <option value="Exception">Exception</option>
-                <option value="Under Review">Under Review</option>
-                <option value="Correction Required">Correction Required</option>
-                <option value="Pending">Pending</option>
-              </FormSelect>
-            </div>
+          {/* EVV Verification Status */}
+          <div>
+            <select
+              value={selectedVerificationStatus}
+              onChange={(e) => {
+                setSelectedVerificationStatus(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:bg-white focus:outline-none text-slate-700"
+            >
+              <option value="ALL">Verification: All</option>
+              <option value="Verified">Verified</option>
+              <option value="Exception">Exception</option>
+              <option value="Under Review">Under Review</option>
+              <option value="Correction Required">Correction Required</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
+        </div>
 
-            {/* Reset Filter Button if active */}
+        {/* Toolbar Footer with Clear Filters & Active Count */}
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs text-slate-500">
+          <div className="flex items-center gap-3">
+            <span>
+              Showing <strong className="text-slate-900 font-bold">{sortedVisits.length}</strong> of{" "}
+              {visits.length} operational visits
+            </span>
             {(searchQuery ||
-              activeTab !== "ALL" ||
-              selectedService !== "ALL" ||
               selectedVerificationStatus !== "ALL" ||
-              activeExceptionType) && (
+              selectedService !== "ALL" ||
+              selectedDateMode === "ALL" ||
+              activeTab !== "ALL") && (
                 <button
                   type="button"
-                  onClick={handleResetFilters}
-                  title="Reset all filters"
-                  className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 cursor-pointer"
+                  onClick={handleClearFilters}
+                  className="text-xs font-semibold text-[#3e6b2b] hover:underline cursor-pointer"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  Clear all filters
                 </button>
               )}
+          </div>
 
-            {/* View Switcher: List vs Grid Toggle */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {/* Page size selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-400">Rows per page:</span>
+            {[10, 25, 50, 100].map((size) => (
               <button
+                key={size}
                 type="button"
-                onClick={() => setViewMode("list")}
-                title="List View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "list"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-500 hover:text-slate-900"
+                onClick={() => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+                className={`px-2 py-0.5 rounded text-[11px] font-bold ${pageSize === size
+                  ? "bg-[#3e6b2b] text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
               >
-                <ListIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">List</span>
+                {size}
               </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("grid")}
-                title="Grid View"
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${viewMode === "grid"
-                  ? "bg-white text-slate-900 shadow-2xs font-bold"
-                  : "text-slate-500 hover:text-slate-900"
-                  }`}
-              >
-                <LayoutGrid className="w-4 h-4" />
-                <span className="hidden sm:inline">Grid</span>
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* =========================================================================
-          4. CONTENT AREA: LIST VIEW vs GRID VIEW (Matches /admin/clients/ style)
+          5. MAIN OPERATIONAL EVV TABLE (Streamlined, zero horizontal scrolling)
          ========================================================================= */}
-      {filteredVisits.length === 0 ? (
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 p-12 text-center shadow-2xs">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-3">
-            <Users className="w-6 h-6" />
-          </div>
-          <h3 className="text-base font-bold text-slate-800">No visits found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            No records matched your search query or filter criteria. Try clearing filters to see all visits.
-          </p>
-          <button
-            type="button"
-            onClick={handleResetFilters}
-            className="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
-          >
-            Clear Filters
-          </button>
-        </div>
-      ) : viewMode === "list" ? (
-        /* LIST VIEW */
-        <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Visit ID
-                  </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Caregiver
-                  </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    {selectedDateFilter === "ALL" ? "Date & Scheduled" : "Scheduled"}
-                  </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Actual Time
-                  </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Visit Status
-                  </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Verification
-                  </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
-                    Actions
-                  </th>
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            {/* Sticky Table Header */}
+            <thead className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 z-20 backdrop-blur-xs">
+              <tr>
+                <th className="py-3 px-3.5 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={isAllVisibleSelected}
+                    onChange={(e) => handleSelectAllVisible(e.target.checked)}
+                    className="rounded text-[#3e6b2b] focus:ring-[#3e6b2b] h-3.5 w-3.5 cursor-pointer"
+                  />
+                </th>
+
+                <th
+                  onClick={() => handleSort("date")}
+                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Visit ID</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                <th className="py-3 px-3.5 whitespace-nowrap">Service Date &amp; Time</th>
+
+                <th
+                  onClick={() => handleSort("caregiver")}
+                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Caregiver</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                <th
+                  onClick={() => handleSort("client")}
+                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Client / Patient</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                <th
+                  onClick={() => handleSort("service")}
+                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Service</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                <th
+                  onClick={() => handleSort("status")}
+                  className="py-3 px-3.5 cursor-pointer hover:text-slate-800 select-none whitespace-nowrap"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Verification Status</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                <th className="py-3 px-3.5 text-right whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+
+            {/* Table Body */}
+            <tbody className="divide-y divide-slate-100 text-xs">
+              {paginatedVisits.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-16 text-center text-slate-500">
+                    <div className="max-w-sm mx-auto space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 mx-auto">
+                        <AlertCircle className="w-6 h-6" />
+                      </div>
+                      <h3 className="font-bold text-slate-800 text-sm">No EVV records match filters</h3>
+                      <p className="text-xs text-slate-500">
+                        Try adjusting your query, clearing active filters, or changing the service date.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleClearFilters}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#3e6b2b] text-white font-semibold rounded-xl text-xs cursor-pointer shadow-md shadow-[#3e6b2b]/20 hover:bg-[#345c1d] transition-all"
+                      >
+                        Reset All Filters
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {paginatedVisits.map((visit) => {
+              ) : (
+                paginatedVisits.map((visit) => {
+                  const isSelected = selectedIds.includes(visit.id);
                   const initials = getInitials(visit.caregiverName);
-                  const scheduledStr = `${formatTimeDisplay(visit.scheduledStartTime)} – ${formatTimeDisplay(
-                    visit.scheduledEndTime
-                  )}`;
-                  const actualStr = visit.actualClockInTime
-                    ? `${formatTimeDisplay(visit.actualClockInTime)} – ${visit.actualClockOutTime ? formatTimeDisplay(visit.actualClockOutTime) : "In Progress"
-                    }`
-                    : "Not Started";
+
+                  const actualDisplay = !visit.actualClockInTime
+                    ? `--:-- – ${visit.actualClockOutTime ? formatTimeDisplay(visit.actualClockOutTime) : "In Progress"}`
+                    : `${formatTimeDisplay(visit.actualClockInTime)} – ${visit.actualClockOutTime
+                      ? formatTimeDisplay(visit.actualClockOutTime)
+                      : "In Progress"
+                    }`;
 
                   return (
                     <tr
                       key={visit.id}
                       onClick={() => router.push(`/admin/evv-visits/${visit.id}/`)}
-                      className="hover:bg-slate-50/70 transition-colors group cursor-pointer"
+                      className={`hover:bg-slate-50/80 transition-colors cursor-pointer group ${isSelected ? "bg-[#3e6b2b]/5" : ""
+                        }`}
                     >
+                      {/* Checkbox */}
+                      <td
+                        className="py-3 px-3.5 text-center"
+                        onClick={(e) => handleToggleRow(visit.id, e)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => { }}
+                          className="rounded text-[#3e6b2b] focus:ring-[#3e6b2b] h-3.5 w-3.5 cursor-pointer"
+                        />
+                      </td>
+
                       {/* Visit ID */}
-                      <td className="py-4 px-4 sm:px-6">
-                        <span className="font-medium text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        <span className="font-mono font-bold text-slate-900 group-hover:text-[#3e6b2b] transition-colors">
                           {visit.id}
                         </span>
                       </td>
 
-                      {/* Caregiver with Avatar Initials */}
-                      <td className="py-4 px-4 sm:px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-xs shrink-0 shadow-2xs">
+                      {/* Date & Time */}
+                      <td className="py-3 px-3.5 whitespace-nowrap text-slate-700">
+                        <span className="font-medium text-slate-900">{visit.date}</span>
+                        <span className="text-slate-400 mx-1.5">•</span>
+                        <span className="text-slate-600">{actualDisplay}</span>
+                      </td>
+
+                      {/* Caregiver */}
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3e6b2b] font-bold text-[10px] shrink-0">
                             {initials}
                           </div>
-                          <div>
-                            <div className="font-semibold text-xs text-slate-800 group-hover:text-[#3D6B22] transition-colors">
-                              {visit.caregiverName}
-                            </div>
-                          </div>
+                          <span className="font-semibold text-slate-900 group-hover:text-[#3e6b2b] transition-colors">
+                            {visit.caregiverName}
+                          </span>
                         </div>
                       </td>
 
-                      {/* Scheduled Time */}
-                      <td className="py-4 px-4 sm:px-6">
-                        <p className="text-xs text-slate-800 font-medium">
-                          {selectedDateFilter === "ALL" && (
-                            <span className="block font-semibold text-slate-900 text-[11px] mb-0.5">
-                              {formatDateLabel(visit.date)}
+                      {/* Client / Patient */}
+                      <td className="py-3 px-3.5 whitespace-nowrap font-semibold text-slate-900">
+                        {visit.clientName}
+                      </td>
+
+                      {/* Service & Code */}
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        <span className="font-medium text-slate-800">
+                          {visit.serviceName}
+                        </span>
+                        <span className="ml-1.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold">
+                          {visit.serviceCode}
+                        </span>
+                      </td>
+
+                      {/* Verification Status with Exception indicator */}
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          {renderVerificationStatusBadge(visit.verificationStatus)}
+                          {visit.exceptionReason && (
+                            <span
+                              title={visit.exceptionReason}
+                              className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100 text-amber-700"
+                            >
+                              <AlertTriangle className="w-2.5 h-2.5" />
                             </span>
                           )}
-                          {scheduledStr}
-                        </p>
-                      </td>
-
-                      {/* Actual Time */}
-                      <td className="py-4 px-4 sm:px-6">
-                        <p className="text-xs text-slate-800 font-medium">
-                          {actualStr}
-                        </p>
-                      </td>
-
-                      {/* Visit Status */}
-                      <td className="py-4 px-4 sm:px-6">
-                        {renderVisitStatusBadge(visit.visitStatus)}
-                      </td>
-
-                      {/* Verification Status */}
-                      <td className="py-4 px-4 sm:px-6">
-                        {renderVerificationStatusBadge(visit.verificationStatus)}
+                        </div>
                       </td>
 
                       {/* Actions */}
-                      <td className="py-4 px-4 sm:px-6 text-right">
-                        <div className="inline-flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                        <div
+                          className="inline-flex items-center justify-end gap-1.5"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={(e) => openQuickReview(visit, e)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold rounded-xl text-xs shadow-2xs transition-all cursor-pointer"
+                          >
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#3e6b2b]" />
+                            <span>Review</span>
+                          </button>
                           <Link
                             href={`/admin/evv-visits/${visit.id}/`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                            title="Open full visit details"
                           >
-                            <span>Review Visit</span>
-                            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                            <ArrowRight className="w-4 h-4" />
                           </Link>
                         </div>
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      ) : (
-        /* GRID VIEW (Matches /admin/clients/ style) */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {paginatedVisits.map((visit) => {
-            const initials = getInitials(visit.caregiverName);
-            const scheduledStr = `${formatTimeDisplay(visit.scheduledStartTime)} – ${formatTimeDisplay(
-              visit.scheduledEndTime
-            )}`;
-            const actualStr = visit.actualClockInTime
-              ? `${formatTimeDisplay(visit.actualClockInTime)} – ${visit.actualClockOutTime ? formatTimeDisplay(visit.actualClockOutTime) : "In Progress"
-              }`
-              : "Not Started";
 
-            return (
-              <div
-                key={visit.id}
-                onClick={() => router.push(`/admin/evv-visits/${visit.id}/`)}
-                className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between cursor-pointer group"
+        {/* Table Pagination Footer */}
+        {sortedVisits.length > 0 && (
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span className="text-slate-500 font-medium">
+              Page <strong className="text-slate-900 font-bold">{currentPage}</strong> of{" "}
+              {totalPages} ({sortedVisits.length} total entries)
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                <div>
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-sm shrink-0 shadow-2xs">
-                        {initials}
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-                          {visit.caregiverName}
-                        </div>
-                        <p className="font-mono text-xs text-slate-400 font-medium mt-0.5">
-                          {visit.id}
-                        </p>
-                      </div>
-                    </div>
-                    {renderVisitStatusBadge(visit.visitStatus)}
-                  </div>
+                Previous
+              </button>
 
-                  <div className="space-y-2.5 text-xs">
-                    <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                      <span className="text-slate-500 font-medium">
-                        {selectedDateFilter === "ALL" ? "Date & Scheduled" : "Scheduled"}
-                      </span>
-                      <span className="text-slate-800 font-semibold text-right">
-                        {selectedDateFilter === "ALL" && (
-                          <span className="block text-[11px] text-slate-500">
-                            {formatDateLabel(visit.date)}
-                          </span>
-                        )}
-                        {scheduledStr}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                      <span className="text-slate-500 font-medium">Actual EVV</span>
-                      <span className="text-slate-800 font-semibold">{actualStr}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
-                  <Link
-                    href={`/admin/evv-visits/${visit.id}/`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3D6B22] hover:text-[#345C1D] transition-colors"
+              {Array.from({ length: Math.min(5, totalPages) }, (_, idx) => {
+                const pageNum = idx + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-8 h-8 rounded-lg font-bold text-xs ${currentPage === pageNum
+                      ? "bg-[#3e6b2b] text-white"
+                      : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
+                      }`}
                   >
-                    <span>Review Visit</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                  <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200/60 font-mono">
-                    Shift {visit.visitNumber}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* =========================================================================
-          5. GLOBAL STANDARDIZED PAGINATION BAR
+          6. CONTEXTUAL BULK ACTIONS BAR (When records selected)
          ========================================================================= */}
-      {filteredVisits.length > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredVisits.length}
-          pageSize={pageSize}
-          onPageChange={setCurrentPage}
-          entryLabel="visits"
-          variant="standalone-card"
-        />
-      )}
+      <EvvBulkActionBar
+        selectedIds={selectedIds}
+        allVisits={visits}
+        onClearSelection={() => setSelectedIds([])}
+        onActionComplete={loadVisits}
+      />
+
+      {/* =========================================================================
+          7. RIGHT-SIDE QUICK REVIEW & RESOLUTION DRAWER
+         ========================================================================= */}
+      <EvvQuickReviewDrawer
+        visit={reviewDrawerVisit}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onUpdated={loadVisits}
+      />
     </div>
   );
 }

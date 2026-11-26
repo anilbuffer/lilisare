@@ -293,7 +293,7 @@ const getNavGroups = (role?: string): NavGroup[] => {
       items: [
         { name: "Authorizations", icon: ClipboardCheck, id: "authorizations" },
         { name: "Scheduling", icon: Calendar, id: "scheduling" },
-        { name: "EVV & Visits", icon: MapPin, id: "evv-visits" },
+        { name: "EVV Visits", icon: MapPin, id: "evv-visits" },
         { name: "Care Notes", icon: FileText, id: "care-notes" },
         { name: "Clinical & Supervisory", icon: Stethoscope, id: "clinical-supervisory" },
       ],

@@ -26,7 +26,7 @@ const adminNavItems = [
   { id: "Billing", icon: Wallet, href: "/billing", title: "Billing" },
   { id: "Quality", icon: Scale, href: "/quality-assurance", title: "Quality" },
   { id: "Training", icon: GraduationCap, href: "/training", title: "Training" },
-  { id: "EVV", icon: ShieldCheck, href: "/evv-monitoring", title: "EVV" },
+  { id: "EVV", icon: ShieldCheck, href: "/admin/evv-visits", title: "EVV Visits" },
 ];
 
 const schedulerNavItems = [

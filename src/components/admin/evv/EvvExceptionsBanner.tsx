@@ -28,6 +28,9 @@ export function EvvExceptionsBanner({
     LOCATION_VERIFICATION: 0,
     SCHEDULE_MISMATCH: 0,
     MISSING_VISIT_INFO: 0,
+    AGGREGATOR_REJECTED: 0,
+    SERVICE_DISCIPLINE_UNCONFIRMED: 0,
+    DURATION_MISMATCH: 0,
   };
 
   exceptionVisits.forEach((v) => {

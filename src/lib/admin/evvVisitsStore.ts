@@ -3,16 +3,23 @@ import {
   EvvKpiSummary,
   EvvVerificationStatus,
   EvvVisitStatus,
+  EvvAggregatorStatus,
+  EvvBillingReadiness,
+  EvvPayrollReadiness,
   EvvExceptionType,
   EvvReviewNote,
   EvvTimelineEvent,
+  EvvCorrection,
+  EvvSubmissionRecord,
+  EvvToleranceRule,
+  EvvReviewer,
+  EvvCaptureMethod,
 } from "@/types/evvVisit";
 import { INITIAL_REALTIME_VISITS, getVisitsFromStorage } from "@/lib/scheduling/schedulingStore";
-import { INITIAL_CLIENTS } from "@/lib/clients/mockData";
-import { INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
-import { LILISARE_SERVICES } from "@/lib/services";
 
-export const EVV_STORAGE_KEY = "lilisare_evv_visits_v2";
+export const EVV_STORAGE_KEY = "lilisare_evv_visits_v3";
+export const EVV_SUBMISSIONS_KEY = "lilisare_evv_submissions_v1";
+export const EVV_RULES_KEY = "lilisare_evv_rules_v1";
 export const EVV_SYNC_EVENT = "lilisare_evv_visits_sync";
 
 export const DEMO_DATE = "2026-11-25";
@@ -26,64 +33,113 @@ export const EVV_REASON_CODES = [
   { code: "RC-06", label: "Client delayed arrival / Unscheduled schedule shift" },
   { code: "RC-07", label: "GPS signal drift / High-rise residential interference" },
   { code: "RC-08", label: "Telephony IVR backup utilized" },
+  { code: "RC-09", label: "Client refused signature / Physical inability to sign" },
+  { code: "RC-10", label: "Payer Medicaid ID or Service Code mismatch" },
 ];
 
-/**
- * Standard Caregiver Pool synchronized with /admin/caregivers/
- */
-const CAREGIVER_ROSTER = [
-  { id: "CG-102", name: "Sarah Miller", phone: "(541) 555-0199", role: "Family Caregiver (W-2)", classification: "W-2" },
-  { id: "CG-101", name: "Rahul Sharma", phone: "(303) 555-8821", role: "Certified Nurse Aide (CNA)", classification: "W-2" },
-  { id: "CG-103", name: "Priya Patel", phone: "(720) 555-4122", role: "Home Health Aide (HHA)", classification: "W-2" },
-  { id: "CG-104", name: "David Wilson", phone: "(720) 555-9012", role: "Personal Care Worker", classification: "Direct Care Worker" },
-  { id: "CG-105", name: "Clara Jenkins", phone: "(541) 555-0245", role: "Direct Care Worker", classification: "1099" },
-  { id: "CG-106", name: "Marcus Vance", phone: "(503) 555-8812", role: "Certified Nurse Aide (CNA)", classification: "W-2" },
-  { id: "CG-107", name: "Elena Rostova", phone: "(303) 555-1144", role: "Direct Care Professional", classification: "Direct Care Worker" },
-  { id: "CG-108", name: "Samuel O'Connor", phone: "(720) 555-3399", role: "Direct Support Professional (DSP)", classification: "W-2" },
-  { id: "CG-109", name: "Maya Lin", phone: "(303) 555-2255", role: "Home Health Aide (HHA)", classification: "W-2" },
-  { id: "CG-110", name: "James Chen", phone: "(720) 555-6677", role: "Homemaker Care Specialist", classification: "Direct Care Worker" },
-  { id: "CG-111", name: "Hannah Abbott", phone: "(303) 555-4422", role: "Direct Support Professional", classification: "W-2" },
-  { id: "CG-112", name: "Jesse Pinkman", phone: "(720) 555-8833", role: "Homemaker", classification: "1099" },
-  { id: "CG-113", name: "Tanya Rivera", phone: "(303) 555-7799", role: "Personal Care Aide", classification: "W-2" },
-  { id: "CG-114", name: "Carlos Mendez", phone: "(503) 555-4819", role: "Live-In Attendant", classification: "W-2" },
+export const EVV_RESOLUTION_CODES = [
+  { code: "RES-01", label: "Approved minor time variance within policy tolerance" },
+  { code: "RES-02", label: "Manual time entry verified via telephony IVR audit log" },
+  { code: "RES-03", label: "Alternate service location verified with client care plan" },
+  { code: "RES-04", label: "Client paper signature form received and filed" },
+  { code: "RES-05", label: "Client voice attestation verified by phone supervisor" },
+  { code: "RES-06", label: "Caregiver timesheet correction approved by supervisor" },
+  { code: "RES-07", label: "Resubmitted with corrected Medicaid authorization ID" },
+  { code: "RES-08", label: "Schedule adjustment retroactively authorized by case manager" },
 ];
 
-/**
- * Standard Client Pool synchronized with /admin/clients/ & /admin/households/
- */
-const CLIENT_ROSTER = [
-  { id: "CL-1001", name: "Leo Miller", address: "742 Evergreen Terrace, Springfield, OR 97477", medicaidId: "OR-MED-1001", phone: "(541) 555-0199", householdId: "hh-1001", householdName: "Miller Household" },
-  { id: "CL-1002", name: "Marcus Whitfield", address: "1248 Oakwood Drive, Cedar Falls, IA 50613", medicaidId: "IA-MED-1002", phone: "(319) 555-3820", householdId: "hh-1002", householdName: "Whitfield Household" },
-  { id: "CL-1003", name: "Lucas Santos", address: "1842 Beacon Hill Dr, Des Moines, IA 50315", medicaidId: "IA-MED-1003", phone: "(515) 555-0142", householdId: "hh-1003", householdName: "Santos Household" },
-  { id: "CL-1004", name: "Raymond Chen", address: "5500 E 6th Ave, Denver, CO 80220", medicaidId: "CO-MED-1004", phone: "(303) 555-0550", householdId: "hh-1004", householdName: "Chen Household" },
-  { id: "CL-1005", name: "Sophia Patel", address: "1940 Colorado Blvd, Denver, CO 80220", medicaidId: "CO-MED-1005", phone: "(303) 555-1940", householdId: "hh-1005", householdName: "Patel Household" },
-  { id: "CL-1006", name: "Evelyn Foster", address: "880 Broadway, Boulder, CO 80302", medicaidId: "CO-MED-1006", phone: "(303) 555-8800", householdId: "hh-1006", householdName: "Foster Household" },
-  { id: "CL-1007", name: "John Smith", address: "1284 Oakridge Ave, Denver, CO 80204", medicaidId: "CO-MED-994102", phone: "(303) 555-0142", householdId: "hh-1007", householdName: "Smith Residence" },
-  { id: "CL-1008", name: "Michael Brown", address: "450 Spruce St, Boulder, CO 80302", medicaidId: "CO-MED-841920", phone: "(303) 555-0198", householdId: "hh-1008", householdName: "Brown Household" },
-  { id: "CL-1009", name: "Emily Jones", address: "7820 S University Blvd, Centennial, CO 80122", medicaidId: "CO-MED-772154", phone: "(303) 555-0814", householdId: "hh-1009", householdName: "Jones Residence" },
-  { id: "CL-1010", name: "Beatrice Hall", address: "2201 S Oneida St, Denver, CO 80224", medicaidId: "CO-MED-1010", phone: "(303) 555-2201", householdId: "hh-1010", householdName: "Hall Household" },
-  { id: "CL-1011", name: "Walter White", address: "308 Negra Arroyo Ln, Albuquerque, NM 87104", medicaidId: "NM-MED-1011", phone: "(505) 555-0308", householdId: "hh-1011", householdName: "White Household" },
-  { id: "CL-1012", name: "Diana Ross", address: "670 Wadsworth Blvd, Lakewood, CO 80214", medicaidId: "CO-MED-1012", phone: "(303) 555-0670", householdId: "hh-1012", householdName: "Ross Residence" },
+export const EVV_REVIEWERS: EvvReviewer[] = [
+  { id: "REV-1", name: "Dana Jenkins, MSW", role: "Agency Operations Admin", email: "dana.jenkins@lilisare.com", avatarInitials: "DJ" },
+  { id: "REV-2", name: "Carlos Mendez, RN", role: "Clinical Supervisor", email: "carlos.mendez@lilisare.com", avatarInitials: "CM" },
+  { id: "REV-3", name: "Marcus Vance", role: "Lead Dispatcher & Scheduler", email: "marcus.vance@lilisare.com", avatarInitials: "MV" },
+  { id: "REV-4", name: "Sarah Alverez", role: "Billing & Compliance Auditor", email: "sarah.alverez@lilisare.com", avatarInitials: "SA" },
 ];
 
-/**
- * Single source of truth services from LILISARE_SERVICES
- */
-const SERVICE_ROSTER = [
-  { name: "Personal Care", code: "T1019" },
-  { name: "Homemaker", code: "S5130" },
-  { name: "In-Home Support Services (IHSS)", code: "T1019-IHSS" },
-  { name: "CES Waiver (Children’s Extensive Support)", code: "CES-WVR" },
-  { name: "Respite Care", code: "T1005" },
-  { name: "Companion Care", code: "S5125" },
-  { name: "CNA (Certified Nurse Aide)", code: "T1019" },
-  { name: "Family Caregiver", code: "S5125" },
+export const INITIAL_EVV_RULES: EvvToleranceRule[] = [
+  {
+    id: "RULE-001",
+    ruleName: "Colorado Medicaid Standard (HCBS/EBD)",
+    payer: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    serviceCode: "ALL",
+    serviceName: "All HCBS Services",
+    clockInToleranceMinutes: 10,
+    clockOutToleranceMinutes: 10,
+    earlyArrivalHandling: "Allow within Grace",
+    lateArrivalHandling: "Allow within Grace",
+    earlyDepartureHandling: "Require Supervisor Approval",
+    lateDepartureHandling: "Allow within Grace",
+    reviewRequired: false,
+    approvalRequired: false,
+    effectiveDate: "2026-01-01",
+    isActive: true,
+    description: "Standard state Medicaid tolerance window allowing +/-10 minutes arrival/departure without flagging exception.",
+  },
+  {
+    id: "RULE-002",
+    ruleName: "CES Waiver Strict Tolerance & Geofence",
+    payer: "Health First Colorado (Medicaid)",
+    program: "CES",
+    serviceCode: "CES-WVR",
+    serviceName: "Children's Extensive Support",
+    clockInToleranceMinutes: 7,
+    clockOutToleranceMinutes: 7,
+    earlyArrivalHandling: "Flag for Review",
+    lateArrivalHandling: "Require Reason",
+    earlyDepartureHandling: "Flag Exception",
+    lateDepartureHandling: "Require Overtime Approval",
+    reviewRequired: true,
+    approvalRequired: true,
+    effectiveDate: "2026-01-01",
+    isActive: true,
+    description: "High-acuity pediatric waiver requires strict 7-minute window and supervisor sign-off on any geofence variance.",
+  },
+  {
+    id: "RULE-003",
+    ruleName: "IHSS Extended Grace Rule",
+    payer: "Health First Colorado (Medicaid)",
+    program: "IHSS",
+    serviceCode: "T1019-IHSS",
+    serviceName: "In-Home Support Services",
+    clockInToleranceMinutes: 15,
+    clockOutToleranceMinutes: 15,
+    earlyArrivalHandling: "Allow",
+    lateArrivalHandling: "Allow within Grace",
+    earlyDepartureHandling: "Allow within Grace",
+    lateDepartureHandling: "Allow within Grace",
+    reviewRequired: false,
+    approvalRequired: false,
+    effectiveDate: "2026-02-01",
+    isActive: true,
+    description: "Family-directed care model permits up to 15 minutes variance to accommodate household schedules.",
+  },
+  {
+    id: "RULE-004",
+    ruleName: "Commercial & Private Duty Policy",
+    payer: "Commercial / Private Insurance",
+    program: "Private Duty",
+    serviceCode: "ALL",
+    serviceName: "All Commercial Services",
+    clockInToleranceMinutes: 15,
+    clockOutToleranceMinutes: 15,
+    earlyArrivalHandling: "Round to Schedule",
+    lateArrivalHandling: "Allow within Grace",
+    earlyDepartureHandling: "Flag Exception",
+    lateDepartureHandling: "Require Overtime Approval",
+    reviewRequired: false,
+    approvalRequired: false,
+    effectiveDate: "2026-01-01",
+    isActive: true,
+    description: "Private pay visits adhere to scheduled rounding rules unless overtime is formally authorized.",
+  },
 ];
 
 function createInitialVisits(): EvvVisitRecord[] {
   const visits: EvvVisitRecord[] = [];
 
-  // 1. Illustrative Record 1: Rahul Sharma, Client John Smith, 10:00 AM – 2:00 PM, Personal Care, Verified
+  // 1. Illustrative Record 1: Rahul Sharma, Client John Smith
+  // 10:00 - 14:00, Actual: 10:01 - 14:02 (+1m / +2m -> WITHIN TOLERANCE)
+  // Scenario A & F: Verified, Cleared for Billing, Cleared for Payroll
   visits.push({
     id: "EVV-2026-001",
     visitNumber: "#401",
@@ -104,6 +160,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     serviceName: "Personal Care",
     serviceCode: "T1019",
     payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
     authorizationNumber: "AUTH-CO-2026-4410",
     authorizedHours: 20,
     billRate: 34.0,
@@ -114,9 +171,14 @@ function createInitialVisits(): EvvVisitRecord[] {
     actualClockInTime: "10:01",
     actualClockOutTime: "14:02",
     actualDurationHours: 4.02,
+    varianceMinutes: 3,
+    varianceDisplay: "+1m in / +2m out (Within tolerance)",
+    varianceStatus: "Within Tolerance",
+    captureMethod: "Mobile GPS",
     visitStatus: "Completed",
     verificationStatus: "Verified",
     geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
     clockInLocation: {
       address: "1284 Oakridge Ave, Denver, CO 80204",
       lat: 39.7392,
@@ -125,7 +187,9 @@ function createInitialVisits(): EvvVisitRecord[] {
       withinGeofence: true,
       distanceFeet: 42,
       timestamp: "2026-11-25 10:01:14 AM",
-      method: "Mobile App GPS",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "1284 Oakridge Ave, Denver, CO 80204",
     },
     clockOutLocation: {
       address: "1284 Oakridge Ave, Denver, CO 80204",
@@ -135,7 +199,18 @@ function createInitialVisits(): EvvVisitRecord[] {
       withinGeofence: true,
       distanceFeet: 38,
       timestamp: "2026-11-25 02:02:40 PM",
-      method: "Mobile App GPS",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "1284 Oakridge Ave, Denver, CO 80204",
+    },
+    patientVerification: {
+      signatureCaptured: "Yes",
+      voiceVerificationCaptured: "Not applicable",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "Yes",
+      verificationTimestamp: "2026-11-25 02:02:45 PM",
+      signatureType: "Digital Signature",
+      evidenceRef: "SIG-CO-2026-4410-01",
     },
     sixElements: {
       serviceType: { verified: true, value: "T1019 - Personal Care" },
@@ -148,59 +223,58 @@ function createInitialVisits(): EvvVisitRecord[] {
     tasksCompleted: ["Assistance with transfers", "Bathing & hygiene", "Nutritional lunch meal prep", "Medication reminder"],
     careNotes: "Client was alert and in good spirits. Assisted with warm sponge bath and provided balance support. Prepared chicken vegetable soup.",
     clientSignatureCaptured: true,
-    clientSignatureTimestamp: "2026-11-25 02:01:12 PM",
+    clientSignatureTimestamp: "2026-11-25 02:02 PM",
     signatureType: "Digital Signature",
-    billingReadiness: "Ready for Billing",
-    payrollReadiness: "Ready for Payroll",
-    aggregator: "Sandata",
+    billingReadiness: "Cleared for Billing",
+    payrollReadiness: "Cleared for Payroll",
+    aggregator: "Sandata" as any,
     aggregatorStatus: "Accepted",
-    aggregatorSubmissionId: "SAN-CO-8829104",
-    reviewNotes: [],
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9810",
+    reviewNotes: [
+      {
+        id: "rn-001-1",
+        reviewerName: "System Audit Engine",
+        reviewerRole: "Automated Compliance",
+        timestamp: "2026-11-25 02:05 PM",
+        note: "Visit verified automatically: 6 federal elements validated, variance (+1m / +2m) is within 10-minute tolerance.",
+        action: "NOTE_ADDED",
+      },
+    ],
     timeline: [
       {
         id: "t-001-1",
-        timestamp: "2026-11-25 07:00 AM",
-        actor: "System Engine",
-        actorRole: "Scheduling Engine",
-        event: "Visit Scheduled",
-        details: "Shift locked from weekly recurring master template.",
+        timestamp: "2026-11-25 10:01 AM",
+        actor: "Rahul Sharma",
+        actorRole: "Caregiver (Mobile GPS)",
+        event: "Clock-in Verified",
+        details: "GPS geofence match (42ft from service address).",
+        badgeType: "success",
       },
       {
         id: "t-001-2",
-        timestamp: "2026-11-25 10:01 AM",
+        timestamp: "2026-11-25 02:02 PM",
         actor: "Rahul Sharma",
-        actorRole: "Caregiver (Mobile App)",
-        event: "Clock-in Captured",
-        details: "GPS verified within 42ft of client home. Accuracy 6m.",
+        actorRole: "Caregiver (Mobile GPS)",
+        event: "Clock-out & Digital Signature Captured",
+        details: "Client John Smith signed digitally on caregiver device.",
+        badgeType: "success",
       },
       {
         id: "t-001-3",
-        timestamp: "2026-11-25 01:58 PM",
-        actor: "Rahul Sharma",
-        actorRole: "Caregiver (Mobile App)",
-        event: "Care Notes & Tasks Submitted",
-        details: "4/4 ADL tasks completed. Client digital signature attached.",
-      },
-      {
-        id: "t-001-4",
-        timestamp: "2026-11-25 02:02 PM",
-        actor: "Rahul Sharma",
-        actorRole: "Caregiver (Mobile App)",
-        event: "Clock-out Captured",
-        details: "Clock-out location verified within geofence (38ft).",
-      },
-      {
-        id: "t-001-5",
-        timestamp: "2026-11-25 02:03 PM",
-        actor: "EVV Verification Engine",
-        actorRole: "Automated Compliance",
-        event: "EVV 6/6 Elements Verified",
-        details: "All federal 21st Century CURES Act criteria passed. Forwarded to Sandata aggregator.",
+        timestamp: "2026-11-25 02:15 PM",
+        actor: "EVV Aggregator Engine",
+        actorRole: "State Gateway",
+        event: "Aggregator Ingestion Accepted",
+        details: "Transmission SUB-2026-9810 confirmed with response code 200.",
+        badgeType: "success",
       },
     ],
   });
 
-  // 2. Illustrative Record 2: Priya Patel, Client Michael Brown, 9:00 AM – In progress, Homemaker, Missing clock-out
+  // 2. Illustrative Record 2: Priya Patel, Client Michael Brown
+  // In progress, Scheduled 09:00 - 13:00, Actual 08:58 - In Progress
+  // Scenario B: Missing clock-out (>2 hrs overdue), Exception
   visits.push({
     id: "EVV-2026-002",
     visitNumber: "#402",
@@ -221,6 +295,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     serviceName: "Homemaker",
     serviceCode: "S5130",
     payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
     authorizationNumber: "AUTH-CO-2026-1189",
     authorizedHours: 15,
     billRate: 31.0,
@@ -231,13 +306,19 @@ function createInitialVisits(): EvvVisitRecord[] {
     actualClockInTime: "08:58",
     actualClockOutTime: undefined,
     actualDurationHours: 6.8,
+    varianceMinutes: -2,
+    varianceDisplay: "-2m in / Clock-out Missing",
+    varianceStatus: "Missing Events",
+    captureMethod: "Mobile GPS",
     visitStatus: "In Progress",
     verificationStatus: "Exception",
     exceptionType: "MISSING_CLOCK_IN_OUT",
     exceptionTitle: "Missing clock-out",
+    exceptionReason: "Missing clock-out (>2 hrs past planned shift end)",
     exceptionDescription: "Shift scheduled until 1:00 PM. Currently >2 hours past planned shift end with no clock-out timestamp recorded.",
     exceptionDateFlagged: "2026-11-25 01:15 PM",
     geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
     clockInLocation: {
       address: "450 Spruce St, Boulder, CO 80302",
       lat: 40.015,
@@ -246,7 +327,16 @@ function createInitialVisits(): EvvVisitRecord[] {
       withinGeofence: true,
       distanceFeet: 55,
       timestamp: "2026-11-25 08:58:22 AM",
-      method: "Mobile App GPS",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "450 Spruce St, Boulder, CO 80302",
+    },
+    patientVerification: {
+      signatureCaptured: "No",
+      voiceVerificationCaptured: "No",
+      patientConfirmedService: "Not captured",
+      patientConfirmedTime: "Not captured",
+      signatureType: "None",
     },
     sixElements: {
       serviceType: { verified: true, value: "S5130 - Homemaker" },
@@ -259,16 +349,18 @@ function createInitialVisits(): EvvVisitRecord[] {
     tasksCompleted: ["Light housekeeping", "Laundry", "Trash removal"],
     careNotes: "In-progress shift. Completed kitchen sanitation and started laundry cycle.",
     clientSignatureCaptured: false,
-    signatureType: "Digital Signature",
-    billingReadiness: "Hold (Exception)",
-    payrollReadiness: "Hold (Exception)",
-    aggregator: "Sandata",
-    aggregatorStatus: "Pending Submission",
+    signatureType: "Declined",
+    billingReadiness: "Blocked",
+    payrollReadiness: "Blocked",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Not Submitted",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    assignedReviewer: "Dana Jenkins, MSW",
     reviewNotes: [
       {
         id: "rn-002-1",
-        reviewerName: "Dana Jenkins, Operations Admin",
-        reviewerRole: "Admin Supervisor",
+        reviewerName: "Dana Jenkins, MSW",
+        reviewerRole: "Agency Operations Admin",
         timestamp: "2026-11-25 01:45 PM",
         note: "Sent mobile push notification reminder to Priya Patel to confirm shift completion and submit clock-out.",
         action: "INVESTIGATION_STARTED",
@@ -279,9 +371,10 @@ function createInitialVisits(): EvvVisitRecord[] {
         id: "t-002-1",
         timestamp: "2026-11-25 08:58 AM",
         actor: "Priya Patel",
-        actorRole: "Caregiver (Mobile App)",
+        actorRole: "Caregiver (Mobile GPS)",
         event: "Clock-in Captured",
         details: "GPS verified at 450 Spruce St. Geofence distance 55ft.",
+        badgeType: "info",
       },
       {
         id: "t-002-2",
@@ -295,7 +388,10 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
   });
 
-  // 3. Illustrative Record 3: David Wilson, Client Emily Jones, 8:30 AM – 11:30 AM, Personal Care, Location issue
+  // 3. Illustrative Record 3: David Wilson, Client Emily Jones
+  // 08:30 - 11:30, Actual: 08:31 - 11:33 (+1m / +3m time variance is within tolerance!)
+  // Scenario C & F: Location issue (GPS recorded 1,480 ft outside geofence).
+  // Note: Time variance is within tolerance, so exception is strictly location!
   visits.push({
     id: "EVV-2026-003",
     visitNumber: "#403",
@@ -316,6 +412,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     serviceName: "Personal Care",
     serviceCode: "T1019",
     payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
     authorizationNumber: "AUTH-CO-2026-7833",
     authorizedHours: 18,
     billRate: 34.0,
@@ -326,13 +423,19 @@ function createInitialVisits(): EvvVisitRecord[] {
     actualClockInTime: "08:31",
     actualClockOutTime: "11:33",
     actualDurationHours: 3.03,
+    varianceMinutes: 4,
+    varianceDisplay: "+1m in / +3m out (Time within tol.)",
+    varianceStatus: "Within Tolerance",
+    captureMethod: "Mobile GPS",
     visitStatus: "Completed",
     verificationStatus: "Exception",
     exceptionType: "LOCATION_VERIFICATION",
     exceptionTitle: "Location verification issue",
+    exceptionReason: "Outside approved service location (1,480ft from residence)",
     exceptionDescription: "Clock-in GPS coordinates recorded 1,480 feet outside designated residential geofence (250ft threshold).",
     exceptionDateFlagged: "2026-11-25 08:32 AM",
     geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Outside Geofence",
     clockInLocation: {
       address: "8100 S University Blvd, Centennial, CO 80122",
       lat: 39.5742,
@@ -341,7 +444,9 @@ function createInitialVisits(): EvvVisitRecord[] {
       withinGeofence: false,
       distanceFeet: 1480,
       timestamp: "2026-11-25 08:31:05 AM",
-      method: "Mobile App GPS",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "7820 S University Blvd, Centennial, CO 80122",
     },
     clockOutLocation: {
       address: "7820 S University Blvd, Centennial, CO 80122",
@@ -351,7 +456,18 @@ function createInitialVisits(): EvvVisitRecord[] {
       withinGeofence: true,
       distanceFeet: 40,
       timestamp: "2026-11-25 11:33:10 AM",
-      method: "Mobile App GPS",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "7820 S University Blvd, Centennial, CO 80122",
+    },
+    patientVerification: {
+      signatureCaptured: "Yes",
+      voiceVerificationCaptured: "Not applicable",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "Yes",
+      verificationTimestamp: "2026-11-25 11:33:20 AM",
+      signatureType: "Digital Signature",
+      evidenceRef: "SIG-CO-2026-7833-03",
     },
     sixElements: {
       serviceType: { verified: true, value: "T1019 - Personal Care" },
@@ -359,31 +475,32 @@ function createInitialVisits(): EvvVisitRecord[] {
       dateOfService: { verified: true, value: "2026-11-25" },
       locationOfService: {
         verified: false,
-        value: "Clock-in at 8100 S University Blvd (1,480ft outside geofence)",
-        notes: "Location discrepancy flagged for coordinator review",
+        value: "Clock-in 1,480ft outside geofence (8100 S University Blvd)",
+        notes: "Requires supervisor investigation of alternate location",
       },
       individualProviding: { verified: true, value: "David Wilson (CG-104)" },
       timeBeginsAndEnds: { verified: true, value: "08:31 AM – 11:33 AM (3.03 hrs)" },
     },
-    tasksCompleted: ["Assistance with dressing", "Meal preparation", "Range of motion exercises"],
-    careNotes: "Client was walking with assistance. Clock-in occurred at local pharmacy entrance while picking up physician-ordered prescription before entering residence.",
+    tasksCompleted: ["Grooming & dressing", "Ambulation assistance", "Breakfast prep"],
+    careNotes: "Met client at nearby pharmacy plaza before returning to residence. Assisted with morning routine and safe transfer.",
     clientSignatureCaptured: true,
-    clientSignatureTimestamp: "2026-11-25 11:30:15 AM",
+    clientSignatureTimestamp: "2026-11-25 11:33 AM",
     signatureType: "Digital Signature",
-    billingReadiness: "Hold (Exception)",
-    payrollReadiness: "Hold (Exception)",
-    aggregator: "Sandata",
-    aggregatorStatus: "Pending Submission",
+    billingReadiness: "Blocked",
+    payrollReadiness: "Ready for Review",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Submitted",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9811",
+    assignedReviewer: "Carlos Mendez, RN",
     reviewNotes: [
       {
         id: "rn-003-1",
-        reviewerName: "Carlos Mendez, Billing Specialist",
-        reviewerRole: "Billing Specialist",
-        timestamp: "2026-11-25 12:15 PM",
-        note: "Caregiver notes indicate pharmacy pickup at shift start. Contacted caregiver to verify prescription receipt.",
+        reviewerName: "Carlos Mendez, RN",
+        reviewerRole: "Clinical Supervisor",
+        timestamp: "2026-11-25 09:10 AM",
+        note: "Caregiver contacted: Clock-in occurred at Walgreens pharmacy accompanying client for urgent prescription pickup. Verifying care plan authorized community outing.",
         action: "INVESTIGATION_STARTED",
-        reasonCode: "RC-04",
-        reasonDescription: "Authorized alternate care location / Community prescription run",
       },
     ],
     timeline: [
@@ -391,756 +508,1178 @@ function createInitialVisits(): EvvVisitRecord[] {
         id: "t-003-1",
         timestamp: "2026-11-25 08:31 AM",
         actor: "David Wilson",
-        actorRole: "Caregiver (Mobile App)",
-        event: "Clock-in Outside Geofence",
-        details: "Recorded at 8100 S University Blvd (1,480ft distance). Flagged as Location Exception.",
+        actorRole: "Caregiver (Mobile GPS)",
+        event: "Clock-in Flagged (Outside Geofence)",
+        details: "Coordinates captured at 8100 S University Blvd (1,480ft outside 250ft perimeter).",
         badgeType: "warning",
       },
       {
         id: "t-003-2",
         timestamp: "2026-11-25 11:33 AM",
         actor: "David Wilson",
-        actorRole: "Caregiver (Mobile App)",
-        event: "Clock-out Inside Geofence",
-        details: "Recorded inside residential boundary (40ft).",
-      },
-      {
-        id: "t-003-3",
-        timestamp: "2026-11-25 12:15 PM",
-        actor: "Carlos Mendez",
-        actorRole: "Billing Specialist",
-        event: "Review Note Added",
-        details: "Caregiver verified community pharmacy run at shift commencement.",
+        actorRole: "Caregiver (Mobile GPS)",
+        event: "Clock-out & Signature Verified",
+        details: "Clock-out GPS within geofence (40ft). Digital signature recorded.",
+        badgeType: "success",
       },
     ],
   });
 
-  // Additional 9 Exception Records (Total 12 Exceptions)
-  const exceptionPool = [
-    {
-      id: "EVV-2026-004",
-      visitNumber: "#404",
-      schedulingVisitId: "VIS-1004",
-      clientName: "Leo Miller",
-      clientId: "CL-1001",
-      caregiverName: "Clara Jenkins",
-      caregiverId: "CG-105",
-      serviceName: "CES Waiver (Children’s Extensive Support)",
-      serviceCode: "CES-WVR",
-      scheduledStartTime: "07:30",
-      scheduledEndTime: "11:30",
-      actualClockInTime: "08:45",
-      actualClockOutTime: "11:30",
-      actualDurationHours: 2.75,
-      visitStatus: "Completed" as EvvVisitStatus,
-      verificationStatus: "Exception" as EvvVerificationStatus,
-      exceptionType: "LATE_OR_EARLY" as EvvExceptionType,
-      exceptionTitle: "Late arrival (+75 mins)",
-      exceptionDescription: "Caregiver clocked in 75 minutes past scheduled start time due to severe traffic delay on I-25.",
+  // 4. Illustrative Record 4: Clara Jenkins, Client Raymond Chen
+  // 08:00 - 16:00, Actual: 08:00 - 16:00 (Telephony IVR)
+  // Verified, Cleared for Billing
+  visits.push({
+    id: "EVV-2026-004",
+    visitNumber: "#404",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1008",
+    clientId: "CL-1004",
+    clientName: "Raymond Chen",
+    clientPhone: "(303) 555-0550",
+    clientAddress: "5500 E 6th Ave, Denver, CO 80220",
+    clientMedicaidId: "CO-MED-1004",
+    householdId: "hh-1004",
+    householdName: "Chen Household",
+    caregiverId: "CG-105",
+    caregiverName: "Clara Jenkins",
+    caregiverPhone: "(541) 555-0245",
+    caregiverRole: "Direct Care Worker",
+    caregiverClassification: "1099",
+    serviceName: "Companion Care",
+    serviceCode: "S5125",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-3390",
+    authorizedHours: 24,
+    billRate: 29.0,
+    payRate: 19.5,
+    scheduledStartTime: "08:00",
+    scheduledEndTime: "16:00",
+    scheduledDurationHours: 8.0,
+    actualClockInTime: "08:00",
+    actualClockOutTime: "16:00",
+    actualDurationHours: 8.0,
+    varianceMinutes: 0,
+    varianceDisplay: "On schedule (0m)",
+    varianceStatus: "On Schedule",
+    captureMethod: "Telephony / IVR",
+    visitStatus: "Completed",
+    verificationStatus: "Verified",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
+    clockInLocation: {
+      address: "5500 E 6th Ave, Denver, CO 80220 (Client Home Landline)",
+      withinGeofence: true,
+      timestamp: "2026-11-25 08:00:10 AM",
+      method: "Telephony / IVR",
+      coordinatesAvailable: false,
+      approvedAddress: "5500 E 6th Ave, Denver, CO 80220",
     },
-    {
-      id: "EVV-2026-005",
-      visitNumber: "#405",
-      schedulingVisitId: "VIS-1007",
-      clientName: "Eleanor Ruth Whitfield",
-      clientId: "CL-1003",
-      caregiverName: "Marcus Vance",
-      caregiverId: "CG-106",
-      serviceName: "In-Home Support Services (IHSS)",
-      serviceCode: "T1019-IHSS",
-      scheduledStartTime: "09:00",
-      scheduledEndTime: "13:00",
-      actualClockInTime: "09:02",
-      actualClockOutTime: "11:15",
-      actualDurationHours: 2.22,
-      visitStatus: "Completed" as EvvVisitStatus,
-      verificationStatus: "Exception" as EvvVerificationStatus,
-      exceptionType: "LATE_OR_EARLY" as EvvExceptionType,
-      exceptionTitle: "Early departure (-105 mins)",
-      exceptionDescription: "Client had unscheduled outpatient medical appointment; caregiver released early at client request.",
+    clockOutLocation: {
+      address: "5500 E 6th Ave, Denver, CO 80220 (Client Home Landline)",
+      withinGeofence: true,
+      timestamp: "2026-11-25 04:00:15 PM",
+      method: "Telephony / IVR",
+      coordinatesAvailable: false,
+      approvedAddress: "5500 E 6th Ave, Denver, CO 80220",
     },
-    {
-      id: "EVV-2026-006",
-      visitNumber: "#406",
-      schedulingVisitId: "VIS-1009",
-      clientName: "Robert DeLuca",
-      clientId: "CL-1004",
-      caregiverName: "Elena Rostova",
-      caregiverId: "CG-107",
-      serviceName: "Personal Care",
-      serviceCode: "T1019",
-      scheduledStartTime: "11:00",
-      scheduledEndTime: "15:00",
-      actualClockInTime: "11:05",
-      actualClockOutTime: "17:30",
-      actualDurationHours: 6.42,
-      visitStatus: "Completed" as EvvVisitStatus,
-      verificationStatus: "Exception" as EvvVerificationStatus,
-      exceptionType: "SCHEDULE_MISMATCH" as EvvExceptionType,
-      exceptionTitle: "Scheduled vs actual discrepancy (+2.5 hrs)",
-      exceptionDescription: "Actual shift duration exceeded authorized scheduled window by 2.5 hours without prior schedule revision.",
+    patientVerification: {
+      signatureCaptured: "Not applicable",
+      voiceVerificationCaptured: "Yes",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "Yes",
+      verificationTimestamp: "2026-11-25 04:01:00 PM",
+      signatureType: "Voice Attestation",
+      evidenceRef: "IVR-AUDIO-2026-3390-04",
+      notes: "Client authenticated via registered home landline caller ID (303) 555-0550 and voice pin.",
     },
-    {
-      id: "EVV-2026-007",
-      visitNumber: "#407",
-      schedulingVisitId: "VIS-1010",
-      clientName: "Angela Martinez",
-      clientId: "CL-1005",
-      caregiverName: "Samuel O'Connor",
-      caregiverId: "CG-108",
-      serviceName: "Respite Care",
-      serviceCode: "T1005",
-      scheduledStartTime: "12:00",
-      scheduledEndTime: "16:00",
-      actualClockInTime: "12:01",
-      actualClockOutTime: "16:02",
-      actualDurationHours: 4.02,
-      visitStatus: "Completed" as EvvVisitStatus,
-      verificationStatus: "Exception" as EvvVerificationStatus,
-      exceptionType: "MISSING_VISIT_INFO" as EvvExceptionType,
-      exceptionTitle: "Missing visit information (No client signature)",
-      exceptionDescription: "Care note recorded but client verification signature/voice attestation is missing.",
+    sixElements: {
+      serviceType: { verified: true, value: "S5125 - Companion Care" },
+      individualReceiving: { verified: true, value: "Raymond Chen (CO-MED-1004)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "5500 E 6th Ave, Denver, CO (Registered Client Landline)" },
+      individualProviding: { verified: true, value: "Clara Jenkins (CG-105)" },
+      timeBeginsAndEnds: { verified: true, value: "08:00 AM – 04:00 PM (8.00 hrs)" },
     },
-    {
-      id: "EVV-2026-008",
-      visitNumber: "#408",
-      schedulingVisitId: "VIS-1014",
-      clientName: "Grace Hopper",
-      clientId: "CL-1006",
-      caregiverName: "Maya Lin",
-      caregiverId: "CG-109",
-      serviceName: "Companion Care",
-      serviceCode: "S5125",
-      scheduledStartTime: "10:30",
-      scheduledEndTime: "14:30",
-      actualClockInTime: undefined,
-      actualClockOutTime: "14:32",
-      actualDurationHours: 4.0,
-      visitStatus: "Completed" as EvvVisitStatus,
-      verificationStatus: "Exception" as EvvVerificationStatus,
-      exceptionType: "MISSING_CLOCK_IN_OUT" as EvvExceptionType,
-      exceptionTitle: "Missing clock-in",
-      exceptionDescription: "Clock-out recorded via mobile app, but start time clock-in record was omitted.",
-    },
-    {
-      id: "EVV-2026-009",
-      visitNumber: "#409",
-      schedulingVisitId: "VIS-1015",
-      clientName: "Arthur Dent",
-      clientId: "CL-1002",
-      caregiverName: "James Chen",
-      caregiverId: "CG-110",
-      serviceName: "Homemaker",
-      serviceCode: "S5130",
-      scheduledStartTime: "08:00",
-      scheduledEndTime: "12:00",
-      actualClockInTime: "08:02",
-      actualClockOutTime: "12:04",
-      actualDurationHours: 4.03,
-      visitStatus: "Completed" as EvvVisitStatus,
-      verificationStatus: "Exception" as EvvVerificationStatus,
-      exceptionType: "LOCATION_VERIFICATION" as EvvExceptionType,
-      exceptionTitle: "Location verification issue (GPS accuracy low)",
-      exceptionDescription: "Clock-in GPS accuracy was +/- 95 meters due to basement apartment reception.",
-    },
-    {
-      id: "EVV-2026-010",
-      visitNumber: "#410",
-      schedulingVisitId: "VIS-1016",
-      clientName: "Beatrice Hall",
-      clientId: "CL-1010",
-      caregiverName: "Hannah Abbott",
-      caregiverId: "CG-111",
-      serviceName: "Personal Care",
-      serviceCode: "T1019",
-      scheduledStartTime: "13:00",
-      scheduledEndTime: "17:00",
-      actualClockInTime: "13:05",
-      actualClockOutTime: undefined,
-      actualDurationHours: 2.7,
-      visitStatus: "In Progress" as EvvVisitStatus,
-      verificationStatus: "Under Review" as EvvVerificationStatus,
-      exceptionType: "SCHEDULE_MISMATCH" as EvvExceptionType,
-      exceptionTitle: "Shift overlap inquiry",
-      exceptionDescription: "Caregiver previously logged a concurrent telephonic check-in for another agency client.",
-    },
-    {
-      id: "EVV-2026-011",
-      visitNumber: "#411",
-      schedulingVisitId: "VIS-1017",
-      clientName: "Walter White",
-      clientId: "CL-1011",
-      caregiverName: "Jesse Pinkman",
-      caregiverId: "CG-112",
-      serviceName: "Homemaker",
-      serviceCode: "S5130",
-      scheduledStartTime: "09:30",
-      scheduledEndTime: "13:30",
-      actualClockInTime: undefined,
-      actualClockOutTime: undefined,
-      actualDurationHours: 0,
-      visitStatus: "Missed" as EvvVisitStatus,
-      verificationStatus: "Exception" as EvvVerificationStatus,
-      exceptionType: "MISSING_CLOCK_IN_OUT" as EvvExceptionType,
-      exceptionTitle: "Unreported missed visit",
-      exceptionDescription: "Scheduled shift time elapsed with zero clock-in or clock-out timestamps detected.",
-    },
-    {
-      id: "EVV-2026-012",
-      visitNumber: "#412",
-      schedulingVisitId: "VIS-1018",
-      clientName: "Diana Ross",
-      clientId: "CL-1012",
-      caregiverName: "Tanya Rivera",
-      caregiverId: "CG-113",
-      serviceName: "Personal Care",
-      serviceCode: "T1019",
-      scheduledStartTime: "14:00",
-      scheduledEndTime: "18:00",
-      actualClockInTime: "14:02",
-      actualClockOutTime: undefined,
-      actualDurationHours: 1.7,
-      visitStatus: "In Progress" as EvvVisitStatus,
-      verificationStatus: "Correction Required" as EvvVerificationStatus,
-      exceptionType: "MISSING_VISIT_INFO" as EvvExceptionType,
-      exceptionTitle: "Care plan task checklist incomplete",
-      exceptionDescription: "Caregiver submitted interim care notes with unselected mandatory medication observation step.",
-    },
-  ];
-
-  exceptionPool.forEach((ex, idx) => {
-    const cl = CLIENT_ROSTER.find((c) => c.id === ex.clientId) || CLIENT_ROSTER[idx % CLIENT_ROSTER.length];
-    const cg = CAREGIVER_ROSTER.find((c) => c.id === ex.caregiverId) || CAREGIVER_ROSTER[idx % CAREGIVER_ROSTER.length];
-
-    visits.push({
-      id: ex.id,
-      visitNumber: ex.visitNumber,
-      date: DEMO_DATE,
-      schedulingVisitId: ex.schedulingVisitId,
-      clientId: cl.id,
-      clientName: cl.name,
-      clientPhone: cl.phone,
-      clientAddress: cl.address,
-      clientMedicaidId: cl.medicaidId,
-      householdId: cl.householdId,
-      householdName: cl.householdName,
-      caregiverId: cg.id,
-      caregiverName: cg.name,
-      caregiverPhone: cg.phone,
-      caregiverRole: cg.role,
-      caregiverClassification: cg.classification,
-      serviceName: ex.serviceName,
-      serviceCode: ex.serviceCode,
-      payerName: "Health First Colorado (Medicaid)",
-      authorizationNumber: `AUTH-CO-2026-${5000 + idx}`,
-      authorizedHours: 20,
-      billRate: 34.0,
-      payRate: 22.0,
-      scheduledStartTime: ex.scheduledStartTime,
-      scheduledEndTime: ex.scheduledEndTime,
-      scheduledDurationHours: 4.0,
-      actualClockInTime: ex.actualClockInTime,
-      actualClockOutTime: ex.actualClockOutTime,
-      actualDurationHours: ex.actualDurationHours,
-      visitStatus: ex.visitStatus,
-      verificationStatus: ex.verificationStatus,
-      exceptionType: ex.exceptionType,
-      exceptionTitle: ex.exceptionTitle,
-      exceptionDescription: ex.exceptionDescription,
-      exceptionDateFlagged: `${DEMO_DATE} ${ex.scheduledStartTime}`,
-      geofenceRadiusFeet: 250,
-      clockInLocation: ex.actualClockInTime
-        ? {
-            address: cl.address,
-            lat: 39.7047,
-            lng: -105.0814,
-            accuracyMeters: 12,
-            withinGeofence: ex.exceptionType !== "LOCATION_VERIFICATION",
-            distanceFeet: ex.exceptionType === "LOCATION_VERIFICATION" ? 850 : 35,
-            timestamp: `${DEMO_DATE} ${ex.actualClockInTime} AM`,
-            method: "Mobile App GPS",
-          }
-        : undefined,
-      clockOutLocation: ex.actualClockOutTime
-        ? {
-            address: cl.address,
-            lat: 39.7047,
-            lng: -105.0814,
-            accuracyMeters: 10,
-            withinGeofence: true,
-            distanceFeet: 25,
-            timestamp: `${DEMO_DATE} ${ex.actualClockOutTime} PM`,
-            method: "Mobile App GPS",
-          }
-        : undefined,
-      sixElements: {
-        serviceType: { verified: true, value: `${ex.serviceCode} - ${ex.serviceName}` },
-        individualReceiving: { verified: true, value: `${cl.name} (${cl.medicaidId})` },
-        dateOfService: { verified: true, value: DEMO_DATE },
-        locationOfService: {
-          verified: ex.exceptionType !== "LOCATION_VERIFICATION",
-          value: `${cl.address}`,
-        },
-        individualProviding: { verified: true, value: `${cg.name} (${cg.id})` },
-        timeBeginsAndEnds: {
-          verified: !["MISSING_CLOCK_IN_OUT", "SCHEDULE_MISMATCH"].includes(ex.exceptionType || ""),
-          value: `${ex.actualClockInTime || "Missing"} – ${ex.actualClockOutTime || "Missing"}`,
-        },
+    tasksCompleted: ["Companionship & cognitive stimulation", "Safety monitoring", "Meal preparation"],
+    careNotes: "Completed full 8-hour shift. Client was engaged in memory exercises and light garden walk.",
+    clientSignatureCaptured: true,
+    clientSignatureTimestamp: "2026-11-25 04:01 PM",
+    signatureType: "Voice Attestation",
+    billingReadiness: "Cleared for Billing",
+    payrollReadiness: "Cleared for Payroll",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Accepted",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9812",
+    reviewNotes: [],
+    timeline: [
+      {
+        id: "t-004-1",
+        timestamp: "2026-11-25 08:00 AM",
+        actor: "Clara Jenkins",
+        actorRole: "Caregiver (Telephony IVR)",
+        event: "Telephony Clock-in Verified",
+        details: "Call placed from registered client phone (303) 555-0550.",
+        badgeType: "success",
       },
-      tasksCompleted: ["ADL Assistance", "Meal preparation", "Safety check"],
-      careNotes: "Visit service delivered as authorized. Exception flagged for coordinator review.",
-      clientSignatureCaptured: ex.exceptionType !== "MISSING_VISIT_INFO",
-      signatureType: "Digital Signature",
-      billingReadiness: "Hold (Exception)",
-      payrollReadiness: "Hold (Exception)",
-      aggregator: "Sandata",
-      aggregatorStatus: "Pending Submission",
-      reviewNotes: [
-        {
-          id: `rn-ex-${idx}`,
-          reviewerName: "Dana Jenkins, MSW",
-          reviewerRole: "Agency Operations Admin",
-          timestamp: `${DEMO_DATE} 12:30 PM`,
-          note: `Flagged automatically by system rule: ${ex.exceptionTitle}. Review required prior to billing lock.`,
-          action: "INVESTIGATION_STARTED",
-        },
-      ],
-      timeline: [
-        {
-          id: `t-ex-${idx}-1`,
-          timestamp: `${DEMO_DATE} ${ex.scheduledStartTime}`,
-          actor: "System Engine",
-          actorRole: "Scheduling Engine",
-          event: "Visit Scheduled",
-          details: "Shift locked from schedule plan.",
-        },
-        {
-          id: `t-ex-${idx}-2`,
-          timestamp: `${DEMO_DATE} ${ex.actualClockInTime || ex.scheduledStartTime}`,
-          actor: "EVV Monitoring Engine",
-          actorRole: "Automated Compliance",
-          event: `Exception Flagged: ${ex.exceptionTitle}`,
-          details: ex.exceptionDescription || "",
-          badgeType: "warning",
-        },
-      ],
-    });
+      {
+        id: "t-004-2",
+        timestamp: "2026-11-25 04:00 PM",
+        actor: "Clara Jenkins",
+        actorRole: "Caregiver (Telephony IVR)",
+        event: "Telephony Clock-out & Voice Attestation",
+        details: "Client voice PIN confirmed service hours.",
+        badgeType: "success",
+      },
+    ],
   });
 
-  // Now populate remaining records to reach exact target numbers:
-  // 32 In Progress (we have 2 in progress exceptions + 30 standard verified in-progress)
-  // 84 Completed (we have 9 completed exceptions + 1 verified record + 74 standard verified completed)
-  // 12 Scheduled
-  // Total Visits = 128!
-  let recordCounter = 13;
-
-  // 30 In Progress
-  for (let i = 0; i < 30; i++) {
-    const cg = CAREGIVER_ROSTER[i % CAREGIVER_ROSTER.length];
-    const cl = CLIENT_ROSTER[i % CLIENT_ROSTER.length];
-    const svc = SERVICE_ROSTER[i % SERVICE_ROSTER.length];
-    const startHour = 8 + (i % 6);
-    const startStr = `${String(startHour).padStart(2, "0")}:00`;
-    const endStr = `${String(startHour + 4).padStart(2, "0")}:00`;
-    const actualIn = `${String(startHour).padStart(2, "0")}:0${i % 5}`;
-    const visitId = `EVV-2026-${String(recordCounter).padStart(3, "0")}`;
-
-    visits.push({
-      id: visitId,
-      visitNumber: `#${400 + recordCounter}`,
-      date: DEMO_DATE,
-      schedulingVisitId: i < INITIAL_REALTIME_VISITS.length ? INITIAL_REALTIME_VISITS[i].id : `VIS-${1000 + recordCounter}`,
-      clientId: cl.id,
-      clientName: cl.name,
-      clientPhone: cl.phone,
-      clientAddress: cl.address,
-      clientMedicaidId: cl.medicaidId,
-      householdId: cl.householdId,
-      householdName: cl.householdName,
-      caregiverId: cg.id,
-      caregiverName: cg.name,
-      caregiverPhone: cg.phone,
-      caregiverRole: cg.role,
-      caregiverClassification: cg.classification,
-      serviceName: svc.name,
-      serviceCode: svc.code,
-      payerName: "Health First Colorado (Medicaid)",
-      authorizationNumber: `AUTH-CO-2026-${7000 + i}`,
-      authorizedHours: 20,
-      billRate: 34.0,
-      payRate: 22.0,
-      scheduledStartTime: startStr,
-      scheduledEndTime: endStr,
-      scheduledDurationHours: 4.0,
-      actualClockInTime: actualIn,
-      actualClockOutTime: undefined,
-      actualDurationHours: 2.1,
-      visitStatus: "In Progress",
-      verificationStatus: "Pending",
-      geofenceRadiusFeet: 250,
-      clockInLocation: {
-        address: cl.address,
-        lat: 39.7392 + (i * 0.002),
-        lng: -104.9903 - (i * 0.002),
-        accuracyMeters: 6,
-        withinGeofence: true,
-        distanceFeet: 35 + (i * 2),
-        timestamp: `${DEMO_DATE} ${actualIn} AM`,
-        method: "Mobile App GPS",
-      },
-      sixElements: {
-        serviceType: { verified: true, value: `${svc.code} - ${svc.name}` },
-        individualReceiving: { verified: true, value: `${cl.name} (${cl.medicaidId})` },
-        dateOfService: { verified: true, value: DEMO_DATE },
-        locationOfService: { verified: true, value: `${cl.address} (Within geofence)` },
-        individualProviding: { verified: true, value: `${cg.name} (${cg.id})` },
-        timeBeginsAndEnds: { verified: false, value: `Clocked in at ${actualIn} AM; in progress` },
-      },
-      tasksCompleted: ["ADL hygiene", "Nutritional support"],
-      careNotes: "Shift actively in progress. Routine morning care delivered safely.",
-      clientSignatureCaptured: false,
+  // 5. Illustrative Record 5: Marcus Vance, Client Sophia Patel
+  // Fixed Device / FOB Token
+  visits.push({
+    id: "EVV-2026-005",
+    visitNumber: "#405",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1009",
+    clientId: "CL-1005",
+    clientName: "Sophia Patel",
+    clientPhone: "(303) 555-1940",
+    clientAddress: "1940 Colorado Blvd, Denver, CO 80220",
+    clientMedicaidId: "CO-MED-1005",
+    householdId: "hh-1005",
+    householdName: "Patel Household",
+    caregiverId: "CG-106",
+    caregiverName: "Marcus Vance",
+    caregiverPhone: "(503) 555-8812",
+    caregiverRole: "Certified Nurse Aide (CNA)",
+    caregiverClassification: "W-2",
+    serviceName: "CES Waiver (Children’s Extensive Support)",
+    serviceCode: "CES-WVR",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "CES",
+    authorizationNumber: "AUTH-CO-2026-9921",
+    authorizedHours: 16,
+    billRate: 42.0,
+    payRate: 26.0,
+    scheduledStartTime: "07:00",
+    scheduledEndTime: "11:00",
+    scheduledDurationHours: 4.0,
+    actualClockInTime: "07:02",
+    actualClockOutTime: "11:01",
+    actualDurationHours: 3.98,
+    varianceMinutes: 1,
+    varianceDisplay: "+2m in / +1m out (Within 7m CES tol.)",
+    varianceStatus: "Within Tolerance",
+    captureMethod: "Fixed Device",
+    visitStatus: "Completed",
+    verificationStatus: "Verified",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
+    clockInLocation: {
+      address: "1940 Colorado Blvd, Denver, CO 80220 (Fixed In-Home FOB: FOB-9042)",
+      withinGeofence: true,
+      timestamp: "2026-11-25 07:02:15 AM",
+      method: "Fixed Device",
+      coordinatesAvailable: false,
+      approvedAddress: "1940 Colorado Blvd, Denver, CO 80220",
+    },
+    clockOutLocation: {
+      address: "1940 Colorado Blvd, Denver, CO 80220 (Fixed In-Home FOB: FOB-9042)",
+      withinGeofence: true,
+      timestamp: "2026-11-25 11:01:20 AM",
+      method: "Fixed Device",
+      coordinatesAvailable: false,
+      approvedAddress: "1940 Colorado Blvd, Denver, CO 80220",
+    },
+    patientVerification: {
+      signatureCaptured: "Yes",
+      voiceVerificationCaptured: "Not applicable",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "Yes",
+      verificationTimestamp: "2026-11-25 11:01:45 AM",
       signatureType: "Digital Signature",
-      billingReadiness: "Awaiting Verification",
-      payrollReadiness: "Awaiting Verification",
-      aggregator: "Sandata",
-      aggregatorStatus: "Pending Submission",
-      reviewNotes: [],
-      timeline: [
-        {
-          id: `t-${recordCounter}-1`,
-          timestamp: `${DEMO_DATE} ${startStr}`,
-          actor: "System Engine",
-          actorRole: "Scheduling Engine",
-          event: "Visit Scheduled",
-          details: "Shift locked from roster.",
-        },
-        {
-          id: `t-${recordCounter}-2`,
-          timestamp: `${DEMO_DATE} ${actualIn}`,
-          actor: cg.name,
-          actorRole: "Caregiver (Mobile App)",
-          event: "Clock-in Verified",
-          details: `Inside residential geofence (${35 + (i * 2)}ft).`,
-        },
-      ],
-    });
-    recordCounter++;
-  }
+      evidenceRef: "FOB-CO-2026-9921-05",
+      notes: "Mother/Authorized Representative signed digitally on tablet.",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "CES-WVR - Children's Extensive Support" },
+      individualReceiving: { verified: true, value: "Sophia Patel (CO-MED-1005)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "1940 Colorado Blvd (Fixed In-Home FOB Unit #9042)" },
+      individualProviding: { verified: true, value: "Marcus Vance (CG-106)" },
+      timeBeginsAndEnds: { verified: true, value: "07:02 AM – 11:01 AM (3.98 hrs)" },
+    },
+    tasksCompleted: ["Pediatric sensory integration", "G-tube feed support", "Mobility transfer"],
+    careNotes: "Morning routine completed without distress. G-tube flush successful per nursing protocol.",
+    clientSignatureCaptured: true,
+    clientSignatureTimestamp: "2026-11-25 11:01 AM",
+    signatureType: "Digital Signature",
+    billingReadiness: "Cleared for Billing",
+    payrollReadiness: "Cleared for Payroll",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Accepted",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9813",
+    reviewNotes: [],
+    timeline: [
+      {
+        id: "t-005-1",
+        timestamp: "2026-11-25 07:02 AM",
+        actor: "Marcus Vance",
+        actorRole: "Caregiver (Fixed Device)",
+        event: "Fixed Device Token Captured",
+        details: "In-home FOB serial #FOB-9042 rolling passcode authenticated.",
+        badgeType: "success",
+      },
+    ],
+  });
 
-  // 74 Completed
-  for (let i = 0; i < 74; i++) {
-    const cg = CAREGIVER_ROSTER[i % CAREGIVER_ROSTER.length];
-    const cl = CLIENT_ROSTER[i % CLIENT_ROSTER.length];
-    const svc = SERVICE_ROSTER[i % SERVICE_ROSTER.length];
-    const startHour = 6 + (i % 8);
-    const startStr = `${String(startHour).padStart(2, "0")}:00`;
-    const endStr = `${String(startHour + 4).padStart(2, "0")}:00`;
-    const actualIn = `${String(startHour).padStart(2, "0")}:0${(i % 5) + 1}`;
-    const actualOut = `${String(startHour + 4).padStart(2, "0")}:0${(i % 4) + 1}`;
-    const visitId = `EVV-2026-${String(recordCounter).padStart(3, "0")}`;
-
-    visits.push({
-      id: visitId,
-      visitNumber: `#${400 + recordCounter}`,
-      date: DEMO_DATE,
-      schedulingVisitId: i < INITIAL_REALTIME_VISITS.length ? INITIAL_REALTIME_VISITS[i].id : `VIS-${1000 + recordCounter}`,
-      clientId: cl.id,
-      clientName: cl.name,
-      clientPhone: cl.phone,
-      clientAddress: cl.address,
-      clientMedicaidId: cl.medicaidId,
-      householdId: cl.householdId,
-      householdName: cl.householdName,
-      caregiverId: cg.id,
-      caregiverName: cg.name,
-      caregiverPhone: cg.phone,
-      caregiverRole: cg.role,
-      caregiverClassification: cg.classification,
-      serviceName: svc.name,
-      serviceCode: svc.code,
-      payerName: "Health First Colorado (Medicaid)",
-      authorizationNumber: `AUTH-CO-2026-${8000 + i}`,
-      authorizedHours: 20,
-      billRate: 34.0,
-      payRate: 22.0,
-      scheduledStartTime: startStr,
-      scheduledEndTime: endStr,
-      scheduledDurationHours: 4.0,
-      actualClockInTime: actualIn,
-      actualClockOutTime: actualOut,
-      actualDurationHours: 4.0,
-      visitStatus: "Completed",
-      verificationStatus: "Verified",
-      geofenceRadiusFeet: 250,
-      clockInLocation: {
-        address: cl.address,
-        lat: 39.7392 + (i * 0.001),
-        lng: -104.9903 - (i * 0.001),
-        accuracyMeters: 5,
-        withinGeofence: true,
-        distanceFeet: 40 + (i % 25),
-        timestamp: `${DEMO_DATE} ${actualIn} AM`,
-        method: "Mobile App GPS",
-      },
-      clockOutLocation: {
-        address: cl.address,
-        lat: 39.7392 + (i * 0.001),
-        lng: -104.9903 - (i * 0.001),
-        accuracyMeters: 5,
-        withinGeofence: true,
-        distanceFeet: 36 + (i % 25),
-        timestamp: `${DEMO_DATE} ${actualOut} PM`,
-        method: "Mobile App GPS",
-      },
-      sixElements: {
-        serviceType: { verified: true, value: `${svc.code} - ${svc.name}` },
-        individualReceiving: { verified: true, value: `${cl.name} (${cl.medicaidId})` },
-        dateOfService: { verified: true, value: DEMO_DATE },
-        locationOfService: { verified: true, value: `${cl.address} (Verified within 250ft geofence)` },
-        individualProviding: { verified: true, value: `${cg.name} (${cg.id})` },
-        timeBeginsAndEnds: { verified: true, value: `${actualIn} AM – ${actualOut} PM (4.0 hrs)` },
-      },
-      tasksCompleted: ["ADL assistance", "Meal prep", "Mobility transfer", "Hydration check"],
-      careNotes: "Completed authorized care plan tasks. Client was safe, stable, and rested.",
-      clientSignatureCaptured: true,
-      clientSignatureTimestamp: `${DEMO_DATE} ${actualOut} PM`,
+  // 6. Record 6: Elena Rostova, Client Evelyn Foster
+  // 09:00 - 13:00, Actual: 09:00 - 15:30 (+2.5 hrs unauthorized overtime)
+  // Scenario: Duration mismatch exception, Blocked for billing & payroll review
+  visits.push({
+    id: "EVV-2026-006",
+    visitNumber: "#406",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1010",
+    clientId: "CL-1006",
+    clientName: "Evelyn Foster",
+    clientPhone: "(303) 555-8800",
+    clientAddress: "880 Broadway, Boulder, CO 80302",
+    clientMedicaidId: "CO-MED-1006",
+    householdId: "hh-1006",
+    householdName: "Foster Household",
+    caregiverId: "CG-107",
+    caregiverName: "Elena Rostova",
+    caregiverPhone: "(303) 555-1144",
+    caregiverRole: "Direct Care Professional",
+    caregiverClassification: "Direct Care Worker",
+    serviceName: "Homemaker",
+    serviceCode: "S5130",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-7711",
+    authorizedHours: 12,
+    billRate: 31.0,
+    payRate: 20.0,
+    scheduledStartTime: "09:00",
+    scheduledEndTime: "13:00",
+    scheduledDurationHours: 4.0,
+    actualClockInTime: "09:00",
+    actualClockOutTime: "15:30",
+    actualDurationHours: 6.5,
+    varianceMinutes: 150,
+    varianceDisplay: "+2.5 hrs (Outside tolerance)",
+    varianceStatus: "Outside Tolerance",
+    captureMethod: "Mobile GPS",
+    visitStatus: "Completed",
+    verificationStatus: "Exception",
+    exceptionType: "DURATION_MISMATCH",
+    exceptionTitle: "Visit duration mismatch (+2.5 hrs unauthorized)",
+    exceptionReason: "Visit duration mismatch (+2.5 hrs unauthorized extension)",
+    exceptionDescription: "Actual shift duration exceeded authorized scheduled window by 2.5 hours without prior schedule revision.",
+    exceptionDateFlagged: "2026-11-25 03:35 PM",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
+    clockInLocation: {
+      address: "880 Broadway, Boulder, CO 80302",
+      lat: 40.015,
+      lng: -105.279,
+      accuracyMeters: 5,
+      withinGeofence: true,
+      distanceFeet: 30,
+      timestamp: "2026-11-25 09:00:10 AM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "880 Broadway, Boulder, CO 80302",
+    },
+    clockOutLocation: {
+      address: "880 Broadway, Boulder, CO 80302",
+      lat: 40.015,
+      lng: -105.279,
+      accuracyMeters: 6,
+      withinGeofence: true,
+      distanceFeet: 35,
+      timestamp: "2026-11-25 03:30:15 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "880 Broadway, Boulder, CO 80302",
+    },
+    patientVerification: {
+      signatureCaptured: "Yes",
+      voiceVerificationCaptured: "Not applicable",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "No",
+      verificationTimestamp: "2026-11-25 03:30:40 PM",
       signatureType: "Digital Signature",
-      billingReadiness: "Ready for Billing",
-      payrollReadiness: "Ready for Payroll",
-      aggregator: "Sandata",
-      aggregatorStatus: "Accepted",
-      aggregatorSubmissionId: `SAN-CO-${900000 + i}`,
-      reviewNotes: [],
-      timeline: [
-        {
-          id: `t-${recordCounter}-1`,
-          timestamp: `${DEMO_DATE} ${startStr}`,
-          actor: "System Engine",
-          actorRole: "Scheduling Engine",
-          event: "Visit Scheduled",
-          details: "Shift locked from master schedule.",
-        },
-        {
-          id: `t-${recordCounter}-2`,
-          timestamp: `${DEMO_DATE} ${actualIn}`,
-          actor: cg.name,
-          actorRole: "Caregiver (Mobile App)",
-          event: "Clock-in Verified",
-          details: "GPS inside geofence.",
-        },
-        {
-          id: `t-${recordCounter}-3`,
-          timestamp: `${DEMO_DATE} ${actualOut}`,
-          actor: cg.name,
-          actorRole: "Caregiver (Mobile App)",
-          event: "Clock-out & Care Note Submitted",
-          details: "Completed with client digital attestation.",
-        },
-        {
-          id: `t-${recordCounter}-4`,
-          timestamp: `${DEMO_DATE} ${actualOut}`,
-          actor: "EVV Verification Engine",
-          actorRole: "Automated Compliance",
-          event: "EVV Verified",
-          details: "All 6 elements satisfied. Sent to Sandata aggregator.",
-        },
-      ],
-    });
-    recordCounter++;
-  }
-
-  // 12 Scheduled
-  for (let i = 0; i < 12; i++) {
-    const cg = CAREGIVER_ROSTER[i % CAREGIVER_ROSTER.length];
-    const cl = CLIENT_ROSTER[i % CLIENT_ROSTER.length];
-    const svc = SERVICE_ROSTER[i % SERVICE_ROSTER.length];
-    const startHour = 17 + (i % 3);
-    const startStr = `${String(startHour).padStart(2, "0")}:00`;
-    const endStr = `${String(startHour + 3).padStart(2, "0")}:00`;
-    const visitId = `EVV-2026-${String(recordCounter).padStart(3, "0")}`;
-
-    visits.push({
-      id: visitId,
-      visitNumber: `#${400 + recordCounter}`,
-      date: DEMO_DATE,
-      schedulingVisitId: i < INITIAL_REALTIME_VISITS.length ? INITIAL_REALTIME_VISITS[i].id : `VIS-${1000 + recordCounter}`,
-      clientId: cl.id,
-      clientName: cl.name,
-      clientPhone: cl.phone,
-      clientAddress: cl.address,
-      clientMedicaidId: cl.medicaidId,
-      householdId: cl.householdId,
-      householdName: cl.householdName,
-      caregiverId: cg.id,
-      caregiverName: cg.name,
-      caregiverPhone: cg.phone,
-      caregiverRole: cg.role,
-      caregiverClassification: cg.classification,
-      serviceName: svc.name,
-      serviceCode: svc.code,
-      payerName: "Health First Colorado (Medicaid)",
-      authorizationNumber: `AUTH-CO-2026-${9000 + i}`,
-      authorizedHours: 20,
-      billRate: 34.0,
-      payRate: 22.0,
-      scheduledStartTime: startStr,
-      scheduledEndTime: endStr,
-      scheduledDurationHours: 3.0,
-      visitStatus: "Scheduled",
-      verificationStatus: "Pending",
-      geofenceRadiusFeet: 250,
-      sixElements: {
-        serviceType: { verified: true, value: `${svc.code} - ${svc.name}` },
-        individualReceiving: { verified: true, value: `${cl.name} (${cl.medicaidId})` },
-        dateOfService: { verified: true, value: DEMO_DATE },
-        locationOfService: { verified: false, value: `${cl.address} (Pending clock-in)` },
-        individualProviding: { verified: true, value: `${cg.name} (${cg.id})` },
-        timeBeginsAndEnds: { verified: false, value: `Scheduled: ${startStr} – ${endStr}` },
+      notes: "Client signed but noted caregiver stayed to help family with unexpected emergency.",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "S5130 - Homemaker" },
+      individualReceiving: { verified: true, value: "Evelyn Foster (CO-MED-1006)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "880 Broadway, Boulder, CO 80302" },
+      individualProviding: { verified: true, value: "Elena Rostova (CG-107)" },
+      timeBeginsAndEnds: { verified: false, value: "09:00 AM – 03:30 PM (6.5 hrs vs 4.0 scheduled)", notes: "Exceeds schedule" },
+    },
+    tasksCompleted: ["Extended home cleaning", "Laundry", "Family emergency support"],
+    careNotes: "Stayed beyond schedule at daughter's request due to minor water leak in kitchen.",
+    clientSignatureCaptured: true,
+    clientSignatureTimestamp: "2026-11-25 03:30 PM",
+    signatureType: "Digital Signature",
+    billingReadiness: "Blocked",
+    payrollReadiness: "Blocked",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Queued",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9814",
+    assignedReviewer: "Marcus Vance",
+    reviewNotes: [
+      {
+        id: "rn-006-1",
+        reviewerName: "Marcus Vance",
+        reviewerRole: "Lead Dispatcher & Scheduler",
+        timestamp: "2026-11-25 03:45 PM",
+        note: "Flagged +2.5 hour overtime. Checking weekly authorization cap with Case Manager before approving billing.",
+        action: "INVESTIGATION_STARTED",
       },
-      tasksCompleted: [],
-      careNotes: "Evening shift scheduled.",
-      clientSignatureCaptured: false,
-      billingReadiness: "Awaiting Verification",
-      payrollReadiness: "Awaiting Verification",
-      aggregator: "Sandata",
-      aggregatorStatus: "Pending Submission",
-      reviewNotes: [],
-      timeline: [
-        {
-          id: `t-${recordCounter}-1`,
-          timestamp: `${DEMO_DATE} 08:00 AM`,
-          actor: "System Engine",
-          actorRole: "Scheduling Engine",
-          event: "Visit Scheduled",
-          details: "Upcoming evening shift confirmed.",
-        },
-      ],
-    });
-    recordCounter++;
-  }
+    ],
+    timeline: [],
+  });
 
-  // Additional Multi-Date Visits to support operational date filtering (Nov 23, 24, 26, 27)
-  const additionalDates = [
-    { date: "2026-11-24", count: 16, defaultStatus: "Completed" as const, defaultVerification: "Verified" as const },
-    { date: "2026-11-23", count: 12, defaultStatus: "Completed" as const, defaultVerification: "Verified" as const },
-    { date: "2026-11-26", count: 16, defaultStatus: "Scheduled" as const, defaultVerification: "Pending" as const },
-    { date: "2026-11-27", count: 12, defaultStatus: "Scheduled" as const, defaultVerification: "Pending" as const },
-  ];
+  // 7. Record 7: Samuel O'Connor, Client Angela Martinez
+  // 12:00 - 16:00, Actual: 12:01 - 16:02 (+1m / +2m time variance is within tolerance!)
+  // Scenario D & F: Patient verification missing (signature missing)
+  // Note: Consistent tolerance: 1-2m variance is NOT the exception reason!
+  visits.push({
+    id: "EVV-2026-007",
+    visitNumber: "#407",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1010",
+    clientId: "CL-1005",
+    clientName: "Angela Martinez",
+    clientPhone: "(303) 555-4921",
+    clientAddress: "1420 Champa St, Denver, CO 80202",
+    clientMedicaidId: "CO-MED-7719",
+    householdId: "hh-1005",
+    householdName: "Martinez Household",
+    caregiverId: "CG-108",
+    caregiverName: "Samuel O'Connor",
+    caregiverPhone: "(720) 555-3399",
+    caregiverRole: "Direct Support Professional (DSP)",
+    caregiverClassification: "W-2",
+    serviceName: "Respite Care",
+    serviceCode: "T1005",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-8802",
+    authorizedHours: 12,
+    billRate: 32.0,
+    payRate: 21.0,
+    scheduledStartTime: "12:00",
+    scheduledEndTime: "16:00",
+    scheduledDurationHours: 4.0,
+    actualClockInTime: "12:01",
+    actualClockOutTime: "16:02",
+    actualDurationHours: 4.02,
+    varianceMinutes: 3,
+    varianceDisplay: "+1m in / +2m out (Time within tol.)",
+    varianceStatus: "Within Tolerance",
+    captureMethod: "Mobile GPS",
+    visitStatus: "Completed",
+    verificationStatus: "Exception",
+    exceptionType: "MISSING_VISIT_INFO",
+    exceptionTitle: "Missing visit information (No client signature)",
+    exceptionReason: "Patient verification missing (No client signature or voice attestation)",
+    exceptionDescription: "Care note recorded and location verified within geofence, but client verification signature/voice attestation was not captured upon departure.",
+    exceptionDateFlagged: "2026-11-25 04:05 PM",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
+    clockInLocation: {
+      address: "1420 Champa St, Denver, CO 80202",
+      lat: 39.747,
+      lng: -104.996,
+      accuracyMeters: 6,
+      withinGeofence: true,
+      distanceFeet: 40,
+      timestamp: "2026-11-25 12:01:10 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "1420 Champa St, Denver, CO 80202",
+    },
+    clockOutLocation: {
+      address: "1420 Champa St, Denver, CO 80202",
+      lat: 39.747,
+      lng: -104.996,
+      accuracyMeters: 6,
+      withinGeofence: true,
+      distanceFeet: 45,
+      timestamp: "2026-11-25 04:02:18 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "1420 Champa St, Denver, CO 80202",
+    },
+    patientVerification: {
+      signatureCaptured: "No",
+      voiceVerificationCaptured: "No",
+      patientConfirmedService: "Not captured",
+      patientConfirmedTime: "Not captured",
+      signatureType: "Declined",
+      notes: "Caregiver reported client was sleeping at shift conclusion; family caregiver departed early.",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "T1005 - Respite Care" },
+      individualReceiving: { verified: true, value: "Angela Martinez (CO-MED-7719)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "1420 Champa St, Denver, CO 80202" },
+      individualProviding: { verified: true, value: "Samuel O'Connor (CG-108)" },
+      timeBeginsAndEnds: { verified: true, value: "12:01 PM – 04:02 PM (4.02 hrs)" },
+    },
+    tasksCompleted: ["Companionship", "Recreational support", "Snack prep"],
+    careNotes: "Client rested comfortably throughout afternoon. No clinical changes.",
+    clientSignatureCaptured: false,
+    signatureType: "Declined",
+    billingReadiness: "Blocked",
+    payrollReadiness: "Ready for Review",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Queued",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    assignedReviewer: "Sarah Alverez",
+    reviewNotes: [
+      {
+        id: "rn-007-1",
+        reviewerName: "Sarah Alverez",
+        reviewerRole: "Billing & Compliance Auditor",
+        timestamp: "2026-11-25 04:15 PM",
+        note: "Requested paper exception form or telephone follow-up from family caregiver to confirm hours.",
+        action: "CORRECTION_REQUESTED",
+      },
+    ],
+    timeline: [],
+  });
 
-  additionalDates.forEach(({ date, count, defaultStatus, defaultVerification }) => {
-    for (let k = 0; k < count; k++) {
-      const cl = CLIENT_ROSTER[(recordCounter + k) % CLIENT_ROSTER.length];
-      const cg = CAREGIVER_ROSTER[(recordCounter + k) % CAREGIVER_ROSTER.length];
-      const svc = LILISARE_SERVICES[(recordCounter + k) % LILISARE_SERVICES.length];
-      const startHour = 8 + (k % 6);
-      const endHour = startHour + 4;
-      const startStr = `${String(startHour).padStart(2, "0")}:00`;
-      const endStr = `${String(endHour).padStart(2, "0")}:00`;
+  // 8. Record 8: Maya Lin, Client Grace Hopper
+  // Scenario G FIX: Previously showed "Not Started" while Completed!
+  // Scheduled: 10:30 - 14:30.
+  // Coherent data: Shift was completed, but mobile app crashed at start, so clock-in was omitted.
+  // Clock-out was recorded at 14:32.
+  // Correction submitted by Maya Lin for clock-in: 10:30 AM (Reason: Mobile app crashed on arrival).
+  // Status: Completed, Verification: Correction Required
+  visits.push({
+    id: "EVV-2026-008",
+    visitNumber: "#408",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1014",
+    clientId: "CL-1006",
+    clientName: "Grace Hopper",
+    clientPhone: "(303) 555-9018",
+    clientAddress: "7200 E Hampden Ave, Denver, CO 80224",
+    clientMedicaidId: "CO-MED-1014",
+    householdId: "hh-1006",
+    householdName: "Hopper Residence",
+    caregiverId: "CG-109",
+    caregiverName: "Maya Lin",
+    caregiverPhone: "(303) 555-2255",
+    caregiverRole: "Home Health Aide (HHA)",
+    caregiverClassification: "W-2",
+    serviceName: "Companion Care",
+    serviceCode: "S5125",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-5541",
+    authorizedHours: 14,
+    billRate: 29.0,
+    payRate: 19.5,
+    scheduledStartTime: "10:30",
+    scheduledEndTime: "14:30",
+    scheduledDurationHours: 4.0,
+    actualClockInTime: undefined, // Missing clock-in
+    actualClockOutTime: "14:32",
+    actualDurationHours: 4.0,
+    varianceMinutes: 2,
+    varianceDisplay: "Clock-in Missing / +2m out",
+    varianceStatus: "Missing Events",
+    captureMethod: "Mobile GPS",
+    visitStatus: "Completed",
+    verificationStatus: "Correction Required",
+    exceptionType: "MISSING_CLOCK_IN_OUT",
+    exceptionTitle: "Missing clock-in",
+    exceptionReason: "Missing clock-in (Clock-out captured at 14:32 via Mobile App)",
+    exceptionDescription: "Clock-out recorded via mobile app at 14:32, but start time clock-in event was omitted due to caregiver app crash.",
+    exceptionDateFlagged: "2026-11-25 02:35 PM",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
+    clockOutLocation: {
+      address: "7200 E Hampden Ave, Denver, CO 80224",
+      lat: 39.653,
+      lng: -104.898,
+      accuracyMeters: 6,
+      withinGeofence: true,
+      distanceFeet: 35,
+      timestamp: "2026-11-25 02:32:15 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "7200 E Hampden Ave, Denver, CO 80224",
+    },
+    patientVerification: {
+      signatureCaptured: "Yes",
+      voiceVerificationCaptured: "Not applicable",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "Yes",
+      verificationTimestamp: "2026-11-25 02:32:45 PM",
+      signatureType: "Digital Signature",
+      evidenceRef: "SIG-CO-2026-5541-08",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "S5125 - Companion Care" },
+      individualReceiving: { verified: true, value: "Grace Hopper (CO-MED-1014)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "7200 E Hampden Ave, Denver, CO 80224 (Within geofence, 35ft)" },
+      individualProviding: { verified: true, value: "Maya Lin (CG-109)" },
+      timeBeginsAndEnds: { verified: false, value: "Clock-in MISSING; Clock-out 02:32 PM", notes: "Correction submitted: 10:30 AM" },
+    },
+    tasksCompleted: ["Companion activities", "Light lunch meal prep", "Cognitive reading"],
+    careNotes: "Completed full shift. Mobile app crashed upon arrival at 10:30 AM; device restarted later. Client confirmed start time.",
+    clientSignatureCaptured: true,
+    clientSignatureTimestamp: "2026-11-25 02:32 PM",
+    signatureType: "Digital Signature",
+    billingReadiness: "Blocked",
+    payrollReadiness: "Blocked",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Retry Required",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9816",
+    aggregatorRejectionReason: "ERR-422: Missing mandatory clock-in timestamp in payload",
+    assignedReviewer: "Dana Jenkins, MSW",
+    corrections: [
+      {
+        id: "cor-008-1",
+        visitId: "EVV-2026-008",
+        fieldChanged: "actualClockInTime",
+        originalValue: "[Omitted / App Crash]",
+        correctedValue: "10:30 AM",
+        reason: "RC-02: Mobile device failure / Dead battery on arrival",
+        submittedBy: "Maya Lin (Caregiver)",
+        submittedAt: "2026-11-25 02:35 PM",
+        status: "Pending Approval",
+      },
+    ],
+    reviewNotes: [
+      {
+        id: "rn-008-1",
+        reviewerName: "Dana Jenkins, MSW",
+        reviewerRole: "Agency Operations Admin",
+        timestamp: "2026-11-25 02:45 PM",
+        note: "Caregiver Maya Lin submitted timesheet correction for 10:30 AM arrival with client signature verification attached. Awaiting supervisor approval.",
+        action: "INVESTIGATION_STARTED",
+        reasonCode: "RC-02",
+        reasonDescription: "Mobile device failure / Dead battery",
+      },
+    ],
+    timeline: [
+      {
+        id: "t-008-1",
+        timestamp: "2026-11-25 02:32 PM",
+        actor: "Maya Lin",
+        actorRole: "Caregiver (Mobile GPS)",
+        event: "Clock-out & Client Signature Recorded",
+        details: "Clock-out GPS verified at client residence. Client confirmed 10:30 AM arrival.",
+        badgeType: "info",
+      },
+      {
+        id: "t-008-2",
+        timestamp: "2026-11-25 02:35 PM",
+        actor: "Maya Lin",
+        actorRole: "Caregiver (Portal Correction)",
+        event: "Correction Submitted: Clock-in 10:30 AM",
+        details: "Reason code RC-02: Device failure. Pending agency approval.",
+        badgeType: "warning",
+      },
+    ],
+  });
 
-      const isException = defaultStatus === "Completed" && k === 2;
-      const vStatus = isException ? "Exception" : defaultVerification;
-      const exceptionType = isException ? ("LOCATION_VERIFICATION" as const) : undefined;
-      const clockInActual = defaultStatus === "Completed" ? `${String(startHour).padStart(2, "0")}:03` : undefined;
-      const clockOutActual = defaultStatus === "Completed" ? `${String(endHour).padStart(2, "0")}:01` : undefined;
+  // 9. Record 9: James Chen, Client Arthur Dent
+  // 08:00 - 12:00, Actual: 08:02 - 12:04 (+2m / +4m time variance is within tolerance!)
+  // Scenario C & F: Location accuracy low (GPS accuracy +/-95m due to basement apartment reception)
+  // Time variance is within tolerance, so exception is strictly location accuracy!
+  visits.push({
+    id: "EVV-2026-009",
+    visitNumber: "#409",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1015",
+    clientId: "CL-1002",
+    clientName: "Arthur Dent",
+    clientPhone: "(319) 555-3820",
+    clientAddress: "1248 Oakwood Drive, Cedar Falls, IA 50613",
+    clientMedicaidId: "IA-MED-1002",
+    householdId: "hh-1002",
+    householdName: "Dent Household",
+    caregiverId: "CG-110",
+    caregiverName: "James Chen",
+    caregiverPhone: "(720) 555-6677",
+    caregiverRole: "Homemaker Care Specialist",
+    caregiverClassification: "Direct Care Worker",
+    serviceName: "Homemaker",
+    serviceCode: "S5130",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-4488",
+    authorizedHours: 16,
+    billRate: 31.0,
+    payRate: 20.0,
+    scheduledStartTime: "08:00",
+    scheduledEndTime: "12:00",
+    scheduledDurationHours: 4.0,
+    actualClockInTime: "08:02",
+    actualClockOutTime: "12:04",
+    actualDurationHours: 4.03,
+    varianceMinutes: 6,
+    varianceDisplay: "+2m in / +4m out (Time within tol.)",
+    varianceStatus: "Within Tolerance",
+    captureMethod: "Mobile GPS",
+    visitStatus: "Completed",
+    verificationStatus: "Exception",
+    exceptionType: "LOCATION_VERIFICATION",
+    exceptionTitle: "Location verification issue (GPS accuracy low)",
+    exceptionReason: "Location verification failed (GPS accuracy +/-95m in basement unit)",
+    exceptionDescription: "Clock-in GPS accuracy was +/- 95 meters due to basement apartment reception.",
+    exceptionDateFlagged: "2026-11-25 08:05 AM",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Accuracy Low",
+    clockInLocation: {
+      address: "1248 Oakwood Drive, Cedar Falls, IA 50613",
+      lat: 42.534,
+      lng: -92.445,
+      accuracyMeters: 95,
+      withinGeofence: true,
+      distanceFeet: 110,
+      timestamp: "2026-11-25 08:02:10 AM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "1248 Oakwood Drive, Cedar Falls, IA 50613",
+    },
+    clockOutLocation: {
+      address: "1248 Oakwood Drive, Cedar Falls, IA 50613",
+      lat: 42.534,
+      lng: -92.445,
+      accuracyMeters: 88,
+      withinGeofence: true,
+      distanceFeet: 105,
+      timestamp: "2026-11-25 12:04:15 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "1248 Oakwood Drive, Cedar Falls, IA 50613",
+    },
+    patientVerification: {
+      signatureCaptured: "Yes",
+      voiceVerificationCaptured: "Not applicable",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "Yes",
+      verificationTimestamp: "2026-11-25 12:04:30 PM",
+      signatureType: "Digital Signature",
+      evidenceRef: "SIG-IA-2026-4488-09",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "S5130 - Homemaker" },
+      individualReceiving: { verified: true, value: "Arthur Dent (IA-MED-1002)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: false, value: "1248 Oakwood Drive (Low GPS accuracy +/-95m)", notes: "Basement drift" },
+      individualProviding: { verified: true, value: "James Chen (CG-110)" },
+      timeBeginsAndEnds: { verified: true, value: "08:02 AM – 12:04 PM (4.03 hrs)" },
+    },
+    tasksCompleted: ["Kitchen cleaning", "Linen change", "Dishes & surfaces"],
+    careNotes: "Completed routine housekeeping. Cellular signal was weak inside basement apartment.",
+    clientSignatureCaptured: true,
+    clientSignatureTimestamp: "2026-11-25 12:04 PM",
+    signatureType: "Digital Signature",
+    billingReadiness: "Ready for Review",
+    payrollReadiness: "Ready for Review",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Acknowledgement Pending",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9817",
+    assignedReviewer: "Carlos Mendez, RN",
+    reviewNotes: [
+      {
+        id: "rn-009-1",
+        reviewerName: "Carlos Mendez, RN",
+        reviewerRole: "Clinical Supervisor",
+        timestamp: "2026-11-25 08:30 AM",
+        note: "Caregiver noted persistent cellular drift in garden level apartment. Corroborated with previous visit telemetry history.",
+        action: "INVESTIGATION_STARTED",
+        reasonCode: "RC-07",
+        reasonDescription: "GPS signal drift / High-rise residential interference",
+      },
+    ],
+    timeline: [],
+  });
 
-      visits.push({
-        id: `EVV-2026-${String(recordCounter).padStart(3, "0")}`,
-        visitNumber: `#${500 + recordCounter}`,
-        date,
-        schedulingVisitId: `VIS-${1000 + recordCounter}`,
-        clientId: cl.id,
-        clientName: cl.name,
-        clientPhone: cl.phone,
-        clientAddress: cl.address,
-        clientMedicaidId: cl.medicaidId,
-        householdId: cl.householdId,
-        householdName: cl.householdName,
-        caregiverId: cg.id,
-        caregiverName: cg.name,
-        caregiverPhone: cg.phone,
-        caregiverRole: cg.role,
-        caregiverClassification: cg.classification,
-        serviceName: svc.name,
-        serviceCode: svc.code,
-        payerName: "Health First Colorado (Medicaid)",
-        authorizationNumber: `AUTH-CO-2026-${8000 + recordCounter}`,
-        authorizedHours: 20,
-        billRate: 34.0,
-        payRate: 22.0,
-        scheduledStartTime: startStr,
-        scheduledEndTime: endStr,
-        scheduledDurationHours: 4.0,
-        actualClockInTime: clockInActual,
-        actualClockOutTime: clockOutActual,
-        actualDurationHours: defaultStatus === "Completed" ? 4.0 : undefined,
-        visitStatus: defaultStatus,
-        verificationStatus: vStatus,
-        exceptionType,
-        exceptionTitle: isException ? "Location Discrepancy" : undefined,
-        exceptionDescription: isException ? "Clock-in recorded outside geofence buffer." : undefined,
-        geofenceRadiusFeet: 250,
-        clockInLocation: clockInActual
-          ? {
-              address: cl.address,
-              lat: 39.7392,
-              lng: -104.9903,
-              accuracyMeters: isException ? 240 : 6,
-              withinGeofence: !isException,
-              distanceFeet: isException ? 380 : 35,
-              timestamp: `${date} ${clockInActual}`,
-              method: "Mobile App GPS",
-            }
-          : undefined,
-        clockOutLocation: clockOutActual
-          ? {
-              address: cl.address,
-              lat: 39.7392,
-              lng: -104.9903,
-              accuracyMeters: 5,
-              withinGeofence: true,
-              distanceFeet: 30,
-              timestamp: `${date} ${clockOutActual}`,
-              method: "Mobile App GPS",
-            }
-          : undefined,
-        sixElements: {
-          serviceType: { verified: true, value: `${svc.code} - ${svc.name}` },
-          individualReceiving: { verified: true, value: `${cl.name} (${cl.medicaidId})` },
-          dateOfService: { verified: true, value: date },
-          locationOfService: { verified: !isException, value: cl.address },
-          individualProviding: { verified: true, value: `${cg.name} (${cg.id})` },
-          timeBeginsAndEnds: {
-            verified: defaultStatus === "Completed",
-            value: defaultStatus === "Completed" ? `${startStr} – ${endStr}` : `Scheduled: ${startStr} – ${endStr}`,
-          },
-        },
-        tasksCompleted: defaultStatus === "Completed" ? ["Personal Hygiene", "Meal Preparation"] : [],
-        careNotes: defaultStatus === "Completed" ? "Shift completed without client issues." : "Scheduled upcoming visit.",
-        clientSignatureCaptured: defaultStatus === "Completed",
-        billingReadiness: vStatus === "Verified" ? "Ready for Billing" : "Awaiting Verification",
-        payrollReadiness: vStatus === "Verified" ? "Ready for Payroll" : "Awaiting Verification",
-        aggregator: "Sandata",
-        aggregatorStatus: vStatus === "Verified" ? "Accepted" : "Pending Submission",
-        reviewNotes: [],
-        timeline: [
-          {
-            id: `t-${recordCounter}-1`,
-            timestamp: `${date} 08:00 AM`,
-            actor: "System Engine",
-            actorRole: "Scheduling Engine",
-            event: "Visit Scheduled",
-            details: `Shift created for ${date}.`,
-          },
-        ],
-      });
-      recordCounter++;
-    }
+  // 10. Record 10: Hannah Abbott, Client Beatrice Hall
+  // In progress
+  visits.push({
+    id: "EVV-2026-010",
+    visitNumber: "#410",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1016",
+    clientId: "CL-1010",
+    clientName: "Beatrice Hall",
+    clientPhone: "(303) 555-2201",
+    clientAddress: "2201 S Oneida St, Denver, CO 80224",
+    clientMedicaidId: "CO-MED-1010",
+    householdId: "hh-1010",
+    householdName: "Hall Household",
+    caregiverId: "CG-111",
+    caregiverName: "Hannah Abbott",
+    caregiverPhone: "(303) 555-4422",
+    caregiverRole: "Direct Support Professional",
+    caregiverClassification: "W-2",
+    serviceName: "Personal Care",
+    serviceCode: "T1019",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-6632",
+    authorizedHours: 20,
+    billRate: 34.0,
+    payRate: 22.0,
+    scheduledStartTime: "13:00",
+    scheduledEndTime: "17:00",
+    scheduledDurationHours: 4.0,
+    actualClockInTime: "13:05",
+    actualClockOutTime: undefined,
+    actualDurationHours: 2.7,
+    varianceMinutes: 5,
+    varianceDisplay: "+5m in / In Progress",
+    varianceStatus: "Within Tolerance",
+    captureMethod: "Mobile GPS",
+    visitStatus: "In Progress",
+    verificationStatus: "Pending",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
+    clockInLocation: {
+      address: "2201 S Oneida St, Denver, CO 80224",
+      lat: 39.676,
+      lng: -104.908,
+      accuracyMeters: 6,
+      withinGeofence: true,
+      distanceFeet: 35,
+      timestamp: "2026-11-25 01:05:10 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "2201 S Oneida St, Denver, CO 80224",
+    },
+    patientVerification: {
+      signatureCaptured: "No",
+      voiceVerificationCaptured: "No",
+      patientConfirmedService: "Not captured",
+      patientConfirmedTime: "Not captured",
+      signatureType: "None",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "T1019 - Personal Care" },
+      individualReceiving: { verified: true, value: "Beatrice Hall (CO-MED-1010)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "2201 S Oneida St, Denver, CO 80224" },
+      individualProviding: { verified: true, value: "Hannah Abbott (CG-111)" },
+      timeBeginsAndEnds: { verified: true, value: "Clock-in 01:05 PM (Active shift)" },
+    },
+    tasksCompleted: ["Personal grooming", "Lunch assistance"],
+    careNotes: "Active shift progressing smoothly.",
+    clientSignatureCaptured: false,
+    signatureType: "Declined",
+    billingReadiness: "Not Evaluated",
+    payrollReadiness: "Not Evaluated",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Not Submitted",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    reviewNotes: [],
+    timeline: [],
+  });
+
+  // 11. Record 11: Jesse Pinkman, Client Walter White
+  // Scenario E: Aggregator rejection!
+  // Completed visit, but Aggregator status is REJECTED (Medicaid ID mismatch in state registry).
+  // Demonstrates independent readiness: Billing is Blocked, while Payroll is Cleared for Payroll!
+  visits.push({
+    id: "EVV-2026-011",
+    visitNumber: "#411",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1017",
+    clientId: "CL-1011",
+    clientName: "Walter White",
+    clientPhone: "(505) 555-0308",
+    clientAddress: "308 Negra Arroyo Ln, Albuquerque, NM 87104",
+    clientMedicaidId: "NM-MED-1011",
+    householdId: "hh-1011",
+    householdName: "White Household",
+    caregiverId: "CG-112",
+    caregiverName: "Jesse Pinkman",
+    caregiverPhone: "(720) 555-8833",
+    caregiverRole: "Homemaker",
+    caregiverClassification: "1099",
+    serviceName: "Companion Care",
+    serviceCode: "S5125",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-1011",
+    authorizedHours: 15,
+    billRate: 29.0,
+    payRate: 19.5,
+    scheduledStartTime: "14:00",
+    scheduledEndTime: "17:00",
+    scheduledDurationHours: 3.0,
+    actualClockInTime: "14:01",
+    actualClockOutTime: "17:02",
+    actualDurationHours: 3.02,
+    varianceMinutes: 3,
+    varianceDisplay: "+1m in / +2m out (Time within tol.)",
+    varianceStatus: "Within Tolerance",
+    captureMethod: "Mobile GPS",
+    visitStatus: "Completed",
+    verificationStatus: "Exception",
+    exceptionType: "AGGREGATOR_REJECTED",
+    exceptionTitle: "Aggregator rejected submission",
+    exceptionReason: "Aggregator rejected submission (Medicaid ID mismatch in state registry)",
+    exceptionDescription: "State aggregator returned HTTP 422: Client Medicaid recipient ID NM-MED-1011 not found in Colorado eligibility file.",
+    exceptionDateFlagged: "2026-11-25 05:15 PM",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Verified",
+    clockInLocation: {
+      address: "308 Negra Arroyo Ln, Albuquerque, NM 87104",
+      lat: 35.084,
+      lng: -106.65,
+      accuracyMeters: 5,
+      withinGeofence: true,
+      distanceFeet: 25,
+      timestamp: "2026-11-25 02:01:10 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "308 Negra Arroyo Ln, Albuquerque, NM 87104",
+    },
+    clockOutLocation: {
+      address: "308 Negra Arroyo Ln, Albuquerque, NM 87104",
+      lat: 35.084,
+      lng: -106.65,
+      accuracyMeters: 5,
+      withinGeofence: true,
+      distanceFeet: 22,
+      timestamp: "2026-11-25 05:02:14 PM",
+      method: "Mobile GPS",
+      coordinatesAvailable: true,
+      approvedAddress: "308 Negra Arroyo Ln, Albuquerque, NM 87104",
+    },
+    patientVerification: {
+      signatureCaptured: "Yes",
+      voiceVerificationCaptured: "Not applicable",
+      patientConfirmedService: "Yes",
+      patientConfirmedTime: "Yes",
+      verificationTimestamp: "2026-11-25 05:02:40 PM",
+      signatureType: "Digital Signature",
+      evidenceRef: "SIG-NM-2026-1011-11",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "S5125 - Companion Care" },
+      individualReceiving: { verified: false, value: "Walter White (NM-MED-1011 - Registry Mismatch)", notes: "State error 422" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "308 Negra Arroyo Ln" },
+      individualProviding: { verified: true, value: "Jesse Pinkman (CG-112)" },
+      timeBeginsAndEnds: { verified: true, value: "02:01 PM – 05:02 PM (3.02 hrs)" },
+    },
+    tasksCompleted: ["Light cleaning", "Safety oversight", "Errand companionship"],
+    careNotes: "Completed shift as assigned. Client confirmed hours.",
+    clientSignatureCaptured: true,
+    clientSignatureTimestamp: "2026-11-25 05:02 PM",
+    signatureType: "Digital Signature",
+    billingReadiness: "Blocked",
+    payrollReadiness: "Cleared for Payroll",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Rejected",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    aggregatorSubmissionId: "SUB-2026-9815",
+    aggregatorRejectionReason: "ERR-404: Client Medicaid ID NM-MED-1011 mismatch in state registry",
+    assignedReviewer: "Sarah Alverez",
+    reviewNotes: [
+      {
+        id: "rn-011-1",
+        reviewerName: "Sarah Alverez",
+        reviewerRole: "Billing & Compliance Auditor",
+        timestamp: "2026-11-25 05:25 PM",
+        note: "Checking with Intake Coordinator: Client was recently transferred from New Mexico Medicaid to Colorado Health First. Updated authorization number pending from county.",
+        action: "INVESTIGATION_STARTED",
+        reasonCode: "RC-10",
+        reasonDescription: "Payer Medicaid ID or Service Code mismatch",
+      },
+    ],
+    timeline: [
+      {
+        id: "t-011-1",
+        timestamp: "2026-11-25 05:15 PM",
+        actor: "EVV Aggregator Engine",
+        actorRole: "State Gateway",
+        event: "Transmission Rejected by State Aggregator",
+        details: "ERR-404: Client Medicaid ID NM-MED-1011 not found in state eligibility roster.",
+        badgeType: "error",
+      },
+    ],
+  });
+
+  // 12. Record 12: Carlos Mendez, Client Diana Ross
+  // Scheduled visit (Upcoming later today)
+  visits.push({
+    id: "EVV-2026-012",
+    visitNumber: "#412",
+    date: DEMO_DATE,
+    schedulingVisitId: "VIS-1018",
+    clientId: "CL-1012",
+    clientName: "Diana Ross",
+    clientPhone: "(303) 555-0670",
+    clientAddress: "670 Wadsworth Blvd, Lakewood, CO 80214",
+    clientMedicaidId: "CO-MED-1012",
+    householdId: "hh-1012",
+    householdName: "Ross Residence",
+    caregiverId: "CG-114",
+    caregiverName: "Carlos Mendez",
+    caregiverPhone: "(503) 555-4819",
+    caregiverRole: "Live-In Attendant",
+    caregiverClassification: "W-2",
+    serviceName: "Personal Care",
+    serviceCode: "T1019",
+    payerName: "Health First Colorado (Medicaid)",
+    program: "HCBS-EBD",
+    authorizationNumber: "AUTH-CO-2026-8199",
+    authorizedHours: 25,
+    billRate: 34.0,
+    payRate: 22.5,
+    scheduledStartTime: "18:00",
+    scheduledEndTime: "22:00",
+    scheduledDurationHours: 4.0,
+    varianceMinutes: 0,
+    varianceDisplay: "Upcoming Shift",
+    varianceStatus: "On Schedule",
+    captureMethod: "Mobile GPS",
+    visitStatus: "Scheduled",
+    verificationStatus: "Pending",
+    geofenceRadiusFeet: 250,
+    locationVerificationStatus: "Unavailable",
+    patientVerification: {
+      signatureCaptured: "Unknown",
+      voiceVerificationCaptured: "Unknown",
+      patientConfirmedService: "Not captured",
+      patientConfirmedTime: "Not captured",
+    },
+    sixElements: {
+      serviceType: { verified: true, value: "T1019 - Personal Care" },
+      individualReceiving: { verified: true, value: "Diana Ross (CO-MED-1012)" },
+      dateOfService: { verified: true, value: "2026-11-25" },
+      locationOfService: { verified: true, value: "670 Wadsworth Blvd, Lakewood, CO 80214" },
+      individualProviding: { verified: true, value: "Carlos Mendez (CG-114)" },
+      timeBeginsAndEnds: { verified: false, value: "Scheduled: 06:00 PM – 10:00 PM" },
+    },
+    tasksCompleted: [],
+    careNotes: "Upcoming shift. Caregiver notified via mobile shift dispatch.",
+    clientSignatureCaptured: false,
+    signatureType: "Declined",
+    billingReadiness: "Not Evaluated",
+    payrollReadiness: "Not Evaluated",
+    aggregator: "Sandata" as any,
+    aggregatorStatus: "Not Submitted",
+    aggregatorProvider: "EVV Aggregator (State Interface)",
+    reviewNotes: [],
+    timeline: [
+      {
+        id: "t-012-1",
+        timestamp: "2026-11-25 08:00 AM",
+        actor: "System Engine",
+        actorRole: "Scheduling Engine",
+        event: "Visit Scheduled & Dispatched",
+        details: "Shift dispatched to mobile app.",
+        badgeType: "info",
+      },
+    ],
   });
 
   return visits;
 }
 
 export const INITIAL_EVV_VISITS: EvvVisitRecord[] = createInitialVisits();
+
+export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
+  {
+    id: "SUB-2026-9810",
+    visitId: "EVV-2026-001",
+    clientName: "John Smith",
+    caregiverName: "Rahul Sharma",
+    serviceName: "Personal Care (T1019)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 02:15 PM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Accepted",
+    responseCode: "ACK-200",
+    responseReason: "All 6 federal elements validated. State visit token issued: #TOK-992144.",
+    retryCount: 0,
+    lastAttemptAt: "2026-11-25 02:15 PM",
+    nextRetryState: "None (Accepted)",
+    reconciliationStatus: "Reconciled",
+    payloadSummary: {
+      provider: "LiliSphere Health LLC",
+      procedure: "T1019",
+      caregiver_id: "CG-101",
+      client_id: "CL-1007",
+      clock_in: "2026-11-25T10:01:14Z",
+      clock_out: "2026-11-25T14:02:40Z",
+      lat: 39.7392,
+      lng: -104.9903,
+      signature: true,
+    },
+  },
+  {
+    id: "SUB-2026-9811",
+    visitId: "EVV-2026-003",
+    clientName: "Emily Jones",
+    caregiverName: "David Wilson",
+    serviceName: "Personal Care (T1019)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 11:45 AM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Submitted",
+    responseCode: "QUEUED-102",
+    responseReason: "Payload received by aggregator gateway; pending state ingestion batch run.",
+    retryCount: 0,
+    lastAttemptAt: "2026-11-25 11:45 AM",
+    nextRetryState: "Awaiting Batch Run (Scheduled 18:00)",
+    reconciliationStatus: "Pending Response",
+    payloadSummary: {
+      procedure: "T1019",
+      caregiver_id: "CG-104",
+      client_id: "CL-1009",
+      clock_in: "2026-11-25T08:31:05Z",
+      clock_out: "2026-11-25T11:33:10Z",
+      distance_feet: 1480,
+    },
+  },
+  {
+    id: "SUB-2026-9812",
+    visitId: "EVV-2026-004",
+    clientName: "Raymond Chen",
+    caregiverName: "Clara Jenkins",
+    serviceName: "Companion Care (S5125)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 04:05 PM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Accepted",
+    responseCode: "ACK-200",
+    responseReason: "Telephony IVR audio hash and registered landline caller ID matched state database.",
+    retryCount: 0,
+    lastAttemptAt: "2026-11-25 04:05 PM",
+    nextRetryState: "None (Accepted)",
+    reconciliationStatus: "Reconciled",
+    payloadSummary: {
+      method: "Telephony / IVR",
+      phone: "(303) 555-0550",
+      caller_id_verified: true,
+    },
+  },
+  {
+    id: "SUB-2026-9813",
+    visitId: "EVV-2026-005",
+    clientName: "Sophia Patel",
+    caregiverName: "Marcus Vance",
+    serviceName: "CES Waiver (CES-WVR)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 11:15 AM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Accepted",
+    responseCode: "ACK-200",
+    responseReason: "Fixed In-Home FOB serial token authenticated.",
+    retryCount: 0,
+    lastAttemptAt: "2026-11-25 11:15 AM",
+    nextRetryState: "None (Accepted)",
+    reconciliationStatus: "Reconciled",
+    payloadSummary: {
+      method: "Fixed FOB Device",
+      fob_serial: "FOB-9042",
+      rolling_code_valid: true,
+    },
+  },
+  {
+    id: "SUB-2026-9814",
+    visitId: "EVV-2026-006",
+    clientName: "Evelyn Foster",
+    caregiverName: "Elena Rostova",
+    serviceName: "Homemaker (S5130)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 03:40 PM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Queued",
+    responseCode: "QUEUED-101",
+    responseReason: "Transmission staged for nocturnal EDI 837P reconciliation batch.",
+    retryCount: 0,
+    lastAttemptAt: "2026-11-25 03:40 PM",
+    nextRetryState: "Scheduled Batch (00:00 MT)",
+    reconciliationStatus: "Pending Response",
+  },
+  {
+    id: "SUB-2026-9815",
+    visitId: "EVV-2026-011",
+    clientName: "Walter White",
+    caregiverName: "Jesse Pinkman",
+    serviceName: "Companion Care (S5125)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 05:15 PM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Rejected",
+    responseCode: "ERR-404",
+    responseReason: "Client Medicaid ID NM-MED-1011 mismatch in state registry. Recipient not eligible in Colorado jurisdiction.",
+    retryCount: 2,
+    lastAttemptAt: "2026-11-25 05:15 PM",
+    nextRetryState: "Retry Available (Pending Medicaid ID Correction)",
+    reconciliationStatus: "Unreconciled",
+    payloadSummary: {
+      client_medicaid_id: "NM-MED-1011",
+      error_field: "individualReceiving.id",
+      status: "REJECTED_BY_STATE",
+    },
+  },
+  {
+    id: "SUB-2026-9816",
+    visitId: "EVV-2026-008",
+    clientName: "Grace Hopper",
+    caregiverName: "Maya Lin",
+    serviceName: "Companion Care (S5125)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 02:40 PM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Retry Required",
+    responseCode: "ERR-422",
+    responseReason: "Missing mandatory clock-in timestamp in payload (Federal Element #6 incomplete).",
+    retryCount: 1,
+    lastAttemptAt: "2026-11-25 02:40 PM",
+    nextRetryState: "Awaiting Timesheet Correction Approval",
+    reconciliationStatus: "Unreconciled",
+    payloadSummary: {
+      clock_in: null,
+      clock_out: "2026-11-25T14:32:15Z",
+      missing: "timeBegins",
+    },
+  },
+  {
+    id: "SUB-2026-9817",
+    visitId: "EVV-2026-009",
+    clientName: "Arthur Dent",
+    caregiverName: "James Chen",
+    serviceName: "Homemaker (S5130)",
+    serviceDate: DEMO_DATE,
+    submissionTimestamp: "2026-11-25 12:15 PM",
+    providerName: "EVV Aggregator (State Interface)",
+    status: "Acknowledgement Pending",
+    responseCode: "ACK-PENDING",
+    responseReason: "Payload delivered to external aggregator server; awaiting asynchronous batch acceptance token.",
+    retryCount: 0,
+    lastAttemptAt: "2026-11-25 12:15 PM",
+    nextRetryState: "Polling State API (interval 15m)",
+    reconciliationStatus: "Pending Response",
+  },
+];
 
 /**
  * Storage helpers
@@ -1170,158 +1709,320 @@ export function saveEvvVisitsToStorage(visits: EvvVisitRecord[]): void {
   }
 }
 
+export function getEvvSubmissionsFromStorage(): EvvSubmissionRecord[] {
+  if (typeof window === "undefined") return INITIAL_EVV_SUBMISSIONS;
+  try {
+    const raw = localStorage.getItem(EVV_SUBMISSIONS_KEY);
+    if (!raw) {
+      localStorage.setItem(EVV_SUBMISSIONS_KEY, JSON.stringify(INITIAL_EVV_SUBMISSIONS));
+      return INITIAL_EVV_SUBMISSIONS;
+    }
+    return JSON.parse(raw);
+  } catch (err) {
+    return INITIAL_EVV_SUBMISSIONS;
+  }
+}
+
+export function saveEvvSubmissionsToStorage(submissions: EvvSubmissionRecord[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(EVV_SUBMISSIONS_KEY, JSON.stringify(submissions));
+    window.dispatchEvent(new CustomEvent(EVV_SYNC_EVENT));
+  } catch (err) {
+    console.error("Error saving EVV submissions to localStorage", err);
+  }
+}
+
+export function getEvvRulesFromStorage(): EvvToleranceRule[] {
+  if (typeof window === "undefined") return INITIAL_EVV_RULES;
+  try {
+    const raw = localStorage.getItem(EVV_RULES_KEY);
+    if (!raw) {
+      localStorage.setItem(EVV_RULES_KEY, JSON.stringify(INITIAL_EVV_RULES));
+      return INITIAL_EVV_RULES;
+    }
+    return JSON.parse(raw);
+  } catch (err) {
+    return INITIAL_EVV_RULES;
+  }
+}
+
+export function saveEvvRulesToStorage(rules: EvvToleranceRule[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(EVV_RULES_KEY, JSON.stringify(rules));
+    window.dispatchEvent(new CustomEvent(EVV_SYNC_EVENT));
+  } catch (err) {
+    console.error("Error saving EVV rules to localStorage", err);
+  }
+}
+
+export function saveEvvRule(rule: EvvToleranceRule): void {
+  const rules = getEvvRulesFromStorage();
+  const index = rules.findIndex((r) => r.id === rule.id);
+  if (index >= 0) {
+    rules[index] = rule;
+  } else {
+    rules.unshift(rule);
+  }
+  saveEvvRulesToStorage(rules);
+}
+
+export function toggleEvvRule(ruleId: string): void {
+  const rules = getEvvRulesFromStorage();
+  const target = rules.find((r) => r.id === ruleId);
+  if (target) {
+    target.isActive = !target.isActive;
+    saveEvvRulesToStorage(rules);
+  }
+}
+
 export function getEvvVisitById(id: string): EvvVisitRecord | undefined {
   const visits = getEvvVisitsFromStorage();
   const searchId = id.toLowerCase().trim();
 
-  // Try direct match in EVV visits
   const match =
     visits.find((v) => v.id.toLowerCase() === searchId) ||
     visits.find((v) => v.visitNumber.toLowerCase() === searchId) ||
     visits.find((v) => v.schedulingVisitId?.toLowerCase() === searchId) ||
-    INITIAL_EVV_VISITS.find((v) => v.id.toLowerCase() === searchId) ||
-    INITIAL_EVV_VISITS.find((v) => v.schedulingVisitId?.toLowerCase() === searchId);
+    INITIAL_EVV_VISITS.find((v) => v.id.toLowerCase() === searchId);
 
-  if (match) return match;
-
-  // Cross-lookup in stored scheduling visits or INITIAL_REALTIME_VISITS from scheduling
-  const storedVisits = typeof window !== "undefined" ? getVisitsFromStorage() : INITIAL_REALTIME_VISITS;
-  const realtimeVisit =
-    storedVisits.find((v) => v.id.toLowerCase() === searchId) ||
-    INITIAL_REALTIME_VISITS.find((v) => v.id.toLowerCase() === searchId);
-  if (realtimeVisit) {
-    // Synthesize an EVV record matching this scheduling visit
-    return {
-      id: realtimeVisit.id,
-      visitNumber: realtimeVisit.shiftNumber,
-      date: realtimeVisit.date,
-      schedulingVisitId: realtimeVisit.id,
-      clientId: realtimeVisit.clientId,
-      clientName: realtimeVisit.clientName,
-      clientPhone: "(541) 555-0199",
-      clientAddress: realtimeVisit.address,
-      clientMedicaidId: "OR-MED-1001",
-      householdId: realtimeVisit.householdId,
-      householdName: realtimeVisit.householdName,
-      caregiverId: realtimeVisit.caregiverId || "CG-102",
-      caregiverName: realtimeVisit.caregiverName || "Unassigned Caregiver",
-      caregiverPhone: "(541) 555-0199",
-      caregiverRole: realtimeVisit.caregiverClass || "Direct Care Worker",
-      caregiverClassification: "W-2",
-      serviceName: realtimeVisit.serviceName,
-      serviceCode: realtimeVisit.serviceCode,
-      payerName: "Health First Colorado (Medicaid)",
-      authorizationNumber: realtimeVisit.authorizationNumber,
-      authorizedHours: realtimeVisit.authorizedWeeklyCap || 20,
-      billRate: realtimeVisit.billRate,
-      payRate: realtimeVisit.payRate,
-      scheduledStartTime: realtimeVisit.startTime,
-      scheduledEndTime: realtimeVisit.endTime,
-      scheduledDurationHours: realtimeVisit.scheduledHours,
-      actualClockInTime: realtimeVisit.clockInActual,
-      actualClockOutTime: realtimeVisit.clockOutActual,
-      actualDurationHours: realtimeVisit.billableHours,
-      visitStatus:
-        realtimeVisit.status === "In-Progress"
-          ? "In Progress"
-          : realtimeVisit.status === "Completed" || realtimeVisit.status === "Verified"
-          ? "Completed"
-          : "Scheduled",
-      verificationStatus:
-        realtimeVisit.evvStatus === "Verified"
-          ? "Verified"
-          : realtimeVisit.status === "In-Progress"
-          ? "Pending"
-          : "Pending",
-      geofenceRadiusFeet: 250,
-      clockInLocation: {
-        address: realtimeVisit.address,
-        lat: 44.0462,
-        lng: -123.022,
-        accuracyMeters: 6,
-        withinGeofence: true,
-        distanceFeet: 35,
-        timestamp: `${realtimeVisit.date} ${realtimeVisit.clockInActual || realtimeVisit.startTime}`,
-        method: "Mobile App GPS",
-      },
-      clockOutLocation: realtimeVisit.clockOutActual
-        ? {
-            address: realtimeVisit.address,
-            lat: 44.0462,
-            lng: -123.022,
-            accuracyMeters: 5,
-            withinGeofence: true,
-            distanceFeet: 28,
-            timestamp: `${realtimeVisit.date} ${realtimeVisit.clockOutActual}`,
-            method: "Mobile App GPS",
-          }
-        : undefined,
-      sixElements: {
-        serviceType: { verified: true, value: `${realtimeVisit.serviceCode} - ${realtimeVisit.serviceName}` },
-        individualReceiving: { verified: true, value: realtimeVisit.clientName },
-        dateOfService: { verified: true, value: realtimeVisit.date },
-        locationOfService: { verified: true, value: realtimeVisit.address },
-        individualProviding: { verified: Boolean(realtimeVisit.caregiverName), value: realtimeVisit.caregiverName || "Unassigned" },
-        timeBeginsAndEnds: {
-          verified: Boolean(realtimeVisit.clockInActual && realtimeVisit.clockOutActual),
-          value: `${realtimeVisit.clockInActual || realtimeVisit.startTime} – ${
-            realtimeVisit.clockOutActual || realtimeVisit.endTime
-          }`,
-        },
-      },
-      tasksCompleted: ["ADL hygiene", "Nutritional support", "Sensory calming"],
-      careNotes: realtimeVisit.careNoteSummary || "Care provided per authorized care plan.",
-      clientSignatureCaptured: true,
-      clientSignatureTimestamp: `${realtimeVisit.date} 04:00 PM`,
-      signatureType: "Digital Signature",
-      billingReadiness: realtimeVisit.evvStatus === "Verified" ? "Ready for Billing" : "Awaiting Verification",
-      payrollReadiness: realtimeVisit.evvStatus === "Verified" ? "Ready for Payroll" : "Awaiting Verification",
-      aggregator: "Sandata",
-      aggregatorStatus: "Accepted",
-      reviewNotes: [],
-      timeline: [
-        {
-          id: `t-rt-${realtimeVisit.id}-1`,
-          timestamp: `${realtimeVisit.date} ${realtimeVisit.startTime}`,
-          actor: "System Engine",
-          actorRole: "Scheduling Engine",
-          event: "Shift Scheduled",
-          details: "Shift locked from scheduling master roster.",
-        },
-        {
-          id: `t-rt-${realtimeVisit.id}-2`,
-          timestamp: `${realtimeVisit.date} ${realtimeVisit.clockInActual || realtimeVisit.startTime}`,
-          actor: realtimeVisit.caregiverName || "Caregiver",
-          actorRole: "Caregiver (Mobile App)",
-          event: "Clock-in Verified",
-          details: "Verified inside authorized household geofence.",
-        },
-      ],
-    };
-  }
-
-  return undefined;
+  return match;
 }
 
 export function calculateEvvKpis(visits: EvvVisitRecord[]): EvvKpiSummary {
-  const totalVisits = visits.length;
+  const todaysVisits = visits.length;
   const inProgress = visits.filter((v) => v.visitStatus === "In Progress").length;
-  const completed = visits.filter((v) => v.visitStatus === "Completed").length;
+  const pendingVerification = visits.filter(
+    (v) => v.visitStatus === "Completed" && v.verificationStatus === "Pending"
+  ).length;
   const exceptions = visits.filter(
     (v) =>
       v.verificationStatus === "Exception" ||
       v.verificationStatus === "Under Review" ||
       v.verificationStatus === "Correction Required"
   ).length;
-  const scheduled = visits.filter((v) => v.visitStatus === "Scheduled").length;
+  const clearedForBilling = visits.filter((v) => v.billingReadiness === "Cleared for Billing").length;
+  const aggregatorRejected = visits.filter((v) => v.aggregatorStatus === "Rejected").length;
 
   return {
-    totalVisits,
+    todaysVisits,
     inProgress,
-    completed,
+    pendingVerification,
     exceptions,
-    scheduled,
+    clearedForBilling,
+    aggregatorRejected,
+    totalVisits: todaysVisits,
   };
+}
+
+/**
+ * Exception Resolution Workflow
+ */
+export function resolveEvvException(
+  visitId: string,
+  reasonCode: string,
+  resolutionCode: string,
+  reviewerNotes: string,
+  reviewerName: string = "Dana Jenkins, MSW"
+): EvvVisitRecord | null {
+  const visits = getEvvVisitsFromStorage();
+  const index = visits.findIndex((v) => v.id.toLowerCase() === visitId.toLowerCase());
+  if (index === -1) return null;
+
+  const current = visits[index];
+  const reasonObj = EVV_REASON_CODES.find((r) => r.code === reasonCode);
+  const resObj = EVV_RESOLUTION_CODES.find((r) => r.code === resolutionCode);
+  const now = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+
+  const newNote: EvvReviewNote = {
+    id: `rn-${Date.now()}`,
+    reviewerName,
+    reviewerRole: "Agency Operations Admin",
+    timestamp: now,
+    note: reviewerNotes || `Exception resolved: ${resObj?.label || resolutionCode}`,
+    action: "EXCEPTION_RESOLVED",
+    reasonCode,
+    reasonDescription: reasonObj?.label,
+    resolutionCode,
+  };
+
+  const newTimelineEvent: EvvTimelineEvent = {
+    id: `t-res-${Date.now()}`,
+    timestamp: now,
+    actor: reviewerName,
+    actorRole: "Agency Operations Admin",
+    event: "Exception Resolved & Verified",
+    details: `Reason: ${reasonObj?.label || reasonCode} | Resolution: ${resObj?.label || resolutionCode}. Notes: ${reviewerNotes || "None"}`,
+    badgeType: "success",
+  };
+
+  // If visit was completed, resolve to Verified and evaluate downstream billing
+  const updated: EvvVisitRecord = {
+    ...current,
+    verificationStatus: "Verified",
+    resolutionCode,
+    resolutionLabel: resObj?.label,
+    resolutionNotes: reviewerNotes,
+    resolutionTimestamp: now,
+    reviewNotes: [newNote, ...current.reviewNotes],
+    timeline: [newTimelineEvent, ...current.timeline],
+    billingReadiness: current.visitStatus === "Completed" ? "Cleared for Billing" : current.billingReadiness,
+    payrollReadiness: current.visitStatus === "Completed" ? "Cleared for Payroll" : current.payrollReadiness,
+    aggregatorStatus: current.aggregatorStatus === "Rejected" ? "Queued" : current.aggregatorStatus,
+  };
+
+  visits[index] = updated;
+  saveEvvVisitsToStorage(visits);
+  return updated;
+}
+
+/**
+ * Approve minor variance (within policy)
+ */
+export function approveMinorVariance(
+  visitId: string,
+  reviewerName: string = "Dana Jenkins, MSW",
+  notes: string = "Minor variance approved per agency tolerance policy."
+): EvvVisitRecord | null {
+  return resolveEvvException(visitId, "RC-01", "RES-01", notes, reviewerName);
+}
+
+/**
+ * Request correction from caregiver
+ */
+export function requestCaregiverCorrection(
+  visitId: string,
+  reviewerName: string = "Dana Jenkins, MSW",
+  notes: string
+): EvvVisitRecord | null {
+  const visits = getEvvVisitsFromStorage();
+  const index = visits.findIndex((v) => v.id.toLowerCase() === visitId.toLowerCase());
+  if (index === -1) return null;
+
+  const current = visits[index];
+  const now = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+
+  const newNote: EvvReviewNote = {
+    id: `rn-${Date.now()}`,
+    reviewerName,
+    reviewerRole: "Agency Operations Admin",
+    timestamp: now,
+    note: notes,
+    action: "CORRECTION_REQUESTED",
+  };
+
+  const newTimeline: EvvTimelineEvent = {
+    id: `t-req-${Date.now()}`,
+    timestamp: now,
+    actor: reviewerName,
+    actorRole: "Agency Operations Admin",
+    event: "Correction Requested from Caregiver",
+    details: notes,
+    badgeType: "warning",
+  };
+
+  const updated: EvvVisitRecord = {
+    ...current,
+    verificationStatus: "Correction Required",
+    billingReadiness: "Blocked",
+    payrollReadiness: "Blocked",
+    reviewNotes: [newNote, ...current.reviewNotes],
+    timeline: [newTimeline, ...current.timeline],
+  };
+
+  visits[index] = updated;
+  saveEvvVisitsToStorage(visits);
+  return updated;
+}
+
+/**
+ * Bulk actions
+ */
+export function bulkAssignReviewer(visitIds: string[], reviewerName: string): number {
+  const visits = getEvvVisitsFromStorage();
+  let updatedCount = 0;
+  const now = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+
+  visits.forEach((v) => {
+    if (visitIds.includes(v.id)) {
+      v.assignedReviewer = reviewerName;
+      v.reviewNotes.unshift({
+        id: `rn-assign-${Date.now()}-${Math.random()}`,
+        reviewerName: "System Dispatch",
+        reviewerRole: "Operations Coordinator",
+        timestamp: now,
+        note: `Assigned for exception review to ${reviewerName}.`,
+        action: "REVIEWER_ASSIGNED",
+      });
+      updatedCount++;
+    }
+  });
+
+  if (updatedCount > 0) {
+    saveEvvVisitsToStorage(visits);
+  }
+  return updatedCount;
+}
+
+export function bulkResolveVariances(visitIds: string[], reviewerName: string, notes: string): { processed: number; skipped: string[] } {
+  const visits = getEvvVisitsFromStorage();
+  const skipped: string[] = [];
+  let processed = 0;
+
+  visits.forEach((v) => {
+    if (visitIds.includes(v.id)) {
+      // Safeguard: Do not auto-resolve missing clock-in or location issues
+      if (v.exceptionType === "MISSING_CLOCK_IN_OUT" || v.exceptionType === "LOCATION_VERIFICATION") {
+        skipped.push(`${v.id} (${v.exceptionReason || "Missing clock or location issue requires manual evidence"})`);
+        return;
+      }
+      v.verificationStatus = "Verified";
+      v.resolutionCode = "RES-01";
+      v.resolutionLabel = "Approved minor time variance within policy tolerance";
+      v.resolutionNotes = notes;
+      v.billingReadiness = v.visitStatus === "Completed" ? "Cleared for Billing" : v.billingReadiness;
+      v.payrollReadiness = v.visitStatus === "Completed" ? "Cleared for Payroll" : v.payrollReadiness;
+      processed++;
+    }
+  });
+
+  if (processed > 0) {
+    saveEvvVisitsToStorage(visits);
+  }
+  return { processed, skipped };
+}
+
+/**
+ * Retry an aggregator submission
+ */
+export function retryEvvSubmission(submissionId: string): boolean {
+  const submissions = getEvvSubmissionsFromStorage();
+  const subIndex = submissions.findIndex((s) => s.id === submissionId);
+  if (subIndex === -1) return false;
+
+  const target = submissions[subIndex];
+  const now = new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+
+  target.retryCount += 1;
+  target.lastAttemptAt = now;
+  target.status = "Queued";
+  target.responseCode = "QUEUED-RETRY";
+  target.responseReason = "Transmission re-queued into Colorado state aggregator ingestion buffer.";
+  target.nextRetryState = "Batch Processing";
+  target.reconciliationStatus = "Pending Response";
+
+  saveEvvSubmissionsToStorage(submissions);
+
+  // Also update corresponding visit aggregator status
+  const visits = getEvvVisitsFromStorage();
+  const visitIndex = visits.findIndex((v) => v.id === target.visitId);
+  if (visitIndex !== -1) {
+    visits[visitIndex].aggregatorStatus = "Queued";
+    saveEvvVisitsToStorage(visits);
+  }
+
+  return true;
 }
 
 export function addEvvReviewNote(
@@ -1339,14 +2040,16 @@ export function addEvvReviewNote(
   if (index === -1) return null;
 
   const current = visits[index];
+  const now = new Date().toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
   const newNote: EvvReviewNote = {
     id: `rn-${Date.now()}`,
     reviewerName,
     reviewerRole,
-    timestamp: new Date().toLocaleString("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
+    timestamp: now,
     note,
     action,
     reasonCode,
@@ -1355,18 +2058,15 @@ export function addEvvReviewNote(
 
   const newTimelineEvent: EvvTimelineEvent = {
     id: `t-action-${Date.now()}`,
-    timestamp: new Date().toLocaleString("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
+    timestamp: now,
     actor: reviewerName,
     actorRole: reviewerRole,
     event:
       action === "EXCEPTION_RESOLVED"
         ? "Exception Resolved & Verified"
         : action === "CORRECTION_REQUESTED"
-        ? "Correction Requested from Caregiver"
-        : "Staff Review Note Added",
+          ? "Correction Requested from Caregiver"
+          : "Staff Review Note Added",
     details: `${note}${reasonCode ? ` (Reason Code: ${reasonCode} - ${reasonDescription})` : ""}`,
     badgeType: action === "EXCEPTION_RESOLVED" ? "success" : "info",
   };
@@ -1378,17 +2078,17 @@ export function addEvvReviewNote(
     verificationStatus: resolveException
       ? "Verified"
       : action === "CORRECTION_REQUESTED"
-      ? "Correction Required"
-      : action === "INVESTIGATION_STARTED"
-      ? "Under Review"
-      : current.verificationStatus,
+        ? "Correction Required"
+        : action === "INVESTIGATION_STARTED"
+          ? "Under Review"
+          : current.verificationStatus,
     billingReadiness:
       resolveException && current.visitStatus === "Completed"
-        ? "Ready for Billing"
+        ? "Cleared for Billing"
         : current.billingReadiness,
     payrollReadiness:
       resolveException && current.visitStatus === "Completed"
-        ? "Ready for Payroll"
+        ? "Cleared for Payroll"
         : current.payrollReadiness,
   };
 
@@ -1397,45 +2097,62 @@ export function addEvvReviewNote(
   return updated;
 }
 
+/**
+ * CSV Export
+ */
 export function exportEvvVisitsCsv(visits: EvvVisitRecord[]): void {
   const headers = [
     "Visit ID",
+    "Shift #",
     "Date",
     "Caregiver Name",
     "Caregiver ID",
     "Client Name",
     "Client ID",
+    "Client Medicaid ID",
     "Service Code",
     "Service Name",
-    "Scheduled Time",
+    "Scheduled Start",
+    "Scheduled End",
     "Actual Clock-In",
     "Actual Clock-Out",
-    "Duration (Hrs)",
+    "Variance",
+    "Capture Method",
+    "Location Status",
+    "Patient Verification",
     "Visit Status",
     "Verification Status",
-    "Exception Issue",
+    "Exception Reason",
     "Aggregator Status",
     "Billing Readiness",
+    "Payroll Readiness",
   ];
 
   const rows = visits.map((v) => [
     `"${v.id}"`,
+    `"${v.visitNumber}"`,
     `"${v.date}"`,
     `"${v.caregiverName}"`,
     `"${v.caregiverId}"`,
     `"${v.clientName}"`,
     `"${v.clientId}"`,
+    `"${v.clientMedicaidId}"`,
     `"${v.serviceCode}"`,
     `"${v.serviceName}"`,
-    `"${v.scheduledStartTime} - ${v.scheduledEndTime}"`,
-    `"${v.actualClockInTime || "N/A"}"`,
-    `"${v.actualClockOutTime || "N/A"}"`,
-    `"${v.actualDurationHours ?? v.scheduledDurationHours}"`,
+    `"${v.scheduledStartTime}"`,
+    `"${v.scheduledEndTime}"`,
+    `"${v.actualClockInTime || "--"}"`,
+    `"${v.actualClockOutTime || "--"}"`,
+    `"${v.varianceDisplay || "0m"}"`,
+    `"${v.captureMethod}"`,
+    `"${v.locationVerificationStatus}"`,
+    `"${v.patientVerification?.signatureCaptured === "Yes" ? "Signed" : "Unsigned"}"`,
     `"${v.visitStatus}"`,
     `"${v.verificationStatus}"`,
-    `"${v.exceptionTitle || "None"}"`,
+    `"${v.exceptionReason || "None"}"`,
     `"${v.aggregatorStatus}"`,
     `"${v.billingReadiness}"`,
+    `"${v.payrollReadiness}"`,
   ]);
 
   const csvContent =
@@ -1444,7 +2161,7 @@ export function exportEvvVisitsCsv(visits: EvvVisitRecord[]): void {
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `lilisare_evv_visits_${DEMO_DATE}.csv`);
+  link.setAttribute("download", `lilisare_evv_operational_audit_${DEMO_DATE}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

@@ -17,7 +17,7 @@ const feedData = [
 export function LiveVisitFeed() {
   return (
     <Card className="flex flex-col h-full flex flex-col h-full">
-      <CardHeader title="Live visit feed" action={<Link href="/evv-monitoring"><span className="text-brand-teal text-sm font-medium hover:underline cursor-pointer">View all →</span></Link>} />
+      <CardHeader title="Live visit feed" action={<Link href="/admin/evv-visits"><span className="text-[#3e6b2b] text-xs font-semibold hover:underline cursor-pointer">View all →</span></Link>} />
 
       <div className="flex-1 space-y-3 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full">
         {feedData.map((item) => (

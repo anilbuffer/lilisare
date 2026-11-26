@@ -26,10 +26,10 @@ export function EvvCompliance() {
         </div>
 
         <Link
-          href="/admin/evv-visits"
+          href="/admin/evv-visits/exceptions"
           className="text-xs font-semibold text-[#3D6B22] hover:text-[#274C1D] flex items-center gap-1 transition-colors"
         >
-          Exceptions <ArrowRight className="w-3.5 h-3.5" />
+          Exceptions Queue <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
@@ -69,7 +69,7 @@ export function EvvCompliance() {
               Missing EVV GPS or clock-out data may block Medicaid claims.
             </div>
             <Link
-              href="/evv-monitoring"
+              href="/admin/evv-visits/exceptions"
               className="text-[11px] font-bold text-amber-900 underline mt-1.5 inline-block hover:text-amber-950"
             >
               Resolve exceptions now →

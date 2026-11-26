@@ -54,7 +54,7 @@ const TAB_MIN_WIDTHS: Record<string, number> = {
 const MORE_BUTTON_MIN_WIDTH = 96;
 
 export function CareNotesSubNav({
-  title = "CareNotes",
+  title = "Care Notes",
   activeTab: controlledActiveTab,
   onTabChange,
 }: CareNotesSubNavProps) {
@@ -271,7 +271,7 @@ export function CareNotesSubNav({
   const activeOverflowTab = overflowTabs.find((t) => t.id === activeTabState);
 
   return (
-    <div className="w-full space-y-4 mb-4">
+    <div className="w-full space-y-6 mb-4">
       {/* 01. Standard Page Header (Natural page flow, not fixed header) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

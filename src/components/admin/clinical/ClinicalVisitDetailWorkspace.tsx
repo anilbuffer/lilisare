@@ -59,6 +59,7 @@ import {
   VisitDeliveryMethod,
 } from "@/types/clinicalSupervisory";
 import {
+  ClinicalAvatarName,
   ClinicalReviewStatusBadge,
   ClinicalVisitStatusBadge,
   DeliveryMethodBadge,
@@ -402,152 +403,255 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
 
       {/* Header Identity & Actions Card */}
       <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-2 min-w-0">
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
                 {visit.id}
               </span>
-              <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-                {visit.clientName} — {visit.visitType}
-              </h1>
+              <span className="font-mono text-[11px] text-slate-500 font-medium">
+                Req: {visit.requirementId}
+              </span>
               <PriorityBadge priority={visit.priority} />
+              <ClinicalVisitStatusBadge status={visit.visitStatus} />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-600">
-              <span className="font-semibold text-slate-800">{visit.serviceName}</span>
+            <div className="flex items-center gap-3 pt-0.5">
+              <div className="w-10 h-10 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center font-bold text-sm text-[#3D6B22] shrink-0">
+                {visit.clientName
+                  .split(" ")
+                  .filter(Boolean)
+                  .map((p) => p[0])
+                  .slice(0, 2)
+                  .join("")}
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">
+                  {visit.clientName}
+                </h1>
+                <p className="text-xs text-slate-600 font-medium">
+                  {visit.visitType} · {visit.serviceName}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-0.5">
+              <span>{visit.agencyName}</span>
               <span className="text-slate-300">•</span>
-              <span>Due: <strong className="font-mono text-slate-800">{visit.dueDate}</strong></span>
+              <span>{visit.programName}</span>
               <span className="text-slate-300">•</span>
               <span>
-                Assigned:{" "}
-                <strong className={visit.professionalName ? "text-[#3D6B22]" : "text-[#ff6900]"}>
-                  {visit.professionalName || "Unassigned"}
-                </strong>
+                Due: <strong className="font-mono text-slate-800">{visit.dueDate}</strong>
               </span>
-            </div>
-
-            {/* Separate 4 Status Dimensions */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              {requirement && (
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                  <span>Requirement:</span>
-                  <RequirementStatusBadge status={requirement.status} />
-                </div>
-              )}
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                <span>Visit:</span>
-                <ClinicalVisitStatusBadge status={visit.visitStatus} />
-              </div>
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                <span>Documentation:</span>
-                <DocumentationStatusBadge status={visit.documentationStatus} />
-              </div>
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                <span>Review:</span>
-                <ClinicalReviewStatusBadge status={visit.reviewStatus} />
-              </div>
+              <span className="text-slate-300">•</span>
+              <DeliveryMethodBadge method={visit.deliveryMethod} />
             </div>
           </div>
 
-          {/* Permission-Based Operational Actions */}
+          {/* 1 or 2 Primary Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {canEditReq && requirement && (
-              <button
-                type="button"
-                onClick={openEditModal}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs cursor-pointer"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span>Edit Requirement</span>
-              </button>
-            )}
             <button
               type="button"
               onClick={() => setAssignOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs hover:text-slate-900 transition-all cursor-pointer"
             >
               <UserCheck className="w-3.5 h-3.5 text-[#3D6B22]" />
-              <span>{visit.professionalId ? "Reassign" : "Assign"}</span>
+              <span>{visit.professionalId ? "Reassign" : "Assign Professional"}</span>
             </button>
-            {visit.visitStatus !== "Completed" && visit.visitStatus !== "Cancelled" && (
+
+            {visit.visitStatus !== "Completed" && visit.visitStatus !== "Cancelled" ? (
               <button
                 type="button"
                 onClick={() => setScheduleOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
               >
                 <CalendarPlus className="w-3.5 h-3.5" />
-                <span>{visit.scheduledDate ? "Reschedule" : "Schedule"}</span>
+                <span>{visit.scheduledDate ? "Reschedule Visit" : "Schedule Visit"}</span>
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setEscalateDefault(false);
-                setFollowUpOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs cursor-pointer"
-            >
-              <Flag className="w-3.5 h-3.5 text-amber-600" />
-              <span>Add Follow-up</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setEscalateDefault(true);
-                setFollowUpOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#c2410c] bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl shadow-2xs cursor-pointer"
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>Escalate</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setReminderOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs cursor-pointer"
-            >
-              <Bell className="w-3.5 h-3.5 text-slate-500" />
-              <span>Remind</span>
-            </button>
-            {visit.visitStatus !== "Completed" && visit.visitStatus !== "Cancelled" && (
+            ) : (
               <button
                 type="button"
-                onClick={() => setCancelVisitOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl cursor-pointer"
+                onClick={() => {
+                  setEscalateDefault(false);
+                  setFollowUpOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
               >
-                <XCircle className="w-3.5 h-3.5" />
-                <span>Cancel Visit</span>
-              </button>
-            )}
-            {canCancelReq && requirement && requirement.status !== "Cancelled" && (
-              <button
-                type="button"
-                onClick={() => setCancelReqOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl cursor-pointer"
-              >
-                <XCircle className="w-3.5 h-3.5" />
-                <span>Cancel Req</span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Follow-up</span>
               </button>
             )}
           </div>
         </div>
+      </div>
 
-        {/* Operational Attention Alert moved from Overview / Overdue tables */}
-        {activeIssue && (
-          <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-2 font-semibold">
-              <AlertTriangle className="w-4 h-4 text-[#ff6900] shrink-0" />
-              <span>Attention Reason: {activeIssue}</span>
+      {/* Top 4-Card Status & Operational Summary Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Assigned Professional */}
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between space-y-2">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Assigned Professional
+              </span>
+              <UserCheck className="w-4 h-4 text-[#3D6B22]" />
             </div>
-            {daysLate > 0 && (
-              <span className="font-mono font-bold text-[#c2410c] shrink-0">
-                {daysLate}d overdue (due {visit.dueDate})
+            <div>
+              {visit.professionalName ? (
+                <div className="font-bold text-sm text-slate-900 truncate">
+                  {visit.professionalName}
+                </div>
+              ) : (
+                <span className="text-xs font-bold text-[#ff6900] bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200 inline-block">
+                  Unassigned
+                </span>
+              )}
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {visit.professionalQualification || "RN Required"} · {visit.deliveryMethod}
+              </p>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-400 text-[11px]">Staffing Status</span>
+            <button
+              type="button"
+              onClick={() => setAssignOpen(true)}
+              className="font-bold text-[#3D6B22] hover:underline cursor-pointer text-xs"
+            >
+              {visit.professionalId ? "Reassign" : "Assign Staff"}
+            </button>
+          </div>
+        </div>
+
+        {/* Card 2: Due Date & Timeliness */}
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between space-y-2">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Due Date &amp; Timeliness
+              </span>
+              <PriorityBadge priority={visit.priority} />
+            </div>
+            <div>
+              <div className="text-sm font-bold font-mono text-slate-900">
+                {visit.dueDate}
+              </div>
+              <p
+                className={`text-[11px] font-semibold mt-0.5 ${
+                  daysLate > 0
+                    ? "text-[#c2410c] font-bold"
+                    : visit.visitStatus === "Completed"
+                      ? "text-slate-500"
+                      : "text-[#3D6B22]"
+                }`}
+              >
+                {daysLate > 0
+                  ? `${daysLate} day(s) overdue`
+                  : visit.visitStatus === "Completed"
+                    ? "Visit completed"
+                    : "On schedule"}
+              </p>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-400 text-[11px]">
+              {requirement?.frequency || "Periodic"}
+            </span>
+            {activeIssue && (
+              <span
+                className="text-amber-700 font-bold text-[11px] bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 max-w-[140px] truncate"
+                title={activeIssue}
+              >
+                {activeIssue}
               </span>
             )}
           </div>
-        )}
+        </div>
+
+        {/* Card 3: Documentation Status */}
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between space-y-2">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Documentation
+              </span>
+              <FileText className="w-4 h-4 text-slate-400" />
+            </div>
+            <div>
+              <DocumentationStatusBadge status={visit.documentationStatus} />
+              <p className="text-[11px] text-slate-500 mt-1 truncate">
+                {documentation?.documentType || "Awaiting visit submission"}
+              </p>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-400 text-[11px]">
+              {documentation?.attachments?.length || 0} file(s)
+            </span>
+            <button
+              type="button"
+              onClick={() => setReqDocOpen(true)}
+              className="font-bold text-[#3D6B22] hover:underline cursor-pointer text-xs"
+            >
+              Request Docs
+            </button>
+          </div>
+        </div>
+
+        {/* Card 4: Clinical Review & Sign-Off */}
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between space-y-2">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Clinical Review
+              </span>
+              <ShieldCheck className="w-4 h-4 text-[#3D6B22]" />
+            </div>
+            <div>
+              <ClinicalReviewStatusBadge status={visit.reviewStatus} />
+              <p className="text-[11px] text-slate-500 mt-1 truncate">
+                {review?.reviewerName
+                  ? `Reviewer: ${review.reviewerName}`
+                  : "Reviewer unassigned"}
+              </p>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-400 text-[11px]">
+              {visit.daysPendingReview > 0
+                ? `${visit.daysPendingReview}d pending`
+                : "Operational queue"}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedReviewerId(
+                  review?.reviewerId || clinicalSigners[0]?.id || "PROF-RN-01"
+                );
+                setAssignReviewerOpen(true);
+              }}
+              className="font-bold text-[#3D6B22] hover:underline cursor-pointer text-xs"
+            >
+              {review?.reviewerName ? "Change" : "Assign Reviewer"}
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Operational Attention Alert banner (if activeIssue exists) */}
+      {activeIssue && (
+        <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2 font-semibold">
+            <AlertTriangle className="w-4 h-4 text-[#ff6900] shrink-0" />
+            <span>Attention Reason: {activeIssue}</span>
+          </div>
+          {daysLate > 0 && (
+            <span className="font-mono font-bold text-[#c2410c] shrink-0">
+              {daysLate}d overdue (due {visit.dueDate})
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Detail Sections Space-Aware Overflow Tab Strip */}
       <ResponsiveDomainTabStrip
@@ -640,14 +744,38 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
 
           {/* Section B — Requirement Information */}
           {showClientReq && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3 min-w-0">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h2 className="text-sm font-bold text-slate-900">
-                  Section B — Requirement Information
-                </h2>
-                <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
-                  Rule v{visit.ruleVersion}
-                </span>
+            <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-3 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-slate-900">
+                    Section B — Requirement Information
+                  </h2>
+                  <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                    Rule v{visit.ruleVersion}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {canEditReq && requirement && (
+                    <button
+                      type="button"
+                      onClick={openEditModal}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-2xs hover:text-slate-900 transition-all cursor-pointer"
+                    >
+                      <Edit3 className="w-3 h-3 text-slate-500" />
+                      <span>Edit</span>
+                    </button>
+                  )}
+                  {canCancelReq && requirement && requirement.status !== "Cancelled" && (
+                    <button
+                      type="button"
+                      onClick={() => setCancelReqOpen(true)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-lg transition-all cursor-pointer"
+                    >
+                      <XCircle className="w-3 h-3 text-rose-500" />
+                      <span>Cancel</span>
+                    </button>
+                  )}
+                </div>
               </div>
               <dl className="space-y-2 text-xs">
                 <div className="flex justify-between gap-2">
@@ -707,12 +835,26 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
 
           {/* Section C — Visit Information */}
           {showVisitSchedule && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3 min-w-0">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h2 className="text-sm font-bold text-slate-900">
-                  Section C — Visit Information
-                </h2>
-                <ClinicalVisitStatusBadge status={visit.visitStatus} />
+            <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-3 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-slate-900">
+                    Section C — Visit Information
+                  </h2>
+                  <ClinicalVisitStatusBadge status={visit.visitStatus} />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {visit.visitStatus !== "Completed" && visit.visitStatus !== "Cancelled" && (
+                    <button
+                      type="button"
+                      onClick={() => setCancelVisitOpen(true)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-all cursor-pointer"
+                    >
+                      <XCircle className="w-3 h-3 text-rose-500" />
+                      <span>Cancel Visit</span>
+                    </button>
+                  )}
+                </div>
               </div>
               <dl className="space-y-2 text-xs">
                 <div className="flex justify-between gap-2">
@@ -1089,22 +1231,43 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
           )}
 
           {showFollowUps && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4 min-w-0">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-4 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <h2 className="text-base font-bold text-slate-900">
                   Operational Follow-up Tasks &amp; Reminders
                 </h2>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEscalateDefault(false);
-                    setFollowUpOpen(true);
-                  }}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] text-xs font-bold cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>New Follow-up</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEscalateDefault(false);
+                      setFollowUpOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#3D6B22]/10 hover:bg-[#3D6B22]/20 text-[#3D6B22] text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>New Follow-up</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEscalateDefault(true);
+                      setFollowUpOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#c2410c] border border-orange-200 text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Escalate</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReminderOpen(true)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    <Bell className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Remind</span>
+                  </button>
+                </div>
               </div>
 
               {visitFollowUps.length === 0 ? (

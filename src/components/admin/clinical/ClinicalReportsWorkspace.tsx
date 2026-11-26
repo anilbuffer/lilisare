@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { Download, Info } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Download, Info } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -22,12 +24,14 @@ import {
   CLINICAL_PROGRAMS,
   DEMO_TODAY,
   exportClinicalCsv,
+  getClinicalDetailHref,
   getClinicalFollowUps,
   getClinicalRequirements,
   getClinicalVisits,
   subscribeToClinicalSync,
 } from "@/lib/admin/clinicalSupervisoryStore";
 import { ClinicalSubNav } from "./ClinicalSubNav";
+import { ClinicalAvatarName } from "./ClinicalBadges";
 import {
   ResponsiveDomainTabStrip,
   DomainTabItem,
@@ -57,6 +61,7 @@ const REPORTS: DomainTabItem<ReportId>[] = [
 const emptySubscribe = () => () => { };
 
 export function ClinicalReportsWorkspace() {
+  const router = useRouter();
   const [visits, setVisits] = useState(() => getClinicalVisits());
   const [reqs, setReqs] = useState(() => getClinicalRequirements());
   const [followUps, setFollowUps] = useState(() => getClinicalFollowUps());
@@ -176,41 +181,79 @@ export function ClinicalReportsWorkspace() {
     },
   ];
 
-  // Active Report Table Rows
-  const reportRows = useMemo(() => {
+  // Active Report Table Rows (concise on-screen view + full CSV export rows)
+  const reportData = useMemo((): {
+    rows: { detailHref?: string; cells: Record<string, string | number> }[];
+    exportRows: Record<string, string | number>[];
+  } => {
     if (activeReport === "workload") {
-      return CLINICAL_PROFESSIONALS.map((p) => {
+      const items = CLINICAL_PROFESSIONALS.map((p) => {
         const assigned = filteredVisits.filter((v) => v.professionalId === p.id);
+        const completed = assigned.filter((v) => v.visitStatus === "Completed").length;
+        const pendingDoc = assigned.filter(
+          (v) => v.documentationStatus === "Pending" || v.documentationStatus === "Incomplete"
+        ).length;
         return {
-          Professional: p.name,
-          Qualification: p.qualificationType,
-          AssignedVisits: assigned.length,
-          Completed: assigned.filter((v) => v.visitStatus === "Completed").length,
-          PendingDoc: assigned.filter(
-            (v) => v.documentationStatus === "Pending" || v.documentationStatus === "Incomplete"
-          ).length,
-          Status: p.status,
+          cells: {
+            Professional: p.name,
+            Qualification: p.qualificationType,
+            "Assigned Visits": assigned.length,
+            Completed: completed,
+            Status: p.status,
+          },
+          exportRow: {
+            Professional: p.name,
+            Qualification: p.qualificationType,
+            AssignedVisits: assigned.length,
+            Completed: completed,
+            PendingDoc: pendingDoc,
+            Status: p.status,
+          },
         };
       });
+      return {
+        rows: items.map((x) => ({ cells: x.cells })),
+        exportRows: items.map((x) => x.exportRow),
+      };
     }
     if (activeReport === "followup") {
-      return followUps.map((f) => ({
-        FollowUpID: f.id,
-        Client: f.clientName,
-        VisitID: f.visitId,
-        Type: f.followUpType,
-        Priority: f.priority,
-        Owner: f.assignedToName,
-        DueDate: f.dueDate,
-        Status: f.status,
+      const items = followUps.map((f) => ({
+        detailHref: getClinicalDetailHref(f.visitId),
+        cells: {
+          Client: f.clientName,
+          "Follow-up Type": f.followUpType,
+          Priority: f.priority,
+          "Due Date": f.dueDate,
+          Status: f.status,
+        },
+        exportRow: {
+          FollowUpID: f.id,
+          Client: f.clientName,
+          VisitID: f.visitId,
+          Type: f.followUpType,
+          Priority: f.priority,
+          Owner: f.assignedToName,
+          DueDate: f.dueDate,
+          Status: f.status,
+        },
       }));
+      return {
+        rows: items.map((x) => ({ detailHref: x.detailHref, cells: x.cells })),
+        exportRows: items.map((x) => x.exportRow),
+      };
     }
     if (activeReport === "service_wise") {
-      return serviceDistributionData.map((s) => ({
-        Service: s.service,
-        TotalVisits: s.count,
-        ActiveRequirements: reqs.filter((r) => r.serviceName.includes(s.service)).length,
+      const items = serviceDistributionData.map((s) => ({
+        cells: {
+          Service: s.service,
+          "Total Visits": s.count,
+          "Active Requirements": reqs.filter((r) => r.serviceName.includes(s.service)).length,
+        },
       }));
+      return {
+        rows: items.map((x) => ({ cells: x.cells })),
+        exportRows: items.map((x) => x.cells),
+      };
     }
     const subset = filteredVisits.filter((v) => {
       if (activeReport === "overdue")
@@ -223,29 +266,48 @@ export function ClinicalReportsWorkspace() {
         return v.reviewStatus !== "Approved" && v.reviewStatus !== "Not Required";
       return true;
     });
-    return subset.map((v) => ({
-      VisitID: v.id,
-      Client: v.clientName,
-      Service: v.serviceName,
-      VisitType: v.visitType,
-      Professional: v.professionalName || "Unassigned",
-      DueDate: v.dueDate,
-      VisitStatus: v.visitStatus,
-      DocumentationStatus: v.documentationStatus,
-      ReviewStatus: v.reviewStatus,
+    const items = subset.map((v) => ({
+      detailHref: getClinicalDetailHref(v.id),
+      cells: {
+        Client: v.clientName,
+        "Visit Type": v.visitType,
+        Professional: v.professionalName || "Unassigned",
+        "Due Date": v.dueDate,
+        Status:
+          activeReport === "documentation"
+            ? v.documentationStatus
+            : activeReport === "pending_review"
+              ? v.reviewStatus
+              : v.visitStatus,
+      },
+      exportRow: {
+        VisitID: v.id,
+        Client: v.clientName,
+        Service: v.serviceName,
+        VisitType: v.visitType,
+        Professional: v.professionalName || "Unassigned",
+        DueDate: v.dueDate,
+        VisitStatus: v.visitStatus,
+        DocumentationStatus: v.documentationStatus,
+        ReviewStatus: v.reviewStatus,
+      },
     }));
+    return {
+      rows: items.map((x) => ({ detailHref: x.detailHref, cells: x.cells })),
+      exportRows: items.map((x) => x.exportRow),
+    };
   }, [activeReport, filteredVisits, followUps, reqs, serviceDistributionData]);
 
   const handleExportReport = () => {
-    if (reportRows.length === 0) {
+    if (reportData.exportRows.length === 0) {
       toast.info("No rows to export for the current report filter.");
       return;
     }
     exportClinicalCsv(
-      reportRows as Record<string, string | number>[],
+      reportData.exportRows,
       `lilisare-clinical-${activeReport}-report.csv`
     );
-    toast.success(`Exported ${reportRows.length} report rows to CSV`);
+    toast.success(`Exported ${reportData.exportRows.length} report rows to CSV`);
   };
 
   return (
@@ -454,11 +516,11 @@ export function ClinicalReportsWorkspace() {
         </div>
       </div>
 
-      {/* Underlying Report Table */}
+      {/* Standardized Clean Underlying Report Table */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900">
-            {REPORTS.find((r) => r.id === activeReport)?.label} ({reportRows.length} rows)
+            {REPORTS.find((r) => r.id === activeReport)?.label} ({reportData.rows.length} rows)
           </h3>
           <span className="text-[11px] text-slate-400">
             Completed vs Overdue snapshot: {completedVsOverdueData[0]?.count} /{" "}
@@ -466,29 +528,77 @@ export function ClinicalReportsWorkspace() {
           </span>
         </div>
         <div className="overflow-x-auto">
-          {reportRows.length === 0 ? (
+          {reportData.rows.length === 0 ? (
             <div className="p-8 text-center text-xs text-slate-400">
               No records match the active report filters.
             </div>
           ) : (
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  {Object.keys(reportRows[0]).map((col) => (
-                    <th key={col} className="py-3 px-4 whitespace-nowrap">
+                <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  {Object.keys(reportData.rows[0].cells).map((col) => (
+                    <th key={col} className="py-3.5 px-4 whitespace-nowrap">
                       {col}
                     </th>
                   ))}
+                  {reportData.rows.some((r) => Boolean(r.detailHref)) && (
+                    <th className="py-3.5 px-4 text-right whitespace-nowrap">Action</th>
+                  )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {reportRows.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/70">
-                    {Object.values(row).map((val, cIdx) => (
-                      <td key={cIdx} className="py-3 px-4 text-slate-700 whitespace-nowrap">
-                        {String(val)}
+              <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
+                {reportData.rows.map((row, idx) => (
+                  <tr
+                    key={idx}
+                    onClick={() => {
+                      if (row.detailHref) router.push(row.detailHref);
+                    }}
+                    className={`transition-colors ${
+                      row.detailHref
+                        ? "hover:bg-slate-50/80 cursor-pointer group"
+                        : "hover:bg-slate-50/60"
+                    }`}
+                  >
+                    {Object.entries(row.cells).map(([col, val], cIdx) => {
+                      const strVal = String(val);
+                      const isPersonCol = col === "Client" || col === "Professional";
+                      return (
+                        <td
+                          key={col}
+                          className={`py-3.5 px-4 whitespace-nowrap ${
+                            !isPersonCol && cIdx === 0
+                              ? "font-semibold text-slate-900 group-hover:text-[#3D6B22]"
+                              : ""
+                          }`}
+                        >
+                          {isPersonCol ? (
+                            <ClinicalAvatarName
+                              name={strVal}
+                              variant={col === "Client" ? "client" : "staff"}
+                              highlightHover={cIdx === 0}
+                            />
+                          ) : (
+                            strVal
+                          )}
+                        </td>
+                      );
+                    })}
+                    {reportData.rows.some((r) => Boolean(r.detailHref)) && (
+                      <td
+                        className="py-3.5 px-4 text-right whitespace-nowrap"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {row.detailHref && (
+                          <Link
+                            href={row.detailHref}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                          >
+                            <span>View</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        )}
                       </td>
-                    ))}
+                    )}
                   </tr>
                 ))}
               </tbody>

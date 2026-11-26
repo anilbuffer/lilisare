@@ -3,47 +3,22 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  CheckCircle2,
-  Eye,
-  FileWarning,
-  Flag,
-  Lock,
-  Search,
-  ShieldCheck,
-  UserCheck,
-} from "lucide-react";
-import { toast } from "sonner";
-import { Modal } from "@/components/ui/Modal";
-import {
-  FormButtonCancel,
-  FormButtonPrimary,
-  FormLabel,
-  FormSelect,
-  FormTextarea,
-} from "@/components/ui/FormControls";
+import { ArrowRight, Lock, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   checkClinicalPermission,
   resolveClinicalActor,
 } from "@/lib/admin/clinicalAuthGuard";
 import {
-  CLINICAL_PROFESSIONALS,
-  assignClinicalReviewer,
-  completeClinicalSignOff,
   getClinicalDetailHref,
-  getClinicalDocumentationList,
   getClinicalReviews,
   getClinicalVisits,
   subscribeToClinicalSync,
 } from "@/lib/admin/clinicalSupervisoryStore";
-import {
-  ClinicalDocumentation,
-  ClinicalReview,
-  ClinicalVisit,
-} from "@/types/clinicalSupervisory";
+import { ClinicalReview, ClinicalVisit } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
 import {
+  ClinicalAvatarName,
   ClinicalReviewStatusBadge,
   DocumentationStatusBadge,
 } from "./ClinicalBadges";
@@ -51,10 +26,6 @@ import {
   ResponsiveDomainTabStrip,
   DomainTabItem,
 } from "@/components/ui/ResponsiveDomainTabStrip";
-import {
-  CreateFollowUpModal,
-  RequestDocumentationModal,
-} from "./ClinicalActionModals";
 
 type QueueCategory =
   | "all"
@@ -73,9 +44,6 @@ export function ClinicalReviewQueueWorkspace() {
   const canSignOff = checkClinicalPermission(actor, "CLINICAL_SIGN_OFF").allowed;
 
   const [visits, setVisits] = useState<ClinicalVisit[]>(() => getClinicalVisits());
-  const [docs, setDocs] = useState<ClinicalDocumentation[]>(() =>
-    getClinicalDocumentationList()
-  );
   const [reviews, setReviews] = useState<ClinicalReview[]>(() =>
     getClinicalReviews()
   );
@@ -87,18 +55,9 @@ export function ClinicalReviewQueueWorkspace() {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Action Modals
-  const [assignReviewerTarget, setAssignReviewerTarget] = useState<ClinicalVisit | null>(null);
-  const [selectedReviewerId, setSelectedReviewerId] = useState("PROF-RN-01");
-  const [reqDocTarget, setReqDocTarget] = useState<ClinicalVisit | null>(null);
-  const [escalateTarget, setEscalateTarget] = useState<ClinicalVisit | null>(null);
-  const [signOffTarget, setSignOffTarget] = useState<ClinicalVisit | null>(null);
-  const [signOffComment, setSignOffComment] = useState("");
-
   useEffect(() => {
     const load = () => {
       setVisits(getClinicalVisits());
-      setDocs(getClinicalDocumentationList());
       setReviews(getClinicalReviews());
     };
     const timer = window.setTimeout(load, 0);
@@ -108,11 +67,6 @@ export function ClinicalReviewQueueWorkspace() {
       unsub();
     };
   }, []);
-
-  const clinicalSigners = useMemo(
-    () => CLINICAL_PROFESSIONALS.filter((p) => p.canPerformClinicalSignOff),
-    []
-  );
 
   const inScopeVisits = useMemo(
     () =>
@@ -169,7 +123,6 @@ export function ClinicalReviewQueueWorkspace() {
           .includes(t);
       })
       .sort((a, b) => {
-        // Priority: 1. Overdue reviews, 2. Clinical follow-up required, 3. Missing doc, 4. Long-pending
         const score = (x: ClinicalVisit) => {
           let s = x.daysPendingReview * 10;
           if (x.reviewStatus === "Returned for Correction") s += 200;
@@ -181,31 +134,6 @@ export function ClinicalReviewQueueWorkspace() {
         return score(b) - score(a);
       });
   }, [inScopeVisits, category, searchTerm]);
-
-  const handleAssignReviewerSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!assignReviewerTarget || !selectedReviewerId) return;
-    try {
-      assignClinicalReviewer(assignReviewerTarget.id, selectedReviewerId, actor);
-      toast.success(`Clinical reviewer assigned for ${assignReviewerTarget.id}`);
-      setAssignReviewerTarget(null);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to assign reviewer");
-    }
-  };
-
-  const handleSignOffSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!signOffTarget) return;
-    try {
-      completeClinicalSignOff(signOffTarget.id, signOffComment, actor);
-      toast.success(`Clinical sign-off completed for ${signOffTarget.id}`);
-      setSignOffTarget(null);
-      setSignOffComment("");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Sign-off blocked");
-    }
-  };
 
   const categories: DomainTabItem<QueueCategory>[] = useMemo(
     () => [
@@ -328,216 +256,79 @@ export function ClinicalReviewQueueWorkspace() {
         </div>
       </div>
 
-      {/* Review Queue Table */}
+      {/* Standardized Clean Review Queue Table (6 Columns, Zero Horizontal Scroll) */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1140px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3.5 px-4">Visit ID</th>
-                <th className="py-3.5 px-3">Client</th>
-                <th className="py-3.5 px-3">Service</th>
-                <th className="py-3.5 px-3">Visit Type</th>
-                <th className="py-3.5 px-3">Performing Professional</th>
-                <th className="py-3.5 px-3">Visit Date</th>
-                <th className="py-3.5 px-3">Submitted Date</th>
-                <th className="py-3.5 px-3">Documentation Status</th>
-                <th className="py-3.5 px-3">Review Status</th>
-                <th className="py-3.5 px-3">Assigned Reviewer</th>
-                <th className="py-3.5 px-3">Days Pending</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th className="py-3.5 px-4">Client</th>
+                <th className="py-3.5 px-4">Visit Type</th>
+                <th className="py-3.5 px-4">Assigned Reviewer</th>
+                <th className="py-3.5 px-4">Documentation</th>
+                <th className="py-3.5 px-4">Review Status</th>
+                <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
-              {queueRecords.map((v) => {
-                const doc = docs.find((d) => d.visitId === v.id);
-                const rev = reviews.find((r) => r.visitId === v.id);
-                return (
-                  <tr
-                    key={v.id}
-                    onClick={() => router.push(getClinicalDetailHref(v.id))}
-                    className="hover:bg-slate-50/70 transition-colors cursor-pointer"
-                  >
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-800 whitespace-nowrap">
-                      {v.id}
-                    </td>
-                    <td className="py-3.5 px-3 font-semibold text-slate-900 whitespace-nowrap">
-                      {v.clientName}
-                    </td>
-                    <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap truncate max-w-[150px]">
-                      {v.serviceName}
-                    </td>
-                    <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap">
-                      {v.visitType}
-                    </td>
-                    <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap">
-                      {v.professionalName || "Unassigned"}
-                    </td>
-                    <td className="py-3.5 px-3 font-mono text-slate-600 whitespace-nowrap">
-                      {v.scheduledDate || v.dueDate}
-                    </td>
-                    <td className="py-3.5 px-3 font-mono text-slate-500 whitespace-nowrap">
-                      {doc?.submittedAt || "Not Submitted"}
-                    </td>
-                    <td className="py-3.5 px-3 whitespace-nowrap">
-                      <DocumentationStatusBadge status={v.documentationStatus} />
-                    </td>
-                    <td className="py-3.5 px-3 whitespace-nowrap">
-                      <ClinicalReviewStatusBadge status={v.reviewStatus} />
-                    </td>
-                    <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap">
-                      {rev?.reviewerName || "Unassigned"}
-                    </td>
-                    <td className="py-3.5 px-3 whitespace-nowrap">
-                      <span
-                        className={`font-bold ${
-                          v.daysPendingReview >= 5
-                            ? "text-[#ff6900]"
-                            : v.daysPendingReview > 0
-                              ? "text-amber-700"
-                              : "text-slate-500"
-                        }`}
-                      >
-                        {v.daysPendingReview}d
-                      </span>
-                    </td>
-                    <td
-                      className="py-3.5 px-4 text-right whitespace-nowrap"
-                      onClick={(e) => e.stopPropagation()}
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
+              {queueRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
+                    No records currently match this review queue filter.
+                  </td>
+                </tr>
+              ) : (
+                queueRecords.map((v) => {
+                  const rev = reviews.find((r) => r.visitId === v.id);
+                  return (
+                    <tr
+                      key={v.id}
+                      onClick={() => router.push(getClinicalDetailHref(v.id))}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
-                      <div className="inline-flex items-center gap-1.5">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalAvatarName
+                          name={v.clientName}
+                          variant="client"
+                          highlightHover
+                        />
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[190px]">
+                        {v.visitType}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalAvatarName
+                          name={rev?.reviewerName}
+                          variant="staff"
+                          fallbackVariant="muted"
+                        />
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <DocumentationStatusBadge status={v.documentationStatus} />
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalReviewStatusBadge status={v.reviewStatus} />
+                      </td>
+                      <td
+                        className="py-3.5 px-4 text-right whitespace-nowrap"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Link
                           href={getClinicalDetailHref(v.id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold text-slate-700"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
                         >
-                          <Eye className="w-3 h-3" />
-                          <span>Open</span>
+                          <span>View</span>
+                          <ArrowRight className="w-3 h-3" />
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedReviewerId(rev?.reviewerId || clinicalSigners[0]?.id || "");
-                            setAssignReviewerTarget(v);
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-semibold text-slate-700 cursor-pointer"
-                        >
-                          <UserCheck className="w-3 h-3" />
-                          <span>Reviewer</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setReqDocTarget(v)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[11px] font-semibold text-amber-800 cursor-pointer"
-                          title="Request missing documentation"
-                        >
-                          <FileWarning className="w-3 h-3" />
-                          <span>Req Doc</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEscalateTarget(v)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-200 text-[11px] font-semibold text-[#c2410c] cursor-pointer"
-                          title="Escalate or add follow-up"
-                        >
-                          <Flag className="w-3 h-3" />
-                          <span>Escalate</span>
-                        </button>
-                        {canSignOff && (
-                          <button
-                            type="button"
-                            onClick={() => setSignOffTarget(v)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#3D6B22] hover:bg-[#345C1D] text-white text-[11px] font-bold cursor-pointer"
-                          >
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Sign Off</span>
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
       </div>
-
-      {/* Assign Clinical Reviewer Modal */}
-      <Modal
-        isOpen={Boolean(assignReviewerTarget)}
-        onClose={() => setAssignReviewerTarget(null)}
-        title="Assign Clinical Reviewer"
-        description={
-          assignReviewerTarget
-            ? `${assignReviewerTarget.clientName} • ${assignReviewerTarget.id}`
-            : undefined
-        }
-        icon={<ShieldCheck className="w-5 h-5" />}
-        maxWidth="md"
-      >
-        <form onSubmit={handleAssignReviewerSubmit} className="space-y-4">
-          <div>
-            <FormLabel required>Authorised Clinical Reviewer (RN)</FormLabel>
-            <FormSelect
-              value={selectedReviewerId}
-              onChange={(e) => setSelectedReviewerId(e.target.value)}
-            >
-              {clinicalSigners.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.roleTitle} · {p.licenseNumber})
-                </option>
-              ))}
-            </FormSelect>
-          </div>
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
-            <FormButtonCancel onClick={() => setAssignReviewerTarget(null)} />
-            <FormButtonPrimary type="submit">Assign Reviewer</FormButtonPrimary>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Authorised RN Sign-off Modal (only accessible when role is CLINICAL_SUPERVISOR_RN) */}
-      <Modal
-        isOpen={Boolean(signOffTarget)}
-        onClose={() => setSignOffTarget(null)}
-        title="Professional Clinical Sign-Off"
-        description={
-          signOffTarget
-            ? `${signOffTarget.clientName} • ${signOffTarget.visitType}`
-            : undefined
-        }
-        icon={<CheckCircle2 className="w-5 h-5" />}
-        maxWidth="md"
-      >
-        <form onSubmit={handleSignOffSubmit} className="space-y-4">
-          <div>
-            <FormLabel>Clinical Review Comments</FormLabel>
-            <FormTextarea
-              rows={3}
-              value={signOffComment}
-              onChange={(e) => setSignOffComment(e.target.value)}
-              placeholder="Document professional sign-off verification..."
-            />
-          </div>
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
-            <FormButtonCancel onClick={() => setSignOffTarget(null)} />
-            <FormButtonPrimary type="submit">Complete Clinical Sign-Off</FormButtonPrimary>
-          </div>
-        </form>
-      </Modal>
-
-      <RequestDocumentationModal
-        visit={reqDocTarget}
-        actor={actor}
-        onClose={() => setReqDocTarget(null)}
-      />
-
-      <CreateFollowUpModal
-        visit={escalateTarget}
-        actor={actor}
-        defaultEscalate
-        onClose={() => setEscalateTarget(null)}
-      />
     </div>
   );
 }

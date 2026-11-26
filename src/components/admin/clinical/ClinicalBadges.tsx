@@ -191,3 +191,52 @@ export function DeliveryMethodBadge({ method }: { method: VisitDeliveryMethod })
     </span>
   );
 }
+
+export function ClinicalAvatarName({
+  name,
+  variant = "client",
+  highlightHover = false,
+  fallbackText = "Unassigned",
+  fallbackVariant = "warning",
+}: {
+  name?: string | null;
+  variant?: "client" | "staff";
+  highlightHover?: boolean;
+  fallbackText?: string;
+  fallbackVariant?: "warning" | "muted";
+}) {
+  if (!name || name === "Unassigned") {
+    return (
+      <span
+        className={
+          fallbackVariant === "warning"
+            ? "font-bold text-[#ff6900]"
+            : "font-semibold text-slate-400"
+        }
+      >
+        {fallbackText}
+      </span>
+    );
+  }
+
+  const avatarCls =
+    variant === "client"
+      ? "bg-emerald-100/80 border-emerald-200/60 text-[#3D6B22]"
+      : "bg-slate-100 border-slate-200/80 text-slate-600";
+
+  const textCls =
+    variant === "client"
+      ? `font-semibold text-slate-900 ${highlightHover ? "group-hover:text-[#3D6B22] transition-colors" : ""}`
+      : `font-medium text-slate-700 ${highlightHover ? "group-hover:text-[#3D6B22] transition-colors" : ""}`;
+
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <div
+        className={`w-6 h-6 rounded-full border flex items-center justify-center font-bold text-[10px] shrink-0 ${avatarCls}`}
+      >
+        {getInitials(name)}
+      </div>
+      <span className={`${textCls} truncate`}>{name}</span>
+    </div>
+  );
+}

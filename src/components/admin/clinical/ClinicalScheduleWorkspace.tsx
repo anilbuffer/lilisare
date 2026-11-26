@@ -4,24 +4,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  ArrowRight,
   Calendar,
   CalendarPlus,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
   List,
-  RefreshCw,
-  UserCheck,
-  XCircle,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
-import {
-  FormButtonCancel,
-  FormButtonPrimary,
-  FormLabel,
-  FormTextarea,
-} from "@/components/ui/FormControls";
 import { useAuth } from "@/hooks/useAuth";
 import { resolveClinicalActor } from "@/lib/admin/clinicalAuthGuard";
 import {
@@ -29,18 +20,14 @@ import {
   CLINICAL_PROFESSIONALS,
   CLINICAL_PROGRAMS,
   DEMO_TODAY,
-  cancelClinicalVisit,
   getClinicalDetailHref,
   getClinicalVisits,
   subscribeToClinicalSync,
 } from "@/lib/admin/clinicalSupervisoryStore";
 import { ClinicalVisit } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
-import { ClinicalVisitStatusBadge, DeliveryMethodBadge } from "./ClinicalBadges";
-import {
-  AssignProfessionalModal,
-  ScheduleClinicalVisitModal,
-} from "./ClinicalActionModals";
+import { ClinicalAvatarName, ClinicalVisitStatusBadge } from "./ClinicalBadges";
+import { ScheduleClinicalVisitModal } from "./ClinicalActionModals";
 
 function getMonday(anchor: Date): Date {
   const d = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
@@ -75,24 +62,24 @@ export function ClinicalScheduleWorkspace() {
   const [clientFilter, setClientFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Modals
+  // Schedule Modal for Unscheduled Visits
   const [scheduleTarget, setScheduleTarget] = useState<ClinicalVisit | null>(null);
   const [pickUnscheduledOpen, setPickUnscheduledOpen] = useState(false);
-  const [reassignTarget, setReassignTarget] = useState<ClinicalVisit | null>(null);
-  const [cancelTarget, setCancelTarget] = useState<ClinicalVisit | null>(null);
-  const [cancelReason, setCancelReason] = useState("");
 
   useEffect(() => {
     const load = () => setVisits(getClinicalVisits());
-    load();
-    return subscribeToClinicalSync(load);
+    const timer = window.setTimeout(load, 0);
+    const unsub = subscribeToClinicalSync(load);
+    return () => {
+      window.clearTimeout(timer);
+      unsub();
+    };
   }, []);
 
   const unscheduledQueue = useMemo(
     () =>
       visits.filter(
-        (v) =>
-          v.visitStatus === "Unscheduled" || v.visitStatus === "Missed"
+        (v) => v.visitStatus === "Unscheduled" || v.visitStatus === "Missed"
       ),
     [visits]
   );
@@ -139,7 +126,6 @@ export function ClinicalScheduleWorkspace() {
         return d;
       });
     }
-    // Month grid (4 weeks starting from Monday of month start)
     const first = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1);
     const mon = getMonday(first);
     return Array.from({ length: 35 }).map((_, i) => {
@@ -155,22 +141,6 @@ export function ClinicalScheduleWorkspace() {
     else if (calMode === "week") next.setDate(next.getDate() + dir * 7);
     else next.setMonth(next.getMonth() + dir);
     setAnchorDate(next);
-  };
-
-  const handleConfirmCancel = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!cancelTarget || !cancelReason.trim()) {
-      toast.error("Cancellation reason is required.");
-      return;
-    }
-    try {
-      cancelClinicalVisit(cancelTarget.id, cancelReason.trim(), actor);
-      toast.success(`Visit ${cancelTarget.id} cancelled and synced with Scheduling`);
-      setCancelTarget(null);
-      setCancelReason("");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Cancellation failed");
-    }
   };
 
   return (
@@ -373,9 +343,7 @@ export function ClinicalScheduleWorkspace() {
         <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
           <div
             className={`grid ${
-              calMode === "day"
-                ? "grid-cols-1"
-                : "grid-cols-1 md:grid-cols-7"
+              calMode === "day" ? "grid-cols-1" : "grid-cols-1 md:grid-cols-7"
             } divide-y md:divide-y-0 md:divide-x divide-slate-200`}
           >
             {calendarDays.map((dayObj) => {
@@ -444,11 +412,6 @@ export function ClinicalScheduleWorkspace() {
                           <div className="text-[10px] font-semibold text-slate-500 truncate">
                             {v.professionalName || "Unassigned"}
                           </div>
-                          {v.scheduledVisitId && (
-                            <div className="text-[10px] font-mono text-[#3D6B22]">
-                              Linked: {v.scheduledVisitId}
-                            </div>
-                          )}
                         </div>
                       ))
                     )}
@@ -460,65 +423,45 @@ export function ClinicalScheduleWorkspace() {
         </div>
       )}
 
-      {/* List View */}
+      {/* Standardized Clean List View (6 Concise Columns, Zero Horizontal Scroll) */}
       {viewType === "list" && (
         <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[980px]">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Visit ID</th>
+                <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th className="py-3.5 px-4">Client</th>
                   <th className="py-3.5 px-4">Visit Type</th>
-                  <th className="py-3.5 px-4">Assigned RN / Supervisor</th>
+                  <th className="py-3.5 px-4">Assigned Professional</th>
                   <th className="py-3.5 px-4">Date &amp; Time</th>
-                  <th className="py-3.5 px-4">Delivery Method</th>
-                  <th className="py-3.5 px-4">Scheduling Ref</th>
                   <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
+              <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
                 {filteredVisits.map((v) => (
                   <tr
                     key={v.id}
                     onClick={() => router.push(getClinicalDetailHref(v.id))}
-                    className="hover:bg-slate-50/70 transition-colors cursor-pointer"
+                    className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                   >
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-800 whitespace-nowrap">
-                      {v.id}
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <ClinicalAvatarName
+                        name={v.clientName}
+                        variant="client"
+                        highlightHover
+                      />
                     </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">
-                      {v.clientName}
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap">
+                    <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[190px]">
                       {v.visitType}
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
-                      {v.professionalName || (
-                        <span className="font-bold text-[#ff6900]">Unassigned</span>
-                      )}
+                      <ClinicalAvatarName name={v.professionalName} variant="staff" />
                     </td>
-                    <td className="py-3.5 px-4 font-mono text-slate-700 whitespace-nowrap">
+                    <td className="py-3.5 px-4 font-mono whitespace-nowrap">
                       {v.scheduledDate
                         ? `${v.scheduledDate} ${v.scheduledStartTime || ""}`
                         : `Due ${v.dueDate}`}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <DeliveryMethodBadge method={v.deliveryMethod} />
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      {v.scheduledVisitId ? (
-                        <Link
-                          href={`/admin/scheduling/${v.scheduledVisitId}/`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="font-mono text-[11px] font-bold text-[#3D6B22] hover:underline"
-                        >
-                          {v.scheduledVisitId} ↗
-                        </Link>
-                      ) : (
-                        <span className="text-slate-400">Not Linked</span>
-                      )}
                     </td>
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <ClinicalVisitStatusBadge status={v.visitStatus} />
@@ -527,36 +470,13 @@ export function ClinicalScheduleWorkspace() {
                       className="py-3.5 px-4 text-right whitespace-nowrap"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="inline-flex items-center gap-1.5">
-                        {v.visitStatus !== "Completed" && v.visitStatus !== "Cancelled" && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setScheduleTarget(v)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#3D6B22]/10 text-[#3D6B22] hover:bg-[#3D6B22]/20 text-[11px] font-bold cursor-pointer"
-                            >
-                              <RefreshCw className="w-3 h-3" />
-                              <span>{v.scheduledDate ? "Reschedule" : "Schedule"}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setReassignTarget(v)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold text-slate-700 cursor-pointer"
-                            >
-                              <UserCheck className="w-3 h-3" />
-                              <span>Reassign</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setCancelTarget(v)}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-[11px] font-semibold text-rose-700 cursor-pointer"
-                              title="Cancel visit"
-                            >
-                              <XCircle className="w-3 h-3" />
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      <Link
+                        href={getClinicalDetailHref(v.id)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                      >
+                        <span>View</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -616,43 +536,6 @@ export function ClinicalScheduleWorkspace() {
         actor={actor}
         onClose={() => setScheduleTarget(null)}
       />
-
-      <AssignProfessionalModal
-        visit={reassignTarget}
-        actor={actor}
-        onClose={() => setReassignTarget(null)}
-      />
-
-      {/* Cancel Visit Confirmation Modal */}
-      <Modal
-        isOpen={Boolean(cancelTarget)}
-        onClose={() => setCancelTarget(null)}
-        title="Cancel Clinical Visit"
-        description={
-          cancelTarget
-            ? `${cancelTarget.clientName} • ${cancelTarget.visitType}`
-            : undefined
-        }
-        icon={<XCircle className="w-5 h-5" />}
-        maxWidth="md"
-      >
-        <form onSubmit={handleConfirmCancel} className="space-y-4">
-          <div>
-            <FormLabel required>Cancellation Reason (Audited)</FormLabel>
-            <FormTextarea
-              rows={3}
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Explain why this clinical visit is being cancelled..."
-              required
-            />
-          </div>
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
-            <FormButtonCancel onClick={() => setCancelTarget(null)} />
-            <FormButtonPrimary type="submit">Confirm Cancellation</FormButtonPrimary>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 }

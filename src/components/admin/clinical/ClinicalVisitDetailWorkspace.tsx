@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
+  AlertTriangle,
   ArrowLeft,
   Bell,
   CalendarPlus,
@@ -37,12 +38,17 @@ import {
   resolveClinicalActor,
 } from "@/lib/admin/clinicalAuthGuard";
 import {
+  CLINICAL_PROFESSIONALS,
+  DEMO_TODAY,
+  assignClinicalReviewer,
   cancelClinicalRequirement,
+  cancelClinicalVisit,
   completeClinicalFollowUp,
   completeClinicalSignOff,
   editClinicalRequirement,
   getClinicalAuditEvents,
   getClinicalFollowUps,
+  getMockNotifications,
   resolveClinicalRecordByParam,
   subscribeToClinicalSync,
 } from "@/lib/admin/clinicalSupervisoryStore";
@@ -81,9 +87,30 @@ type DetailSectionTab =
   | "followups"
   | "audit";
 
+const VALID_DETAIL_TABS: DetailSectionTab[] = [
+  "all",
+  "client_req",
+  "visit_schedule",
+  "documentation",
+  "review",
+  "followups",
+  "audit",
+];
+
+function calcDaysOverdue(dueDate: string): number {
+  const due = new Date(`${dueDate}T12:00:00`).getTime();
+  const today = new Date(`${DEMO_TODAY}T12:00:00`).getTime();
+  return Math.max(0, Math.round((today - due) / (1000 * 60 * 60 * 24)));
+}
+
 export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
   const searchParams = useSearchParams();
   const queryId = searchParams.get("id");
+  const urlTabParam = searchParams.get("tab") as DetailSectionTab | null;
+  const highlightedEventId = searchParams.get("eventId");
+  const resolvedUrlTab: DetailSectionTab =
+    urlTabParam && VALID_DETAIL_TABS.includes(urlTabParam) ? urlTabParam : "all";
+
   const { currentUser } = useAuth();
   const actor = useMemo(() => resolveClinicalActor(currentUser), [currentUser]);
   const canEditReq = checkClinicalPermission(actor, "EDIT_REQUIREMENT").allowed;
@@ -95,19 +122,34 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
   );
   const [followUps, setFollowUps] = useState(() => getClinicalFollowUps());
   const [auditEvents, setAuditEvents] = useState(() => getClinicalAuditEvents());
-  const [activeDetailTab, setActiveDetailTab] = useState<DetailSectionTab>("all");
+  const [mockNotifs, setMockNotifs] = useState(() => getMockNotifications());
+  const [tabOverride, setTabOverride] = useState<{
+    sourceKey: string;
+    tab: DetailSectionTab;
+  } | null>(null);
+
+  const tabSourceKey = `${visitId}:${queryId || ""}:${resolvedUrlTab}`;
+  const activeDetailTab: DetailSectionTab =
+    tabOverride && tabOverride.sourceKey === tabSourceKey
+      ? tabOverride.tab
+      : resolvedUrlTab;
+  const setActiveDetailTab = (tab: DetailSectionTab) =>
+    setTabOverride({ sourceKey: tabSourceKey, tab });
 
   // Modals
   const [assignOpen, setAssignOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [followUpOpen, setFollowUpOpen] = useState(false);
+  const [escalateDefault, setEscalateDefault] = useState(false);
   const [reqDocOpen, setReqDocOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [editReqOpen, setEditReqOpen] = useState(false);
   const [cancelReqOpen, setCancelReqOpen] = useState(false);
+  const [cancelVisitOpen, setCancelVisitOpen] = useState(false);
+  const [assignReviewerOpen, setAssignReviewerOpen] = useState(false);
   const [signOffOpen, setSignOffOpen] = useState(false);
 
-  // Edit Requirement Form state
+  // Edit / Reviewer / Sign-Off Form State
   const [editName, setEditName] = useState("");
   const [editDueDate, setEditDueDate] = useState("");
   const [editDelivery, setEditDelivery] = useState<VisitDeliveryMethod>("In-home");
@@ -115,12 +157,15 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
   const [editStatus, setEditStatus] = useState<RequirementStatus>("Active");
   const [editNotes, setEditNotes] = useState("");
   const [cancelReason, setCancelReason] = useState("");
+  const [cancelVisitReason, setCancelVisitReason] = useState("");
+  const [selectedReviewerId, setSelectedReviewerId] = useState("PROF-RN-01");
   const [signOffComment, setSignOffComment] = useState("");
 
   const reload = useCallback(() => {
     setBundle(resolveClinicalRecordByParam(visitId, queryId));
     setFollowUps(getClinicalFollowUps());
     setAuditEvents(getClinicalAuditEvents());
+    setMockNotifs(getMockNotifications());
   }, [visitId, queryId]);
 
   useEffect(() => {
@@ -136,6 +181,11 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
   const clientRecord = useMemo(
     () => (visit ? getClientById(visit.clientId) : undefined),
     [visit]
+  );
+
+  const clinicalSigners = useMemo(
+    () => CLINICAL_PROFESSIONALS.filter((p) => p.canPerformClinicalSignOff),
+    []
   );
 
   const openEditModal = () => {
@@ -187,6 +237,33 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
     }
   };
 
+  const handleConfirmCancelVisit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!visit || !cancelVisitReason.trim()) return;
+    try {
+      cancelClinicalVisit(visit.id, cancelVisitReason.trim(), actor);
+      toast.success(`Visit ${visit.id} cancelled and synced with Scheduling`);
+      setCancelVisitOpen(false);
+      setCancelVisitReason("");
+      reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Visit cancellation failed");
+    }
+  };
+
+  const handleAssignReviewer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!visit || !selectedReviewerId) return;
+    try {
+      assignClinicalReviewer(visit.id, selectedReviewerId, actor);
+      toast.success(`Clinical reviewer assigned for ${visit.id}`);
+      setAssignReviewerOpen(false);
+      reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to assign reviewer");
+    }
+  };
+
   const handleSignOff = (e: React.FormEvent) => {
     e.preventDefault();
     if (!visit) return;
@@ -194,6 +271,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
       completeClinicalSignOff(visit.id, signOffComment, actor);
       toast.success(`Clinical sign-off completed for ${visit.id}`);
       setSignOffOpen(false);
+      setSignOffComment("");
       reload();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign-off denied");
@@ -209,6 +287,12 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
         : [],
     [visit, followUps]
   );
+
+  const visitNotifications = useMemo(
+    () => (visit ? mockNotifs.filter((n) => n.visitId === visit.id) : []),
+    [visit, mockNotifs]
+  );
+
   const visitAudit = useMemo(
     () =>
       visit
@@ -266,6 +350,28 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
     );
   }
 
+  const daysLate =
+    visit.visitStatus !== "Completed" && visit.visitStatus !== "Cancelled"
+      ? calcDaysOverdue(visit.dueDate)
+      : 0;
+  const activeIssue = !visit.professionalId
+    ? "No eligible professional assigned yet"
+    : visit.visitStatus === "Missed" || daysLate > 0
+      ? `Visit overdue / past due by ${daysLate} day(s)`
+      : visit.documentationStatus === "Correction Requested"
+        ? "Returned for documentation correction"
+        : visit.documentationStatus === "Pending" ||
+          visit.documentationStatus === "Incomplete" ||
+          (visit.visitStatus === "Completed" &&
+            visit.documentationStatus === "Not Started")
+          ? `Documentation ${visit.documentationStatus.toLowerCase()} — awaiting evidence`
+          : visit.reviewStatus === "Pending Review" ||
+            visit.reviewStatus === "Under Review"
+            ? `Awaiting clinical sign-off (${visit.daysPendingReview}d pending)`
+            : visit.followUpRequired
+              ? "Active operational follow-up / escalation required"
+              : null;
+
   const showClientReq =
     activeDetailTab === "all" || activeDetailTab === "client_req";
   const showVisitSchedule =
@@ -278,7 +384,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
   const showAudit = activeDetailTab === "all" || activeDetailTab === "audit";
 
   return (
-    <div className="w-full max-w-7xl mx-auto min-w-0 space-y-6 pb-12 animate-in fade-in duration-300">
+    <div className="w-full max-w-9xl mx-auto min-w-0 space-y-6 pb-12 animate-in fade-in duration-300">
       {/* Top Back Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
@@ -376,11 +482,25 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
             )}
             <button
               type="button"
-              onClick={() => setFollowUpOpen(true)}
+              onClick={() => {
+                setEscalateDefault(false);
+                setFollowUpOpen(true);
+              }}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs cursor-pointer"
             >
               <Flag className="w-3.5 h-3.5 text-amber-600" />
               <span>Add Follow-up</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEscalateDefault(true);
+                setFollowUpOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#c2410c] bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl shadow-2xs cursor-pointer"
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>Escalate</span>
             </button>
             <button
               type="button"
@@ -390,18 +510,43 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               <Bell className="w-3.5 h-3.5 text-slate-500" />
               <span>Remind</span>
             </button>
+            {visit.visitStatus !== "Completed" && visit.visitStatus !== "Cancelled" && (
+              <button
+                type="button"
+                onClick={() => setCancelVisitOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl cursor-pointer"
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                <span>Cancel Visit</span>
+              </button>
+            )}
             {canCancelReq && requirement && requirement.status !== "Cancelled" && (
               <button
                 type="button"
                 onClick={() => setCancelReqOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl cursor-pointer"
               >
                 <XCircle className="w-3.5 h-3.5" />
-                <span>Cancel</span>
+                <span>Cancel Req</span>
               </button>
             )}
           </div>
         </div>
+
+        {/* Operational Attention Alert moved from Overview / Overdue tables */}
+        {activeIssue && (
+          <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-semibold">
+              <AlertTriangle className="w-4 h-4 text-[#ff6900] shrink-0" />
+              <span>Attention Reason: {activeIssue}</span>
+            </div>
+            {daysLate > 0 && (
+              <span className="font-mono font-bold text-[#c2410c] shrink-0">
+                {daysLate}d overdue (due {visit.dueDate})
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Detail Sections Space-Aware Overflow Tab Strip */}
@@ -466,6 +611,12 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   <dd className="font-semibold text-slate-800 text-right">{visit.serviceName}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
+                  <dt className="text-slate-500">Authorization ID</dt>
+                  <dd className="font-mono text-slate-700">
+                    {requirement?.authorizationId || clientRecord?.authorization?.authNumber || "—"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-2">
                   <dt className="text-slate-500">Service Start Date</dt>
                   <dd className="font-mono text-slate-700">
                     {requirement?.serviceStartDate || "—"}
@@ -500,19 +651,26 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               </div>
               <dl className="space-y-2 text-xs">
                 <div className="flex justify-between gap-2">
+                  <dt className="text-slate-500">Requirement ID</dt>
+                  <dd className="font-mono font-bold text-slate-900">{visit.requirementId}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
                   <dt className="text-slate-500">Requirement Type</dt>
                   <dd className="font-semibold text-slate-900 text-right">{visit.visitCategory}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
                   <dt className="text-slate-500">Applicable Rule</dt>
                   <dd className="font-medium text-[#3D6B22] text-right">
-                    <Link href="/admin/clinical/rules/" className="hover:underline">
+                    <Link
+                      href={`/admin/clinical/rules/${visit.ruleId}/`}
+                      className="hover:underline"
+                    >
                       {requirement?.ruleName || visit.ruleId}
                     </Link>
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Qualification</dt>
+                  <dt className="text-slate-500">Required Professional</dt>
                   <dd className="font-semibold text-slate-800">{visit.professionalQualification}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
@@ -558,6 +716,10 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               </div>
               <dl className="space-y-2 text-xs">
                 <div className="flex justify-between gap-2">
+                  <dt className="text-slate-500">Visit ID</dt>
+                  <dd className="font-mono font-bold text-slate-900">{visit.id}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
                   <dt className="text-slate-500">Scheduled Date</dt>
                   <dd className="font-mono font-semibold text-slate-800">
                     {visit.scheduledAt || "Not Scheduled"}
@@ -576,9 +738,9 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Location / Method</dt>
-                  <dd className="text-slate-700 text-right max-w-[180px]">
-                    {visit.locationDetails}
+                  <dt className="text-slate-500">Delivery &amp; Location</dt>
+                  <dd className="text-slate-700 text-right max-w-[200px]">
+                    {visit.deliveryMethod} · {visit.locationDetails}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2 pt-1">
@@ -762,11 +924,26 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               className={`${showDocumentation ? "lg:col-span-5" : ""
                 } bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4 min-w-0`}
             >
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <h2 className="text-base font-bold text-slate-900">
                   Section E — Clinical Review &amp; Sign-Off
                 </h2>
-                <ClinicalReviewStatusBadge status={visit.reviewStatus} />
+                <div className="flex items-center gap-2">
+                  <ClinicalReviewStatusBadge status={visit.reviewStatus} />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedReviewerId(
+                        review?.reviewerId || clinicalSigners[0]?.id || "PROF-RN-01"
+                      );
+                      setAssignReviewerOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold text-slate-700 cursor-pointer"
+                  >
+                    <UserCheck className="w-3 h-3 text-[#3D6B22]" />
+                    <span>{review?.reviewerName ? "Change Reviewer" : "Assign Reviewer"}</span>
+                  </button>
+                </div>
               </div>
 
               <dl className="space-y-2.5 text-xs">
@@ -774,6 +951,19 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   <dt className="text-slate-500">Assigned Reviewer</dt>
                   <dd className="font-semibold text-slate-900">
                     {review?.reviewerName || "Unassigned"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-slate-500">Days Pending Review</dt>
+                  <dd
+                    className={`font-mono font-bold ${visit.daysPendingReview >= 5
+                      ? "text-[#ff6900]"
+                      : visit.daysPendingReview > 0
+                        ? "text-amber-700"
+                        : "text-slate-600"
+                      }`}
+                  >
+                    {visit.daysPendingReview} day(s)
                   </dd>
                 </div>
                 <div className="flex justify-between gap-2">
@@ -865,29 +1055,35 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                 </span>
               </div>
 
-              <div className="space-y-3 max-h-[340px] overflow-y-auto thin-scrollbar">
-                {visitAudit.map((evt) => (
-                  <div
-                    key={evt.id}
-                    className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/60 space-y-1 text-xs"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono font-bold text-[#3D6B22] text-[11px]">
-                        {evt.action.replace(/_/g, " ")}
-                      </span>
-                      <span className="font-mono text-[10px] text-slate-400">
-                        {evt.timestamp}
-                      </span>
+              <div className="space-y-3 max-h-[380px] overflow-y-auto thin-scrollbar">
+                {visitAudit.map((evt) => {
+                  const isHighlighted = highlightedEventId === evt.id;
+                  return (
+                    <div
+                      key={evt.id}
+                      className={`p-3.5 rounded-xl border space-y-1 text-xs transition-all ${isHighlighted
+                        ? "border-[#3D6B22] bg-emerald-50/40 ring-2 ring-[#3D6B22]/20"
+                        : "border-slate-100 bg-slate-50/60"
+                        }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono font-bold text-[#3D6B22] text-[11px]">
+                          {evt.id} · {evt.action.replace(/_/g, " ")}
+                        </span>
+                        <span className="font-mono text-[10px] text-slate-400">
+                          {evt.timestamp}
+                        </span>
+                      </div>
+                      <div className="text-slate-700 font-medium">
+                        {evt.previousValue} → <strong>{evt.newValue}</strong>
+                      </div>
+                      <p className="text-[11px] text-slate-500">{evt.reason}</p>
+                      <div className="text-[10px] text-slate-400">
+                        {evt.performedBy} ({evt.performedByRole})
+                      </div>
                     </div>
-                    <div className="text-slate-700 font-medium">
-                      {evt.previousValue} → <strong>{evt.newValue}</strong>
-                    </div>
-                    <p className="text-[11px] text-slate-500">{evt.reason}</p>
-                    <div className="text-[10px] text-slate-400">
-                      {evt.performedBy} ({evt.performedByRole})
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -896,11 +1092,14 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
             <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4 min-w-0">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h2 className="text-base font-bold text-slate-900">
-                  Operational Follow-up Tasks
+                  Operational Follow-up Tasks &amp; Reminders
                 </h2>
                 <button
                   type="button"
-                  onClick={() => setFollowUpOpen(true)}
+                  onClick={() => {
+                    setEscalateDefault(false);
+                    setFollowUpOpen(true);
+                  }}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] text-xs font-bold cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -909,7 +1108,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               </div>
 
               {visitFollowUps.length === 0 ? (
-                <p className="text-xs text-slate-400 py-6 text-center">
+                <p className="text-xs text-slate-400 py-4 text-center">
                   No operational follow-up tasks created for this visit.
                 </p>
               ) : (
@@ -946,6 +1145,29 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {visitNotifications.length > 0 && (
+                <div className="pt-3 border-t border-slate-100 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <span>Simulated Operational Reminders Sent</span>
+                    <span>{visitNotifications.length} logged</span>
+                  </div>
+                  <div className="space-y-2">
+                    {visitNotifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className="p-3 rounded-xl border border-slate-100 bg-slate-50/70 text-xs space-y-1"
+                      >
+                        <div className="flex justify-between gap-2">
+                          <span className="font-bold text-slate-800">{n.recipientName}</span>
+                          <span className="font-mono text-[10px] text-slate-400">{n.sentAt}</span>
+                        </div>
+                        <p className="text-slate-600 text-[11px]">{n.message}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -1034,6 +1256,33 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
         </form>
       </Modal>
 
+      {/* Cancel Scheduled Visit Modal */}
+      <Modal
+        isOpen={cancelVisitOpen}
+        onClose={() => setCancelVisitOpen(false)}
+        title="Cancel Scheduled Visit"
+        description={`${visit.id} · ${visit.clientName}`}
+        icon={<XCircle className="w-5 h-5" />}
+        maxWidth="md"
+      >
+        <form onSubmit={handleConfirmCancelVisit} className="space-y-4">
+          <div>
+            <FormLabel required>Visit Cancellation Reason (Audited &amp; Synced)</FormLabel>
+            <FormTextarea
+              rows={3}
+              value={cancelVisitReason}
+              onChange={(e) => setCancelVisitReason(e.target.value)}
+              placeholder="Document operational reason for cancelling this visit..."
+              required
+            />
+          </div>
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <FormButtonCancel onClick={() => setCancelVisitOpen(false)} />
+            <FormButtonPrimary type="submit">Confirm Visit Cancellation</FormButtonPrimary>
+          </div>
+        </form>
+      </Modal>
+
       {/* Cancel Requirement Modal */}
       <Modal
         isOpen={cancelReqOpen}
@@ -1056,6 +1305,37 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
             <FormButtonCancel onClick={() => setCancelReqOpen(false)} />
             <FormButtonPrimary type="submit">Confirm Cancellation</FormButtonPrimary>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Assign Clinical Reviewer Modal */}
+      <Modal
+        isOpen={assignReviewerOpen}
+        onClose={() => setAssignReviewerOpen(false)}
+        title="Assign Eligible Clinical Reviewer"
+        description={`${visit.id} • ${visit.clientName}`}
+        icon={<UserCheck className="w-5 h-5" />}
+        maxWidth="md"
+      >
+        <form onSubmit={handleAssignReviewer} className="space-y-4">
+          <div>
+            <FormLabel required>Authorised Reviewer (RN / Clinical Supervisor)</FormLabel>
+            <FormSelect
+              value={selectedReviewerId}
+              onChange={(e) => setSelectedReviewerId(e.target.value)}
+              required
+            >
+              {clinicalSigners.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — {p.roleTitle} ({p.licenseNumber})
+                </option>
+              ))}
+            </FormSelect>
+          </div>
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <FormButtonCancel onClick={() => setAssignReviewerOpen(false)} />
+            <FormButtonPrimary type="submit">Assign Reviewer</FormButtonPrimary>
           </div>
         </form>
       </Modal>
@@ -1099,6 +1379,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
       <CreateFollowUpModal
         visit={followUpOpen ? visit : null}
         actor={actor}
+        defaultEscalate={escalateDefault}
         onClose={() => setFollowUpOpen(false)}
         onSuccess={reload}
       />

@@ -1,17 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  Copy,
-  Edit3,
-  Eye,
-  History,
-  Info,
-  Plus,
-  Power,
-  Sliders,
-} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Info, Plus, Sliders } from "lucide-react";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
 import {
@@ -31,11 +23,10 @@ import {
   CLINICAL_AGENCIES,
   CLINICAL_PROGRAMS,
   DEMO_TODAY,
-  duplicateClinicalRule,
+  getClinicalRuleDetailHref,
   getClinicalRules,
   saveClinicalRule,
   subscribeToClinicalSync,
-  toggleClinicalRuleStatus,
 } from "@/lib/admin/clinicalSupervisoryStore";
 import {
   ClinicalProfessionalType,
@@ -47,26 +38,24 @@ import {
 import { ClinicalSubNav } from "./ClinicalSubNav";
 
 export function ClinicalRulesWorkspace() {
+  const router = useRouter();
   const { currentUser } = useAuth();
   const actor = useMemo(() => resolveClinicalActor(currentUser), [currentUser]);
   const canManageRules = checkClinicalPermission(actor, "MANAGE_RULES").allowed;
 
   const [rules, setRules] = useState<ClinicalRule[]>(() => getClinicalRules());
-  const [viewRule, setViewRule] = useState<ClinicalRule | null>(null);
-  const [historyRule, setHistoryRule] = useState<ClinicalRule | null>(null);
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingRule, setEditingRule] = useState<ClinicalRule | null>(null);
-  const [confirmImpactChecked, setConfirmImpactChecked] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
-  // Rule Editor Fields
+  // Create New Rule Form State
   const [ruleName, setRuleName] = useState("");
   const [agencyId, setAgencyId] = useState(CLINICAL_AGENCIES[0].id);
   const [stateCode, setStateCode] = useState("OR");
   const [programName, setProgramName] = useState(CLINICAL_PROGRAMS[0]);
   const [serviceName, setServiceName] = useState("");
-  const [serviceCode, setServiceCode] = useState("");
-  const [visitCategory, setVisitCategory] = useState<ClinicalVisitCategory>("Recurring RN Visit");
-  const [visitType, setVisitType] = useState("");
+  const [serviceCode, setServiceCode] = useState("T1019");
+  const [visitCategory, setVisitCategory] =
+    useState<ClinicalVisitCategory>("Recurring RN Visit");
+  const [visitType, setVisitType] = useState("Supervisory Visit");
   const [profType, setProfType] = useState<ClinicalProfessionalType>("RN");
   const [initialReq, setInitialReq] = useState(true);
   const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>("Quarterly");
@@ -76,22 +65,23 @@ export function ClinicalRulesWorkspace() {
   const [reviewRequired, setReviewRequired] = useState(true);
   const [effectiveDate, setEffectiveDate] = useState(DEMO_TODAY);
   const [endDate, setEndDate] = useState("");
-  const [status, setStatus] = useState<"Active" | "Inactive" | "Draft">("Active");
+  const [status, setStatus] = useState<"Active" | "Inactive" | "Draft">("Draft");
   const [confirmationStatus, setConfirmationStatus] = useState<
     "Confirmed" | "Pending LiliSare Confirmation"
   >("Pending LiliSare Confirmation");
   const [notes, setNotes] = useState("");
-  const [changeSummary, setChangeSummary] = useState("");
 
   useEffect(() => {
     const load = () => setRules(getClinicalRules());
-    load();
-    return subscribeToClinicalSync(load);
+    const timer = window.setTimeout(load, 0);
+    const unsub = subscribeToClinicalSync(load);
+    return () => {
+      window.clearTimeout(timer);
+      unsub();
+    };
   }, []);
 
   const openCreate = () => {
-    setEditingRule(null);
-    setConfirmImpactChecked(true);
     setRuleName("");
     setAgencyId(CLINICAL_AGENCIES[0].id);
     setStateCode("OR");
@@ -112,45 +102,13 @@ export function ClinicalRulesWorkspace() {
     setStatus("Draft");
     setConfirmationStatus("Pending LiliSare Confirmation");
     setNotes("");
-    setChangeSummary("Created new configurable rule.");
-    setEditorOpen(true);
+    setCreateOpen(true);
   };
 
-  const openEdit = (rule: ClinicalRule) => {
-    setEditingRule(rule);
-    setConfirmImpactChecked(false);
-    setRuleName(rule.ruleName);
-    setAgencyId(rule.agencyId);
-    setStateCode(rule.state);
-    setProgramName(rule.programName);
-    setServiceName(rule.serviceName);
-    setServiceCode(rule.serviceCode);
-    setVisitCategory(rule.visitCategory);
-    setVisitType(rule.visitType);
-    setProfType(rule.professionalType);
-    setInitialReq(rule.initialVisitRequired);
-    setRecurrenceType(rule.recurrenceType);
-    setIntervalDays(rule.recurrenceIntervalDays);
-    setDeliveryMethod(rule.deliveryMethod);
-    setDocRequired(rule.documentationRequired);
-    setReviewRequired(rule.reviewRequired);
-    setEffectiveDate(rule.effectiveDate);
-    setEndDate(rule.endDate || "");
-    setStatus(rule.status);
-    setConfirmationStatus(rule.confirmationStatus);
-    setNotes(rule.internalNotes);
-    setChangeSummary("");
-    setEditorOpen(true);
-  };
-
-  const handleSave = (e: React.FormEvent) => {
+  const handleSaveNew = (e: React.FormEvent) => {
     e.preventDefault();
     if (!ruleName.trim() || !serviceName.trim() || !visitType.trim()) {
       toast.error("Please fill in Rule Name, Service, and Visit Type.");
-      return;
-    }
-    if (editingRule && editingRule.status === "Active" && !confirmImpactChecked) {
-      toast.error("Please acknowledge the forward-only effective rule warning.");
       return;
     }
 
@@ -162,16 +120,15 @@ export function ClinicalRulesWorkspace() {
         : `${recurrenceType} (${intervalDays}d)`;
 
     try {
-      saveClinicalRule(
+      const created = saveClinicalRule(
         {
-          id: editingRule?.id,
           ruleName: ruleName.trim(),
           agencyId: agency.id,
-          agencyName: editingRule?.agencyName || agency.name,
+          agencyName: agency.name,
           state: stateCode.trim() || agency.state,
           programId: `PRG-${programName.slice(0, 6).toUpperCase()}`,
           programName,
-          serviceId: editingRule?.serviceId || "svc-custom",
+          serviceId: "svc-custom",
           serviceName: serviceName.trim(),
           serviceCode: serviceCode.trim() || "CUSTOM",
           visitCategory,
@@ -182,7 +139,12 @@ export function ClinicalRulesWorkspace() {
               ? ["RN"]
               : profType === "Clinical Supervisor"
                 ? ["RN", "Clinical Supervisor", "Field Supervisor"]
-                : ["RN", "Clinical Supervisor", "Field Supervisor", "Qualified Non-RN Supervisor"],
+                : [
+                  "RN",
+                  "Clinical Supervisor",
+                  "Field Supervisor",
+                  "Qualified Non-RN Supervisor",
+                ],
           initialVisitRequired: initialReq,
           recurrenceType,
           recurrenceIntervalDays: Number(intervalDays) || 0,
@@ -195,20 +157,15 @@ export function ClinicalRulesWorkspace() {
           status,
           confirmationStatus,
           internalNotes: notes.trim(),
-          changeSummary:
-            changeSummary.trim() ||
-            `Updated rule configuration effective ${effectiveDate}.`,
+          changeSummary: "Created new configurable rule.",
         },
         actor
       );
-      toast.success(
-        editingRule
-          ? "Rule updated with new version snapshot & audit event"
-          : "New configurable rule saved"
-      );
-      setEditorOpen(false);
+      toast.success(`New rule ${created.id} created`);
+      setCreateOpen(false);
+      router.push(getClinicalRuleDetailHref(created.id));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save rule");
+      toast.error(err instanceof Error ? err.message : "Failed to create rule");
     }
   };
 
@@ -227,7 +184,7 @@ export function ClinicalRulesWorkspace() {
               Configurable Service-Based Reference Rules (Pending Confirmation Where Marked)
             </div>
             <p>
-              Exact supervisory rules for CNA, IHSS, annual in-home visits, and service cadences remain configurable until LiliSare confirms jurisdictional policies. Existing completed records preserve the rule version snapshot active when created.
+              Exact supervisory rules for CNA, IHSS, annual in-home visits, and service cadences remain configurable until LiliSare confirms jurisdictional policies. Select any rule to view or edit full configuration, delivery policies, and version history.
             </p>
           </div>
         </div>
@@ -244,258 +201,83 @@ export function ClinicalRulesWorkspace() {
         )}
       </div>
 
-      {/* Rules Table */}
+      {/* Standardized Clean Rules Table (6 Concise Columns, Zero Horizontal Scroll) */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1180px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="py-3.5 px-4">Rule Name</th>
-                <th className="py-3.5 px-3">Agency</th>
-                <th className="py-3.5 px-3">Program</th>
-                <th className="py-3.5 px-3">Service</th>
-                <th className="py-3.5 px-3">Visit Type</th>
-                <th className="py-3.5 px-3">Required Professional</th>
-                <th className="py-3.5 px-3">Frequency</th>
-                <th className="py-3.5 px-3">Delivery</th>
-                <th className="py-3.5 px-3">Effective Date</th>
-                <th className="py-3.5 px-3">Status</th>
-                <th className="py-3.5 px-3">Version</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3.5 px-4">Service</th>
+                <th className="py-3.5 px-4">Required Professional</th>
+                <th className="py-3.5 px-4">Frequency</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
-              {rules.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap max-w-[230px] truncate">
-                    {r.ruleName}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-600 whitespace-nowrap">
-                    {r.agencyName}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-600 whitespace-nowrap max-w-[155px] truncate">
-                    {r.programName}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap">
-                    {r.serviceName}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap">
-                    {r.visitType}
-                  </td>
-                  <td className="py-3.5 px-3 font-medium text-slate-800 whitespace-nowrap">
-                    {r.professionalType}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-600 whitespace-nowrap">
-                    {r.frequencyLabel}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap">
-                    {r.deliveryMethod}
-                  </td>
-                  <td className="py-3.5 px-3 font-mono text-slate-600 whitespace-nowrap">
-                    {r.effectiveDate}
-                  </td>
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${r.status === "Active"
-                        ? "bg-emerald-50 text-[#3D6B22] border-emerald-200"
-                        : r.status === "Draft"
-                          ? "bg-amber-50 text-amber-800 border-amber-200"
-                          : "bg-slate-100 text-slate-600 border-slate-200"
-                        }`}
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
+              {rules.map((r) => {
+                const detailHref = getClinicalRuleDetailHref(r.id);
+                return (
+                  <tr
+                    key={r.id}
+                    onClick={() => router.push(detailHref)}
+                    className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                  >
+                    <td className="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap max-w-[230px] truncate group-hover:text-[#3D6B22]">
+                      {r.ruleName}
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[170px]">
+                      {r.serviceName}
+                    </td>
+                    <td className="py-3.5 px-4 font-medium text-slate-800 whitespace-nowrap">
+                      {r.professionalType}
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      {r.frequencyLabel}
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${r.status === "Active"
+                          ? "bg-emerald-50 text-[#3D6B22] border-emerald-200"
+                          : r.status === "Draft"
+                            ? "bg-amber-50 text-amber-800 border-amber-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                          }`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td
+                      className="py-3.5 px-4 text-right whitespace-nowrap"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 font-mono font-bold text-slate-700 whitespace-nowrap">
-                    v{r.version}
-                  </td>
-                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                    <div className="inline-flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setViewRule(r)}
-                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 cursor-pointer"
-                        title="View Rule Details"
+                      <Link
+                        href={detailHref}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
                       >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      {canManageRules && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => openEdit(r)}
-                            className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 cursor-pointer"
-                            title="Edit Rule"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              duplicateClinicalRule(r.id, actor);
-                              toast.success(`Duplicated ${r.id} as Draft`);
-                            }}
-                            className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 cursor-pointer"
-                            title="Duplicate Rule"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              toggleClinicalRuleStatus(r.id, actor);
-                              toast.success(
-                                `Rule ${r.id} ${r.status === "Active" ? "deactivated" : "activated"}`
-                              );
-                            }}
-                            className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 cursor-pointer"
-                            title={r.status === "Active" ? "Deactivate" : "Activate"}
-                          >
-                            <Power className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setHistoryRule(r)}
-                        className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 cursor-pointer"
-                        title="View Version History"
-                      >
-                        <History className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <span>View</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* View Rule Details Modal */}
+      {/* Create Visit Rule Modal */}
       <Modal
-        isOpen={Boolean(viewRule)}
-        onClose={() => setViewRule(null)}
-        title={viewRule?.ruleName || "Rule Details"}
-        description={
-          viewRule
-            ? `${viewRule.id} · v${viewRule.version} · ${viewRule.confirmationStatus}`
-            : undefined
-        }
-        icon={<Sliders className="w-5 h-5" />}
-        maxWidth="lg"
-      >
-        {viewRule && (
-          <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
-              <div>
-                <span className="text-slate-400 font-bold uppercase text-[10px] block">
-                  Service / Code
-                </span>
-                <span className="font-semibold text-slate-900">
-                  {viewRule.serviceName} ({viewRule.serviceCode})
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-bold uppercase text-[10px] block">
-                  Required Professional
-                </span>
-                <span className="font-semibold text-slate-900">
-                  {viewRule.professionalType}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-bold uppercase text-[10px] block">
-                  Initial / Recurrence
-                </span>
-                <span className="font-semibold text-slate-900">
-                  {viewRule.initialVisitRequired ? "Initial + " : ""}
-                  {viewRule.frequencyLabel}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-bold uppercase text-[10px] block">
-                  Confirmation Status
-                </span>
-                <span className="font-semibold text-amber-800">
-                  {viewRule.confirmationStatus}
-                </span>
-              </div>
-            </div>
-            <div className="p-3.5 rounded-xl border border-slate-200 bg-white">
-              <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">
-                Internal Rule Notes
-              </span>
-              <p className="text-slate-700">{viewRule.internalNotes}</p>
-            </div>
-          </div>
-        )}
-      </Modal>
-
-      {/* Version History Modal */}
-      <Modal
-        isOpen={Boolean(historyRule)}
-        onClose={() => setHistoryRule(null)}
-        title={`Version History — ${historyRule?.id}`}
-        description="Historical snapshots are preserved immutably; existing clinical records retain their original rule version."
-        icon={<History className="w-5 h-5" />}
-        maxWidth="lg"
-      >
-        <div className="space-y-3">
-          {historyRule?.versionHistory.map((snap, i) => (
-            <div
-              key={`${snap.version}-${i}`}
-              className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-1 text-xs"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-[#3D6B22]">
-                  v{snap.version} ({snap.status})
-                </span>
-                <span className="font-mono text-[11px] text-slate-400">
-                  {snap.updatedAt}
-                </span>
-              </div>
-              <p className="text-slate-700 font-medium">{snap.changeSummary}</p>
-              <div className="text-[11px] text-slate-500">
-                Effective {snap.effectiveDate} · {snap.professionalType} ·{" "}
-                {snap.recurrenceType} ({snap.deliveryMethod}) · By {snap.updatedBy}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Modal>
-
-      {/* Create / Edit Rule Modal */}
-      <Modal
-        isOpen={editorOpen}
-        onClose={() => setEditorOpen(false)}
-        title={editingRule ? `Edit Rule ${editingRule.id}` : "Create Visit Rule"}
-        description="Configure service-based clinical and supervisory visit triggers."
+        isOpen={createOpen}
+        onClose={() => setCreateOpen(false)}
+        title="Create Visit Rule"
+        description="Configure a new service-based clinical or supervisory visit rule."
         icon={<Sliders className="w-5 h-5" />}
         maxWidth="2xl"
       >
-        <form onSubmit={handleSave} className="space-y-4">
-          {editingRule && editingRule.status === "Active" && (
-            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 space-y-2">
-              <div className="font-bold flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4 text-amber-600" />
-                <span>Active Rule Modification Safeguard</span>
-              </div>
-              <p>
-                Modifying an active rule creates a new version forward from the Effective Date. Completed clinical visits and existing active requirements keep their original snapshot version and are NOT retroactively altered.
-              </p>
-              <label className="flex items-center gap-2 font-semibold cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={confirmImpactChecked}
-                  onChange={(e) => setConfirmImpactChecked(e.target.checked)}
-                  className="rounded border-amber-400 text-[#3D6B22]"
-                />
-                <span>I confirm this change applies forward with version &amp; audit tracking.</span>
-              </label>
-            </div>
-          )}
-
+        <form onSubmit={handleSaveNew} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div className="sm:col-span-2">
               <FormLabel required>Rule Name</FormLabel>
@@ -717,7 +499,7 @@ export function ClinicalRulesWorkspace() {
           </div>
 
           <div>
-            <FormLabel>Rule Notes &amp; Change Summary</FormLabel>
+            <FormLabel>Rule Notes</FormLabel>
             <FormTextarea
               rows={2}
               value={notes}
@@ -726,8 +508,8 @@ export function ClinicalRulesWorkspace() {
           </div>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
-            <FormButtonCancel onClick={() => setEditorOpen(false)} />
-            <FormButtonPrimary type="submit">Save Rule Version</FormButtonPrimary>
+            <FormButtonCancel onClick={() => setCreateOpen(false)} />
+            <FormButtonPrimary type="submit">Create Rule</FormButtonPrimary>
           </div>
         </form>
       </Modal>

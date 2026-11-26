@@ -4,19 +4,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  ArrowRight,
   ArrowUpDown,
   CheckSquare,
   Download,
-  Eye,
   RotateCcw,
   Search,
   Square,
-  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Pagination } from "@/components/ui/Pagination";
-import { useAuth } from "@/hooks/useAuth";
-import { resolveClinicalActor } from "@/lib/admin/clinicalAuthGuard";
 import {
   CLINICAL_AGENCIES,
   CLINICAL_PROGRAMS,
@@ -24,38 +21,26 @@ import {
   exportClinicalCsv,
   getClinicalDetailHref,
   getClinicalRequirements,
-  getClinicalVisits,
   subscribeToClinicalSync,
 } from "@/lib/admin/clinicalSupervisoryStore";
 import {
   ClinicalRequirement,
-  ClinicalVisit,
   DocumentationStatus,
   RequirementStatus,
 } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
-import { DocumentationStatusBadge, RequirementStatusBadge } from "./ClinicalBadges";
-import { AssignProfessionalModal } from "./ClinicalActionModals";
+import { ClinicalAvatarName, RequirementStatusBadge } from "./ClinicalBadges";
 
-type SortKey =
-  | "id"
-  | "clientName"
-  | "serviceName"
-  | "nextDueDate"
-  | "status"
-  | "documentationStatus";
+type SortKey = "clientName" | "visitType" | "nextDueDate" | "status";
 
 export function ClinicalRequirementsWorkspace() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialFilter = searchParams.get("filter") || "all";
-  const { currentUser } = useAuth();
-  const actor = useMemo(() => resolveClinicalActor(currentUser), [currentUser]);
 
   const [requirements, setRequirements] = useState<ClinicalRequirement[]>(() =>
     getClinicalRequirements()
   );
-  const [visits, setVisits] = useState<ClinicalVisit[]>(() => getClinicalVisits());
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,12 +72,9 @@ export function ClinicalRequirementsWorkspace() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  const [assignVisitTarget, setAssignVisitTarget] = useState<ClinicalVisit | null>(null);
-
   useEffect(() => {
     const load = () => {
       setRequirements(getClinicalRequirements());
-      setVisits(getClinicalVisits());
     };
     const timer = window.setTimeout(load, 0);
     const unsub = subscribeToClinicalSync(load);
@@ -482,12 +464,12 @@ export function ClinicalRequirementsWorkspace() {
         </div>
       </div>
 
-      {/* Repository Table */}
+      {/* Standardized Clean Repository Table (Checkbox + 6 Primary Columns, Zero Horizontal Scroll) */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1180px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 <th className="py-3.5 px-4 w-10">
                   <button
                     type="button"
@@ -502,17 +484,7 @@ export function ClinicalRequirementsWorkspace() {
                     )}
                   </button>
                 </th>
-                <th className="py-3.5 px-3">
-                  <button
-                    type="button"
-                    onClick={() => toggleSort("id")}
-                    className="inline-flex items-center gap-1 hover:text-slate-700 cursor-pointer"
-                  >
-                    <span>Requirement ID</span>
-                    <ArrowUpDown className="w-3 h-3" />
-                  </button>
-                </th>
-                <th className="py-3.5 px-3">
+                <th className="py-3.5 px-4">
                   <button
                     type="button"
                     onClick={() => toggleSort("clientName")}
@@ -522,22 +494,18 @@ export function ClinicalRequirementsWorkspace() {
                     <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th className="py-3.5 px-3">Agency / Program</th>
-                <th className="py-3.5 px-3">
+                <th className="py-3.5 px-4">
                   <button
                     type="button"
-                    onClick={() => toggleSort("serviceName")}
+                    onClick={() => toggleSort("visitType")}
                     className="inline-flex items-center gap-1 hover:text-slate-700 cursor-pointer"
                   >
-                    <span>Service</span>
+                    <span>Visit Type</span>
                     <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th className="py-3.5 px-3">Visit Type</th>
-                <th className="py-3.5 px-3">Required Professional</th>
-                <th className="py-3.5 px-3">Frequency</th>
-                <th className="py-3.5 px-3">Last Completed</th>
-                <th className="py-3.5 px-3">
+                <th className="py-3.5 px-4">Assigned Professional</th>
+                <th className="py-3.5 px-4">
                   <button
                     type="button"
                     onClick={() => toggleSort("nextDueDate")}
@@ -547,16 +515,23 @@ export function ClinicalRequirementsWorkspace() {
                     <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </th>
-                <th className="py-3.5 px-3">Assigned Professional</th>
-                <th className="py-3.5 px-3">Requirement Status</th>
-                <th className="py-3.5 px-3">Documentation Status</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+                <th className="py-3.5 px-4">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("status")}
+                    className="inline-flex items-center gap-1 hover:text-slate-700 cursor-pointer"
+                  >
+                    <span>Status</span>
+                    <ArrowUpDown className="w-3 h-3" />
+                  </button>
+                </th>
+                <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={14} className="py-12 text-center text-slate-500">
+                  <td colSpan={7} className="py-12 text-center text-slate-500">
                     <p className="font-semibold text-sm text-slate-700">
                       No matching clinical or supervisory requirements found
                     </p>
@@ -567,13 +542,13 @@ export function ClinicalRequirementsWorkspace() {
                 </tr>
               ) : (
                 paginated.map((req) => {
-                  const linkedVisit = visits.find((v) => v.id === req.activeVisitId);
                   const isSelected = selectedIds.includes(req.id);
+                  const detailHref = getClinicalDetailHref(req.activeVisitId || req.id);
                   return (
                     <tr
                       key={req.id}
-                      onClick={() => router.push(getClinicalDetailHref(req.activeVisitId || req.id))}
-                      className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                      onClick={() => router.push(detailHref)}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
                       <td className="py-3.5 px-4" onClick={(e) => toggleRow(req.id, e)}>
                         {isSelected ? (
@@ -582,73 +557,39 @@ export function ClinicalRequirementsWorkspace() {
                           <Square className="w-4 h-4 text-slate-300 group-hover:text-slate-400" />
                         )}
                       </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-lg border border-slate-200 group-hover:text-[#3D6B22]">
-                          {req.id}
-                        </span>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalAvatarName
+                          name={req.clientName}
+                          variant="client"
+                          highlightHover
+                        />
                       </td>
-                      <td className="py-3.5 px-3 font-semibold text-slate-900 whitespace-nowrap group-hover:text-[#3D6B22]">
-                        {req.clientName}
-                      </td>
-                      <td className="py-3.5 px-3 text-slate-600 whitespace-nowrap truncate max-w-[175px]">
-                        {req.programName}
-                      </td>
-                      <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap truncate max-w-[155px]">
-                        {req.serviceName}
-                      </td>
-                      <td className="py-3.5 px-3 text-slate-700 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[200px]">
                         {req.visitType}
                       </td>
-                      <td className="py-3.5 px-3 font-medium text-slate-700 whitespace-nowrap">
-                        {req.professionalType}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalAvatarName
+                          name={req.assignedProfessionalName}
+                          variant="staff"
+                        />
                       </td>
-                      <td className="py-3.5 px-3 text-slate-600 whitespace-nowrap">
-                        {req.frequency}
-                      </td>
-                      <td className="py-3.5 px-3 font-mono text-slate-500 whitespace-nowrap">
-                        {req.lastCompletedDate || "—"}
-                      </td>
-                      <td className="py-3.5 px-3 font-mono font-semibold text-slate-800 whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-mono font-semibold text-slate-800 whitespace-nowrap">
                         {req.nextDueDate}
                       </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        {req.assignedProfessionalName ? (
-                          <span className="font-medium text-slate-700">
-                            {req.assignedProfessionalName}
-                          </span>
-                        ) : (
-                          <span className="font-bold text-[#ff6900]">Unassigned</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <RequirementStatusBadge status={req.status} />
-                      </td>
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        <DocumentationStatusBadge status={req.documentationStatus} />
                       </td>
                       <td
                         className="py-3.5 px-4 text-right whitespace-nowrap"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="inline-flex items-center gap-1.5">
-                          {linkedVisit && !req.assignedProfessionalId && (
-                            <button
-                              type="button"
-                              onClick={() => setAssignVisitTarget(linkedVisit)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#3D6B22]/10 text-[#3D6B22] hover:bg-[#3D6B22]/20 text-[11px] font-bold cursor-pointer"
-                            >
-                              <UserCheck className="w-3 h-3" />
-                              <span>Assign</span>
-                            </button>
-                          )}
-                          <Link
-                            href={getClinicalDetailHref(req.activeVisitId || req.id)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-semibold text-slate-700"
-                          >
-                            <Eye className="w-3 h-3" />
-                            <span>View</span>
-                          </Link>
-                        </div>
+                        <Link
+                          href={detailHref}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                        >
+                          <span>View</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
                       </td>
                     </tr>
                   );
@@ -667,12 +608,6 @@ export function ClinicalRequirementsWorkspace() {
           entryLabel="requirements"
         />
       </div>
-
-      <AssignProfessionalModal
-        visit={assignVisitTarget}
-        actor={actor}
-        onClose={() => setAssignVisitTarget(null)}
-      />
     </div>
   );
 }

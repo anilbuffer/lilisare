@@ -2225,7 +2225,7 @@ export function appendClinicalAuditEvent(
 }
 
 export function subscribeToClinicalSync(cb: () => void): () => void {
-  if (typeof window === "undefined") return () => {};
+  if (typeof window === "undefined") return () => { };
   const handler = () => cb();
   window.addEventListener(CLINICAL_SYNC_EVENT, handler);
   window.addEventListener("lilisare_scheduling_sync", handler);
@@ -2247,11 +2247,68 @@ const SEEDED_DETAIL_IDS = new Set([
   ...INITIAL_CLINICAL_REQUIREMENTS.map((r) => r.id),
 ]);
 
-export function getClinicalDetailHref(id: string): string {
-  if (SEEDED_DETAIL_IDS.has(id)) {
-    return `/admin/clinical/${encodeURIComponent(id)}/`;
+const SEEDED_RULE_IDS = new Set(INITIAL_CLINICAL_RULES.map((r) => r.id));
+const SEEDED_AUDIT_IDS = new Set(INITIAL_CLINICAL_AUDIT.map((e) => e.id));
+
+export function getClinicalDetailHref(
+  id: string,
+  options?: { tab?: string; eventId?: string }
+): string {
+  const base = SEEDED_DETAIL_IDS.has(id)
+    ? `/admin/clinical/${encodeURIComponent(id)}/`
+    : `/admin/clinical/default/?id=${encodeURIComponent(id)}`;
+  const extra = new URLSearchParams();
+  if (options?.tab) extra.set("tab", options.tab);
+  if (options?.eventId) extra.set("eventId", options.eventId);
+  const qs = extra.toString();
+  if (!qs) return base;
+  return base.includes("?") ? `${base}&${qs}` : `${base}?${qs}`;
+}
+
+export function getClinicalRuleDetailHref(ruleId: string): string {
+  if (SEEDED_RULE_IDS.has(ruleId)) {
+    return `/admin/clinical/rules/${encodeURIComponent(ruleId)}/`;
   }
-  return `/admin/clinical/default/?id=${encodeURIComponent(id)}`;
+  return `/admin/clinical/rules/default/?id=${encodeURIComponent(ruleId)}`;
+}
+
+export function getClinicalAuditEventDetailHref(evt: ClinicalAuditEvent): string {
+  if (evt.relatedVisitId) {
+    return getClinicalDetailHref(evt.relatedVisitId, {
+      tab: "audit",
+      eventId: evt.id,
+    });
+  }
+  if (SEEDED_AUDIT_IDS.has(evt.id)) {
+    return `/admin/clinical/audit/${encodeURIComponent(evt.id)}/`;
+  }
+  return `/admin/clinical/audit/default/?id=${encodeURIComponent(evt.id)}`;
+}
+
+export function resolveClinicalRuleByParam(
+  paramId: string,
+  queryId?: string | null
+): ClinicalRule | null {
+  const targetId = (queryId && queryId.trim()) || paramId;
+  const rules = getClinicalRules();
+  const match = rules.find((r) => r.id.toLowerCase() === targetId.toLowerCase()) || null;
+  if (!match && (targetId === "default" || targetId === "[ruleId]")) {
+    return rules[0] || null;
+  }
+  return match;
+}
+
+export function resolveClinicalAuditEventByParam(
+  paramId: string,
+  queryId?: string | null
+): ClinicalAuditEvent | null {
+  const targetId = (queryId && queryId.trim()) || paramId;
+  const events = getClinicalAuditEvents();
+  const match = events.find((e) => e.id.toLowerCase() === targetId.toLowerCase()) || null;
+  if (!match && (targetId === "default" || targetId === "[eventId]")) {
+    return events[0] || null;
+  }
+  return match;
 }
 
 export function resolveClinicalRecordByParam(paramId: string, queryId?: string | null): {
@@ -2588,28 +2645,28 @@ export function assignClinicalProfessional(
   const updatedVisits = visits.map((v) =>
     v.id === visitId
       ? {
-          ...v,
-          professionalId: prof.id,
-          professionalName: prof.name,
-          updatedAt: nowIso,
-        }
+        ...v,
+        professionalId: prof.id,
+        professionalName: prof.name,
+        updatedAt: nowIso,
+      }
       : v
   );
 
   const updatedReqs = reqs.map((r) =>
     r.id === visit.requirementId
       ? {
-          ...r,
-          assignedProfessionalId: prof.id,
-          assignedProfessionalName: prof.name,
-          status:
-            r.status === "Pending Assignment"
-              ? visit.scheduledDate
-                ? ("Scheduled" as RequirementStatus)
-                : ("Active" as RequirementStatus)
-              : r.status,
-          updatedAt: nowIso,
-        }
+        ...r,
+        assignedProfessionalId: prof.id,
+        assignedProfessionalName: prof.name,
+        status:
+          r.status === "Pending Assignment"
+            ? visit.scheduledDate
+              ? ("Scheduled" as RequirementStatus)
+              : ("Active" as RequirementStatus)
+            : r.status,
+        updatedAt: nowIso,
+      }
       : r
   );
 
@@ -2622,24 +2679,24 @@ export function assignClinicalProfessional(
     const updatedSched = schedVisits.map((sv) =>
       sv.id === visit.scheduledVisitId
         ? {
-            ...sv,
-            caregiverId: prof.id,
-            caregiverName: prof.name,
-            caregiverClass: `${prof.roleTitle} (Clinical)`,
-            isModifiedFromSchedule: true,
-            modificationReason: "Clinical Professional Reassigned",
-            auditTrail: [
-              {
-                id: `aud-${Date.now()}`,
-                timestamp: new Date().toLocaleString(),
-                actor: actor.name,
-                actorRole: actor.roleLabel,
-                action: "Clinical Professional Reassigned",
-                details: `Assigned to ${prof.name} (${prof.qualificationType})`,
-              },
-              ...(sv.auditTrail || []),
-            ],
-          }
+          ...sv,
+          caregiverId: prof.id,
+          caregiverName: prof.name,
+          caregiverClass: `${prof.roleTitle} (Clinical)`,
+          isModifiedFromSchedule: true,
+          modificationReason: "Clinical Professional Reassigned",
+          auditTrail: [
+            {
+              id: `aud-${Date.now()}`,
+              timestamp: new Date().toLocaleString(),
+              actor: actor.name,
+              actorRole: actor.roleLabel,
+              action: "Clinical Professional Reassigned",
+              details: `Assigned to ${prof.name} (${prof.qualificationType})`,
+            },
+            ...(sv.auditTrail || []),
+          ],
+        }
         : sv
     );
     saveVisitsToStorage(updatedSched);
@@ -2787,32 +2844,32 @@ export function scheduleOrRescheduleClinicalVisit(
   const updatedVisits = visits.map((v) =>
     v.id === visitId
       ? {
-          ...v,
-          scheduledVisitId: linkedSchedId,
-          professionalId: prof?.id || null,
-          professionalName: prof?.name || null,
-          scheduledDate: params.date,
-          scheduledStartTime: params.startTime,
-          scheduledEndTime: params.endTime,
-          scheduledAt: `${params.date} ${params.startTime}`,
-          deliveryMethod: params.deliveryMethod,
-          visitStatus: nextVisitStatus,
-          operationalNotes: params.notes || v.operationalNotes,
-          updatedAt: nowIso,
-        }
+        ...v,
+        scheduledVisitId: linkedSchedId,
+        professionalId: prof?.id || null,
+        professionalName: prof?.name || null,
+        scheduledDate: params.date,
+        scheduledStartTime: params.startTime,
+        scheduledEndTime: params.endTime,
+        scheduledAt: `${params.date} ${params.startTime}`,
+        deliveryMethod: params.deliveryMethod,
+        visitStatus: nextVisitStatus,
+        operationalNotes: params.notes || v.operationalNotes,
+        updatedAt: nowIso,
+      }
       : v
   );
 
   const updatedReqs = reqs.map((r) =>
     r.id === existing.requirementId
       ? {
-          ...r,
-          assignedProfessionalId: prof?.id || null,
-          assignedProfessionalName: prof?.name || null,
-          deliveryMethod: params.deliveryMethod,
-          status: (prof ? "Scheduled" : "Pending Assignment") as RequirementStatus,
-          updatedAt: nowIso,
-        }
+        ...r,
+        assignedProfessionalId: prof?.id || null,
+        assignedProfessionalName: prof?.name || null,
+        deliveryMethod: params.deliveryMethod,
+        status: (prof ? "Scheduled" : "Pending Assignment") as RequirementStatus,
+        updatedAt: nowIso,
+      }
       : r
   );
 
@@ -2916,11 +2973,11 @@ export function requestMissingDocumentation(
     visits.map((v) =>
       v.id === visitId
         ? {
-            ...v,
-            documentationStatus: "Correction Requested" as DocumentationStatus,
-            followUpRequired: true,
-            updatedAt: nowIso,
-          }
+          ...v,
+          documentationStatus: "Correction Requested" as DocumentationStatus,
+          followUpRequired: true,
+          updatedAt: nowIso,
+        }
         : v
     )
   );
@@ -2929,10 +2986,10 @@ export function requestMissingDocumentation(
     reqs.map((r) =>
       r.id === target.requirementId
         ? {
-            ...r,
-            documentationStatus: "Correction Requested" as DocumentationStatus,
-            updatedAt: nowIso,
-          }
+          ...r,
+          documentationStatus: "Correction Requested" as DocumentationStatus,
+          updatedAt: nowIso,
+        }
         : r
     )
   );
@@ -2944,10 +3001,10 @@ export function requestMissingDocumentation(
       docs.map((d) =>
         d.visitId === visitId
           ? {
-              ...d,
-              completenessStatus: "Correction Requested" as DocumentationStatus,
-              correctionRequestedNote: note,
-            }
+            ...d,
+            completenessStatus: "Correction Requested" as DocumentationStatus,
+            correctionRequestedNote: note,
+          }
           : d
       )
     );
@@ -2991,35 +3048,35 @@ export function assignClinicalReviewer(
 
   const nextReviews = existing
     ? reviews.map((r) =>
-        r.visitId === visitId
-          ? {
-              ...r,
-              reviewerId: prof.id,
-              reviewerName: prof.name,
-              reviewerRole: prof.roleTitle,
-              reviewStatus:
-                r.reviewStatus === "Not Required"
-                  ? ("Pending Review" as ClinicalReviewStatus)
-                  : r.reviewStatus,
-            }
-          : r
-      )
-    : [
-        {
-          id: `CREV-${Date.now().toString().slice(-4)}`,
-          visitId,
+      r.visitId === visitId
+        ? {
+          ...r,
           reviewerId: prof.id,
           reviewerName: prof.name,
           reviewerRole: prof.roleTitle,
-          reviewStatus: "Pending Review" as ClinicalReviewStatus,
-          reviewedAt: null,
-          signOffTimestamp: null,
-          comments: "Assigned for clinical review.",
-          outstandingIssues: [],
-          followUpRequired: false,
-        },
-        ...reviews,
-      ];
+          reviewStatus:
+            r.reviewStatus === "Not Required"
+              ? ("Pending Review" as ClinicalReviewStatus)
+              : r.reviewStatus,
+        }
+        : r
+    )
+    : [
+      {
+        id: `CREV-${Date.now().toString().slice(-4)}`,
+        visitId,
+        reviewerId: prof.id,
+        reviewerName: prof.name,
+        reviewerRole: prof.roleTitle,
+        reviewStatus: "Pending Review" as ClinicalReviewStatus,
+        reviewedAt: null,
+        signOffTimestamp: null,
+        comments: "Assigned for clinical review.",
+        outstandingIssues: [],
+        followUpRequired: false,
+      },
+      ...reviews,
+    ];
 
   writeJson(CLINICAL_REVIEW_STORAGE_KEY, nextReviews);
 
@@ -3064,12 +3121,12 @@ export function completeClinicalSignOff(
     visits.map((v) =>
       v.id === visitId
         ? {
-            ...v,
-            documentationStatus: "Complete" as DocumentationStatus,
-            reviewStatus: "Approved" as ClinicalReviewStatus,
-            followUpRequired: false,
-            updatedAt: new Date().toISOString(),
-          }
+          ...v,
+          documentationStatus: "Complete" as DocumentationStatus,
+          reviewStatus: "Approved" as ClinicalReviewStatus,
+          followUpRequired: false,
+          updatedAt: new Date().toISOString(),
+        }
         : v
     )
   );
@@ -3078,10 +3135,10 @@ export function completeClinicalSignOff(
     docs.map((d) =>
       d.visitId === visitId
         ? {
-            ...d,
-            completenessStatus: "Complete" as DocumentationStatus,
-            reviewStatus: "Approved" as ClinicalReviewStatus,
-          }
+          ...d,
+          completenessStatus: "Complete" as DocumentationStatus,
+          reviewStatus: "Approved" as ClinicalReviewStatus,
+        }
         : d
     )
   );
@@ -3090,15 +3147,15 @@ export function completeClinicalSignOff(
     reviews.map((r) =>
       r.visitId === visitId
         ? {
-            ...r,
-            reviewerName: actor.name,
-            reviewerRole: actor.roleLabel,
-            reviewStatus: "Approved" as ClinicalReviewStatus,
-            reviewedAt: nowStr,
-            signOffTimestamp: nowStr,
-            comments: comments || "Clinical documentation reviewed and signed off.",
-            followUpRequired: false,
-          }
+          ...r,
+          reviewerName: actor.name,
+          reviewerRole: actor.roleLabel,
+          reviewStatus: "Approved" as ClinicalReviewStatus,
+          reviewedAt: nowStr,
+          signOffTimestamp: nowStr,
+          comments: comments || "Clinical documentation reviewed and signed off.",
+          followUpRequired: false,
+        }
         : r
     )
   );
@@ -3116,14 +3173,14 @@ export function completeClinicalSignOff(
       reqs.map((r) =>
         r.id === targetReq.id
           ? {
-              ...r,
-              lastCompletedDate: target.completedAt?.slice(0, 10) || DEMO_TODAY,
-              nextDueDate: r.isRecurring ? nextIso : r.nextDueDate,
-              status: (r.isRecurring ? "Active" : "Completed") as RequirementStatus,
-              documentationStatus: "Complete" as DocumentationStatus,
-              reviewStatus: "Approved" as ClinicalReviewStatus,
-              updatedAt: new Date().toISOString(),
-            }
+            ...r,
+            lastCompletedDate: target.completedAt?.slice(0, 10) || DEMO_TODAY,
+            nextDueDate: r.isRecurring ? nextIso : r.nextDueDate,
+            status: (r.isRecurring ? "Active" : "Completed") as RequirementStatus,
+            documentationStatus: "Complete" as DocumentationStatus,
+            reviewStatus: "Approved" as ClinicalReviewStatus,
+            updatedAt: new Date().toISOString(),
+          }
           : r
       )
     );
@@ -3231,11 +3288,11 @@ export function completeClinicalFollowUp(
   const updated = followUps.map((f) =>
     f.id === followUpId
       ? {
-          ...f,
-          status: "Completed" as const,
-          completedAt: nowStr,
-          completedBy: actor.name,
-        }
+        ...f,
+        status: "Completed" as const,
+        completedAt: nowStr,
+        completedBy: actor.name,
+      }
       : f
   );
   writeJson(CLINICAL_FOLLOWUP_STORAGE_KEY, updated);
@@ -3511,12 +3568,12 @@ export function editClinicalRequirement(
     visits.map((v) =>
       v.requirementId === reqId
         ? {
-            ...v,
-            dueDate: patch.nextDueDate || v.dueDate,
-            deliveryMethod: patch.deliveryMethod || v.deliveryMethod,
-            priority: patch.priority || v.priority,
-            updatedAt: nowIso,
-          }
+          ...v,
+          dueDate: patch.nextDueDate || v.dueDate,
+          deliveryMethod: patch.deliveryMethod || v.deliveryMethod,
+          priority: patch.priority || v.priority,
+          updatedAt: nowIso,
+        }
         : v
     )
   );

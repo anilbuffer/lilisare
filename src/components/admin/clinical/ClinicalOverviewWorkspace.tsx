@@ -44,10 +44,9 @@ import {
 } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
 import {
+  ClinicalAvatarName,
   ClinicalVisitStatusBadge,
-  DeliveryMethodBadge,
   PriorityBadge,
-  getInitials,
 } from "./ClinicalBadges";
 
 interface AttentionQueueItem {
@@ -339,60 +338,50 @@ export function ClinicalOverviewWorkspace() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[780px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3 px-4">Client</th>
-                <th className="py-3 px-4">Service</th>
-                <th className="py-3 px-4">Visit Type</th>
-                <th className="py-3 px-4">Due Date</th>
-                <th className="py-3 px-4">Assigned Professional</th>
-                <th className="py-3 px-4">Reason for Attention</th>
-                <th className="py-3 px-4">Priority</th>
-                <th className="py-3 px-4 text-right">Next Action</th>
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th className="py-3.5 px-4">Client</th>
+                <th className="py-3.5 px-4">Visit Type</th>
+                <th className="py-3.5 px-4">Due Date</th>
+                <th className="py-3.5 px-4">Priority</th>
+                <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
               {attentionQueue.map((item) => (
                 <tr
                   key={item.visitId}
                   onClick={() => router.push(getClinicalDetailHref(item.visitId))}
                   className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                 >
-                  <td className="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap group-hover:text-[#3D6B22]">
-                    {item.clientName}
+                  <td className="py-3.5 px-4 whitespace-nowrap">
+                    <ClinicalAvatarName
+                      name={item.clientName}
+                      variant="client"
+                      highlightHover
+                    />
                   </td>
-                  <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap truncate max-w-[160px]">
-                    {item.serviceName}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap">
+                  <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[200px]">
                     {item.visitType}
                   </td>
                   <td className="py-3.5 px-4 font-mono font-semibold text-slate-700 whitespace-nowrap">
                     {item.dueDate}
                   </td>
                   <td className="py-3.5 px-4 whitespace-nowrap">
-                    <span
-                      className={
-                        item.assignedProfessional === "Unassigned"
-                          ? "text-[#ff6900] font-bold"
-                          : "text-slate-700 font-medium"
-                      }
-                    >
-                      {item.assignedProfessional}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-600 max-w-[220px] truncate">
-                    {item.reason}
-                  </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap">
                     <PriorityBadge priority={item.priority} />
                   </td>
-                  <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1 font-bold text-[#3D6B22] group-hover:underline">
+                  <td
+                    className="py-3.5 px-4 text-right whitespace-nowrap"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Link
+                      href={getClinicalDetailHref(item.visitId)}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                    >
                       <span>{item.recommendedAction}</span>
                       <ArrowRight className="w-3 h-3" />
-                    </span>
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -428,61 +417,52 @@ export function ClinicalOverviewWorkspace() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[780px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3.5 px-4 sm:px-5">Client</th>
-                <th className="py-3.5 px-4 sm:px-5">Service</th>
-                <th className="py-3.5 px-4 sm:px-5">Visit Type</th>
-                <th className="py-3.5 px-4 sm:px-5">Assigned Professional</th>
-                <th className="py-3.5 px-4 sm:px-5">Visit Date</th>
-                <th className="py-3.5 px-4 sm:px-5">Delivery Method</th>
-                <th className="py-3.5 px-4 sm:px-5">Status</th>
-                <th className="py-3.5 px-4 sm:px-5 text-right">Action</th>
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th className="py-3.5 px-4">Client</th>
+                <th className="py-3.5 px-4">Visit Type</th>
+                <th className="py-3.5 px-4">Assigned Professional</th>
+                <th className="py-3.5 px-4">Visit Date</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
               {upcomingVisits.map((v) => (
                 <tr
                   key={v.id}
                   onClick={() => router.push(getClinicalDetailHref(v.id))}
-                  className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                  className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                 >
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3D6B22] font-bold text-[10px] shrink-0">
-                        {getInitials(v.clientName)}
-                      </div>
-                      <span className="font-semibold text-slate-900 group-hover:text-[#3D6B22]">
-                        {v.clientName}
-                      </span>
-                    </div>
+                  <td className="py-3.5 px-4 whitespace-nowrap">
+                    <ClinicalAvatarName
+                      name={v.clientName}
+                      variant="client"
+                      highlightHover
+                    />
                   </td>
-                  <td className="py-3.5 px-4 sm:px-5 text-slate-700 whitespace-nowrap truncate max-w-[170px]">
-                    {v.serviceName}
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 text-slate-700 whitespace-nowrap">
+                  <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[190px]">
                     {v.visitType}
                   </td>
-                  <td className="py-3.5 px-4 sm:px-5 font-medium text-slate-700 whitespace-nowrap">
-                    {v.professionalName || "Unassigned"}
+                  <td className="py-3.5 px-4 whitespace-nowrap">
+                    <ClinicalAvatarName name={v.professionalName} variant="staff" />
                   </td>
-                  <td className="py-3.5 px-4 sm:px-5 font-mono text-slate-700 whitespace-nowrap">
+                  <td className="py-3.5 px-4 font-mono whitespace-nowrap">
                     {v.scheduledAt || `Due ${v.dueDate}`}
                   </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
-                    <DeliveryMethodBadge method={v.deliveryMethod} />
-                  </td>
-                  <td className="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                  <td className="py-3.5 px-4 whitespace-nowrap">
                     <ClinicalVisitStatusBadge status={v.visitStatus} />
                   </td>
-                  <td className="py-3.5 px-4 sm:px-5 text-right whitespace-nowrap">
+                  <td
+                    className="py-3.5 px-4 text-right whitespace-nowrap"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Link
                       href={getClinicalDetailHref(v.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
                     >
-                      <span>Manage</span>
+                      <span>View</span>
                       <ArrowRight className="w-3 h-3" />
                     </Link>
                   </td>

@@ -2,18 +2,21 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Download, Lock, Search, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Download, Lock, Search, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   exportClinicalCsv,
+  getClinicalAuditEventDetailHref,
   getClinicalAuditEvents,
-  getClinicalDetailHref,
   subscribeToClinicalSync,
 } from "@/lib/admin/clinicalSupervisoryStore";
 import { ClinicalAuditEvent } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
+import { ClinicalAvatarName } from "./ClinicalBadges";
 
 export function ClinicalAuditWorkspace() {
+  const router = useRouter();
   const [events, setEvents] = useState<ClinicalAuditEvent[]>(() =>
     getClinicalAuditEvents()
   );
@@ -23,8 +26,12 @@ export function ClinicalAuditWorkspace() {
 
   useEffect(() => {
     const load = () => setEvents(getClinicalAuditEvents());
-    load();
-    return subscribeToClinicalSync(load);
+    const timer = window.setTimeout(load, 0);
+    const unsub = subscribeToClinicalSync(load);
+    return () => {
+      window.clearTimeout(timer);
+      unsub();
+    };
   }, []);
 
   const uniqueActions = useMemo(
@@ -143,79 +150,64 @@ export function ClinicalAuditWorkspace() {
         </div>
       </div>
 
-      {/* Audit Table */}
+      {/* Standardized Clean Audit Table (5 Concise Columns, Zero Horizontal Scroll) */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1140px]">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                <th className="py-3.5 px-4">Event ID</th>
-                <th className="py-3.5 px-3">Date and Time</th>
-                <th className="py-3.5 px-3">User</th>
-                <th className="py-3.5 px-3">Role</th>
-                <th className="py-3.5 px-3">Related Client</th>
-                <th className="py-3.5 px-3">Related Visit</th>
-                <th className="py-3.5 px-3">Action</th>
-                <th className="py-3.5 px-3">Previous Value</th>
-                <th className="py-3.5 px-3">New Value</th>
-                <th className="py-3.5 px-4">Reason</th>
+              <tr className="border-b border-slate-200/80 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th className="py-3.5 px-4">Date &amp; Time</th>
+                <th className="py-3.5 px-4">User</th>
+                <th className="py-3.5 px-4">Action</th>
+                <th className="py-3.5 px-4">Related Record</th>
+                <th className="py-3.5 px-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
-              {filtered.map((evt) => (
-                <tr key={evt.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-800 whitespace-nowrap">
-                    {evt.id}
-                  </td>
-                  <td className="py-3.5 px-3 font-mono text-slate-500 whitespace-nowrap">
-                    {evt.timestamp}
-                  </td>
-                  <td className="py-3.5 px-3 font-semibold text-slate-900 whitespace-nowrap">
-                    {evt.performedBy}
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-600 whitespace-nowrap">
-                    {evt.performedByRole}
-                  </td>
-                  <td className="py-3.5 px-3 font-medium text-slate-800 whitespace-nowrap">
-                    {evt.relatedClientId !== "SYSTEM" ? (
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
+              {filtered.map((evt) => {
+                const detailHref = getClinicalAuditEventDetailHref(evt);
+                return (
+                  <tr
+                    key={evt.id}
+                    onClick={() => router.push(detailHref)}
+                    className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                  >
+                    <td className="py-3.5 px-4 font-mono text-slate-600 whitespace-nowrap">
+                      {evt.timestamp}
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <ClinicalAvatarName
+                        name={evt.performedBy}
+                        variant="staff"
+                        highlightHover
+                      />
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-mono text-[10px] font-bold text-slate-700">
+                        {evt.action.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 whitespace-nowrap max-w-[220px]">
+                      <ClinicalAvatarName
+                        name={evt.relatedClientName}
+                        variant={evt.relatedClientId === "SYSTEM" ? "staff" : "client"}
+                      />
+                    </td>
+                    <td
+                      className="py-3.5 px-4 text-right whitespace-nowrap"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <Link
-                        href={`/admin/clients/${evt.relatedClientId}/`}
-                        className="hover:text-[#3D6B22] hover:underline"
+                        href={detailHref}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
                       >
-                        {evt.relatedClientName}
+                        <span>View</span>
+                        <ArrowRight className="w-3 h-3" />
                       </Link>
-                    ) : (
-                      evt.relatedClientName
-                    )}
-                  </td>
-                  <td className="py-3.5 px-3 font-mono whitespace-nowrap">
-                    {evt.relatedVisitId ? (
-                      <Link
-                        href={getClinicalDetailHref(evt.relatedVisitId)}
-                        className="font-bold text-[#3D6B22] hover:underline"
-                      >
-                        {evt.relatedVisitId}
-                      </Link>
-                    ) : (
-                      <span className="text-slate-500">{evt.entityId}</span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-3 whitespace-nowrap">
-                    <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-mono text-[10px] font-bold text-slate-700">
-                      {evt.action.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 text-slate-500 max-w-[150px] truncate">
-                    {evt.previousValue}
-                  </td>
-                  <td className="py-3.5 px-3 font-medium text-slate-800 max-w-[160px] truncate">
-                    {evt.newValue}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-600 max-w-xs truncate" title={evt.reason}>
-                    {evt.reason}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

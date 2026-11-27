@@ -432,6 +432,11 @@ export interface ClientRecord {
     notes: string;
     supervisorApproval: "Approved" | "Pending Review" | "Needs Attention";
     evvLocationStatus: "Verified GPS" | "Exception" | "Manual Sign-off";
+    noteType?: "Shift Care Note" | "RN Supervisory Visit" | "Missing Note Backfill";
+    reviewedBy?: string;
+    reviewedAt?: string;
+    reviewComment?: string;
+    flaggedReason?: string;
   }>;
   notes?: Array<{
     id: string;

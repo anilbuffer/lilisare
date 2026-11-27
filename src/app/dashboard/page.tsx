@@ -57,7 +57,7 @@ export default function DashboardPage() {
           <Link
             href="/caregivers-tracker"
             target="_blank"
-            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 active:scale-95 transition-all text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 active:scale-95 transition-all text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold shadow-[0_6px_32px_rgba(0,0,0,0.06)]"
           >
             <MapPin className="w-3.5 h-3.5 text-[#3D6B22]" />
             Track Caregivers

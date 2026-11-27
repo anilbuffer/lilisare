@@ -406,14 +406,14 @@ export function AdminCaregiverDirectory() {
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Link
             href="/admin/evv-visits/"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <Clock className="w-3.5 h-3.5 text-[#3D6B22]" />
             <span>EVV Monitoring</span>
           </Link>
           <Link
             href="/admin/scheduling/"
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <Calendar className="w-3.5 h-3.5 text-[#3D6B22]" />
             <span>Scheduling</span>
@@ -438,8 +438,8 @@ export function AdminCaregiverDirectory() {
           type="button"
           onClick={() => setActiveKpiFilter((prev) => (prev === "ACTIVE" ? "ALL" : "ACTIVE"))}
           className={`text-left bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 cursor-pointer overflow-hidden ${activeKpiFilter === "ACTIVE"
-            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            ? "border-[#3D6B22] shadow-[0_6px_32px_rgba(0,0,0,0.06)] ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-start justify-between gap-2">
@@ -449,7 +449,7 @@ export function AdminCaregiverDirectory() {
                 {activeCount || 18}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -473,7 +473,7 @@ export function AdminCaregiverDirectory() {
                 {onboardingCount || 1}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center shrink-0">
               <UserPlus className="w-4 h-4" />
             </div>
           </div>
@@ -495,7 +495,7 @@ export function AdminCaregiverDirectory() {
               <p className="text-xs font-medium text-slate-500">Avg. Rating</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">{avgRating}</p>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-600 flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-600 flex items-center justify-center shrink-0">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             </div>
           </div>
@@ -517,7 +517,7 @@ export function AdminCaregiverDirectory() {
               <p className="text-xs font-medium text-slate-500">Compliance Rate</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">98%</p>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>

@@ -344,7 +344,7 @@ export function EvvVisitsWorkspace() {
 
               <div className="mt-4 mb-2">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">
+                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
                     {complianceRate}%
                   </span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -359,7 +359,7 @@ export function EvvVisitsWorkspace() {
             </div>
 
             {/* Card 2: Active Exceptions */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   ACTIVE EXCEPTIONS
@@ -385,7 +385,7 @@ export function EvvVisitsWorkspace() {
             </div>
 
             {/* Card 3: Aggregator Accepted */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium tracking-wider uppercase text-slate-500">
                   AGGREGATOR ACCEPTED
@@ -440,7 +440,7 @@ export function EvvVisitsWorkspace() {
           {/* Middle Row: Trend, Donut, Billing Exposure */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* 7-Day Compliance Trend */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-[0_6px_32px_rgba(0,0,0,0.06)] flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">

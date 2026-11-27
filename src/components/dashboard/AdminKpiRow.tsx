@@ -97,7 +97,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
               className="h-full flex flex-col justify-between"
             >
               <div className="flex items-center justify-between gap-1 mb-2 sm:mb-3">
-                <span className="text-[11px] sm:text-xs font-semibold text-slate-500 tracking-tight truncate pr-1">
+                <span className="text-xs font-medium text-slate-500 tracking-tight truncate pr-1">
                   {kpi.label}
                 </span>
                 <div
@@ -111,7 +111,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
                 <div className="flex items-baseline justify-between">
                   <span
                     suppressHydrationWarning
-                    className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 truncate"
+                    className="text-base sm:text-lg lg:text-xl font-bold tracking-tight text-slate-900 truncate"
                   >
                     {kpi.value}
                   </span>

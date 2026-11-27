@@ -117,11 +117,11 @@ export function CaregiverOvertime() {
       {/* 01. Full-Row Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-amber-50 text-amber-700 rounded-xl shrink-0">
-            <Clock className="w-6 h-6" />
+          <div className="w-8 h-8 bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 rounded-xl flex items-center justify-center shrink-0">
+            <Clock className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-base font-bold text-slate-900 tracking-tight">
               Caregiver Overtime & Utilization
             </h3>
           </div>
@@ -167,7 +167,7 @@ export function CaregiverOvertime() {
             <span>Total OT Hours</span>
             <Clock className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 tracking-tight">{currentOtHours} hrs</div>
+          <div className="text-xl font-bold text-slate-900 tracking-tight">{currentOtHours} hrs</div>
         </div>
 
         <div className="p-4 bg-rose-50/70 rounded-xl border border-rose-200/80">
@@ -175,7 +175,7 @@ export function CaregiverOvertime() {
             <span>Est. Overtime Cost</span>
             <DollarSign className="w-4 h-4 text-rose-600" />
           </div>
-          <div className="text-2xl font-extrabold text-rose-700 tracking-tight">${currentOtCost}</div>
+          <div className="text-xl font-bold text-rose-700 tracking-tight">${currentOtCost}</div>
         </div>
 
         <div className="p-4 bg-amber-50/70 rounded-xl border border-amber-200/80">
@@ -183,7 +183,7 @@ export function CaregiverOvertime() {
             <span>Exceeding 40h Limit</span>
             <AlertTriangle className="w-4 h-4 text-amber-600" />
           </div>
-          <div className="text-2xl font-extrabold text-amber-900 tracking-tight">{activeOtCount} caregivers</div>
+          <div className="text-xl font-bold text-amber-900 tracking-tight">{activeOtCount} caregivers</div>
         </div>
 
         <div className="p-4 bg-emerald-50/70 rounded-xl border border-emerald-200/80">
@@ -191,7 +191,7 @@ export function CaregiverOvertime() {
             <span>Approaching (36-40h)</span>
             <Users className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-extrabold text-emerald-950 tracking-tight">5 staff</div>
+          <div className="text-xl font-bold text-emerald-950 tracking-tight">5 staff</div>
         </div>
       </div>
 
@@ -213,8 +213,8 @@ export function CaregiverOvertime() {
                 <div
                   key={caregiver.id}
                   className={`p-3.5 rounded-xl border transition-all ${caregiver.reassigned
-                      ? "bg-slate-50/60 border-slate-200 opacity-60"
-                      : "bg-rose-50/50 border-rose-200/80 hover:border-rose-300"
+                    ? "bg-slate-50/60 border-slate-200 opacity-60"
+                    : "bg-rose-50/50 border-rose-200/80 hover:border-rose-300"
                     }`}
                 >
                   <div className="flex items-center justify-between gap-3">

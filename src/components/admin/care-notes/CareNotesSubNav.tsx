@@ -286,7 +286,7 @@ export function CareNotesSubNav({
             type="button"
             onClick={handleRefresh}
             title="Refresh care documentation data"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
@@ -296,7 +296,7 @@ export function CareNotesSubNav({
             type="button"
             onClick={handleExport}
             title="Export filtered records to CSV"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>Export</span>
@@ -353,7 +353,7 @@ export function CareNotesSubNav({
         {/* Dynamic Space-Aware Tab Navigation Strip: "More" is directly adjacent with zero empty gap */}
         <div
           ref={tabStripRef}
-          className="relative w-full bg-white shadow-2xs rounded-xl lg:rounded-2xl border border-slate-200 p-1.5 flex items-center gap-1 flex-nowrap overflow-visible"
+          className="relative w-full bg-white shadow-[0_6px_16px_rgba(0,0,0,0.06)] rounded-xl lg:rounded-2xl border border-slate-200 p-1.5 flex items-center gap-1 flex-nowrap overflow-visible"
         >
           {/* Front Visible Tabs (Buttons, NOT Route Links) */}
           {visibleTabs.map((tab) => {

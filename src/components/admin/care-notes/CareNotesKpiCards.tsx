@@ -91,8 +91,8 @@ export function CareNotesKpiCards({ kpi, onTabChange }: CareNotesKpiCardsProps) 
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 {card.label}
               </span>
-              <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${card.color}`}>
-                <Icon className="w-4 h-4" />
+              <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${card.color}`}>
+                <Icon className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight text-left">

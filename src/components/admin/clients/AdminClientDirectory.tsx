@@ -385,7 +385,7 @@ export function AdminClientDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Total Clients</span>
-            <div className="w-8 h-8 rounded-xl bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
+            <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -404,7 +404,7 @@ export function AdminClientDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Active Care</span>
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
               <Heart className="w-4 h-4" />
             </div>
           </div>
@@ -423,7 +423,7 @@ export function AdminClientDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">High Risk Alert</span>
-            <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600">
+            <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
@@ -442,7 +442,7 @@ export function AdminClientDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Hospitalized</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600">
+            <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600">
               <Building2 className="w-4 h-4" />
             </div>
           </div>
@@ -461,7 +461,7 @@ export function AdminClientDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Care Completed</span>
-            <div className="w-8 h-8 rounded-xl bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
+            <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>

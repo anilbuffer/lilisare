@@ -72,7 +72,7 @@ export default function HrTrainingPage() {
       {/* Top Quick Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
         <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-brand-teal/40 transition-all flex items-center gap-4 group">
-          <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] flex items-center justify-center font-bold border border-[#3D6B22]/20 shrink-0 group-hover:scale-105 transition-transform">
+          <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 text-[#3D6B22] flex items-center justify-center font-bold border border-[#3D6B22]/20 shrink-0 group-hover:scale-105 transition-transform">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
@@ -82,7 +82,7 @@ export default function HrTrainingPage() {
         </div>
 
         <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-emerald-300 transition-all flex items-center gap-4 group">
-          <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] flex items-center justify-center font-bold border border-[#3D6B22]/20 shrink-0 group-hover:scale-105 transition-transform">
+          <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 text-[#3D6B22] flex items-center justify-center font-bold border border-[#3D6B22]/20 shrink-0 group-hover:scale-105 transition-transform">
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
@@ -92,7 +92,7 @@ export default function HrTrainingPage() {
         </div>
 
         <div className="bg-white/90 backdrop-blur-xl p-4.5 rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.04)] hover:border-blue-300 transition-all flex items-center gap-4 group">
-          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold border border-blue-200/80 shrink-0 group-hover:scale-105 transition-transform">
+          <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold border border-blue-200/80 shrink-0 group-hover:scale-105 transition-transform">
             <Award className="w-5 h-5" />
           </div>
           <div>

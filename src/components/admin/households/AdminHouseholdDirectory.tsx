@@ -261,8 +261,8 @@ export function AdminHouseholdDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Total Households</span>
-            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-              <Home className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
+              <Home className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -274,8 +274,8 @@ export function AdminHouseholdDirectory() {
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Connected Clients</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
-              <Heart className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+              <Heart className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -287,8 +287,8 @@ export function AdminHouseholdDirectory() {
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Assigned Staff</span>
-            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-              <Users className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
+              <Users className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -300,8 +300,8 @@ export function AdminHouseholdDirectory() {
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Auth Utilization</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
-              <Activity className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+              <Activity className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -321,8 +321,8 @@ export function AdminHouseholdDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Action Alerts</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
-              <AlertTriangle className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600">
+              <AlertTriangle className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">

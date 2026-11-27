@@ -17,6 +17,7 @@ import {
   ArrowUpDown,
   ChevronDown,
   Flame,
+  ClipboardCheck,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 
@@ -260,9 +261,18 @@ export function NeedsYourAttentionCard() {
     <Card className="relative overflow-hidden p-0!">
       {/* Header Bar */}
       <div className="p-4 sm:px-6 sm:py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h3 className="text-base font-bold text-slate-900 tracking-tight">
-          Tasks
-        </h3>
+
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+            <ClipboardCheck className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-slate-900 tracking-tight">
+              Tasks
+            </h3>
+          </div>
+        </div>
+
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Quick Filter: All vs My Tasks */}

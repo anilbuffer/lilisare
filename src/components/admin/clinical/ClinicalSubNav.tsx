@@ -318,7 +318,7 @@ export function ClinicalSubNav({
             type="button"
             onClick={handleRefresh}
             title="Synchronize clinical data"
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isRefreshing ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Sync</span>
@@ -327,7 +327,7 @@ export function ClinicalSubNav({
           <button
             type="button"
             onClick={handleDefaultExport}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>Export</span>
@@ -336,7 +336,7 @@ export function ClinicalSubNav({
           {canManageRules && (
             <Link
               href="/admin/clinical/rules/"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
             >
               <Sliders className="w-3.5 h-3.5 text-[#3D6B22]" />
               <span>Configure Rules</span>
@@ -346,7 +346,7 @@ export function ClinicalSubNav({
           {canCreateReq && (
             <Link
               href="/admin/clinical/requirements/new/"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-[0_6px_32px_rgba(0,0,0,0.06)] shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Create Visit Requirement</span>
@@ -404,7 +404,7 @@ export function ClinicalSubNav({
           ref={tabStripRef}
           role="tablist"
           aria-label="Clinical & Supervisory navigation"
-          className="relative w-full min-w-0 bg-white shadow-2xs rounded-xl lg:rounded-2xl border border-slate-200 p-1.5 flex items-center gap-1 flex-nowrap overflow-hidden"
+          className="relative w-full min-w-0 bg-white shadow-[0_6px_32px_rgba(0,0,0,0.06)] rounded-xl lg:rounded-2xl border border-slate-200 p-1.5 flex items-center gap-1 flex-nowrap overflow-hidden"
         >
           {visibleTabs.map((tab) => {
             const Icon = tab.icon;

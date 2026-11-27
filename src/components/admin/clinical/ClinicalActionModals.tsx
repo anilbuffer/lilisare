@@ -63,7 +63,7 @@ export function AssignProfessionalModal({
           : undefined
       }
       icon={<UserCheck className="w-5 h-5" />}
-      maxWidth="lg"
+      maxWidth="2xl"
     >
       {visit && (
         <AssignProfessionalForm
@@ -358,7 +358,7 @@ export function CreateFollowUpModal({
       title={defaultEscalate ? "Escalate Clinical / Operational Issue" : "Create Operational Follow-up"}
       description={visit ? `${visit.clientName} • ${visit.id}` : undefined}
       icon={<Flag className="w-5 h-5" />}
-      maxWidth="lg"
+      maxWidth="2xl"
     >
       {visit && (
         <CreateFollowUpForm
@@ -644,7 +644,7 @@ export function RequestDocumentationModal({
           : undefined
       }
       icon={<FileWarning className="w-5 h-5" />}
-      maxWidth="lg"
+      maxWidth="2xl"
     >
       {visit && (
         <RequestDocumentationForm

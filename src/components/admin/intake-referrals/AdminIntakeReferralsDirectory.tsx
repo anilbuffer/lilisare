@@ -334,8 +334,8 @@ export function AdminIntakeReferralsDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Total Referrals</span>
-            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-              <FileText className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
+              <FileText className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -347,8 +347,8 @@ export function AdminIntakeReferralsDirectory() {
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Conversion Rate</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#3D6B22]">
-              <Sparkles className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+              <Sparkles className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -368,8 +368,8 @@ export function AdminIntakeReferralsDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">RN Assessments</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-              <Stethoscope className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-600">
+              <Stethoscope className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -381,8 +381,8 @@ export function AdminIntakeReferralsDirectory() {
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Intake Velocity</span>
-            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-              <Clock className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
+              <Clock className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -402,8 +402,8 @@ export function AdminIntakeReferralsDirectory() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Urgent Triage</span>
-            <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600">
-              <AlertTriangle className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600">
+              <AlertTriangle className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">

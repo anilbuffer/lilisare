@@ -296,9 +296,9 @@ export function ClinicalOverviewWorkspace() {
                   {card.label}
                 </span>
                 <div
-                  className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 ${card.iconCls}`}
+                  className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${card.iconCls}`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                 </div>
               </div>
               <div className="flex items-baseline justify-between">
@@ -316,16 +316,13 @@ export function ClinicalOverviewWorkspace() {
       <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all duration-200">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#ff6900]/10 border border-[#ff6900]/20 flex items-center justify-center text-[#ff6900] shrink-0">
-              <Flame className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-xl bg-[#ff6900]/10 border border-[#ff6900]/20 flex items-center justify-center text-[#ff6900] shrink-0">
+              <Flame className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 tracking-tight">
                 Attention Required
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Prioritized overdue visits, unassigned requirements, missing documentation &amp; pending sign-offs
-              </p>
             </div>
           </div>
           <Link
@@ -394,16 +391,13 @@ export function ClinicalOverviewWorkspace() {
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
-              <Calendar className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
+              <Calendar className="w-4 h-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 tracking-tight">
                 Upcoming Clinical &amp; Supervisory Visits
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Appointments synchronized with the master Scheduling module
-              </p>
             </div>
           </div>
 
@@ -480,7 +474,7 @@ export function ClinicalOverviewWorkspace() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
-                <TrendingUp className="w-4.5 h-4.5" />
+                <TrendingUp className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">

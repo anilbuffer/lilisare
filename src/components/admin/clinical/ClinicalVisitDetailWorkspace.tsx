@@ -534,13 +534,12 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                 {visit.dueDate}
               </div>
               <p
-                className={`text-[11px] font-semibold mt-0.5 ${
-                  daysLate > 0
-                    ? "text-[#c2410c] font-bold"
-                    : visit.visitStatus === "Completed"
-                      ? "text-slate-500"
-                      : "text-[#3D6B22]"
-                }`}
+                className={`text-[11px] font-semibold mt-0.5 ${daysLate > 0
+                  ? "text-[#c2410c] font-bold"
+                  : visit.visitStatus === "Completed"
+                    ? "text-slate-500"
+                    : "text-[#3D6B22]"
+                  }`}
               >
                 {daysLate > 0
                   ? `${daysLate} day(s) overdue`
@@ -669,12 +668,12 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               : "lg:grid-cols-1"
             }`}
         >
-          {/* Section A — Client Overview */}
+          {/* Client Overview */}
           {showClientReq && (
             <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3 min-w-0">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h2 className="text-sm font-bold text-slate-900">
-                  Section A — Client Overview
+                  Client Overview
                 </h2>
                 <Link
                   href={`/admin/clients/${visit.clientId}/`}
@@ -739,13 +738,13 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
             </div>
           )}
 
-          {/* Section B — Requirement Information */}
+          {/* Requirement Information */}
           {showClientReq && (
             <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-3 min-w-0">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-bold text-slate-900">
-                    Section B — Requirement Information
+                    Requirement Information
                   </h2>
                   <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
                     Rule v{visit.ruleVersion}
@@ -830,13 +829,13 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
             </div>
           )}
 
-          {/* Section C — Visit Information */}
+          {/* Visit Information */}
           {showVisitSchedule && (
             <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-3 min-w-0">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-bold text-slate-900">
-                    Section C — Visit Information
+                    Visit Information
                   </h2>
                   <ClinicalVisitStatusBadge status={visit.visitStatus} />
                 </div>
@@ -918,13 +917,13 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
         </div>
       )}
 
-      {/* Section D & E Grid: Documentation (Read-only findings) + Clinical Review */}
+      {/* Grid: Documentation (Read-only findings) + Clinical Review */}
       {(showDocumentation || showReview) && (
         <div
           className={`grid grid-cols-1 gap-6 ${showDocumentation && showReview ? "lg:grid-cols-12" : "lg:grid-cols-1"
             }`}
         >
-          {/* Section D — Documentation */}
+          {/* Documentation */}
           {showDocumentation && (
             <div
               className={`${showReview ? "lg:col-span-7" : ""
@@ -933,7 +932,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div>
                   <h2 className="text-base font-bold text-slate-900">
-                    Section D — Documentation &amp; Evidence
+                    Documentation &amp; Evidence
                   </h2>
                   <p className="text-xs text-slate-500">
                     Submitted clinical findings are immutable by Agency Admin. Missing documentation can be requested below.
@@ -1057,7 +1056,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
             </div>
           )}
 
-          {/* Section E — Clinical Review */}
+          {/* Clinical Review */}
           {showReview && (
             <div
               className={`${showDocumentation ? "lg:col-span-5" : ""
@@ -1065,7 +1064,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
             >
               <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <h2 className="text-base font-bold text-slate-900">
-                  Section E — Clinical Review &amp; Sign-Off
+                  Clinical Review &amp; Sign-Off
                 </h2>
                 <div className="flex items-center gap-2">
                   <ClinicalReviewStatusBadge status={visit.reviewStatus} />
@@ -1176,7 +1175,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
         </div>
       )}
 
-      {/* Section F — History, Activity & Follow-ups */}
+      {/* History, Activity & Follow-ups */}
       {(showAudit || showFollowUps) && (
         <div
           className={`grid grid-cols-1 gap-6 ${showAudit && showFollowUps ? "lg:grid-cols-2" : "lg:grid-cols-1"
@@ -1187,7 +1186,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <History className="w-4 h-4 text-[#3D6B22]" />
-                  <span>Section F — History &amp; Activity</span>
+                  <span>History &amp; Activity</span>
                 </h2>
                 <span className="text-[11px] font-semibold text-slate-400">
                   {visitAudit.length} events
@@ -1476,7 +1475,7 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
         title="Assign Eligible Clinical Reviewer"
         description={`${visit.id} • ${visit.clientName}`}
         icon={<UserCheck className="w-5 h-5" />}
-        maxWidth="md"
+        maxWidth="2xl"
       >
         <form onSubmit={handleAssignReviewer} className="space-y-4">
           <div>

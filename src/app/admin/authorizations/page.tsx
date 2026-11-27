@@ -179,7 +179,7 @@ export default function AdminAuthorizationsPage() {
             type="button"
             onClick={handleRefresh}
             disabled={isSyncing}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <RefreshCw className={cn("w-3.5 h-3.5 text-slate-500", isSyncing && "animate-spin text-[#3D6B22]")} />
             <span>Sync Portals</span>
@@ -188,7 +188,7 @@ export default function AdminAuthorizationsPage() {
           <button
             type="button"
             onClick={handleExport}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
             <span>Export CSV</span>
@@ -208,9 +208,9 @@ export default function AdminAuthorizationsPage() {
       {/* 02. Essential UX Distinction Callout */}
       {/* ----------------------------------------------------------------- */}
       {showDistinctionBanner && (
-        <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 text-xs text-slate-700 shadow-2xs relative">
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 sm:p-4 flex items-start justify-between gap-3 text-xs text-slate-700 shadow-[0_6px_16px_rgba(0,0,0,0.06)] relative">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0 mt-0.5">
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0 mt-0.5">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div className="space-y-0.5 pr-2">
@@ -279,7 +279,7 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-medium text-slate-500">
               Approved & Active
             </span>
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
@@ -299,7 +299,7 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-medium text-slate-500">
               Remaining Units
             </span>
-            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+            <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
               <Activity className="w-4 h-4" />
             </div>
           </div>
@@ -319,7 +319,7 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-medium text-slate-500">
               Pending Payer Decision
             </span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-700">
+            <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-700">
               <Clock className="w-4 h-4" />
             </div>
           </div>
@@ -339,7 +339,7 @@ export default function AdminAuthorizationsPage() {
             <span className="text-xs font-medium text-slate-500">
               Renewal & Risk Queue
             </span>
-            <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-700">
+            <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-700">
               <AlertOctagon className="w-4 h-4" />
             </div>
           </div>

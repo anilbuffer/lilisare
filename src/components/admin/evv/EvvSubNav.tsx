@@ -238,7 +238,7 @@ export function EvvSubNav({
       {/* Top Header Row with Title, Badge, Dropdowns, and Export */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             EVV & Visits
           </h1>
           {exceptionCount > 0 && (
@@ -255,7 +255,7 @@ export function EvvSubNav({
             <select
               value={currentJurisdiction}
               onChange={(e) => handleJurisdictionSelect(e.target.value)}
-              className="appearance-none pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-2xs cursor-pointer"
+              className="appearance-none pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
             >
               <option value="All Jurisdictions">All Jurisdictions</option>
               <option value="Ohio Medicaid (ODM)">Ohio Medicaid (ODM)</option>
@@ -272,7 +272,7 @@ export function EvvSubNav({
             <select
               value={currentDateFilter}
               onChange={(e) => handleDateFilterSelect(e.target.value)}
-              className="appearance-none pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-2xs cursor-pointer"
+              className="appearance-none pl-8 pr-7 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 shadow-[0_6px_32px_rgba(0,0,0,0.06)] cursor-pointer"
             >
               <option value="Today & Recent">Today & Recent</option>
               <option value="Today (Nov 25, 2026)">Today (Nov 25, 2026)</option>
@@ -305,34 +305,30 @@ export function EvvSubNav({
               key={item.id}
               type="button"
               onClick={item.onClick}
-              className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
-                item.isActive
-                  ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-md shadow-[#3D6B22]/20"
-                  : "bg-white text-slate-800 border-slate-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 hover:bg-slate-50/70 hover:-translate-y-0.5"
-              }`}
+              className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border text-left transition-all duration-200 cursor-pointer ${item.isActive
+                ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-md shadow-[#3D6B22]/20"
+                : "bg-white text-slate-800 border-slate-200/90 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 hover:bg-slate-50/70 hover:-translate-y-0.5"
+                }`}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                    item.isActive
-                      ? "bg-white/20 text-white"
-                      : "bg-slate-100 text-slate-500"
-                  }`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${item.isActive
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-100 text-slate-500"
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
                   <div
-                    className={`text-xs sm:text-sm font-bold tracking-tight truncate ${
-                      item.isActive ? "text-white" : "text-slate-900"
-                    }`}
+                    className={`text-xs sm:text-sm font-bold tracking-tight truncate ${item.isActive ? "text-white" : "text-slate-900"
+                      }`}
                   >
                     {item.title}
                   </div>
                   <div
-                    className={`text-[10px] sm:text-[11px] font-medium truncate mt-0.5 ${
-                      item.isActive ? "text-emerald-100" : "text-slate-500"
-                    }`}
+                    className={`text-[10px] sm:text-[11px] font-medium truncate mt-0.5 ${item.isActive ? "text-emerald-100" : "text-slate-500"
+                      }`}
                   >
                     {item.subtitle}
                   </div>
@@ -341,11 +337,10 @@ export function EvvSubNav({
 
               {item.badge !== null && (
                 <span
-                  className={`ml-2 shrink-0 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full ${
-                    item.isActive
-                      ? "bg-white/25 text-white"
-                      : item.badgeColor
-                  }`}
+                  className={`ml-2 shrink-0 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full ${item.isActive
+                    ? "bg-white/25 text-white"
+                    : item.badgeColor
+                    }`}
                 >
                   {item.badge}
                 </span>

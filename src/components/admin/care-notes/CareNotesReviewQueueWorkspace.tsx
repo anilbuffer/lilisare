@@ -281,7 +281,7 @@ export function CareNotesReviewQueueWorkspace({
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#3D6B22]/10 text-[#3D6B22] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
               <Inbox className="w-4 h-4" />
             </div>
             <div>

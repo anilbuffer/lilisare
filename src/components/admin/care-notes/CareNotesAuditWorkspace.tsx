@@ -87,7 +87,7 @@ export function CareNotesAuditWorkspace({
         {/* Compliance Notice Banner */}
         <div className="p-4 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#3D6B22] border border-emerald-200/80 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>

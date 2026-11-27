@@ -449,7 +449,7 @@ export function AdminCaregiverDirectory() {
                 {activeCount || 18}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -473,7 +473,7 @@ export function AdminCaregiverDirectory() {
                 {onboardingCount || 1}
               </p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 text-purple-600 flex items-center justify-center shrink-0">
               <UserPlus className="w-4 h-4" />
             </div>
           </div>
@@ -495,7 +495,7 @@ export function AdminCaregiverDirectory() {
               <p className="text-xs font-medium text-slate-500">Avg. Rating</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">{avgRating}</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-600 flex items-center justify-center shrink-0">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             </div>
           </div>
@@ -517,7 +517,7 @@ export function AdminCaregiverDirectory() {
               <p className="text-xs font-medium text-slate-500">Compliance Rate</p>
               <p className="text-lg sm:text-xl font-bold text-slate-900 mt-1">98%</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>

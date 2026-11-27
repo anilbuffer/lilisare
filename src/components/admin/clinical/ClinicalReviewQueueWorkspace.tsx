@@ -210,7 +210,7 @@ export function ClinicalReviewQueueWorkspace() {
       {/* Governance Permission Boundary Banner */}
       <div className="bg-white rounded-xl lg:rounded-2xl p-4 border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
             <Lock className="w-4.5 h-4.5" />
           </div>
           <div>

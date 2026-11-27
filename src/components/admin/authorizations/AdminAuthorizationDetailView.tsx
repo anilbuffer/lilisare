@@ -389,7 +389,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
           <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
+                <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
@@ -497,7 +497,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
           {/* Card: Burnout Trajectory & EVV Gating */}
           <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-5">
             <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#3D6B22]">
+              <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
                 <Activity className="w-4 h-4" />
               </div>
               <div>
@@ -569,7 +569,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
           {/* Card: Payer & Policy Specification */}
           <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-5">
             <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-700">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-700 shrink-0">
                 <Building2 className="w-4 h-4" />
               </div>
               <div>
@@ -623,7 +623,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
           {/* Card: Case Management Coordination */}
           <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-5">
             <div className="flex items-center gap-2.5 border-b border-slate-100 pb-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#3D6B22]">
+              <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
                 <User className="w-4 h-4" />
               </div>
               <div>
@@ -703,7 +703,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
             {/* Journey 1: Client Profile Link */}
             <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-700">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center text-blue-700 shrink-0">
                   <User className="w-5 h-5" />
                 </div>
                 <div>
@@ -730,7 +730,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
             {/* Journey 2: Household Profile Link */}
             <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-700">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200/80 flex items-center justify-center text-purple-700 shrink-0">
                   <Home className="w-5 h-5" />
                 </div>
                 <div>
@@ -757,7 +757,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
             {/* Journey 3: Agency Operations & Caregivers */}
             <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#3D6B22]">
+                <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
@@ -833,7 +833,7 @@ export function AdminAuthorizationDetailView({ authId }: AdminAuthorizationDetai
               filteredDocs.map((doc) => (
                 <div key={doc.id} className="py-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100/80 border border-slate-200 flex items-center justify-center text-slate-600 shrink-0">
                       <FileSignature className="w-5 h-5 text-[#3D6B22]" />
                     </div>
                     <div>

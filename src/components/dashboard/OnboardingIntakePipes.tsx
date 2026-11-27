@@ -119,8 +119,8 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
         <div>
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-emerald-50 text-[#3D6B22] rounded-xl shrink-0">
-                <UserPlus className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+                <UserPlus className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 text-base leading-tight">Onboarding Funnel</h3>
@@ -175,8 +175,8 @@ export function OnboardingIntakePipes({ metrics: propMetrics }: OnboardingIntake
         <div>
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-emerald-50 text-[#3D6B22] rounded-xl shrink-0">
-                <Inbox className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+                <Inbox className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 text-base leading-tight">Intake Pipeline</h3>

@@ -18,8 +18,8 @@ export function FinancialHealth() {
     <Card className="flex flex-col h-full">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-emerald-50 text-[#3D6B22] rounded-xl">
-            <DollarSign className="w-5 h-5" />
+          <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+            <DollarSign className="w-4 h-4" />
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900">Revenue Cycle Health</h3>

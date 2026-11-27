@@ -479,7 +479,7 @@ export function ClinicalOverviewWorkspace() {
         <div className="lg:col-span-2 bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
                 <TrendingUp className="w-4.5 h-4.5" />
               </div>
               <div>
@@ -595,7 +595,7 @@ export function ClinicalOverviewWorkspace() {
           <div>
             <div className="flex items-center justify-between pb-3.5 mb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-slate-100/80 border border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
                   <Activity className="w-4 h-4" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">

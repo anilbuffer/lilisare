@@ -170,11 +170,11 @@ export function InsightsLiveActivityFeed() {
       {/* Tab Navigation Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-[#1B3414] text-[#93C573] rounded-xl shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
             {activeTab === "insights" ? (
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-4 h-4" />
             ) : (
-              <Activity className="w-5 h-5" />
+              <Activity className="w-4 h-4" />
             )}
           </div>
           <div>

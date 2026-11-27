@@ -327,7 +327,7 @@ export function CareNotesRulesWorkspace({
           <div className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-200 overflow-hidden flex flex-col">
             <div className="border-b border-slate-100 p-4 sm:p-5 flex items-center justify-between bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
                   <Sliders className="w-5 h-5" />
                 </div>
                 <div>

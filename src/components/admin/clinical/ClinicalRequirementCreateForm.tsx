@@ -299,7 +299,7 @@ export function ClinicalRequirementCreateForm() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2.5">
-              <span className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
+              <span className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 text-[#3D6B22] flex items-center justify-center shrink-0">
                 <ClipboardPlus className="w-5 h-5" />
               </span>
               <span>Create Clinical &amp; Supervisory Visit Requirement</span>

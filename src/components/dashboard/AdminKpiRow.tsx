@@ -35,7 +35,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       label: "Referral-to-Admission",
       value: metrics?.strategicKpis?.referralToAdmissionRate?.rateFormatted || "72.4%",
       icon: UserCheck,
-      iconBg: "bg-emerald-50",
+      iconBg: "bg-[#3D6B22]/10 border-[#3D6B22]/20",
       iconColor: "text-[#3D6B22]",
       borderHover: "hover:border-[#3D6B22]/50",
       href: "/admin/intake-referrals",
@@ -45,7 +45,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       label: "Time to Start of Care",
       value: metrics?.strategicKpis?.timeToStartOfCare?.averageFormatted || "38.5 hrs",
       icon: Clock,
-      iconBg: "bg-teal-50",
+      iconBg: "bg-teal-50 border-teal-200/80",
       iconColor: "text-teal-700",
       borderHover: "hover:border-teal-500/50",
       href: "/admin/dashboard",
@@ -55,7 +55,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       label: "Visit Completion Rate",
       value: metrics?.strategicKpis?.visitCompletionRate?.rateFormatted || "96.0%",
       icon: CalendarCheck,
-      iconBg: "bg-emerald-50",
+      iconBg: "bg-[#3D6B22]/10 border-[#3D6B22]/20",
       iconColor: "text-[#3D6B22]",
       borderHover: "hover:border-[#3D6B22]/50",
       href: "/admin/scheduling",
@@ -65,7 +65,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       label: "Doc & Compliance Status",
       value: metrics?.strategicKpis?.documentationAndCompliance?.scoreFormatted || "94.8%",
       icon: FileCheck2,
-      iconBg: "bg-amber-50",
+      iconBg: "bg-amber-50 border-amber-200/80",
       iconColor: "text-amber-700",
       borderHover: "hover:border-amber-400",
       href: "/admin/compliance",
@@ -75,7 +75,7 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
       label: "Revenue Health",
       value: metrics?.strategicKpis?.revenueHealth?.denialRateFormatted || "3.2%",
       icon: CircleDollarSign,
-      iconBg: "bg-emerald-50",
+      iconBg: "bg-[#3D6B22]/10 border-[#3D6B22]/20",
       iconColor: "text-[#3D6B22]",
       borderHover: "hover:border-[#3D6B22]/50",
       href: "/admin/billing",
@@ -101,9 +101,9 @@ export function AdminKpiRow({ metrics }: AdminKpiRowProps) {
                   {kpi.label}
                 </span>
                 <div
-                  className={`p-1 sm:p-1.5 rounded-lg shrink-0 ${kpi.iconBg} ${kpi.iconColor}`}
+                  className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 ${kpi.iconBg} ${kpi.iconColor}`}
                 >
-                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                 </div>
               </div>
 

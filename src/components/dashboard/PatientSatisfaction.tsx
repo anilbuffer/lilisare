@@ -21,8 +21,8 @@ export function PatientSatisfaction() {
     <Card className="flex flex-col h-full">
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-rose-50 text-rose-600 rounded-xl">
-            <Heart className="w-5 h-5 fill-current text-rose-500" />
+          <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-600 flex items-center justify-center shrink-0">
+            <Heart className="w-4 h-4 fill-current text-rose-500" />
           </div>
           <div>
             <h3 className="text-base font-bold text-slate-900">Client & Family Satisfaction</h3>

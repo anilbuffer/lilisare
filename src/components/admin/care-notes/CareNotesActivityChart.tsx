@@ -65,7 +65,7 @@ export function CareNotesActivityChart({ className }: ActivityChartProps) {
       {/* Card Header matching AI Protocol card */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 min-h-[52px]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22] shrink-0">
             <TrendingUp className="w-4.5 h-4.5" />
           </div>
           <div>

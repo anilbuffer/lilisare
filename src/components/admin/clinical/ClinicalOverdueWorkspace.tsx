@@ -3,8 +3,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Flag, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "@/hooks/useAuth";
 import { resolveClinicalActor } from "@/lib/admin/clinicalAuthGuard";
 import {
@@ -23,6 +24,7 @@ import {
 } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
 import { ClinicalAvatarName, PriorityBadge } from "./ClinicalBadges";
+import { CreateFollowUpModal } from "./ClinicalActionModals";
 import {
   ResponsiveDomainTabStrip,
   DomainTabItem,
@@ -61,6 +63,8 @@ export function ClinicalOverdueWorkspace() {
   const [activeSection, setActiveSection] = useState<SectionTab>(
     initialSection || "all"
   );
+  const [pickFollowUpOpen, setPickFollowUpOpen] = useState(false);
+  const [followUpTarget, setFollowUpTarget] = useState<ClinicalVisit | null>(null);
 
   useEffect(() => {
     const load = () => {
@@ -303,14 +307,24 @@ export function ClinicalOverdueWorkspace() {
 
       {/* Active Follow-up Tasks & Mock Notification Log */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="text-base font-bold text-slate-900">
-              Active Follow-up Tasks ({followUps.filter((f) => f.status !== "Completed").length})
-            </h3>
-            <span className="text-[11px] text-slate-400 font-semibold">
-              Operational Ownership
-            </span>
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                Active Follow-up Tasks ({followUps.filter((f) => f.status !== "Completed").length})
+              </h3>
+              <span className="text-[11px] text-slate-400 font-semibold">
+                Operational Ownership
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPickFollowUpOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#3D6B22] hover:bg-[#345C1D] text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Follow-up</span>
+            </button>
           </div>
           <div className="space-y-3 max-h-[340px] overflow-y-auto thin-scrollbar">
             {followUps.map((fu) => (
@@ -372,7 +386,7 @@ export function ClinicalOverdueWorkspace() {
         </div>
 
         {/* Simulated Mock Reminder Log */}
-        <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <h3 className="text-base font-bold text-slate-900">
               Simulated Reminder Log (Mock Only)
@@ -410,6 +424,58 @@ export function ClinicalOverdueWorkspace() {
           </div>
         </div>
       </div>
+
+      {/* Pick Visit for Follow-up Modal */}
+      <Modal
+        isOpen={pickFollowUpOpen}
+        onClose={() => setPickFollowUpOpen(false)}
+        title="Add Operational Follow-up"
+        description="Select a clinical or supervisory visit to attach an operational follow-up task."
+        icon={<Flag className="w-5 h-5" />}
+        maxWidth="lg"
+      >
+        <div className="space-y-2.5 max-h-[360px] overflow-y-auto thin-scrollbar">
+          {visits.filter((v) => v.visitStatus !== "Cancelled").length === 0 ? (
+            <p className="text-xs text-slate-500 py-4 text-center">
+              No active clinical visits available.
+            </p>
+          ) : (
+            visits
+              .filter((v) => v.visitStatus !== "Cancelled")
+              .map((v) => (
+                <div
+                  key={v.id}
+                  className="p-3.5 rounded-xl border border-slate-200 flex items-center justify-between gap-3 hover:border-[#3D6B22]/40 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-slate-900">
+                      {v.clientName} · {v.visitType}
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">
+                      Due {v.dueDate} · {v.professionalName || "Unassigned"} · {v.visitStatus}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPickFollowUpOpen(false);
+                      setFollowUpTarget(v);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-[#3D6B22] text-white text-xs font-bold shrink-0 cursor-pointer"
+                  >
+                    Select
+                  </button>
+                </div>
+              ))
+          )}
+        </div>
+      </Modal>
+
+      <CreateFollowUpModal
+        visit={followUpTarget}
+        actor={actor}
+        onClose={() => setFollowUpTarget(null)}
+      />
     </div>
   );
 }

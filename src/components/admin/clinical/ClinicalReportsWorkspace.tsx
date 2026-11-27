@@ -315,7 +315,7 @@ export function ClinicalReportsWorkspace() {
       <ClinicalSubNav activeTab="reports" onExport={handleExportReport} />
 
       {/* Mock Metrics Disclaimer */}
-      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] text-xs text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 text-[#3D6B22] shrink-0" />
           <span>
@@ -434,7 +434,7 @@ export function ClinicalReportsWorkspace() {
 
       {/* Visualizations Grid (5 core charts) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
           <h3 className="text-sm font-bold text-slate-900 mb-3">
             Completed vs. Overdue Visits &amp; Monthly Trend
           </h3>
@@ -455,7 +455,7 @@ export function ClinicalReportsWorkspace() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
           <h3 className="text-sm font-bold text-slate-900 mb-3">
             Documentation Completion Rate &amp; Pending Review Breakdown
           </h3>
@@ -497,7 +497,7 @@ export function ClinicalReportsWorkspace() {
       </div>
 
       {/* Service-wise & Snapshot Bar */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
         <h3 className="text-sm font-bold text-slate-900 mb-3">
           Service-wise Visit Distribution ({dateRange})
         </h3>
@@ -518,7 +518,7 @@ export function ClinicalReportsWorkspace() {
 
       {/* Standardized Clean Underlying Report Table */}
       <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900">
             {REPORTS.find((r) => r.id === activeReport)?.label} ({reportData.rows.length} rows)
           </h3>
@@ -529,7 +529,7 @@ export function ClinicalReportsWorkspace() {
         </div>
         <div className="overflow-x-auto">
           {reportData.rows.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-400">
+            <div className="py-12 text-center text-slate-500 text-xs">
               No records match the active report filters.
             </div>
           ) : (

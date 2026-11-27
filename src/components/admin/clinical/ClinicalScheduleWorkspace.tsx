@@ -432,47 +432,60 @@ export function ClinicalScheduleWorkspace() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
-                {filteredVisits.map((v) => (
-                  <tr
-                    key={v.id}
-                    onClick={() => router.push(getClinicalDetailHref(v.id))}
-                    className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                  >
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <ClinicalAvatarName
-                        name={v.clientName}
-                        variant="client"
-                        highlightHover
-                      />
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[190px]">
-                      {v.visitType}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <ClinicalAvatarName name={v.professionalName} variant="staff" />
-                    </td>
-                    <td className="py-3.5 px-4 font-mono whitespace-nowrap">
-                      {v.scheduledDate
-                        ? `${v.scheduledDate} ${v.scheduledStartTime || ""}`
-                        : `Due ${v.dueDate}`}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <ClinicalVisitStatusBadge status={v.visitStatus} />
-                    </td>
-                    <td
-                      className="py-3.5 px-4 text-right whitespace-nowrap"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Link
-                        href={getClinicalDetailHref(v.id)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
-                      >
-                        <span>View</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </Link>
+                {filteredVisits.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-slate-500">
+                      <p className="font-semibold text-sm text-slate-700">
+                        No matching clinical or supervisory visits found
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Adjust filters or schedule a pending visit.
+                      </p>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredVisits.map((v) => (
+                    <tr
+                      key={v.id}
+                      onClick={() => router.push(getClinicalDetailHref(v.id))}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                    >
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalAvatarName
+                          name={v.clientName}
+                          variant="client"
+                          highlightHover
+                        />
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[190px]">
+                        {v.visitType}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalAvatarName name={v.professionalName} variant="staff" />
+                      </td>
+                      <td className="py-3.5 px-4 font-mono whitespace-nowrap">
+                        {v.scheduledDate
+                          ? `${v.scheduledDate} ${v.scheduledStartTime || ""}`
+                          : `Due ${v.dueDate}`}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalVisitStatusBadge status={v.visitStatus} />
+                      </td>
+                      <td
+                        className="py-3.5 px-4 text-right whitespace-nowrap"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Link
+                          href={getClinicalDetailHref(v.id)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                        >
+                          <span>View</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

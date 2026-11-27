@@ -8,14 +8,33 @@ import {
   ArrowUpDown,
   CheckSquare,
   Download,
+  Pencil,
+  Plus,
   RotateCcw,
   Search,
   Square,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Pagination } from "@/components/ui/Pagination";
+import { Modal } from "@/components/ui/Modal";
 import {
+  FormButtonCancel,
+  FormButtonPrimary,
+  FormInput,
+  FormLabel,
+  FormSelect,
+  FormTextarea,
+} from "@/components/ui/FormControls";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  checkClinicalPermission,
+  resolveClinicalActor,
+} from "@/lib/admin/clinicalAuthGuard";
+import {
+  cancelClinicalRequirement,
   DEMO_TODAY,
+  editClinicalRequirement,
   exportClinicalCsv,
   getClinicalDetailHref,
   getClinicalRequirements,
@@ -23,7 +42,9 @@ import {
 } from "@/lib/admin/clinicalSupervisoryStore";
 import {
   ClinicalRequirement,
+  PriorityLevel,
   RequirementStatus,
+  VisitDeliveryMethod,
 } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
 import { ClinicalAvatarName, RequirementStatusBadge } from "./ClinicalBadges";
@@ -34,10 +55,27 @@ export function ClinicalRequirementsWorkspace() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialFilter = searchParams.get("filter") || "all";
+  const { currentUser } = useAuth();
+  const actor = useMemo(() => resolveClinicalActor(currentUser), [currentUser]);
+  const canCreateReq = checkClinicalPermission(actor, "CREATE_REQUIREMENT").allowed;
+  const canEditReq = checkClinicalPermission(actor, "EDIT_REQUIREMENT").allowed;
+  const canCancelReq = checkClinicalPermission(actor, "CANCEL_REQUIREMENT").allowed;
 
   const [requirements, setRequirements] = useState<ClinicalRequirement[]>(() =>
     getClinicalRequirements()
   );
+
+  // Edit / Cancel Requirement Modal State
+  const [editTarget, setEditTarget] = useState<ClinicalRequirement | null>(null);
+  const [editDueDate, setEditDueDate] = useState("");
+  const [editFrequency, setEditFrequency] = useState("");
+  const [editDeliveryMethod, setEditDeliveryMethod] = useState<VisitDeliveryMethod>("In-home");
+  const [editPriority, setEditPriority] = useState<PriorityLevel>("Medium");
+  const [editStatus, setEditStatus] = useState<RequirementStatus>("Active");
+  const [editNotes, setEditNotes] = useState("");
+
+  const [cancelTarget, setCancelTarget] = useState<ClinicalRequirement | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
 
   // Filters (aligned with table columns: Client, Visit Type, Assigned Professional, Next Due Date, Status)
   const [searchTerm, setSearchTerm] = useState("");
@@ -212,6 +250,56 @@ export function ClinicalRequirementsWorkspace() {
     );
   };
 
+  const openEditModal = (req: ClinicalRequirement) => {
+    setEditTarget(req);
+    setEditDueDate(req.nextDueDate);
+    setEditFrequency(req.frequency);
+    setEditDeliveryMethod(req.deliveryMethod);
+    setEditPriority(req.priority);
+    setEditStatus(req.status);
+    setEditNotes(req.internalNotes || "");
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTarget) return;
+    try {
+      editClinicalRequirement(
+        editTarget.id,
+        {
+          nextDueDate: editDueDate,
+          frequency: editFrequency,
+          deliveryMethod: editDeliveryMethod,
+          priority: editPriority,
+          status: editStatus,
+          internalNotes: editNotes.trim(),
+        },
+        actor
+      );
+      toast.success(`Updated requirement ${editTarget.id}`);
+      setEditTarget(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update requirement");
+    }
+  };
+
+  const handleConfirmCancel = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cancelTarget) return;
+    if (!cancelReason.trim()) {
+      toast.error("Please provide a reason for cancelling this requirement.");
+      return;
+    }
+    try {
+      cancelClinicalRequirement(cancelTarget.id, cancelReason.trim(), actor);
+      toast.success(`Cancelled requirement ${cancelTarget.id}`);
+      setCancelTarget(null);
+      setCancelReason("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to cancel requirement");
+    }
+  };
+
   return (
     <div className="w-full max-w-9xl mx-auto min-w-0 space-y-5 animate-in fade-in duration-300 pb-10">
       <ClinicalSubNav
@@ -262,6 +350,15 @@ export function ClinicalRequirementsWorkspace() {
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset</span>
             </button>
+            {canCreateReq && (
+              <Link
+                href="/admin/clinical/requirements/new/"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>New Requirement</span>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -484,13 +581,44 @@ export function ClinicalRequirementsWorkspace() {
                         className="py-3.5 px-4 text-right whitespace-nowrap"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Link
-                          href={detailHref}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
-                        >
-                          <span>View</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          {canEditReq &&
+                            req.status !== "Cancelled" &&
+                            req.status !== "Completed" && (
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(req)}
+                                title="Edit requirement"
+                                aria-label={`Edit ${req.id}`}
+                                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors cursor-pointer"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          {canCancelReq &&
+                            req.status !== "Cancelled" &&
+                            req.status !== "Completed" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCancelTarget(req);
+                                  setCancelReason("");
+                                }}
+                                title="Cancel requirement"
+                                aria-label={`Cancel ${req.id}`}
+                                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 hover:border-rose-200 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          <Link
+                            href={detailHref}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                          >
+                            <span>View</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -509,6 +637,131 @@ export function ClinicalRequirementsWorkspace() {
           entryLabel="requirements"
         />
       </div>
+
+      {/* Edit Requirement Modal */}
+      <Modal
+        isOpen={Boolean(editTarget)}
+        onClose={() => setEditTarget(null)}
+        title="Modify Clinical Requirement"
+        description={editTarget ? `${editTarget.clientName} · ${editTarget.visitType}` : undefined}
+        icon={<Pencil className="w-5 h-5" />}
+        maxWidth="lg"
+      >
+        <form onSubmit={handleSaveEdit} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <FormLabel required>Next Due Date</FormLabel>
+              <FormInput
+                type="date"
+                value={editDueDate}
+                onChange={(e) => setEditDueDate(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <FormLabel required>Frequency</FormLabel>
+              <FormInput
+                value={editFrequency}
+                onChange={(e) => setEditFrequency(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <FormLabel required>Delivery Method</FormLabel>
+              <FormSelect
+                value={editDeliveryMethod}
+                onChange={(e) => setEditDeliveryMethod(e.target.value as VisitDeliveryMethod)}
+              >
+                <option value="In-home">In-home</option>
+                <option value="Virtual">Virtual</option>
+                <option value="Other approved method">Other approved method</option>
+              </FormSelect>
+            </div>
+            <div>
+              <FormLabel required>Priority</FormLabel>
+              <FormSelect
+                value={editPriority}
+                onChange={(e) => setEditPriority(e.target.value as PriorityLevel)}
+              >
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </FormSelect>
+            </div>
+            <div className="sm:col-span-2">
+              <FormLabel required>Status</FormLabel>
+              <FormSelect
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value as RequirementStatus)}
+              >
+                {(
+                  [
+                    "Active",
+                    "Pending Assignment",
+                    "Scheduled",
+                    "Due Soon",
+                    "Overdue",
+                    "On Hold",
+                    "Draft",
+                  ] as RequirementStatus[]
+                ).map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </FormSelect>
+            </div>
+            <div className="sm:col-span-2">
+              <FormLabel>Internal Notes</FormLabel>
+              <FormTextarea
+                rows={3}
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                placeholder="Reason for modification or operational context..."
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+            <FormButtonCancel type="button" onClick={() => setEditTarget(null)}>
+              Cancel
+            </FormButtonCancel>
+            <FormButtonPrimary type="submit">Save Changes</FormButtonPrimary>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Cancel Requirement Modal */}
+      <Modal
+        isOpen={Boolean(cancelTarget)}
+        onClose={() => setCancelTarget(null)}
+        title="Cancel Clinical Requirement"
+        description={cancelTarget ? `${cancelTarget.clientName} · ${cancelTarget.visitType}` : undefined}
+        icon={<Trash2 className="w-5 h-5" />}
+        maxWidth="md"
+      >
+        <form onSubmit={handleConfirmCancel} className="space-y-4">
+          <p className="text-xs text-slate-600">
+            Cancelling this requirement will mark it as <strong>Cancelled</strong> and cancel any uncompleted linked visits. This action is recorded in the immutable audit trail.
+          </p>
+          <div>
+            <FormLabel required>Cancellation Reason</FormLabel>
+            <FormTextarea
+              rows={3}
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Explain why this requirement is being cancelled..."
+              required
+            />
+          </div>
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+            <FormButtonCancel type="button" onClick={() => setCancelTarget(null)}>
+              Keep Active
+            </FormButtonCancel>
+            <FormButtonPrimary type="submit">Confirm Cancellation</FormButtonPrimary>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

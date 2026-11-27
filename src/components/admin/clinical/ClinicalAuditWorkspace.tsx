@@ -81,7 +81,7 @@ export function ClinicalAuditWorkspace() {
       <ClinicalSubNav activeTab="audit" onExport={handleExportAudit} />
 
       {/* Read-only Governance Banner */}
-      <div className="p-4 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div className="p-4 sm:p-5 bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
             <ShieldCheck className="w-5 h-5" />
@@ -101,7 +101,7 @@ export function ClinicalAuditWorkspace() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
@@ -164,50 +164,58 @@ export function ClinicalAuditWorkspace() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
-              {filtered.map((evt) => {
-                const detailHref = getClinicalAuditEventDetailHref(evt);
-                return (
-                  <tr
-                    key={evt.id}
-                    onClick={() => router.push(detailHref)}
-                    className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                  >
-                    <td className="py-3.5 px-4 font-mono text-slate-600 whitespace-nowrap">
-                      {evt.timestamp}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <ClinicalAvatarName
-                        name={evt.performedBy}
-                        variant="staff"
-                        highlightHover
-                      />
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-mono text-[10px] font-bold text-slate-700">
-                        {evt.action.replace(/_/g, " ")}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap max-w-[220px]">
-                      <ClinicalAvatarName
-                        name={evt.relatedClientName}
-                        variant={evt.relatedClientId === "SYSTEM" ? "staff" : "client"}
-                      />
-                    </td>
-                    <td
-                      className="py-3.5 px-4 text-right whitespace-nowrap"
-                      onClick={(e) => e.stopPropagation()}
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center text-slate-500">
+                    No audit events match the active filters.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((evt) => {
+                  const detailHref = getClinicalAuditEventDetailHref(evt);
+                  return (
+                    <tr
+                      key={evt.id}
+                      onClick={() => router.push(detailHref)}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
-                      <Link
-                        href={detailHref}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                      <td className="py-3.5 px-4 font-mono text-slate-600 whitespace-nowrap">
+                        {evt.timestamp}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <ClinicalAvatarName
+                          name={evt.performedBy}
+                          variant="staff"
+                          highlightHover
+                        />
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 font-mono text-[10px] font-bold text-slate-700">
+                          {evt.action.replace(/_/g, " ")}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap max-w-[220px]">
+                        <ClinicalAvatarName
+                          name={evt.relatedClientName}
+                          variant={evt.relatedClientId === "SYSTEM" ? "staff" : "client"}
+                        />
+                      </td>
+                      <td
+                        className="py-3.5 px-4 text-right whitespace-nowrap"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <span>View</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
+                        <Link
+                          href={detailHref}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 transition-colors"
+                        >
+                          <span>View</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

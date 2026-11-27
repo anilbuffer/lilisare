@@ -1,91 +1,103 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Calendar as CalendarIcon,
   Clock,
   User,
   MapPin,
-  CheckCircle2,
-  AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Filter,
+  ChevronsRight,
   Plus,
   ShieldCheck,
   Radio,
-  FileText,
   Navigation,
-  Smartphone,
   Compass,
-  X,
   CalendarDays,
-  CalendarRange,
+  Eye,
+  EyeOff,
+  Printer,
+  Mail,
+  Send,
+  Settings,
+  Bookmark,
+  Lightbulb,
+  Edit3,
+  X,
 } from "lucide-react";
 import { ClientRecord, CalendarVisit } from "@/types/client";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/Modal";
+import { AddVisitDrawer } from "./calendar/AddVisitDrawer";
+import {
+  MONTH_NAMES,
+  SHORT_MONTH_NAMES,
+  DAY_NAMES_SUN,
+  SHORT_DAY_NAMES_SUN,
+  SHORT_DAY_NAMES_MON,
+  STATUS_STYLE_MAP,
+  VisitLegendStatus,
+  getVisitStatusMeta,
+  toDateKey,
+  getStartOfWeek,
+  getEndOfWeek,
+  computeDurationHours,
+  getHolidayName,
+} from "./calendar/calendarUtils";
 
 interface ClientCalendarTabProps {
   client: ClientRecord;
+  onUpdateClient?: (updated: ClientRecord) => void;
   onOpenScheduleVisit?: () => void;
 }
 
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
+const REFERENCE_TODAY_KEY = "2026-11-24";
 
-const SHORT_MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-];
-
-const DAY_NAMES = [
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-];
-
-const SHORT_DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-// Helper to format date as YYYY-MM-DD
-function toDateKey(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-// Get the Sunday of the week for a given date
-function getStartOfWeek(date: Date): Date {
-  const copy = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const day = copy.getDay(); // 0 is Sunday
-  copy.setDate(copy.getDate() - day);
-  return copy;
-}
-
-// Get the Saturday of the week for a given date
-function getEndOfWeek(date: Date): Date {
-  const start = getStartOfWeek(date);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  return end;
-}
-
-export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalendarTabProps) {
-  // Primary view state: month, week, or day
-  const [selectedView, setSelectedView] = useState<"month" | "week" | "day">("week");
-  // Active reference date: initialized to Nov 24, 2026 (matching system reference data)
+export function ClientCalendarTab({
+  client,
+  onUpdateClient,
+}: ClientCalendarTabProps) {
+  // Primary view state: month (default matching reference), week, or day
+  const [selectedView, setSelectedView] = useState<"month" | "week" | "day">("month");
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date(2026, 10, 24));
   const [filterStatus, setFilterStatus] = useState<string>("All");
   const [telemetryVisit, setTelemetryVisit] = useState<CalendarVisit | null>(null);
 
-  const visits = useMemo(() => client.calendarVisits || [], [client.calendarVisits]);
+  // Local visits state synced with client.calendarVisits
+  const [localVisits, setLocalVisits] = useState<CalendarVisit[]>(
+    () => client.calendarVisits || []
+  );
 
-  // Compute Week Range for current reference date
-  const weekStart = useMemo(() => getStartOfWeek(currentDate), [currentDate]);
-  const weekEnd = useMemo(() => getEndOfWeek(currentDate), [currentDate]);
+  useEffect(() => {
+    setLocalVisits(client.calendarVisits || []);
+  }, [client.calendarVisits]);
 
-  // Dynamic Navigation Header Label
+  // Add/Edit Visit Drawer state
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerDateKey, setDrawerDateKey] = useState<string>(REFERENCE_TODAY_KEY);
+  const [editingVisit, setEditingVisit] = useState<CalendarVisit | null>(null);
+
+  // Calendar Preferences & Toolbar Toggles
+  const [showDetails, setShowDetails] = useState(true);
+  const [isPrefsOpen, setIsPrefsOpen] = useState(false);
+  const [startOnMonday, setStartOnMonday] = useState(true);
+  const [showWeeklySummary, setShowWeeklySummary] = useState(true);
+  const [showHolidays, setShowHolidays] = useState(true);
+
+  const selectedDateKey = toDateKey(currentDate);
+  const weekStart = useMemo(
+    () => getStartOfWeek(currentDate, startOnMonday),
+    [currentDate, startOnMonday]
+  );
+  const weekEnd = useMemo(
+    () => getEndOfWeek(currentDate, startOnMonday),
+    [currentDate, startOnMonday]
+  );
+
+  const weekdayHeaders = startOnMonday ? SHORT_DAY_NAMES_MON : SHORT_DAY_NAMES_SUN;
+
+  // Dynamic Navigation Header Label for Week / Day
   const calendarTitle = useMemo(() => {
     if (selectedView === "month") {
       return `${MONTH_NAMES[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
@@ -96,78 +108,70 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
       const startDay = weekStart.getDate();
       const endDay = weekEnd.getDate();
       const year = weekEnd.getFullYear();
-
-      if (startMonth === endMonth) {
-        return `Week of ${startMonth} ${startDay} – ${endMonth} ${endDay}, ${year}`;
-      }
       return `Week of ${startMonth} ${startDay} – ${endMonth} ${endDay}, ${year}`;
     }
-    // Day View
-    const dayName = DAY_NAMES[currentDate.getDay()];
+    const dayName = DAY_NAMES_SUN[currentDate.getDay()];
     const month = SHORT_MONTH_NAMES[currentDate.getMonth()];
     return `${dayName}, ${month} ${currentDate.getDate()}, ${currentDate.getFullYear()}`;
   }, [selectedView, currentDate, weekStart, weekEnd]);
 
-  // Previous Navigation Handler
+  // Navigation Handlers
   const handlePrev = () => {
     setCurrentDate((prev) => {
       const next = new Date(prev);
-      if (selectedView === "month") {
-        next.setMonth(next.getMonth() - 1);
-      } else if (selectedView === "week") {
-        next.setDate(next.getDate() - 7);
-      } else {
-        next.setDate(next.getDate() - 1);
-      }
+      if (selectedView === "month") next.setMonth(next.getMonth() - 1);
+      else if (selectedView === "week") next.setDate(next.getDate() - 7);
+      else next.setDate(next.getDate() - 1);
       return next;
     });
   };
 
-  // Next Navigation Handler
   const handleNext = () => {
     setCurrentDate((prev) => {
       const next = new Date(prev);
-      if (selectedView === "month") {
-        next.setMonth(next.getMonth() + 1);
-      } else if (selectedView === "week") {
-        next.setDate(next.getDate() + 7);
-      } else {
-        next.setDate(next.getDate() + 1);
-      }
+      if (selectedView === "month") next.setMonth(next.getMonth() + 1);
+      else if (selectedView === "week") next.setDate(next.getDate() + 7);
+      else next.setDate(next.getDate() + 1);
       return next;
     });
   };
 
-  // Jump to Today
   const handleToday = () => {
     setCurrentDate(new Date(2026, 10, 24));
   };
 
-  // Filtered Visits based on active view and date range
+  const handleMonthChange = (monthIdx: number) => {
+    setCurrentDate((prev) => new Date(prev.getFullYear(), monthIdx, 1));
+  };
+
+  const handleYearChange = (year: number) => {
+    setCurrentDate((prev) => new Date(year, prev.getMonth(), 1));
+  };
+
+  // Filtered Visits for Agenda List & Cells
+  const matchesFilter = (visit: CalendarVisit) => {
+    if (filterStatus === "All") return true;
+    const meta = getVisitStatusMeta(visit);
+    return meta.legendKey === filterStatus || visit.status === filterStatus;
+  };
+
   const filteredVisits = useMemo(() => {
-    return visits.filter((visit) => {
-      // 1. Status Filter
-      if (filterStatus !== "All" && visit.status !== filterStatus) {
-        return false;
-      }
+    return localVisits.filter((visit) => {
+      if (!matchesFilter(visit)) return false;
 
-      // 2. Date Range Filter based on view
       if (selectedView === "day") {
-        const targetKey = toDateKey(currentDate);
-        return visit.date === targetKey;
+        return visit.date === selectedDateKey;
       }
-
       if (selectedView === "week") {
         const startKey = toDateKey(weekStart);
         const endKey = toDateKey(weekEnd);
         return visit.date >= startKey && visit.date <= endKey;
       }
-
-      // Month View
+      // In Month view, if user clicked a specific day that has visits or selected date, show selected day or month visits
       const yearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
       return visit.date.startsWith(yearMonth);
     });
-  }, [visits, filterStatus, selectedView, currentDate, weekStart, weekEnd]);
+  }, [localVisits, filterStatus, selectedView, selectedDateKey, weekStart, weekEnd, currentDate]);
 
   // 7 Days of the Active Week for Week Strip
   const weekDays = useMemo(() => {
@@ -175,476 +179,891 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
       const d = new Date(weekStart);
       d.setDate(weekStart.getDate() + idx);
       const key = toDateKey(d);
-      const dayVisits = visits.filter((v) => v.date === key);
-      const isSelected = toDateKey(currentDate) === key;
-      const isToday = key === "2026-11-24";
-
+      const dayVisits = localVisits.filter((v) => v.date === key && matchesFilter(v));
       return {
         date: d,
         key,
-        dayName: SHORT_DAY_NAMES[d.getDay()],
+        dayName: SHORT_DAY_NAMES_SUN[d.getDay()],
         dayNumber: d.getDate(),
         visitsCount: dayVisits.length,
-        isSelected,
-        isToday,
+        isSelected: selectedDateKey === key,
+        isToday: key === REFERENCE_TODAY_KEY,
       };
     });
-  }, [weekStart, currentDate, visits]);
+  }, [weekStart, selectedDateKey, localVisits, filterStatus]);
 
-  // Month Grid Calculation for Month View
-  const monthGridDays = useMemo(() => {
+  // Month Grid Weeks (each week has 7 days + weekly summary stats S/B/P/U)
+  const monthWeeks = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
 
-    const startingDayOfWeek = firstDayOfMonth.getDay(); // 0 is Sunday
-    const totalDaysInMonth = lastDayOfMonth.getDate();
+    const gridStart = getStartOfWeek(firstDayOfMonth, startOnMonday);
+    const gridEnd = getEndOfWeek(lastDayOfMonth, startOnMonday);
 
-    const days: Array<{
-      date: Date;
-      key: string;
-      dayNumber: number;
-      isCurrentMonth: boolean;
-      isSelected: boolean;
-      isToday: boolean;
-      visitsCount: number;
+    const weeks: Array<{
+      weekKey: string;
+      days: Array<{
+        date: Date;
+        key: string;
+        dayNumber: number;
+        monthShort: string;
+        isFirstOfMonth: boolean;
+        isCurrentMonth: boolean;
+        isSelected: boolean;
+        isToday: boolean;
+        holiday: string | null;
+        visits: CalendarVisit[];
+      }>;
+      summary: {
+        sHours: number; sCount: number;
+        bHours: number; bCount: number;
+        pHours: number; pCount: number;
+        uHours: number; uCount: number;
+      };
     }> = [];
 
-    // Previous month padding
-    const prevMonthLastDay = new Date(year, month, 0).getDate();
-    for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-      const d = new Date(year, month - 1, prevMonthLastDay - i);
-      const key = toDateKey(d);
-      const dayVisits = visits.filter((v) => v.date === key);
-      days.push({
-        date: d,
-        key,
-        dayNumber: d.getDate(),
-        isCurrentMonth: false,
-        isSelected: toDateKey(currentDate) === key,
-        isToday: key === "2026-11-24",
-        visitsCount: dayVisits.length,
+    const cursor = new Date(gridStart);
+    while (cursor <= gridEnd) {
+      const weekDaysArr: typeof weeks[number]["days"] = [];
+      let sHours = 0, sCount = 0;
+      let bHours = 0, bCount = 0;
+      let pHours = 0, pCount = 0;
+      let uHours = 0, uCount = 0;
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(cursor);
+        const key = toDateKey(d);
+        const dayVisits = localVisits.filter((v) => v.date === key && matchesFilter(v));
+
+        for (const v of dayVisits) {
+          const hrs = Math.round(computeDurationHours(v.startTime, v.endTime));
+          const meta = getVisitStatusMeta(v);
+          if (meta.legendKey === "Unassigned") {
+            uHours += hrs;
+            uCount += 1;
+          } else if (meta.legendKey === "Completed" || meta.legendKey === "Verified") {
+            bHours += hrs;
+            bCount += 1;
+          } else if (meta.legendKey === "In-Progress") {
+            pHours += hrs;
+            pCount += 1;
+          } else if (meta.legendKey !== "Removed") {
+            sHours += hrs;
+            sCount += 1;
+          }
+        }
+
+        weekDaysArr.push({
+          date: d,
+          key,
+          dayNumber: d.getDate(),
+          monthShort: SHORT_MONTH_NAMES[d.getMonth()],
+          isFirstOfMonth: d.getDate() === 1,
+          isCurrentMonth: d.getMonth() === month,
+          isSelected: selectedDateKey === key,
+          isToday: key === REFERENCE_TODAY_KEY,
+          holiday: showHolidays ? getHolidayName(d) : null,
+          visits: dayVisits,
+        });
+
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      weeks.push({
+        weekKey: weekDaysArr[0].key,
+        days: weekDaysArr,
+        summary: { sHours, sCount, bHours, bCount, pHours, pCount, uHours, uCount },
       });
     }
 
-    // Current month days
-    for (let day = 1; day <= totalDaysInMonth; day++) {
-      const d = new Date(year, month, day);
-      const key = toDateKey(d);
-      const dayVisits = visits.filter((v) => v.date === key);
-      days.push({
-        date: d,
-        key,
-        dayNumber: day,
-        isCurrentMonth: true,
-        isSelected: toDateKey(currentDate) === key,
-        isToday: key === "2026-11-24",
-        visitsCount: dayVisits.length,
+    return weeks;
+  }, [currentDate, startOnMonday, localVisits, filterStatus, selectedDateKey, showHolidays]);
+
+  // Open Add Visit Drawer
+  const openNewVisitDrawer = (targetKey?: string) => {
+    const key = targetKey || selectedDateKey;
+    setEditingVisit(null);
+    setDrawerDateKey(key);
+    setIsDrawerOpen(true);
+  };
+
+  const openEditVisitDrawer = (visit: CalendarVisit) => {
+    setEditingVisit(visit);
+    setDrawerDateKey(visit.date);
+    setIsDrawerOpen(true);
+  };
+
+  const handleSaveVisit = (visit: CalendarVisit, isEdit: boolean) => {
+    const updatedVisits = isEdit
+      ? localVisits.map((v) => (v.id === visit.id ? visit : v))
+      : [visit, ...localVisits];
+
+    setLocalVisits(updatedVisits);
+    if (onUpdateClient) {
+      onUpdateClient({
+        ...client,
+        calendarVisits: updatedVisits,
       });
     }
+    toast.success(
+      isEdit
+        ? `Updated visit on ${visit.date}`
+        : `Visit scheduled for ${visit.date} (${visit.startTime} – ${visit.endTime})`
+    );
+    setIsDrawerOpen(false);
+    setEditingVisit(null);
+  };
 
-    // Next month padding to fill complete grid of rows
-    const remainingDays = (7 - (days.length % 7)) % 7;
-    for (let i = 1; i <= remainingDays; i++) {
-      const d = new Date(year, month + 1, i);
-      const key = toDateKey(d);
-      const dayVisits = visits.filter((v) => v.date === key);
-      days.push({
-        date: d,
-        key,
-        dayNumber: d.getDate(),
-        isCurrentMonth: false,
-        isSelected: toDateKey(currentDate) === key,
-        isToday: key === "2026-11-24",
-        visitsCount: dayVisits.length,
+  const handleDeleteVisit = (visitId: string) => {
+    const updatedVisits = localVisits.filter((v) => v.id !== visitId);
+    setLocalVisits(updatedVisits);
+    if (onUpdateClient) {
+      onUpdateClient({
+        ...client,
+        calendarVisits: updatedVisits,
       });
     }
+    toast.success("Visit removed from calendar");
+    setIsDrawerOpen(false);
+    setEditingVisit(null);
+  };
 
-    return days;
-  }, [currentDate, visits]);
+  const legendItems: Array<{ key: VisitLegendStatus; label: string; badgeClass: string }> = [
+    { key: "Unassigned", ...STATUS_STYLE_MAP.Unassigned },
+    { key: "Verified", ...STATUS_STYLE_MAP.Verified },
+    { key: "Removed", ...STATUS_STYLE_MAP.Removed },
+    { key: "Completed", ...STATUS_STYLE_MAP.Completed },
+    { key: "Scheduled", ...STATUS_STYLE_MAP.Scheduled },
+    { key: "Standalone", ...STATUS_STYLE_MAP.Standalone },
+    { key: "In-Progress", ...STATUS_STYLE_MAP["In-Progress"] },
+    { key: "Missed", ...STATUS_STYLE_MAP.Missed },
+  ];
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-4 animate-in fade-in duration-200">
       {/* =========================================================================
-          TOP CONTROLS BANNER
+          MAIN SPLIT WORKSPACE (Calendar Left + Add Visit Drawer Right on lg+)
          ========================================================================= */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
-            <CalendarIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">
-                Service Calendar & EVV Shifts
-              </h2>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 shrink-0">
-                <Radio className="w-3 h-3 text-[#3D6B22] animate-pulse" /> Live Telemetry
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Electronic Visit Verification (EVV) timestamps, GPS geo-fencing, and shift schedules
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 flex-wrap">
-          {/* View Switcher Pill: Month | Week | Day (Matches User Attachment) */}
-          <div className="inline-flex items-center p-1 bg-slate-100/90 rounded-xl border border-slate-200 text-xs shadow-2xs">
-            {(["month", "week", "day"] as const).map((view) => (
-              <button
-                key={view}
-                type="button"
-                onClick={() => setSelectedView(view)}
-                className={`px-3 py-1 font-bold rounded-lg capitalize transition-all cursor-pointer ${selectedView === view
-                    ? "bg-white text-slate-900 shadow-sm shadow-slate-900/5 font-extrabold"
-                    : "text-slate-600 hover:text-slate-900"
-                  }`}
-                aria-pressed={selectedView === view}
-              >
-                {view}
-              </button>
-            ))}
-          </div>
-
-          {onOpenScheduleVisit && (
-            <button
-              type="button"
-              onClick={onOpenScheduleVisit}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Schedule Shift</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* =========================================================================
-          CALENDAR MAIN CONTAINER
-         ========================================================================= */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all space-y-5">
-        {/* Navigation Strip & Filter Legend (Exact Match to User Attachment) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-          {/* < Today > Buttons & Dynamic Date Title */}
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="inline-flex items-center rounded-xl border border-slate-200 bg-white p-0.5 shadow-2xs">
-              <button
-                type="button"
-                onClick={handlePrev}
-                className="p-1.5 rounded-lg hover:bg-slate-100/80 text-slate-700 transition-colors cursor-pointer"
-                title={`Previous ${selectedView}`}
-                aria-label={`Previous ${selectedView}`}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleToday}
-                className="px-3 py-1 text-xs font-bold text-slate-800 hover:bg-slate-100/80 rounded-lg transition-colors cursor-pointer"
-                title="Jump to current date"
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                onClick={handleNext}
-                className="p-1.5 rounded-lg hover:bg-slate-100/80 text-slate-700 transition-colors cursor-pointer"
-                title={`Next ${selectedView}`}
-                aria-label={`Next ${selectedView}`}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
-              {calendarTitle}
-            </h3>
-          </div>
-
-          {/* Status Filter Badges */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-            {["All", "In-Progress", "Scheduled", "Completed"].map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${filterStatus === status
-                    ? "bg-[#3D6B22] text-white shadow-2xs font-bold"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200/80"
-                  }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* =========================================================================
-            VIEW 01: WEEK VIEW (Interactive 7-Day Day Selector Strip + Shifts List)
-           ========================================================================= */}
-        {selectedView === "week" && (
-          <div className="space-y-5">
-            {/* 7-Day Interactive Week Selector Strip */}
-            <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
-              {weekDays.map((day) => (
-                <button
-                  key={day.key}
-                  type="button"
-                  onClick={() => setCurrentDate(day.date)}
-                  className={`p-2 sm:p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${day.isSelected
-                      ? "bg-emerald-50/70 border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/30"
-                      : "bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/80 hover:border-slate-300"
-                    }`}
-                >
-                  <span
-                    className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${day.isSelected ? "text-[#3D6B22]" : "text-slate-500"
-                      }`}
-                  >
-                    {day.dayName}
-                  </span>
-                  <span
-                    className={`text-sm sm:text-lg font-extrabold ${day.isSelected
-                        ? "text-[#3D6B22]"
-                        : day.isToday
-                          ? "text-slate-900 underline decoration-[#3D6B22] decoration-2 underline-offset-4"
-                          : "text-slate-800"
-                      }`}
-                  >
-                    {day.dayNumber}
-                  </span>
-                  {day.visitsCount > 0 ? (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#3D6B22] text-white shadow-2xs">
-                      {day.visitsCount} {day.visitsCount === 1 ? "shift" : "shifts"}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-slate-400 font-medium">—</span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* Visits Header for the Selected Day in the Week */}
-            <div className="flex items-center justify-between text-xs pt-1">
-              <span className="font-bold text-slate-700">
-                Scheduled Shifts ({filteredVisits.length})
-              </span>
-              <span className="text-slate-500 font-medium">
-                Click any day above to jump directly to that date
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 02: MONTH VIEW (Full 7-Column Calendar Month Grid)
-           ========================================================================= */}
-        {selectedView === "month" && (
-          <div className="space-y-4">
-            {/* Weekday column headers */}
-            <div className="grid grid-cols-7 gap-1 text-center font-bold text-[11px] text-slate-500 uppercase tracking-wider pb-1">
-              {SHORT_DAY_NAMES.map((d) => (
-                <div key={d} className="py-1">
-                  {d}
+      <div className="flex flex-col lg:flex-row items-start gap-4">
+        <div className="flex-1 min-w-0 w-full space-y-4">
+          {/* =====================================================================
+              CALENDAR CARD CONTAINER
+             ===================================================================== */}
+          <div className="bg-white rounded-xl lg:rounded-2xl p-3.5 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
+            {/* TOP TOOLBAR (Matches Reference Image + Modern LiliSare Trends) */}
+            <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
+              {/* Left: Title + Live EVV Pill */}
+              <div className="flex items-center justify-between xl:justify-start gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
+                    <CalendarIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+                        Calendar
+                      </h2>
+                      <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20">
+                        <Radio className="w-2.5 h-2.5 animate-pulse" /> EVV Live
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              ))}
+
+                {/* Mobile-only Add Visit button */}
+                <button
+                  type="button"
+                  onClick={() => openNewVisitDrawer()}
+                  className="xl:hidden inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-sm shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>ADD A VISIT</span>
+                </button>
+              </div>
+
+              {/* Center: < [Month v] [Year v] > >> */}
+              <div className="flex items-center justify-between sm:justify-center gap-1.5 sm:gap-2 flex-wrap">
+                <div className="inline-flex items-center gap-1 bg-slate-50/80 border border-slate-200 rounded-xl p-1">
+                  <button
+                    type="button"
+                    onClick={handlePrev}
+                    className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+                    title={`Previous ${selectedView}`}
+                    aria-label={`Previous ${selectedView}`}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  <select
+                    value={currentDate.getMonth()}
+                    onChange={(e) => handleMonthChange(Number(e.target.value))}
+                    className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#3D6B22] cursor-pointer"
+                    aria-label="Select Month"
+                  >
+                    {SHORT_MONTH_NAMES.map((m, idx) => (
+                      <option key={m} value={idx}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={currentDate.getFullYear()}
+                    onChange={(e) => handleYearChange(Number(e.target.value))}
+                    className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:border-[#3D6B22] cursor-pointer"
+                    aria-label="Select Year"
+                  >
+                    {[2024, 2025, 2026, 2027, 2028].map((yr) => (
+                      <option key={yr} value={yr}>
+                        {yr}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+                    title={`Next ${selectedView}`}
+                    aria-label={`Next ${selectedView}`}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleToday}
+                    className="p-1.5 rounded-lg hover:bg-white hover:shadow-2xs text-[#3D6B22] transition-all cursor-pointer"
+                    title="Jump to Today (Nov 24, 2026)"
+                    aria-label="Jump to Today"
+                  >
+                    <ChevronsRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* View Switcher Pill: Month | Week | Day */}
+                <div className="inline-flex items-center p-1 bg-slate-100/90 rounded-xl border border-slate-200 text-xs">
+                  {(["month", "week", "day"] as const).map((view) => (
+                    <button
+                      key={view}
+                      type="button"
+                      onClick={() => setSelectedView(view)}
+                      className={`px-2.5 py-1 font-bold rounded-lg capitalize transition-all cursor-pointer ${
+                        selectedView === view
+                          ? "bg-white text-slate-900 shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {view}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: Utility Icons + ADD A VISIT CTA */}
+              <div className="flex items-center justify-between sm:justify-end gap-2">
+                <div className="flex items-center gap-1 bg-slate-50/80 border border-slate-200 rounded-xl p-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetails((p) => !p)}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
+                    title={showDetails ? "Hide legend & totals" : "Show legend & totals"}
+                  >
+                    {showDetails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toast.info("Preparing printable calendar view...");
+                      window.print();
+                    }}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
+                    title="Print Calendar"
+                  >
+                    <Printer className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      toast.success(
+                        `Schedule summary emailed to ${client.primaryContact?.name || "Primary Contact"}`
+                      )
+                    }
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
+                    title="Email Schedule"
+                  >
+                    <Mail className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      toast.success("Calendar schedule pushed to assigned Caregivers")
+                    }
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white transition-all cursor-pointer"
+                    title="Send to Caregivers"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsPrefsOpen(true)}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-[#3D6B22] hover:bg-white transition-all cursor-pointer"
+                    title="Calendar Preferences"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openNewVisitDrawer()}
+                  className="hidden xl:inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>ADD A VISIT</span>
+                </button>
+              </div>
             </div>
 
-            {/* Month Day Cells Grid */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2">
-              {monthGridDays.map((cell) => (
-                <button
-                  key={cell.key}
-                  type="button"
-                  onClick={() => {
-                    setCurrentDate(cell.date);
-                    // Single click focuses the date; toast gives quick feedback
-                    if (cell.visitsCount > 0) {
-                      toast.info(`${cell.visitsCount} shift(s) on ${cell.key}`);
-                    }
-                  }}
-                  onDoubleClick={() => {
-                    setCurrentDate(cell.date);
-                    setSelectedView("day");
-                  }}
-                  className={`min-h-[70px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border transition-all text-left flex flex-col justify-between cursor-pointer ${cell.isSelected
-                      ? "bg-emerald-50/70 border-[#3D6B22] ring-1 ring-[#3D6B22]/30 shadow-xs"
-                      : cell.isCurrentMonth
-                        ? "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300"
-                        : "bg-slate-50/50 border-slate-100 text-slate-300"
-                    }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span
-                      className={`text-xs sm:text-sm font-bold ${cell.isSelected
-                          ? "text-[#3D6B22] font-extrabold"
-                          : cell.isToday
-                            ? "w-6 h-6 rounded-full bg-[#3D6B22] text-white flex items-center justify-center font-bold"
-                            : cell.isCurrentMonth
-                              ? "text-slate-800"
-                              : "text-slate-400"
-                        }`}
-                    >
-                      {cell.dayNumber}
-                    </span>
-
-                    {cell.visitsCount > 0 && (
-                      <span className="w-2 h-2 rounded-full bg-[#3D6B22] shrink-0 sm:hidden" />
+            {/* =================================================================
+                VIEW 01: MONTH VIEW (8-Column Grid with Weekly Summary Column)
+               ================================================================= */}
+            {selectedView === "month" && (
+              <div className="space-y-3">
+                {/* DESKTOP / TABLET GRID (md+) */}
+                <div className="hidden md:block overflow-hidden rounded-xl border border-slate-200">
+                  {/* Column Headers */}
+                  <div
+                    className={`grid ${
+                      showWeeklySummary
+                        ? "grid-cols-[repeat(7,minmax(0,1fr))_108px]"
+                        : "grid-cols-7"
+                    } bg-slate-50 border-b border-slate-200 text-center`}
+                  >
+                    {weekdayHeaders.map((day) => (
+                      <div
+                        key={day}
+                        className="py-2 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-r border-slate-200 last:border-r-0"
+                      >
+                        {day}
+                      </div>
+                    ))}
+                    {showWeeklySummary && (
+                      <div className="py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-100/80">
+                        Weekly
+                      </div>
                     )}
                   </div>
 
-                  {cell.visitsCount > 0 && (
-                    <div className="hidden sm:block mt-1">
-                      <span className="inline-block w-full text-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#3D6B22]/15 text-[#3D6B22] border border-[#3D6B22]/20 truncate">
-                        {cell.visitsCount} {cell.visitsCount === 1 ? "Shift" : "Shifts"}
+                  {/* Week Rows */}
+                  <div className="divide-y divide-slate-200">
+                    {monthWeeks.map((week) => (
+                      <div
+                        key={week.weekKey}
+                        className={`grid ${
+                          showWeeklySummary
+                            ? "grid-cols-[repeat(7,minmax(0,1fr))_108px]"
+                            : "grid-cols-7"
+                        }`}
+                      >
+                        {week.days.map((cell, idx) => {
+                          const isDraftTarget =
+                            isDrawerOpen && !editingVisit && drawerDateKey === cell.key;
+
+                          return (
+                            <div
+                              key={cell.key}
+                              onClick={() => setCurrentDate(cell.date)}
+                              onDoubleClick={() => openNewVisitDrawer(cell.key)}
+                              className={`group relative min-h-[96px] lg:min-h-[108px] p-1.5 border-r border-slate-200 transition-colors cursor-pointer flex flex-col gap-1 ${
+                                cell.isSelected
+                                  ? "bg-emerald-50/50 ring-1 ring-inset ring-[#3D6B22]/40"
+                                  : cell.holiday
+                                    ? "bg-slate-200/60"
+                                    : cell.isCurrentMonth
+                                      ? "bg-white hover:bg-slate-50/80"
+                                      : "bg-slate-50/70 text-slate-400"
+                              }`}
+                            >
+                              {/* Day Number + Holiday + Quick Add Button */}
+                              <div className="flex items-start justify-between gap-1">
+                                <div className="flex items-center gap-1 min-w-0">
+                                  {cell.holiday && (
+                                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-tight truncate">
+                                      {cell.holiday}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-1 ml-auto shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setCurrentDate(cell.date);
+                                      openNewVisitDrawer(cell.key);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-md bg-[#3D6B22]/10 text-[#3D6B22] hover:bg-[#3D6B22] hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                                    title={`Add visit on ${cell.key}`}
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </button>
+                                  <span
+                                    className={`text-xs font-bold px-1.5 py-0.5 rounded-md ${
+                                      cell.isToday
+                                        ? "bg-[#3D6B22] text-white"
+                                        : cell.isSelected
+                                          ? "text-[#3D6B22] font-extrabold"
+                                          : cell.isCurrentMonth
+                                            ? "text-slate-700"
+                                            : "text-slate-400"
+                                    }`}
+                                  >
+                                    {(cell.isFirstOfMonth || (idx === 0 && week === monthWeeks[0])) &&
+                                    !cell.isToday
+                                      ? `${cell.monthShort} ${cell.dayNumber}`
+                                      : cell.dayNumber}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Draft "NEW VISIT" Pill when Add Visit Drawer is open for this day */}
+                              {isDraftTarget && (
+                                <div className="px-2 py-1 rounded-lg bg-[#3D6B22]/15 border border-[#3D6B22]/40 text-[#3D6B22] shadow-xs flex items-center gap-1.5 text-[10px] font-extrabold tracking-tight animate-in zoom-in-95 duration-150">
+                                  <Bookmark className="w-3 h-3 fill-[#3D6B22] shrink-0" />
+                                  <span className="truncate">NEW VISIT</span>
+                                </div>
+                              )}
+
+                              {/* Visit Pills */}
+                              <div className="space-y-1 overflow-hidden">
+                                {cell.visits.slice(0, 3).map((visit) => {
+                                  const meta = getVisitStatusMeta(visit);
+                                  return (
+                                    <button
+                                      key={visit.id}
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditVisitDrawer(visit);
+                                      }}
+                                      className={`w-full text-left px-1.5 py-0.5 rounded-md border text-[10px] font-semibold truncate transition-all cursor-pointer flex items-center gap-1 ${meta.pillClass}`}
+                                      title={`${visit.startTime} - ${visit.endTime} | ${visit.caregiverName} | ${visit.serviceType}`}
+                                    >
+                                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${meta.dotClass}`} />
+                                      <span className="truncate">
+                                        {visit.startTime.replace(":00 ", "")} {visit.caregiverName === "Unassigned" ? "Open" : visit.caregiverName.split(" ")[0]}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                                {cell.visits.length > 3 && (
+                                  <div className="text-[10px] font-bold text-[#3D6B22] pl-1">
+                                    +{cell.visits.length - 3} more
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* Weekly Summary Column (S / B / P / U) */}
+                        {showWeeklySummary && (
+                          <div className="bg-slate-100/80 p-2 flex flex-col justify-center gap-1 text-[10px] font-bold text-slate-700">
+                            <div className="flex items-center justify-between gap-1">
+                              <span title="Scheduled Hours / Visits">
+                                S <span className="font-semibold text-slate-600">{week.summary.sHours}/{week.summary.sCount}</span>
+                              </span>
+                              <span title="Billed / Completed Hours / Visits">
+                                B <span className="font-semibold text-[#3D6B22]">{week.summary.bHours}/{week.summary.bCount}</span>
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-1">
+                              <span title="In-Progress / Pending Hours / Visits">
+                                P <span className="font-semibold text-blue-700">{week.summary.pHours}/{week.summary.pCount}</span>
+                              </span>
+                              <span title="Unassigned Hours / Visits">
+                                U <span className="font-semibold text-rose-600">{week.summary.uHours}/{week.summary.uCount}</span>
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* MOBILE MINI-MONTH GRID (< md) */}
+                <div className="md:hidden space-y-3">
+                  <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-500 uppercase">
+                    {weekdayHeaders.map((d) => (
+                      <div key={d} className="py-1">
+                        {d.slice(0, 2)}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1">
+                    {monthWeeks.flatMap((w) => w.days).map((cell) => {
+                      const hasDraft =
+                        isDrawerOpen && !editingVisit && drawerDateKey === cell.key;
+                      return (
+                        <button
+                          key={cell.key}
+                          type="button"
+                          onClick={() => setCurrentDate(cell.date)}
+                          className={`h-11 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                            cell.isSelected
+                              ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-sm"
+                              : cell.isToday
+                                ? "bg-emerald-50 text-[#3D6B22] border-[#3D6B22]/40 font-extrabold"
+                                : cell.isCurrentMonth
+                                  ? "bg-white text-slate-800 border-slate-200"
+                                  : "bg-slate-50 text-slate-300 border-slate-100"
+                          }`}
+                        >
+                          <span className="text-xs font-bold leading-none">{cell.dayNumber}</span>
+                          <div className="flex items-center gap-0.5 h-1.5">
+                            {hasDraft && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-300" />
+                            )}
+                            {cell.visits.slice(0, 3).map((v) => (
+                              <span
+                                key={v.id}
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  cell.isSelected ? "bg-white" : getVisitStatusMeta(v).dotClass
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* =================================================================
+                VIEW 02: WEEK VIEW (Interactive 7-Day Strip)
+               ================================================================= */}
+            {selectedView === "week" && (
+              <div className="space-y-4">
+                <div className="text-xs font-bold text-slate-600">{calendarTitle}</div>
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+                  {weekDays.map((day) => (
+                    <button
+                      key={day.key}
+                      type="button"
+                      onClick={() => setCurrentDate(day.date)}
+                      className={`p-2 sm:p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${
+                        day.isSelected
+                          ? "bg-emerald-50/80 border-[#3D6B22] shadow-sm ring-1 ring-[#3D6B22]/30"
+                          : "bg-slate-50/60 border-slate-200/80 hover:bg-slate-100/80"
+                      }`}
+                    >
+                      <span
+                        className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
+                          day.isSelected ? "text-[#3D6B22]" : "text-slate-500"
+                        }`}
+                      >
+                        {day.dayName}
                       </span>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="text-center text-xs text-slate-400 pt-1">
-              Tip: Double-click any day to switch directly to its daily hourly schedule.
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            VIEW 03: DAY VIEW (Focused Agenda Timeline for Selected Day)
-           ========================================================================= */}
-        {selectedView === "day" && (
-          <div className="space-y-3">
-            <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/80 flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">
-                  Daily Agenda Schedule
-                </h4>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  {calendarTitle}
-                </p>
+                      <span
+                        className={`text-sm sm:text-lg font-extrabold ${
+                          day.isSelected
+                            ? "text-[#3D6B22]"
+                            : day.isToday
+                              ? "text-slate-900 underline decoration-[#3D6B22] decoration-2 underline-offset-4"
+                              : "text-slate-800"
+                        }`}
+                      >
+                        {day.dayNumber}
+                      </span>
+                      {day.visitsCount > 0 ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#3D6B22] text-white">
+                          {day.visitsCount}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400">—</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white text-[#3D6B22] border border-[#3D6B22]/20 shadow-2xs">
-                {filteredVisits.length} {filteredVisits.length === 1 ? "Shift Scheduled" : "Shifts Scheduled"}
-              </span>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* =========================================================================
-            VISIT SHIFTS LIST (Shared across views with EVV GPS Telemetry Action)
-           ========================================================================= */}
-        <div className="space-y-3.5 pt-2">
-          {filteredVisits.length === 0 ? (
-            <div className="text-center py-12 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 space-y-3">
-              <CalendarDays className="w-10 h-10 text-slate-300 mx-auto" />
-              <div>
-                <h4 className="text-sm font-bold text-slate-800">
-                  No shifts found for this time period
-                </h4>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto mt-0.5">
-                  There are no scheduled or completed caregiver shifts matching your active status filter in {calendarTitle}.
-                </p>
+            {/* =================================================================
+                VIEW 03: DAY VIEW (Focused Agenda Header)
+               ================================================================= */}
+            {selectedView === "day" && (
+              <div className="bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/80 flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Daily Agenda Schedule</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">{calendarTitle}</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white text-[#3D6B22] border border-[#3D6B22]/20 shadow-2xs">
+                  {filteredVisits.length} {filteredVisits.length === 1 ? "Shift" : "Shifts"}
+                </span>
               </div>
-              {onOpenScheduleVisit && (
+            )}
+
+            {/* =================================================================
+                STATUS LEGEND & TIP BAR (Matches Reference Image)
+               ================================================================= */}
+            {showDetails && (
+              <div className="pt-2 space-y-2.5">
+                <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {legendItems.map((item) => {
+                      const isActiveFilter = filterStatus === item.key;
+                      return (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() =>
+                            setFilterStatus((prev) => (prev === item.key ? "All" : item.key))
+                          }
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-bold transition-all cursor-pointer ${
+                            item.badgeClass
+                          } ${
+                            isActiveFilter
+                              ? "ring-2 ring-offset-1 ring-[#3D6B22] scale-[1.03]"
+                              : "opacity-90 hover:opacity-100"
+                          }`}
+                          title={`Filter by ${item.label}`}
+                        >
+                          <span>{item.label}</span>
+                          {item.key === "Missed" && <Clock className="w-3 h-3" />}
+                        </button>
+                      );
+                    })}
+
+                    {filterStatus !== "All" && (
+                      <button
+                        type="button"
+                        onClick={() => setFilterStatus("All")}
+                        className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                        Clear Filter
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between flex-wrap gap-2 text-xs text-slate-500 px-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsPrefsOpen(true)}
+                    className="inline-flex items-center gap-1.5 hover:text-[#3D6B22] transition-colors cursor-pointer"
+                  >
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                    <span>
+                      <strong className="text-slate-700">Tip:</strong> Use Preferences to customize the calendar
+                    </span>
+                  </button>
+                  <span className="text-[11px] text-slate-400">
+                    Double-click any day cell to schedule a visit
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* =====================================================================
+              VISITS AGENDA LIST (Responsive Cards with Edit & GPS Telemetry)
+             ===================================================================== */}
+          <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-bold text-slate-900">
+                Scheduled Visits ({filteredVisits.length})
+              </h3>
+              <span className="text-xs text-slate-500 font-medium">{calendarTitle}</span>
+            </div>
+
+            {filteredVisits.length === 0 ? (
+              <div className="text-center py-10 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                <CalendarDays className="w-9 h-9 text-slate-300 mx-auto" />
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800">
+                    No visits found for this period
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-0.5">
+                    Click &ldquo;ADD A VISIT&rdquo; or double-click any date cell to schedule a new caregiver shift.
+                  </p>
+                </div>
                 <button
                   type="button"
-                  onClick={onOpenScheduleVisit}
+                  onClick={() => openNewVisitDrawer()}
                   className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-xs transition-colors cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Schedule Shift Now</span>
+                  <span>Add a Visit</span>
                 </button>
-              )}
-            </div>
-          ) : (
-            filteredVisits.map((visit) => {
-              const isInProgress = visit.status === "In-Progress";
-              const isCompleted = visit.status === "Completed";
-              const isScheduled = visit.status === "Scheduled";
-
-              return (
-                <div
-                  key={visit.id}
-                  className={`p-4 sm:p-4.5 rounded-xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${isInProgress
-                      ? "bg-emerald-50/50 border-[#3D6B22]/30 shadow-xs ring-1 ring-[#3D6B22]/20"
-                      : isCompleted
-                        ? "bg-slate-50/70 border-slate-200 hover:bg-slate-50"
-                        : "bg-blue-50/40 border-blue-200/80 hover:bg-blue-50/60"
-                    }`}
-                >
-                  <div className="flex items-start gap-3.5">
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {filteredVisits.map((visit) => {
+                  const meta = getVisitStatusMeta(visit);
+                  return (
                     <div
-                      className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs ${isInProgress
-                          ? "bg-[#3D6B22] text-white"
-                          : isCompleted
-                            ? "bg-slate-200 text-slate-700"
-                            : "bg-blue-100 text-blue-800 border border-blue-200"
-                        }`}
+                      key={visit.id}
+                      className="p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all flex flex-col md:flex-row md:items-center justify-between gap-3"
                     >
-                      <Clock className="w-5 h-5" />
-                    </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20 flex items-center justify-center shrink-0">
+                          <Clock className="w-4 h-4" />
+                        </div>
 
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="text-sm font-bold text-slate-900 tracking-tight">
-                          {visit.title}
-                        </h4>
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isInProgress
-                              ? "bg-emerald-600 text-white animate-pulse"
-                              : isCompleted
-                                ? "bg-slate-200 text-slate-700"
-                                : "bg-blue-100 text-blue-700 border border-blue-200"
-                            }`}
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="text-sm font-bold text-slate-900 tracking-tight">
+                              {visit.title}
+                            </h4>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${meta.badgeClass}`}
+                            >
+                              {visit.status}
+                            </span>
+                            {visit.evvVerified && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20">
+                                <ShieldCheck className="w-3 h-3" />
+                                <span>EVV Verified</span>
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2.5 text-xs text-slate-600 flex-wrap">
+                            <span className="font-semibold text-slate-800">{visit.date}</span>
+                            <span className="text-slate-300">•</span>
+                            <span className="font-semibold text-slate-700">
+                              {visit.startTime} – {visit.endTime}
+                            </span>
+                            <span className="text-slate-300">•</span>
+                            <span className="inline-flex items-center gap-1 text-slate-700">
+                              <User className="w-3.5 h-3.5 text-slate-400" />
+                              <strong className="text-slate-900">{visit.caregiverName}</strong>
+                            </span>
+                            <span className="text-slate-300">•</span>
+                            <span className="text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-semibold">
+                              {visit.serviceType}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end md:self-center shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => openEditVisitDrawer(visit)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all cursor-pointer"
                         >
-                          {visit.status}
-                        </span>
-                        {visit.evvVerified && (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#3D6B22]/10 text-[#3D6B22] border border-[#3D6B22]/20">
-                            <ShieldCheck className="w-3 h-3 text-[#3D6B22]" />
-                            <span>EVV GPS Verified</span>
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-3 text-xs text-slate-600 flex-wrap">
-                        <span className="font-semibold text-slate-800">{visit.date}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className="font-semibold text-slate-700">
-                          {visit.startTime} – {visit.endTime}
-                        </span>
-                        <span className="text-slate-300">•</span>
-                        <span className="inline-flex items-center gap-1 text-slate-700">
-                          <User className="w-3.5 h-3.5 text-slate-400" />
-                          <strong className="text-slate-900">{visit.caregiverName}</strong>
-                        </span>
-                        <span className="text-slate-300">•</span>
-                        <span className=" text-[11px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-semibold">
-                          {visit.serviceType}
-                        </span>
+                          <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTelemetryVisit(visit)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#3D6B22] bg-emerald-50/70 hover:bg-emerald-100/70 border border-[#3D6B22]/20 rounded-xl transition-all cursor-pointer"
+                        >
+                          <Navigation className="w-3.5 h-3.5" />
+                          <span>GPS Telemetry</span>
+                        </button>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 self-end md:self-center shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setTelemetryVisit(visit)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
-                    >
-                      <Navigation className="w-3.5 h-3.5 text-[#3D6B22]" />
-                      <span>GPS Telemetry</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* =====================================================================
+            RIGHT-HAND ADD / EDIT VISIT SPLIT PANEL
+           ===================================================================== */}
+        <AddVisitDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => {
+            setIsDrawerOpen(false);
+            setEditingVisit(null);
+          }}
+          client={client}
+          selectedDate={drawerDateKey}
+          editingVisit={editingVisit}
+          onSaveVisit={handleSaveVisit}
+          onDeleteVisit={handleDeleteVisit}
+        />
       </div>
+
+      {/* =========================================================================
+          CALENDAR PREFERENCES MODAL
+         ========================================================================= */}
+      <Modal
+        isOpen={isPrefsOpen}
+        onClose={() => setIsPrefsOpen(false)}
+        title="Calendar Preferences"
+        description="Customize your LiliSare scheduling grid layout and indicators"
+        icon={<Settings className="w-5 h-5" />}
+        maxWidth="md"
+        footer={
+          <button
+            type="button"
+            onClick={() => setIsPrefsOpen(false)}
+            className="inline-flex items-center justify-center px-5 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all cursor-pointer"
+          >
+            Done
+          </button>
+        }
+      >
+        <div className="space-y-3">
+          <label className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/50 cursor-pointer">
+            <div>
+              <div className="text-xs font-bold text-slate-800">Start Week on Monday</div>
+              <div className="text-[11px] text-slate-500">
+                Display Mon – Sun columns instead of Sun – Sat
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={startOnMonday}
+              onChange={(e) => setStartOnMonday(e.target.checked)}
+              className="w-4 h-4 accent-[#3D6B22] rounded cursor-pointer"
+            />
+          </label>
+
+          <label className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/50 cursor-pointer">
+            <div>
+              <div className="text-xs font-bold text-slate-800">Show Weekly Summary Column</div>
+              <div className="text-[11px] text-slate-500">
+                Display S / B / P / U weekly hours & visit totals
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={showWeeklySummary}
+              onChange={(e) => setShowWeeklySummary(e.target.checked)}
+              className="w-4 h-4 accent-[#3D6B22] rounded cursor-pointer"
+            />
+          </label>
+
+          <label className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/50 cursor-pointer">
+            <div>
+              <div className="text-xs font-bold text-slate-800">Highlight Federal Holidays</div>
+              <div className="text-[11px] text-slate-500">
+                Show holiday badges on applicable calendar dates
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={showHolidays}
+              onChange={(e) => setShowHolidays(e.target.checked)}
+              className="w-4 h-4 accent-[#3D6B22] rounded cursor-pointer"
+            />
+          </label>
+        </div>
+      </Modal>
 
       {/* =========================================================================
           GPS TELEMETRY INSPECTION MODAL
@@ -690,17 +1109,13 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">
                   Clock-in Coordinates
                 </span>
-                <span className=" font-bold text-slate-800">
-                  44.0462° N, 123.0220° W
-                </span>
+                <span className="font-bold text-slate-800">44.0462° N, 123.0220° W</span>
               </div>
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">
                   Geofence Proximity
                 </span>
-                <span className="font-bold text-[#3D6B22]">
-                  18 meters (Inside 50m zone)
-                </span>
+                <span className="font-bold text-[#3D6B22]">18 meters (Inside 50m zone)</span>
               </div>
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">
@@ -714,16 +1129,15 @@ export function ClientCalendarTab({ client, onOpenScheduleVisit }: ClientCalenda
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">
                   Service Billing Code
                 </span>
-                <span className=" font-bold text-slate-800">
-                  {telemetryVisit.serviceType}
-                </span>
+                <span className="font-bold text-slate-800">{telemetryVisit.serviceType}</span>
               </div>
             </div>
 
             <div className="p-3 bg-slate-50/50 rounded-xl border border-slate-100 text-xs text-slate-600 flex items-center gap-2">
               <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
               <span>
-                Verified Location: {client.residentialAddress?.address || "742 Evergreen Terrace"}, {client.residentialAddress?.city || "Springfield"}
+                Verified Location: {client.residentialAddress?.address || "742 Evergreen Terrace"},{" "}
+                {client.residentialAddress?.city || "Springfield"}
               </span>
             </div>
           </div>

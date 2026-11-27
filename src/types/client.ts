@@ -387,8 +387,16 @@ export interface ClientRecord {
     caregiverName: string;
     caregiverId: string;
     serviceType: string;
-    status: "Scheduled" | "In-Progress" | "Completed" | "Missed" | "Cancelled";
+    status: "Scheduled" | "In-Progress" | "Completed" | "Missed" | "Cancelled" | "Unassigned" | "Verified" | "Removed" | "Standalone";
     evvVerified: boolean;
+    billingType?: "Hourly" | "Daily" | "Fixed";
+    rate?: number;
+    clockInLocation?: string;
+    clockOutLocation?: string;
+    reasonForModification?: string;
+    memo?: string;
+    careNotes?: string;
+    isStandalone?: boolean;
   }>;
   schedules?: Array<{
     id: string;

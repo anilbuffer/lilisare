@@ -673,6 +673,7 @@ export function AdminClientDetailView({
         {activeTab === "calendar" && (
           <ClientCalendarTab
             client={client}
+            onUpdateClient={handleUpdateClient}
             onOpenScheduleVisit={() => setIsScheduleModalOpen(true)}
           />
         )}

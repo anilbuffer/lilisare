@@ -65,10 +65,11 @@ export function AdminIntakeReferralsDirectory() {
     useState<AdminIntakeReferralItem[]>(SEED_ADMIN_REFERRALS);
   const [deleteTarget, setDeleteTarget] = useState<AdminIntakeReferralItem | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [pipelineTab, setPipelineTab] = useState<"OPEN" | "CONVERTED" | "ARCHIVED">("OPEN");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
-  const [programFilter, setProgramFilter] = useState<string>("ALL");
+  const [sourceFilter, setSourceFilter] = useState<string>("ALL");
   const [activeKpiKey, setActiveKpiKey] = useState<
     "ALL" | "ASSESSMENT" | "URGENT" | "READY" | "ENROLLED"
   >("ALL");
@@ -79,6 +80,9 @@ export function AdminIntakeReferralsDirectory() {
 
   const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
   const priorityDropdownRef = useRef<HTMLDivElement>(null);
+
+  const [isSourceDropdownOpen, setIsSourceDropdownOpen] = useState(false);
+  const sourceDropdownRef = useRef<HTMLDivElement>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -125,6 +129,12 @@ export function AdminIntakeReferralsDirectory() {
       ) {
         setIsPriorityDropdownOpen(false);
       }
+      if (
+        sourceDropdownRef.current &&
+        !sourceDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsSourceDropdownOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -133,14 +143,19 @@ export function AdminIntakeReferralsDirectory() {
   // KPI Calculations (Computed dynamically from synchronized records)
   const kpiData = useMemo(() => {
     const total = items.length;
-    const assessmentCount = items.filter(
+    const openItems = items.filter(
+      (r) => r.status !== "Enrolled" && r.status !== "Archived"
+    );
+    const openCount = openItems.length;
+    const assessmentCount = openItems.filter(
       (r) => r.status === "Clinical Assessment"
     ).length;
-    const urgentCount = items.filter((r) => r.priority === "Urgent").length;
-    const readyCount = items.filter(
+    const urgentCount = openItems.filter((r) => r.priority === "Urgent").length;
+    const readyCount = openItems.filter(
       (r) => r.status === "Ready for Staffing"
     ).length;
     const enrolledCount = items.filter((r) => r.status === "Enrolled").length;
+    const archivedCount = items.filter((r) => r.status === "Archived").length;
     const conversionRate = total > 0 ? `${((enrolledCount / total) * 100).toFixed(1)}%` : "0.0%";
     const avgDaysVal =
       total > 0
@@ -149,32 +164,46 @@ export function AdminIntakeReferralsDirectory() {
 
     return {
       total,
+      openCount,
       conversionRate,
       assessmentCount,
       avgDays: `${avgDaysVal} days`,
       urgentCount,
       readyCount,
       enrolledCount,
+      archivedCount,
     };
   }, [items]);
 
   // Filtering Logic
   const filteredReferrals = useMemo(() => {
     return items.filter((item) => {
+      // Pipeline tab filter: Open (New -> Ready for Staffing), Converted (Enrolled), Archived
+      if (pipelineTab === "OPEN") {
+        if (item.status === "Enrolled" || item.status === "Archived") return false;
+      } else if (pipelineTab === "CONVERTED") {
+        if (item.status !== "Enrolled") return false;
+      } else if (pipelineTab === "ARCHIVED") {
+        if (item.status !== "Archived") return false;
+      }
+
       // Search match
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchesName = item.patientName.toLowerCase().includes(q);
         const matchesId = item.id.toLowerCase().includes(q);
-        const matchesDiag = item.primaryDiagnosis.toLowerCase().includes(q);
+        const matchesPayer = item.payerName.toLowerCase().includes(q);
         const matchesSource = item.referralSource.toLowerCase().includes(q);
         const matchesCoord = item.assignedCoordinator.toLowerCase().includes(q);
-        if (!matchesName && !matchesId && !matchesDiag && !matchesSource && !matchesCoord) {
+        const matchesServices = item.requestedServices.some((s) =>
+          s.toLowerCase().includes(q)
+        );
+        if (!matchesName && !matchesId && !matchesPayer && !matchesSource && !matchesCoord && !matchesServices) {
           return false;
         }
       }
 
-      // Status filter
+      // Stage filter
       if (statusFilter !== "ALL" && item.status !== statusFilter) {
         return false;
       }
@@ -184,9 +213,12 @@ export function AdminIntakeReferralsDirectory() {
         return false;
       }
 
-      // Program filter
-      if (programFilter !== "ALL" && !item.program.includes(programFilter)) {
-        return false;
+      // Source filter
+      if (sourceFilter !== "ALL") {
+        const src = item.referralSource.toLowerCase();
+        if (sourceFilter === "Hospital" && !src.includes("hospital")) return false;
+        if (sourceFilter === "Physician" && !src.includes("physician") && !src.includes("clinic") && !src.includes("associates") && !src.includes("surgery")) return false;
+        if (sourceFilter === "Family" && !src.includes("family") && !src.includes("self")) return false;
       }
 
       // KPI card filter
@@ -205,12 +237,12 @@ export function AdminIntakeReferralsDirectory() {
 
       return true;
     });
-  }, [items, searchQuery, statusFilter, priorityFilter, programFilter, activeKpiKey]);
+  }, [items, pipelineTab, searchQuery, statusFilter, priorityFilter, sourceFilter, activeKpiKey]);
 
   // Reset to page 1 on filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter, priorityFilter, programFilter, activeKpiKey]);
+  }, [pipelineTab, searchQuery, statusFilter, priorityFilter, sourceFilter, activeKpiKey]);
 
   // Pagination calculation
   const totalPages = Math.max(1, Math.ceil(filteredReferrals.length / pageSize));
@@ -222,21 +254,21 @@ export function AdminIntakeReferralsDirectory() {
   const hasActiveFilters =
     statusFilter !== "ALL" ||
     priorityFilter !== "ALL" ||
-    programFilter !== "ALL" ||
+    sourceFilter !== "ALL" ||
     activeKpiKey !== "ALL" ||
     searchQuery.trim().length > 0;
 
   const activeFiltersCount =
     (statusFilter !== "ALL" ? 1 : 0) +
     (priorityFilter !== "ALL" ? 1 : 0) +
-    (programFilter !== "ALL" ? 1 : 0) +
+    (sourceFilter !== "ALL" ? 1 : 0) +
     (activeKpiKey !== "ALL" ? 1 : 0);
 
   const handleResetFilters = () => {
     setSearchQuery("");
     setStatusFilter("ALL");
     setPriorityFilter("ALL");
-    setProgramFilter("ALL");
+    setSourceFilter("ALL");
     setActiveKpiKey("ALL");
     setCurrentPage(1);
   };
@@ -324,27 +356,39 @@ export function AdminIntakeReferralsDirectory() {
 
       {/* 02. Executive KPI Cards (Harmonized with Clients & Caregivers) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        {/* Card 1: Total Referrals */}
+        {/* Card 1: Open Pipeline */}
         <div
-          onClick={() => setActiveKpiKey(activeKpiKey === "ALL" ? "ALL" : "ALL")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ALL"
+          onClick={() => {
+            setPipelineTab("OPEN");
+            setActiveKpiKey("ALL");
+          }}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ALL" && pipelineTab === "OPEN"
             ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
             : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-500">Total Referrals</span>
+            <span className="text-xs font-medium text-slate-500">Open Pipeline</span>
             <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
               <FileText className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-            {kpiData.total}
+            {kpiData.openCount}
           </div>
+          <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+            New → Ready for Staffing
+          </p>
         </div>
 
         {/* Card 2: Conversion Rate */}
-        <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
+        <div
+          onClick={() => setPipelineTab("CONVERTED")}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border transition-all duration-200 ${pipelineTab === "CONVERTED"
+            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
+            : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
+            }`}
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Conversion Rate</span>
             <div className="w-7 h-7 rounded-lg bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center text-[#3D6B22]">
@@ -354,13 +398,17 @@ export function AdminIntakeReferralsDirectory() {
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.conversionRate}
           </div>
+          <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+            {kpiData.enrolledCount} of {kpiData.total} referrals enrolled
+          </p>
         </div>
 
         {/* Card 3: Clinical Assessment Pending */}
         <div
-          onClick={() =>
-            setActiveKpiKey(activeKpiKey === "ASSESSMENT" ? "ALL" : "ASSESSMENT")
-          }
+          onClick={() => {
+            setPipelineTab("OPEN");
+            setActiveKpiKey(activeKpiKey === "ASSESSMENT" ? "ALL" : "ASSESSMENT");
+          }}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ASSESSMENT"
             ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
             : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
@@ -375,9 +423,12 @@ export function AdminIntakeReferralsDirectory() {
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.assessmentCount}
           </div>
+          <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+            Clinical Assessment stage
+          </p>
         </div>
 
-        {/* Card 4: Avg. Days to Onboard */}
+        {/* Card 4: Avg. Days in Pipeline */}
         <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-slate-500">Intake Velocity</span>
@@ -388,13 +439,17 @@ export function AdminIntakeReferralsDirectory() {
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.avgDays}
           </div>
+          <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+            Avg. days in pipeline
+          </p>
         </div>
 
         {/* Card 5: Urgent Discharge Triage */}
         <div
-          onClick={() =>
-            setActiveKpiKey(activeKpiKey === "URGENT" ? "ALL" : "URGENT")
-          }
+          onClick={() => {
+            setPipelineTab("OPEN");
+            setActiveKpiKey(activeKpiKey === "URGENT" ? "ALL" : "URGENT");
+          }}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "URGENT"
             ? "border-rose-500 shadow-md ring-2 ring-rose-500/15"
             : "border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
@@ -409,7 +464,48 @@ export function AdminIntakeReferralsDirectory() {
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpiData.urgentCount}
           </div>
+          <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+            Urgent open referrals
+          </p>
         </div>
+      </div>
+
+      {/* 02b. Pipeline Stage Tabs (Open Pipeline vs Converted vs Archived) */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-0.5 overflow-x-auto">
+        {[
+          { key: "OPEN" as const, label: "Open Pipeline", count: kpiData.openCount },
+          { key: "CONVERTED" as const, label: "Converted", count: kpiData.enrolledCount },
+          { key: "ARCHIVED" as const, label: "Archived / Declined", count: kpiData.archivedCount },
+        ].map((tab) => {
+          const isActive = pipelineTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => {
+                setPipelineTab(tab.key);
+                setStatusFilter("ALL");
+                setActiveKpiKey("ALL");
+              }}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+                isActive
+                  ? "border-[#3D6B22] text-[#3D6B22]"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  isActive
+                    ? "bg-[#3D6B22]/10 text-[#3D6B22]"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* 03. Search, Dropdown Filters & View Switcher (Single Unified Card) */}
@@ -425,7 +521,7 @@ export function AdminIntakeReferralsDirectory() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search by client name, diagnosis, ID, or risk status..."
+              placeholder="Search by prospect name, requested service, ID, or priority..."
               className="w-full pl-10 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all"
             />
             {searchQuery && (
@@ -443,7 +539,7 @@ export function AdminIntakeReferralsDirectory() {
 
           {/* Controls: Status Dropdown Filter, Risk Dropdown Filter, View Toggle */}
           <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-            {/* Status Dropdown Filter */}
+            {/* Stage Dropdown Filter */}
             <div className="relative" ref={statusDropdownRef}>
               <button
                 type="button"
@@ -456,8 +552,8 @@ export function AdminIntakeReferralsDirectory() {
                 <Filter className="w-3.5 h-3.5 text-slate-500" />
                 <span>
                   {statusFilter === "ALL"
-                    ? "Status: All"
-                    : `Status: ${statusFilter}`}
+                    ? "Stage: All"
+                    : `Stage: ${statusFilter}`}
                 </span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
@@ -465,15 +561,14 @@ export function AdminIntakeReferralsDirectory() {
               {isStatusDropdownOpen && (
                 <div className="absolute right-0 mt-1.5 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Filter by Status
+                    Filter by Stage
                   </div>
                   {[
-                    { label: "All Statuses", value: "ALL" },
+                    { label: "All Stages", value: "ALL" },
                     { label: "New Referral", value: "New Referral" },
                     { label: "Clinical Assessment", value: "Clinical Assessment" },
                     { label: "Documents & Auth", value: "Documents & Auth" },
                     { label: "Ready for Staffing", value: "Ready for Staffing" },
-                    { label: "Enrolled", value: "Enrolled" },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -497,7 +592,7 @@ export function AdminIntakeReferralsDirectory() {
               )}
             </div>
 
-            {/* Risk Level / Priority Dropdown Filter */}
+            {/* Priority Dropdown Filter */}
             <div className="relative" ref={priorityDropdownRef}>
               <button
                 type="button"
@@ -507,17 +602,17 @@ export function AdminIntakeReferralsDirectory() {
                   : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                   }`}
               >
-                <span>{priorityFilter === "ALL" ? "Risk Level" : priorityFilter}</span>
+                <span>{priorityFilter === "ALL" ? "Priority" : priorityFilter}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
               {isPriorityDropdownOpen && (
                 <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                    Risk Level
+                    Priority
                   </div>
                   {[
-                    { label: "All Risk Levels", value: "ALL" },
+                    { label: "All Priorities", value: "ALL" },
                     { label: "Urgent", value: "Urgent" },
                     { label: "High", value: "High" },
                     { label: "Standard", value: "Standard" },
@@ -536,6 +631,53 @@ export function AdminIntakeReferralsDirectory() {
                     >
                       <span>{option.label}</span>
                       {priorityFilter === option.value && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#3D6B22]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Source Dropdown Filter */}
+            <div className="relative" ref={sourceDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsSourceDropdownOpen(!isSourceDropdownOpen)}
+                className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all cursor-pointer ${sourceFilter !== "ALL"
+                  ? "bg-[#3D6B22]/10 border-[#3D6B22]/30 text-[#3D6B22] font-semibold"
+                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+              >
+                <span>{sourceFilter === "ALL" ? "Source: All" : `Source: ${sourceFilter}`}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {isSourceDropdownOpen && (
+                <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                    Referral Source
+                  </div>
+                  {[
+                    { label: "All Sources", value: "ALL" },
+                    { label: "Hospital Discharge", value: "Hospital" },
+                    { label: "Physician / Clinic", value: "Physician" },
+                    { label: "Family / Self", value: "Family" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setSourceFilter(option.value);
+                        setCurrentPage(1);
+                        setIsSourceDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between transition-colors cursor-pointer ${sourceFilter === option.value
+                        ? "bg-[#3D6B22]/10 text-[#3D6B22] font-bold"
+                        : "text-slate-700 hover:bg-slate-50"
+                        }`}
+                    >
+                      <span>{option.label}</span>
+                      {sourceFilter === option.value && (
                         <div className="w-1.5 h-1.5 rounded-full bg-[#3D6B22]" />
                       )}
                     </button>
@@ -594,11 +736,15 @@ export function AdminIntakeReferralsDirectory() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client</th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Requested Services</th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Priority</th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Prospect</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Referral Source</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Referral Date</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Payer / Insurance</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Requested Services</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Priority</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Coordinator / RN</th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -608,27 +754,46 @@ export function AdminIntakeReferralsDirectory() {
                     onClick={() => router.push(`/admin/intake-referrals/${ref.id}`)}
                     className="hover:bg-slate-50/60 transition-colors group cursor-pointer"
                   >
-                    {/* Patient info */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
+                    {/* Prospect */}
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2.5">
                         <div className="w-6 h-6 rounded-full bg-[#E8F2E4] border border-[#3D6B22]/20 text-[#3e6b2b] font-bold text-[10px] flex items-center justify-center shrink-0">
                           {getInitials(ref.patientName)}
                         </div>
-                        <div>
-                          <div className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-                            {ref.patientName}
-                          </div>
-                        </div>
+                        <span className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors whitespace-nowrap">
+                          {ref.patientName}
+                        </span>
                       </div>
                     </td>
 
+                    {/* Referral Source */}
+                    <td className="px-4 py-4">
+                      <span className="text-xs font-medium text-slate-700 whitespace-nowrap block max-w-[180px] truncate">
+                        {ref.referralSource}
+                      </span>
+                    </td>
+
+                    {/* Referral Date */}
+                    <td className="px-4 py-4">
+                      <span className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                        {ref.receivedDate}
+                      </span>
+                    </td>
+
+                    {/* Payer / Insurance */}
+                    <td className="px-4 py-4">
+                      <span className="text-xs font-medium text-slate-700 whitespace-nowrap block max-w-[170px] truncate">
+                        {ref.payerName}
+                      </span>
+                    </td>
+
                     {/* Requested Services */}
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1 max-w-xs">
+                    <td className="px-4 py-4">
+                      <div className="flex flex-wrap gap-1 max-w-[220px]">
                         {ref.requestedServices.map((svc, idx) => (
                           <span
                             key={idx}
-                            className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20"
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20 whitespace-nowrap"
                           >
                             {svc}
                           </span>
@@ -637,9 +802,9 @@ export function AdminIntakeReferralsDirectory() {
                     </td>
 
                     {/* Priority */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${ref.priority === "Urgent"
+                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${ref.priority === "Urgent"
                           ? "bg-rose-50 text-rose-700 border-rose-200"
                           : ref.priority === "High"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
@@ -654,9 +819,9 @@ export function AdminIntakeReferralsDirectory() {
                     </td>
 
                     {/* Status */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4">
                       <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border ${ref.status === "Enrolled"
+                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap ${ref.status === "Enrolled"
                           ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                           : ref.status === "Ready for Staffing"
                             ? "bg-teal-50 text-teal-800 border-teal-200"
@@ -671,16 +836,33 @@ export function AdminIntakeReferralsDirectory() {
                       </span>
                     </td>
 
+                    {/* Coordinator / RN */}
+                    <td className="px-4 py-4">
+                      <span className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                        {ref.assignedCoordinator}
+                      </span>
+                    </td>
+
                     {/* Action */}
-                    <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-4 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="inline-flex items-center justify-end gap-1.5">
-                        <Link
-                          href={`/admin/intake-referrals/${ref.id}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
-                        >
-                          <span>View Profile</span>
-                          <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-                        </Link>
+                        {ref.status === "Enrolled" && ref.clientId ? (
+                          <Link
+                            href={`/admin/clients/${ref.clientId}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+                          >
+                            <span>Client Profile</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        ) : (
+                          <Link
+                            href={`/admin/intake-referrals/${ref.id}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                          >
+                            <span>View Profile</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+                          </Link>
+                        )}
                         <Link
                           href={`/admin/intake-referrals/${ref.id}/edit`}
                           title="Edit Referral"
@@ -705,7 +887,7 @@ export function AdminIntakeReferralsDirectory() {
 
                 {paginatedReferrals.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                    <td colSpan={9} className="px-6 py-12 text-center text-slate-400">
                       <FileText className="w-8 h-8 mx-auto mb-2 text-slate-300" />
                       <p className="font-semibold text-slate-600 text-sm">
                         No intake referrals found

@@ -26,6 +26,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { getClientById, getClientsFromStorage, saveClientsToStorage } from "@/lib/clients/mockData";
+import { getAdminReferralsFromStorage } from "@/lib/intake-referrals/adminIntakeReferralsData";
 import { ClientRecord, ClientStatus } from "@/types/client";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import { toast } from "sonner";
@@ -412,11 +413,26 @@ export function AdminClientDetailView({
               </span>
             </div>
 
-            {/* Row 2: Program Badge */}
+            {/* Row 2: Program Badge & Originating Referral Link */}
             <div className="mt-0.5 flex items-center gap-2.5 flex-wrap text-xs sm:text-sm text-slate-600">
               <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#3D6B22] border border-emerald-200/80">
                 {client.carePlan?.program || "Pediatric In-Home Care"}
               </span>
+              {(() => {
+                const originId =
+                  client.originReferralId ||
+                  getAdminReferralsFromStorage().find((r) => r.clientId === client.id)?.id;
+                if (!originId) return null;
+                return (
+                  <Link
+                    href={`/admin/intake-referrals/${originId}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition-colors"
+                  >
+                    <span>Originated from Referral #{originId}</span>
+                    <ArrowRight className="w-3 h-3 text-slate-400" />
+                  </Link>
+                );
+              })()}
             </div>
           </div>
 

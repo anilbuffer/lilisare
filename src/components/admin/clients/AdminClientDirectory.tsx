@@ -32,15 +32,18 @@ import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import { Modal } from "@/components/ui/Modal";
 import { Pagination } from "@/components/ui/Pagination";
 
-// Unified Client Model with clinical diagnosis & risk level for Agency Admin
+// Unified Client Model with clinical diagnosis, risk level, caregiver, next visit & auth status for Agency Admin
 export interface AdminClientItem {
   id: string;
   name: string;
   age: number;
   gender: string;
-  status: "Active" | "Hospitalized" | "Care Completed" | "Discharged" | "Onboarding";
+  status: "Active" | "Hospitalized" | "On Hold" | "Discharged";
   riskLevel: "High Risk" | "Medium Risk" | "Low Risk";
   primaryDiagnosis: string;
+  assignedCaregiver: string;
+  nextVisit: string;
+  authorizationStatus: "Verified" | "Expiring Soon" | "Pending Renewal" | "Expired";
   householdName?: string;
   householdCode?: string;
 }
@@ -55,6 +58,9 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     status: "Active",
     riskLevel: "High Risk",
     primaryDiagnosis: "s/p right hip ORIF, early-stage vascular dementia",
+    assignedCaregiver: "Elena Whitfield (RN / W-2)",
+    nextVisit: "Today, 2:00 PM",
+    authorizationStatus: "Verified",
     householdName: "Whitfield Household",
     householdCode: "HH-1002",
   },
@@ -63,9 +69,12 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     name: "Jackson Vance",
     age: 6,
     gender: "Male",
-    status: "Onboarding",
+    status: "On Hold",
     riskLevel: "Medium Risk",
     primaryDiagnosis: "Developmental Mobility Delay, Sensory Support",
+    assignedCaregiver: "Maria Santos, BSN",
+    nextVisit: "Start of Care Pending",
+    authorizationStatus: "Pending Renewal",
     householdName: "Vance Household",
     householdCode: "HH-1004",
   },
@@ -74,9 +83,12 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     name: "Mary Smith",
     age: 65,
     gender: "Female",
-    status: "Care Completed",
+    status: "Active",
     riskLevel: "Low Risk",
-    primaryDiagnosis: "Routine Checkup",
+    primaryDiagnosis: "General Debility, Mild Cognitive Impairment",
+    assignedCaregiver: "Tanya Brooks, HHA",
+    nextVisit: "Tomorrow, 9:00 AM",
+    authorizationStatus: "Verified",
     householdName: "Smith Family Care",
     householdCode: "HH-1008",
   },
@@ -88,6 +100,9 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     status: "Active",
     riskLevel: "High Risk",
     primaryDiagnosis: "Severe Rheumatoid Arthritis, managing chronic pain",
+    assignedCaregiver: "Jessica Taylor, RN",
+    nextVisit: "Today, 4:30 PM",
+    authorizationStatus: "Expiring Soon",
     householdName: "Connor Household",
     householdCode: "HH-1003",
   },
@@ -96,9 +111,12 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     name: "James Doe",
     age: 72,
     gender: "Male",
-    status: "Active",
-    riskLevel: "Medium Risk",
-    primaryDiagnosis: "Early-onset dementia",
+    status: "Hospitalized",
+    riskLevel: "High Risk",
+    primaryDiagnosis: "Early-onset dementia, Acute Respiratory Infection",
+    assignedCaregiver: "David Kim, MSW",
+    nextVisit: "Paused (Inpatient)",
+    authorizationStatus: "Verified",
     householdName: "Doe Household",
     householdCode: "HH-1005",
   },
@@ -110,6 +128,9 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     status: "Active",
     riskLevel: "Low Risk",
     primaryDiagnosis: "General debility",
+    assignedCaregiver: "Clara Jenkins, HHA",
+    nextVisit: "Mon, 10:00 AM",
+    authorizationStatus: "Verified",
     householdName: "Smith Household",
     householdCode: "HH-1006",
   },
@@ -121,6 +142,9 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     status: "Active",
     riskLevel: "Medium Risk",
     primaryDiagnosis: "Autism Spectrum Disorder (Level 2), Sensory Processing",
+    assignedCaregiver: "Sarah Miller (W-2)",
+    nextVisit: "Today, 8:00 AM",
+    authorizationStatus: "Verified",
     householdName: "Miller Household",
     householdCode: "HH-1001",
   },
@@ -132,6 +156,9 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     status: "Active",
     riskLevel: "Medium Risk",
     primaryDiagnosis: "Congestive Heart Failure (NYHA Class II), Hypertension",
+    assignedCaregiver: "Evelyn Vance, RN",
+    nextVisit: "Tomorrow, 11:30 AM",
+    authorizationStatus: "Verified",
     householdName: "Chen Household",
     householdCode: "HH-1007",
   },
@@ -143,6 +170,9 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     status: "Discharged",
     riskLevel: "High Risk",
     primaryDiagnosis: "Type 2 Diabetes, Diabetic Neuropathy, Mobility Impairment",
+    assignedCaregiver: "Unassigned",
+    nextVisit: "Discharged",
+    authorizationStatus: "Expired",
     householdName: "Davis Family Care",
     householdCode: "HH-1009",
   },
@@ -173,7 +203,7 @@ export function AdminClientDirectory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [riskFilter, setRiskFilter] = useState<string>("ALL");
-  const [activeKpiKey, setActiveKpiKey] = useState<"TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED" | "COMPLETED">("TOTAL");
+  const [activeKpiKey, setActiveKpiKey] = useState<"TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED" | "ON_HOLD">("TOTAL");
 
   // Pagination State: max 10 entries per page
   const [currentPage, setCurrentPage] = useState(1);
@@ -214,10 +244,35 @@ export function AdminClientDirectory() {
 
             let mappedStatus: AdminClientItem["status"] = "Active";
             if (c.status === "Discharged") mappedStatus = "Discharged";
-            else if (c.status === "Onboarding") mappedStatus = "Onboarding";
-            else if (c.status === "On Hold") mappedStatus = "Hospitalized";
-            else if (c.status === "Active") mappedStatus = "Active";
+            else if (c.status === "Onboarding" || c.status === "On Hold") {
+              mappedStatus = seedMatch?.status === "Hospitalized" ? "Hospitalized" : "On Hold";
+            } else if (c.status === "Active") mappedStatus = "Active";
             else if (seedMatch?.status) mappedStatus = seedMatch.status;
+
+            const assignedCaregiver =
+              c.assignedCareTeam?.primaryCaregiver?.name ||
+              seedMatch?.assignedCaregiver ||
+              c.assignedCareTeam?.onboardingCoordinator?.name ||
+              "Unassigned";
+
+            const nextVisit =
+              seedMatch?.nextVisit ||
+              (mappedStatus === "Discharged"
+                ? "Discharged"
+                : mappedStatus === "Hospitalized"
+                  ? "Paused (Inpatient)"
+                  : mappedStatus === "On Hold"
+                    ? "Start of Care Pending"
+                    : c.carePlan?.frequency || "Scheduled");
+
+            const authRaw = c.authorization?.status;
+            const authorizationStatus: AdminClientItem["authorizationStatus"] =
+              authRaw === "Verified" ||
+              authRaw === "Expiring Soon" ||
+              authRaw === "Pending Renewal" ||
+              authRaw === "Expired"
+                ? authRaw
+                : seedMatch?.authorizationStatus || "Pending Renewal";
 
             return {
               id: c.id,
@@ -227,6 +282,9 @@ export function AdminClientDirectory() {
               status: mappedStatus,
               riskLevel: risk,
               primaryDiagnosis: diagnosis,
+              assignedCaregiver,
+              nextVisit,
+              authorizationStatus,
               householdName: c.household?.name,
               householdCode: c.household?.code,
             };
@@ -267,9 +325,9 @@ export function AdminClientDirectory() {
     const active = items.filter((i) => i.status === "Active").length;
     const highRisk = items.filter((i) => i.riskLevel === "High Risk").length;
     const hospitalized = items.filter((i) => i.status === "Hospitalized").length;
-    const completed = items.filter((i) => i.status === "Care Completed").length;
+    const onHold = items.filter((i) => i.status === "On Hold").length;
 
-    return { total, active, highRisk, hospitalized, completed };
+    return { total, active, highRisk, hospitalized, onHold };
   }, [items]);
 
   // Filter clients based on search, status dropdown, risk dropdown, and active KPI card
@@ -322,7 +380,7 @@ export function AdminClientDirectory() {
   }, [filteredClients, currentPage, pageSize]);
 
   // KPI card click handler
-  const handleKpiCardClick = (key: "TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED" | "COMPLETED") => {
+  const handleKpiCardClick = (key: "TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED" | "ON_HOLD") => {
     setActiveKpiKey(key);
     setCurrentPage(1);
     if (key === "TOTAL") {
@@ -334,8 +392,8 @@ export function AdminClientDirectory() {
       setStatusFilter("High Risk");
     } else if (key === "HOSPITALIZED") {
       setStatusFilter("Hospitalized");
-    } else if (key === "COMPLETED") {
-      setStatusFilter("Care Completed");
+    } else if (key === "ON_HOLD") {
+      setStatusFilter("On Hold");
     }
   };
 
@@ -451,22 +509,22 @@ export function AdminClientDirectory() {
           </div>
         </div>
 
-        {/* Card 5: Care Completed */}
+        {/* Card 5: On Hold */}
         <div
-          onClick={() => handleKpiCardClick("COMPLETED")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "COMPLETED"
+          onClick={() => handleKpiCardClick("ON_HOLD")}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ON_HOLD"
             ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
             : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-500">Care Completed</span>
+            <span className="text-xs font-medium text-slate-500">On Hold</span>
             <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-            {kpis.completed}
+            {kpis.onHold}
           </div>
         </div>
       </div>
@@ -533,10 +591,9 @@ export function AdminClientDirectory() {
                   {[
                     { label: "All Clients", value: "ALL" },
                     { label: "Active", value: "Active" },
-                    { label: "High Risk", value: "High Risk" },
                     { label: "Hospitalized", value: "Hospitalized" },
+                    { label: "On Hold", value: "On Hold" },
                     { label: "Discharged", value: "Discharged" },
-                    { label: "Care Completed", value: "Care Completed" },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -677,19 +734,28 @@ export function AdminClientDirectory() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50">
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Client
                   </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Primary Diagnosis
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Diagnosis
                   </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Risk Level
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Risk
                   </th>
-                  <th className="py-3.5 px-4 sm:px-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Assigned Caregiver / RN
+                  </th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Next Visit
+                  </th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Authorization
+                  </th>
+                  <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">
                     Actions
                   </th>
                 </tr>
@@ -705,49 +771,44 @@ export function AdminClientDirectory() {
                       onClick={() => router.push(`/admin/clients/${client.id}`)}
                     >
                       {/* Client */}
-                      <td className="py-4 px-4 sm:px-6">
-                        <div className="flex items-center gap-3">
-                          {/* Default Avatar (Initial Badge) */}
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2.5">
                           <div className="w-6 h-6 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center text-[#3e6b2b] font-bold text-[10px] shrink-0 shadow-2xs">
                             {initials}
                           </div>
-                          <div>
-                            <div className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-                              {client.name}
-                            </div>
-                          </div>
+                          <span className="font-semibold text-xs text-slate-900 group-hover:text-[#3D6B22] transition-colors whitespace-nowrap">
+                            {client.name}
+                          </span>
                         </div>
                       </td>
 
-                      {/* Primary Diagnosis */}
-                      <td className="py-4 px-4 sm:px-6">
-                        <p className="text-xs text-slate-700 font-medium max-w-xs md:max-w-md truncate">
+                      {/* Diagnosis */}
+                      <td className="py-4 px-4">
+                        <p className="text-xs text-slate-700 font-medium max-w-[220px] truncate">
                           {client.primaryDiagnosis}
                         </p>
                       </td>
 
                       {/* Status */}
-                      <td className="py-4 px-4 sm:px-6">
+                      <td className="py-4 px-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${client.status === "Active"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap ${client.status === "Active"
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : client.status === "Hospitalized"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : client.status === "Care Completed"
-                                ? "bg-rose-50 text-rose-700 border-rose-200"
-                                : client.status === "Discharged"
-                                  ? "bg-slate-100 text-slate-600 border-slate-200"
-                                  : "bg-blue-50 text-blue-700 border-blue-200"
+                              : client.status === "On Hold"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : "bg-slate-100 text-slate-600 border-slate-200"
                             }`}
                         >
                           {client.status}
                         </span>
                       </td>
 
-                      {/* Risk Level */}
-                      <td className="py-4 px-4 sm:px-6">
+                      {/* Risk */}
+                      <td className="py-4 px-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${client.riskLevel === "High Risk"
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap ${client.riskLevel === "High Risk"
                             ? "bg-rose-50 text-rose-700 border-rose-200"
                             : client.riskLevel === "Medium Risk"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
@@ -758,12 +819,42 @@ export function AdminClientDirectory() {
                         </span>
                       </td>
 
+                      {/* Assigned Caregiver / RN */}
+                      <td className="py-4 px-4">
+                        <span className="text-xs font-medium text-slate-700 whitespace-nowrap block max-w-[170px] truncate">
+                          {client.assignedCaregiver}
+                        </span>
+                      </td>
+
+                      {/* Next Visit */}
+                      <td className="py-4 px-4">
+                        <span className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                          {client.nextVisit}
+                        </span>
+                      </td>
+
+                      {/* Authorization Status */}
+                      <td className="py-4 px-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap ${client.authorizationStatus === "Verified"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : client.authorizationStatus === "Expiring Soon"
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : client.authorizationStatus === "Pending Renewal"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : "bg-rose-50 text-rose-700 border-rose-200"
+                            }`}
+                        >
+                          {client.authorizationStatus}
+                        </span>
+                      </td>
+
                       {/* Actions */}
-                      <td className="py-4 px-4 sm:px-6 text-right">
+                      <td className="py-4 px-4 text-right">
                         <div className="inline-flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                           <Link
                             href={`/admin/clients/${client.id}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer whitespace-nowrap"
                           >
                             <span>View Profile</span>
                             <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
@@ -875,11 +966,9 @@ export function AdminClientDirectory() {
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : client.status === "Hospitalized"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : client.status === "Care Completed"
-                              ? "bg-rose-50 text-rose-700 border-rose-200"
-                              : client.status === "Discharged"
-                                ? "bg-slate-100 text-slate-600 border-slate-200"
-                                : "bg-blue-50 text-blue-700 border-blue-200"
+                            : client.status === "On Hold"
+                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              : "bg-slate-100 text-slate-600 border-slate-200"
                           }`}
                       >
                         {client.status}

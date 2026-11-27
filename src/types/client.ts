@@ -200,6 +200,7 @@ export interface ClientAttributesRecord {
 
 export interface ClientRecord {
   id: string; // e.g. CL-1001
+  originReferralId?: string; // e.g. REF-2026-1037
   name: string;
   preferredName?: string;
   avatarUrl?: string;

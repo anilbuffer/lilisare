@@ -214,6 +214,12 @@ export function AdminIntakeReferralDetailView({
   };
 
   const handleUpdateStatus = (newStatus: ReferralStatus) => {
+    if (newStatus === "Enrolled") {
+      setIsStatusDropdownOpen(false);
+      handleConvertToClient();
+      return;
+    }
+
     const all = getAdminReferralsFromStorage();
     const updated = all.map((r) => (r.id === referral.id ? { ...r, status: newStatus } : r));
     saveAdminReferralsToStorage(updated);
@@ -256,12 +262,21 @@ export function AdminIntakeReferralDetailView({
       }
     } else {
       const clients = getClientsFromStorage();
-      if (!clients.some((c) => c.id.toLowerCase() === createdClientId.toLowerCase())) {
+      const existingByName = clients.find(
+        (c) =>
+          c.id.toLowerCase() === createdClientId.toLowerCase() ||
+          c.name.toLowerCase() === referral.patientName.trim().toLowerCase()
+      );
+      if (existingByName) {
+        createdClientId = existingByName.id;
+        createdHouseholdCode = existingByName.household?.code || createdHouseholdCode;
+      } else {
         const nameParts = referral.patientName.trim().split(/\s+/);
         const firstName = nameParts[0] || "Client";
         const lastName = nameParts.slice(1).join(" ") || "Recipient";
         const newClient = enrichClientWith17Domains({
           id: createdClientId,
+          originReferralId: referral.id,
           firstName,
           lastName,
           name: referral.patientName,
@@ -558,10 +573,18 @@ export function AdminIntakeReferralDetailView({
               <span>Admit as Active Client</span>
             </button>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <Link
+              href={referral.clientId ? `/admin/clients/${referral.clientId}` : "/admin/clients"}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors"
+            >
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Client Enrolled</span>
-            </span>
+              <span>
+                {referral.clientId
+                  ? `Converted to Client (${referral.clientId})`
+                  : "Converted to Client"}
+              </span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           )}
         </div>
       </div>

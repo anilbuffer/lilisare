@@ -571,7 +571,7 @@ export function ClinicalRequirementsWorkspace() {
                           variant="staff"
                         />
                       </td>
-                      <td className="py-3.5 px-4 font-mono font-semibold text-slate-800 whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-mono text-slate-700 whitespace-nowrap">
                         {req.nextDueDate}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">

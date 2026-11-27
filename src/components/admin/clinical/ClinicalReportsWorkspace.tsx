@@ -556,7 +556,7 @@ export function ClinicalReportsWorkspace() {
                     className={`transition-colors ${
                       row.detailHref
                         ? "hover:bg-slate-50/80 cursor-pointer group"
-                        : "hover:bg-slate-50/60"
+                        : "hover:bg-slate-50/80"
                     }`}
                   >
                     {Object.entries(row.cells).map(([col, val], cIdx) => {

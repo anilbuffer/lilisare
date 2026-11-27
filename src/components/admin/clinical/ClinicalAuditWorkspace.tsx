@@ -179,7 +179,7 @@ export function ClinicalAuditWorkspace() {
                       onClick={() => router.push(detailHref)}
                       className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
-                      <td className="py-3.5 px-4 font-mono text-slate-600 whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-mono text-slate-700 whitespace-nowrap">
                         {evt.timestamp}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">

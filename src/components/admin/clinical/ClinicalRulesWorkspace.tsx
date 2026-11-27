@@ -347,7 +347,7 @@ export function ClinicalRulesWorkspace() {
                       <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[170px]">
                         {r.serviceName}
                       </td>
-                      <td className="py-3.5 px-4 font-medium text-slate-800 whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-slate-700 whitespace-nowrap">
                         {r.professionalType}
                       </td>
                       <td className="py-3.5 px-4 whitespace-nowrap">

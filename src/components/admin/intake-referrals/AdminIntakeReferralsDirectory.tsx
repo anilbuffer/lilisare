@@ -471,41 +471,73 @@ export function AdminIntakeReferralsDirectory() {
       </div>
 
       {/* 02b. Pipeline Stage Tabs (Open Pipeline vs Converted vs Archived) */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-0.5 overflow-x-auto">
-        {[
-          { key: "OPEN" as const, label: "Open Pipeline", count: kpiData.openCount },
-          { key: "CONVERTED" as const, label: "Converted", count: kpiData.enrolledCount },
-          { key: "ARCHIVED" as const, label: "Archived / Declined", count: kpiData.archivedCount },
-        ].map((tab) => {
-          const isActive = pipelineTab === tab.key;
-          return (
-            <button
-              key={tab.key}
-              type="button"
-              onClick={() => {
-                setPipelineTab(tab.key);
-                setStatusFilter("ALL");
-                setActiveKpiKey("ALL");
-              }}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
-                isActive
-                  ? "border-[#3D6B22] text-[#3D6B22]"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <span>{tab.label}</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="inline-flex items-center p-1 bg-white border border-slate-200 rounded-xl sm:rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] gap-1 overflow-x-auto max-w-full scrollbar-none">
+          {[
+            {
+              key: "OPEN" as const,
+              label: "Open Pipeline",
+              count: kpiData.openCount,
+              icon: FileText,
+            },
+            {
+              key: "CONVERTED" as const,
+              label: "Converted",
+              count: kpiData.enrolledCount,
+              icon: CheckCircle2,
+            },
+            {
+              key: "ARCHIVED" as const,
+              label: "Archived / Declined",
+              count: kpiData.archivedCount,
+              icon: RotateCcw,
+            },
+          ].map((tab) => {
+            const isActive = pipelineTab === tab.key;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => {
+                  setPipelineTab(tab.key);
+                  setStatusFilter("ALL");
+                  setActiveKpiKey("ALL");
+                }}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? "bg-[#3D6B22]/10 text-[#3D6B22]"
-                    : "bg-slate-100 text-slate-600"
+                    ? "bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/25 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent"
                 }`}
               >
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
+                <Icon
+                  className={`w-3.5 h-3.5 shrink-0 ${
+                    isActive ? "text-[#1E5622]" : "text-slate-400"
+                  }`}
+                />
+                <span>{tab.label}</span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
+                    isActive
+                      ? "bg-white text-[#1E5622] border border-[#3D6B22]/20 shadow-2xs"
+                      : "bg-slate-100 text-slate-600 border border-slate-200/70"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <span className="text-xs font-medium text-slate-500 px-1">
+          Showing <strong className="text-slate-800">{filteredReferrals.length}</strong>{" "}
+          {pipelineTab === "OPEN"
+            ? "open referrals"
+            : pipelineTab === "CONVERTED"
+              ? "converted clients"
+              : "archived referrals"}
+        </span>
       </div>
 
       {/* 03. Search, Dropdown Filters & View Switcher (Single Unified Card) */}

@@ -38,7 +38,7 @@ export function AdminCaregiverTopTabs({ activeTab }: AdminCaregiverTopTabsProps)
 
   return (
     <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-      <div className="inline-flex items-center p-1 bg-white border border-slate-200 rounded-xl sm:rounded-2xl shadow-[0_6px_16px_rgba(0,0,0,0.12)] gap-1">
+      <div className="inline-flex items-center p-1 bg-white border border-slate-200 rounded-xl sm:rounded-2xl  gap-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;

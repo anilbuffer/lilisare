@@ -1,7 +1,9 @@
 export interface Patient {
   id: string;
   name: string;
-  status: "Active" | "Care Completed" | "Hospitalized" | "Discharged";
+  status: "Active" | "Care Completed" | "On Hold" | "Discharged";
+  onHoldReason?: "Hospital" | "Vacation" | "Authorization pending" | "Payment issue";
+  expectedReturnDate?: string;
   age: number;
   address: string;
   primaryDiagnosis: string;
@@ -338,7 +340,9 @@ export const mockPatients: Record<string, Patient> = {
   "c-2": {
     id: "c-2",
     name: "John Doe",
-    status: "Hospitalized",
+    status: "On Hold",
+    onHoldReason: "Hospital",
+    expectedReturnDate: "2026-12-05",
     age: 76,
     address: "88 Oak Lane, Apt 4B, Springfield, MA 01103",
     primaryDiagnosis: "Post-Stroke Recovery",

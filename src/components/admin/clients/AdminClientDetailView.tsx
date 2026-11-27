@@ -34,9 +34,10 @@ import {
   normalizeClientStatus,
 } from "@/lib/clients/mockData";
 import { getAdminReferralsFromStorage } from "@/lib/intake-referrals/adminIntakeReferralsData";
-import { ClientRecord, ClientStatus } from "@/types/client";
+import { ClientRecord, ClientStatus, OnHoldReason } from "@/types/client";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import { toast } from "sonner";
+import { Modal } from "@/components/ui/Modal";
 import { ClientContactFamilyModal } from "@/components/clients/modals/ClientContactFamilyModal";
 import { ClientScheduleVisitModal } from "@/components/clients/modals/ClientScheduleVisitModal";
 
@@ -188,6 +189,9 @@ export function AdminClientDetailView({
   // Modals
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isOnHoldModalOpen, setIsOnHoldModalOpen] = useState(false);
+  const [holdReasonInput, setHoldReasonInput] = useState<OnHoldReason>("Hospital");
+  const [expectedReturnInput, setExpectedReturnInput] = useState<string>("");
 
   // Tab Strip Refs & Dynamic Space-Aware Responsive Overflow State
   const tabStripRef = useRef<HTMLDivElement>(null);
@@ -319,10 +323,29 @@ export function AdminClientDetailView({
     .slice(0, 2)
     .toUpperCase();
 
-  const handleUpdateStatus = (newStatus: ClientStatus) => {
+  const applyStatusUpdate = (
+    newStatus: ClientStatus,
+    onHoldReason?: OnHoldReason,
+    expectedReturnDate?: string
+  ) => {
+    const reasonDetail =
+      newStatus === "On Hold" && onHoldReason
+        ? ` (Reason: ${onHoldReason}${expectedReturnDate ? `, Expected Return: ${expectedReturnDate}` : ""})`
+        : "";
+
     const updated: ClientRecord = {
       ...client,
       status: newStatus,
+      onHoldReason: newStatus === "On Hold" ? onHoldReason : undefined,
+      expectedReturnDate: newStatus === "On Hold" ? expectedReturnDate || undefined : undefined,
+      agencyInfo: client.agencyInfo
+        ? {
+            ...client.agencyInfo,
+            status: newStatus,
+            onHoldReason: newStatus === "On Hold" ? onHoldReason : undefined,
+            expectedReturnDate: newStatus === "On Hold" ? expectedReturnDate || undefined : undefined,
+          }
+        : undefined,
       updatedAtRelative: "Just now",
       activity: [
         {
@@ -331,8 +354,8 @@ export function AdminClientDetailView({
           type: "status_change",
           author: `${currentRole.toUpperCase()} User`,
           authorRole: "Operational Administrator",
-          title: `Status Changed to ${newStatus}`,
-          details: `Client status was manually transitioned to ${newStatus}.`,
+          title: `Status Changed to ${newStatus}${reasonDetail}`,
+          details: `Client status was manually transitioned to ${newStatus}${reasonDetail}.`,
         },
         ...client.activity,
       ],
@@ -346,7 +369,23 @@ export function AdminClientDetailView({
       all[index] = updated;
       saveClientsToStorage(all);
     }
-    toast.success(`Client status updated to ${newStatus}`);
+    toast.success(`Client status updated to ${newStatus}${reasonDetail}`);
+  };
+
+  const handleUpdateStatus = (newStatus: ClientStatus) => {
+    if (newStatus === "On Hold") {
+      setHoldReasonInput(client.onHoldReason || "Hospital");
+      setExpectedReturnInput(client.expectedReturnDate || "");
+      setIsOnHoldModalOpen(true);
+      return;
+    }
+    applyStatusUpdate(newStatus);
+  };
+
+  const handleConfirmOnHold = (e: React.FormEvent) => {
+    e.preventDefault();
+    applyStatusUpdate("On Hold", holdReasonInput, expectedReturnInput || undefined);
+    setIsOnHoldModalOpen(false);
   };
 
   const handleUpdateClient = (updated: ClientRecord) => {
@@ -462,25 +501,37 @@ export function AdminClientDetailView({
             {(() => {
               const statusVal = normalizeClientStatus(client.status);
               return (
-                <select
-                  aria-label="Client Roster Status"
-                  value={statusVal}
-                  onChange={(e) => handleUpdateStatus(e.target.value as ClientStatus)}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold border cursor-pointer focus:outline-none transition-all ${
-                    statusVal === "Active"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : statusVal === "Hospitalized"
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                <>
+                  <select
+                    aria-label="Client Roster Status"
+                    value={statusVal}
+                    onChange={(e) => handleUpdateStatus(e.target.value as ClientStatus)}
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold border cursor-pointer focus:outline-none transition-all ${
+                      statusVal === "Active"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : statusVal === "On Hold"
-                          ? "bg-sky-50 text-sky-700 border-sky-200"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
                           : "bg-slate-100 text-slate-600 border-slate-200"
-                  }`}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Hospitalized">Hospitalized</option>
-                  <option value="On Hold">On Hold (Start of Care Pending)</option>
-                  {perms.clients.canDischarge && <option value="Discharged">Discharged</option>}
-                </select>
+                    }`}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="On Hold">On Hold</option>
+                    {perms.clients.canDischarge && <option value="Discharged">Discharged</option>}
+                  </select>
+                  {statusVal === "On Hold" && (
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStatus("On Hold")}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-50/70 hover:bg-amber-100/70 text-amber-800 border border-amber-200/80 transition-colors cursor-pointer"
+                      title="Edit On Hold reason and expected return date"
+                    >
+                      <span>{client.onHoldReason || "Set Hold Reason"}</span>
+                      {client.expectedReturnDate && (
+                        <span className="text-amber-700/90">• Return {client.expectedReturnDate}</span>
+                      )}
+                    </button>
+                  )}
+                </>
               );
             })()}
             <button
@@ -844,6 +895,61 @@ export function AdminClientDetailView({
           setIsScheduleModalOpen(false);
         }}
       />
+
+      <Modal
+        isOpen={isOnHoldModalOpen}
+        onClose={() => setIsOnHoldModalOpen(false)}
+        title="Place Client On Hold"
+        description="Select the hold reason and expected return date for care resumption."
+        icon={<Clock className="w-5 h-5" />}
+        maxWidth="sm"
+      >
+        <form onSubmit={handleConfirmOnHold} className="space-y-4">
+          <div>
+            <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
+              On Hold Reason
+            </label>
+            <select
+              value={holdReasonInput}
+              onChange={(e) => setHoldReasonInput(e.target.value as OnHoldReason)}
+              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+            >
+              <option value="Hospital">Hospital</option>
+              <option value="Vacation">Vacation</option>
+              <option value="Authorization pending">Authorization pending</option>
+              <option value="Payment issue">Payment issue</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[13px] font-medium text-slate-700 block mb-1.5">
+              Expected Return Date
+            </label>
+            <input
+              type="date"
+              value={expectedReturnInput}
+              onChange={(e) => setExpectedReturnInput(e.target.value)}
+              className="w-full px-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all text-slate-800"
+            />
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsOnHoldModalOpen(false)}
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-2xs hover:text-slate-900 cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
+            >
+              Save On Hold Status
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

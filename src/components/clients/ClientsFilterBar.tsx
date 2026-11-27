@@ -44,7 +44,6 @@ export function ClientsFilterBar({
   const statuses: { label: string; value: string }[] = [
     { label: "All Statuses", value: "ALL" },
     { label: "Active", value: "Active" },
-    { label: "Hospitalized", value: "Hospitalized" },
     { label: "On Hold", value: "On Hold" },
     { label: "Discharged", value: "Discharged" },
   ];

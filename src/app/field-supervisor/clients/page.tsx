@@ -79,12 +79,10 @@ export default function FieldClientsPage() {
                 </div>
                 <span
                   className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${client.status === "Active"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : client.status === "Hospitalized"
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : client.status === "On Hold"
-                          ? "bg-sky-50 text-sky-700 border-sky-200"
-                          : "bg-slate-100 text-slate-600 border-slate-200"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : client.status === "On Hold"
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
                     }`}
                 >
                   {client.status}
@@ -102,10 +100,10 @@ export default function FieldClientsPage() {
                   </span>
                   <span
                     className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${risk === "High Risk"
-                        ? "bg-rose-50 text-rose-700 border-rose-200"
-                        : risk === "Medium Risk"
-                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                      : risk === "Medium Risk"
+                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                        : "bg-emerald-50 text-emerald-700 border-emerald-200"
                       }`}
                   >
                     {risk}

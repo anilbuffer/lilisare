@@ -28,7 +28,7 @@ import {
   getClientRiskLevel,
 } from "@/lib/clients/mockData";
 import { MOCK_HOUSEHOLDS } from "@/lib/households/mockData";
-import { ClientRecord, CareArrangementType, ClientStatus, ClientRiskLevel } from "@/types/client";
+import { ClientRecord, CareArrangementType, ClientStatus, ClientRiskLevel, OnHoldReason } from "@/types/client";
 import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
@@ -50,6 +50,8 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
   const [gender, setGender] = useState("");
   const [primaryLanguage, setPrimaryLanguage] = useState("");
   const [status, setStatus] = useState<ClientStatus>("Active");
+  const [onHoldReason, setOnHoldReason] = useState<OnHoldReason>("Hospital");
+  const [expectedReturnDate, setExpectedReturnDate] = useState("");
   const [riskLevel, setRiskLevel] = useState<ClientRiskLevel>("Low Risk");
   const [primaryDiagnosis, setPrimaryDiagnosis] = useState("");
   const [careType, setCareType] = useState<CareArrangementType>("Family Care");
@@ -86,6 +88,8 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
       setGender(found.gender);
       setPrimaryLanguage(found.primaryLanguage);
       setStatus(found.status);
+      setOnHoldReason(found.onHoldReason || "Hospital");
+      setExpectedReturnDate(found.expectedReturnDate || "");
       setRiskLevel(getClientRiskLevel(found));
       setPrimaryDiagnosis(getClientDiagnosis(found));
       setCareType(found.careType);
@@ -144,6 +148,8 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
       gender,
       primaryLanguage,
       status: safeStatus,
+      onHoldReason: safeStatus === "On Hold" ? onHoldReason : undefined,
+      expectedReturnDate: safeStatus === "On Hold" ? expectedReturnDate || undefined : undefined,
       riskLevel,
       primaryDiagnosis: primaryDiagnosis.trim() || client.primaryDiagnosis,
       careType,
@@ -286,13 +292,40 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-bold"
               >
                 <option value="Active">Active (Receiving Care)</option>
-                <option value="Hospitalized">Hospitalized (Inpatient Hold)</option>
-                <option value="On Hold">On Hold (Start of Care Pending)</option>
+                <option value="On Hold">On Hold</option>
                 {perms.clients.canDischarge && (
                   <option value="Discharged">Discharged (Formally Ended)</option>
                 )}
               </select>
             </div>
+
+            {status === "On Hold" && (
+              <>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">On Hold Reason</label>
+                  <select
+                    value={onHoldReason}
+                    onChange={(e) => setOnHoldReason(e.target.value as OnHoldReason)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-bold"
+                  >
+                    <option value="Hospital">Hospital</option>
+                    <option value="Vacation">Vacation</option>
+                    <option value="Authorization pending">Authorization pending</option>
+                    <option value="Payment issue">Payment issue</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Expected Return Date</label>
+                  <input
+                    type="date"
+                    value={expectedReturnDate}
+                    onChange={(e) => setExpectedReturnDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                  />
+                </div>
+              </>
+            )}
 
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">Risk Level</label>

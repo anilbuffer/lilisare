@@ -63,8 +63,8 @@ export const CLIENT_KANBAN_STAGES: {
       },
     },
     {
-      id: "Hospitalized",
-      title: "Hospitalized",
+      id: "On Hold",
+      title: "On Hold",
       icon: Clock,
       badge: {
         bg: "bg-amber-50",
@@ -72,18 +72,6 @@ export const CLIENT_KANBAN_STAGES: {
         border: "border-amber-200",
         dot: "bg-amber-500",
         headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
-      },
-    },
-    {
-      id: "On Hold",
-      title: "On Hold",
-      icon: FileCheck2,
-      badge: {
-        bg: "bg-sky-50",
-        text: "text-sky-800",
-        border: "border-sky-200",
-        dot: "bg-sky-500",
-        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
       },
     },
     {
@@ -112,7 +100,6 @@ export function resolveClientStage(
     return overrides[client.id];
   }
   if (client.status === "Discharged") return "Discharged";
-  if (client.status === "Hospitalized") return "Hospitalized";
   if (client.status === "On Hold") return "On Hold";
   return "Active";
 }
@@ -275,10 +262,10 @@ export function ClientManagementWorkspace({
     const updatedClients = allClients.map((c) =>
       c.id === clientId
         ? {
-            ...c,
-            status: targetStage,
-            updatedAtRelative: "Just now",
-          }
+          ...c,
+          status: targetStage,
+          updatedAtRelative: "Just now",
+        }
         : c
     );
     saveClientsToStorage(updatedClients);
@@ -320,10 +307,8 @@ export function ClientManagementWorkspace({
     switch (status) {
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
-      case "Hospitalized":
-        return "bg-amber-50 text-amber-800 border-amber-200";
       case "On Hold":
-        return "bg-sky-50 text-sky-800 border-sky-200";
+        return "bg-amber-50 text-amber-800 border-amber-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:
@@ -614,13 +599,12 @@ export function ClientManagementWorkspace({
                                 {/* Row 3: Risk Level & Authorized Hours */}
                                 <div className="mt-2.5 flex items-center justify-between text-[11px]">
                                   <span
-                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                                      getClientRiskLevel(client) === "High Risk"
-                                        ? "bg-rose-50 text-rose-700 border-rose-200"
-                                        : getClientRiskLevel(client) === "Medium Risk"
-                                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                    }`}
+                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${getClientRiskLevel(client) === "High Risk"
+                                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                                      : getClientRiskLevel(client) === "Medium Risk"
+                                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                                        : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                      }`}
                                   >
                                     {getClientRiskLevel(client)}
                                   </span>
@@ -728,11 +712,13 @@ export function ClientManagementWorkspace({
                     const nextVisitLabel =
                       stage === "Discharged"
                         ? "Discharged"
-                        : stage === "Hospitalized"
-                          ? "Paused (Inpatient)"
-                          : stage === "On Hold"
-                            ? "Start of Care Pending"
-                            : client.carePlan?.frequency || "Scheduled";
+                        : stage === "On Hold"
+                          ? client.expectedReturnDate
+                            ? `Return: ${client.expectedReturnDate}`
+                            : client.onHoldReason
+                              ? `Paused (${client.onHoldReason})`
+                              : "On Hold"
+                          : client.carePlan?.frequency || "Scheduled";
                     const authStatus = client.authorization?.status || "Pending Renewal";
 
                     return (
@@ -774,13 +760,12 @@ export function ClientManagementWorkspace({
                         {/* Risk */}
                         <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${
-                              riskLabel === "High Risk"
-                                ? "bg-rose-50 text-rose-700 border-rose-200"
-                                : riskLabel === "Medium Risk"
-                                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            }`}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${riskLabel === "High Risk"
+                              ? "bg-rose-50 text-rose-700 border-rose-200"
+                              : riskLabel === "Medium Risk"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              }`}
                           >
                             {riskLabel}
                           </span>
@@ -810,13 +795,12 @@ export function ClientManagementWorkspace({
                         {/* Authorization Status */}
                         <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${
-                              authStatus === "Verified"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : authStatus === "Expiring Soon"
-                                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                                  : "bg-blue-50 text-blue-700 border-blue-200"
-                            }`}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${authStatus === "Verified"
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : authStatus === "Expiring Soon"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : "bg-blue-50 text-blue-700 border-blue-200"
+                              }`}
                           >
                             {authStatus}
                           </span>

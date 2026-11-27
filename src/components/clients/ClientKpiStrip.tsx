@@ -20,7 +20,7 @@ export function ClientKpiStrip({
   const totalCount = clients.length;
   const activeCount = clients.filter((c) => c.status === "Active").length;
   const highRiskCount = clients.filter((c) => getClientRiskLevel(c) === "High Risk").length;
-  const hospitalizedCount = clients.filter((c) => c.status === "Hospitalized").length;
+  const onHoldCount = clients.filter((c) => c.status === "On Hold").length;
 
   const kpis = [
     {
@@ -45,9 +45,9 @@ export function ClientKpiStrip({
       iconBg: "bg-rose-100 text-rose-700",
     },
     {
-      id: "Hospitalized",
-      label: "Hospitalized",
-      value: hospitalizedCount.toLocaleString(),
+      id: "On Hold",
+      label: "On Hold",
+      value: onHoldCount.toLocaleString(),
       icon: Building2,
       iconBg: "bg-amber-100 text-amber-800",
     },

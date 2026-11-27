@@ -44,10 +44,8 @@ export function ClientsTable({
     switch (status) {
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
-      case "Hospitalized":
-        return "bg-amber-50 text-amber-800 border-amber-200";
       case "On Hold":
-        return "bg-sky-50 text-sky-800 border-sky-200";
+        return "bg-amber-50 text-amber-800 border-amber-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:
@@ -202,23 +200,24 @@ export function ClientsTable({
                     <td className="py-3.5 px-4 text-xs text-slate-600 font-medium whitespace-nowrap">
                       {client.status === "Discharged"
                         ? "Discharged"
-                        : client.status === "Hospitalized"
-                          ? "Paused (Inpatient)"
-                          : client.status === "On Hold"
-                            ? "Start of Care Pending"
-                            : client.carePlan?.frequency || "Scheduled"}
+                        : client.status === "On Hold"
+                          ? client.expectedReturnDate
+                            ? `Return: ${client.expectedReturnDate}`
+                            : client.onHoldReason
+                              ? `Paused (${client.onHoldReason})`
+                              : "On Hold"
+                          : client.carePlan?.frequency || "Scheduled"}
                     </td>
 
                     {/* Authorization Status */}
                     <td className="py-3.5 px-4">
                       <span
-                        className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${
-                          client.authorization?.status === "Verified"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : client.authorization?.status === "Expiring Soon"
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
-                        }`}
+                        className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${client.authorization?.status === "Verified"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : client.authorization?.status === "Expiring Soon"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-blue-50 text-blue-700 border-blue-200"
+                          }`}
                       >
                         {client.authorization?.status || "Pending Renewal"}
                       </span>

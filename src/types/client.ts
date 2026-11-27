@@ -1,4 +1,10 @@
-export type ClientStatus = "Active" | "Hospitalized" | "On Hold" | "Discharged";
+export type ClientStatus = "Active" | "On Hold" | "Discharged";
+
+export type OnHoldReason =
+  | "Hospital"
+  | "Vacation"
+  | "Authorization pending"
+  | "Payment issue";
 
 export type ClientRiskLevel = "High Risk" | "Medium Risk" | "Low Risk";
 
@@ -319,6 +325,8 @@ export interface ClientRecord {
   gender: string;
   primaryLanguage: string;
   status: ClientStatus;
+  onHoldReason?: OnHoldReason;
+  expectedReturnDate?: string;
   riskLevel?: ClientRiskLevel;
   primaryDiagnosis?: string;
   careType: CareArrangementType;
@@ -344,6 +352,8 @@ export interface ClientRecord {
   ssn?: string;
   agencyInfo?: {
     status: string;
+    onHoldReason?: OnHoldReason;
+    expectedReturnDate?: string;
     leadCreatedDate?: string;
     initialAssessmentDate?: string;
     conversionDate?: string;

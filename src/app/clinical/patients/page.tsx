@@ -29,7 +29,7 @@ import { Card } from "@/components/ui/Card";
 import { NewPatientModal } from "@/components/patients/NewPatientModal";
 import { toast } from "sonner";
 
-type FilterStatus = "ALL" | "Active" | "High Risk" | "Hospitalized" | "Discharged" | "Care Completed";
+type FilterStatus = "ALL" | "Active" | "High Risk" | "On Hold" | "Discharged" | "Care Completed";
 
 export default function PatientsPage() {
   const router = useRouter();
@@ -72,7 +72,7 @@ export default function PatientsPage() {
       let matchesFilter = true;
       if (activeFilter === "Active") matchesFilter = patient.status === "Active";
       else if (activeFilter === "High Risk") matchesFilter = patient.riskLevel === "High";
-      else if (activeFilter === "Hospitalized") matchesFilter = patient.status === "Hospitalized";
+      else if (activeFilter === "On Hold") matchesFilter = patient.status === "On Hold";
       else if (activeFilter === "Discharged") matchesFilter = patient.status === "Discharged";
       else if (activeFilter === "Care Completed") matchesFilter = patient.status === "Care Completed";
 
@@ -85,7 +85,7 @@ export default function PatientsPage() {
     const total = 247; // Database total representation
     const activeCount = allPatientsList.filter((p: any) => p.status === "Active").length;
     const highRiskCount = allPatientsList.filter((p: any) => p.riskLevel === "High").length;
-    const hospitalizedCount = allPatientsList.filter((p: any) => p.status === "Hospitalized").length;
+    const onHoldCount = allPatientsList.filter((p: any) => p.status === "On Hold").length;
     const inactiveCount = allPatientsList.filter((p: any) => p.status === "Care Completed").length;
 
     return [
@@ -120,10 +120,10 @@ export default function PatientsPage() {
         accentGlow: "group-hover:border-rose-300"
       },
       {
-        id: "Hospitalized" as FilterStatus,
-        title: "Hospitalized",
-        count: hospitalizedCount,
-        subtitle: "Inpatient / Temp Hold",
+        id: "On Hold" as FilterStatus,
+        title: "On Hold",
+        count: onHoldCount,
+        subtitle: "Hospital / Temp Hold",
         icon: Building2,
         badgeBg: "bg-amber-50 text-amber-700 border-amber-200",
         activeBorder: "border-amber-500 ring-2 ring-amber-500/20",
@@ -277,7 +277,7 @@ export default function PatientsPage() {
         {/* Quick Filter Pills Row */}
         <div className="flex items-center gap-2 overflow-x-auto pt-1 pb-0.5 no-scrollbar">
           <span className="text-xs font-medium text-slate-400 shrink-0 mr-1">Status:</span>
-          {(["ALL", "Active", "High Risk", "Hospitalized", "Discharged", "Care Completed"] as FilterStatus[]).map((filterVal) => {
+          {(["ALL", "Active", "High Risk", "On Hold", "Discharged", "Care Completed"] as FilterStatus[]).map((filterVal) => {
             const isSelected = activeFilter === filterVal;
             return (
               <button
@@ -373,7 +373,7 @@ export default function PatientsPage() {
                             variant={
                               patient.status === "Active"
                                 ? "success"
-                                : patient.status === "Hospitalized"
+                                : patient.status === "On Hold"
                                   ? "warning"
                                   : patient.status === "Discharged"
                                     ? "default"
@@ -459,7 +459,7 @@ export default function PatientsPage() {
                         variant={
                           patient.status === "Active"
                             ? "success"
-                            : patient.status === "Hospitalized"
+                            : patient.status === "On Hold"
                               ? "warning"
                               : patient.status === "Discharged"
                                 ? "default"
@@ -543,7 +543,7 @@ export default function PatientsPage() {
                               variant={
                                 patient.status === "Active"
                                   ? "success"
-                                  : patient.status === "Hospitalized"
+                                  : patient.status === "On Hold"
                                     ? "warning"
                                     : patient.status === "Discharged"
                                       ? "default"

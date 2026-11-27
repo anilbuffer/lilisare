@@ -25,7 +25,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ClientRecord, ClientStatus, ClientRiskLevel } from "@/types/client";
+import { ClientRecord, ClientStatus, ClientRiskLevel, OnHoldReason } from "@/types/client";
 import {
   getClientsFromStorage,
   getClientDiagnosis,
@@ -44,6 +44,8 @@ export interface AdminClientItem {
   age: number;
   gender: string;
   status: ClientStatus;
+  onHoldReason?: OnHoldReason;
+  expectedReturnDate?: string;
   riskLevel: ClientRiskLevel;
   primaryDiagnosis: string;
   assignedCaregiver: string;
@@ -75,10 +77,12 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     age: 6,
     gender: "Male",
     status: "On Hold",
+    onHoldReason: "Authorization pending",
+    expectedReturnDate: "2026-12-10",
     riskLevel: "Medium Risk",
     primaryDiagnosis: "Developmental Mobility Delay, Sensory Support",
     assignedCaregiver: "Maria Santos, BSN",
-    nextVisit: "Start of Care Pending",
+    nextVisit: "Return: Dec 10, 2026",
     authorizationStatus: "Pending Renewal",
     householdName: "Vance Household",
     householdCode: "HH-1004",
@@ -116,11 +120,13 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     name: "James Doe",
     age: 72,
     gender: "Male",
-    status: "Hospitalized",
+    status: "On Hold",
+    onHoldReason: "Hospital",
+    expectedReturnDate: "2026-12-05",
     riskLevel: "High Risk",
     primaryDiagnosis: "Early-onset dementia, Acute Respiratory Infection",
     assignedCaregiver: "David Kim, MSW",
-    nextVisit: "Paused (Inpatient)",
+    nextVisit: "Return: Dec 5, 2026",
     authorizationStatus: "Verified",
     householdName: "Doe Household",
     householdCode: "HH-1005",
@@ -183,6 +189,14 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
   },
 ];
 
+// Helper to format ISO date string concisely
+function formatShortDate(dateStr?: string): string {
+  if (!dateStr) return "";
+  const parsed = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 // Helper to extract 2-letter initials
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -208,7 +222,7 @@ export function AdminClientDirectory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [riskFilter, setRiskFilter] = useState<string>("ALL");
-  const [activeKpiKey, setActiveKpiKey] = useState<"TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED">("TOTAL");
+  const [activeKpiKey, setActiveKpiKey] = useState<"TOTAL" | "ACTIVE" | "HIGH_RISK" | "ON_HOLD">("TOTAL");
 
   // Pagination State: max 10 entries per page
   const [currentPage, setCurrentPage] = useState(1);
@@ -235,6 +249,15 @@ export function AdminClientDirectory() {
             const diagnosis = getClientDiagnosis(c);
             const risk = getClientRiskLevel(c);
             const mappedStatus = normalizeClientStatus(c.status);
+            const onHoldReason =
+              mappedStatus === "On Hold"
+                ? c.onHoldReason ||
+                  ((c.status as string) === "Hospitalized" ? "Hospital" : seedMatch?.onHoldReason)
+                : undefined;
+            const expectedReturnDate =
+              mappedStatus === "On Hold"
+                ? c.expectedReturnDate || seedMatch?.expectedReturnDate
+                : undefined;
 
             const assignedCaregiver =
               c.assignedCareTeam?.primaryCaregiver?.name ||
@@ -245,13 +268,15 @@ export function AdminClientDirectory() {
             const nextVisit =
               mappedStatus === "Discharged"
                 ? "Discharged"
-                : mappedStatus === "Hospitalized"
-                  ? "Paused (Inpatient)"
-                  : mappedStatus === "On Hold"
-                    ? "Start of Care Pending"
-                    : seedMatch?.nextVisit && seedMatch.status === "Active"
-                      ? seedMatch.nextVisit
-                      : c.carePlan?.frequency || "Scheduled";
+                : mappedStatus === "On Hold"
+                  ? expectedReturnDate
+                    ? `Return: ${formatShortDate(expectedReturnDate)}`
+                    : onHoldReason
+                      ? `Paused (${onHoldReason})`
+                      : "On Hold"
+                  : seedMatch?.nextVisit && seedMatch.status === "Active"
+                    ? seedMatch.nextVisit
+                    : c.carePlan?.frequency || "Scheduled";
 
             const authRaw = c.authorization?.status;
             const authorizationStatus: AdminClientItem["authorizationStatus"] =
@@ -268,6 +293,8 @@ export function AdminClientDirectory() {
               age: c.age || 65,
               gender: c.gender || "Female",
               status: mappedStatus,
+              onHoldReason,
+              expectedReturnDate,
               riskLevel: risk,
               primaryDiagnosis: diagnosis,
               assignedCaregiver,
@@ -312,9 +339,9 @@ export function AdminClientDirectory() {
     const total = items.length;
     const active = items.filter((i) => i.status === "Active").length;
     const highRisk = items.filter((i) => i.riskLevel === "High Risk").length;
-    const hospitalized = items.filter((i) => i.status === "Hospitalized").length;
+    const onHold = items.filter((i) => i.status === "On Hold").length;
 
-    return { total, active, highRisk, hospitalized };
+    return { total, active, highRisk, onHold };
   }, [items]);
 
   // Filter clients based on search, status dropdown, risk dropdown, and active KPI card
@@ -367,7 +394,7 @@ export function AdminClientDirectory() {
   }, [filteredClients, currentPage, pageSize]);
 
   // KPI card click handler
-  const handleKpiCardClick = (key: "TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED") => {
+  const handleKpiCardClick = (key: "TOTAL" | "ACTIVE" | "HIGH_RISK" | "ON_HOLD") => {
     setActiveKpiKey(key);
     setCurrentPage(1);
     if (key === "TOTAL") {
@@ -379,8 +406,8 @@ export function AdminClientDirectory() {
     } else if (key === "HIGH_RISK") {
       setStatusFilter("ALL");
       setRiskFilter("High Risk");
-    } else if (key === "HOSPITALIZED") {
-      setStatusFilter("Hospitalized");
+    } else if (key === "ON_HOLD") {
+      setStatusFilter("On Hold");
       setRiskFilter("ALL");
     }
   };
@@ -478,22 +505,22 @@ export function AdminClientDirectory() {
           </div>
         </div>
 
-        {/* Card 4: Hospitalized */}
+        {/* Card 4: On Hold */}
         <div
-          onClick={() => handleKpiCardClick("HOSPITALIZED")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HOSPITALIZED"
+          onClick={() => handleKpiCardClick("ON_HOLD")}
+          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ON_HOLD"
             ? "border-amber-500 shadow-md ring-2 ring-amber-500/15"
             : "border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-500">Hospitalized</span>
+            <span className="text-xs font-medium text-slate-500">On Hold</span>
             <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600">
               <Building2 className="w-4 h-4" />
             </div>
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-            {kpis.hospitalized}
+            {kpis.onHold}
           </div>
         </div>
       </div>
@@ -560,7 +587,6 @@ export function AdminClientDirectory() {
                   {[
                     { label: "All Clients", value: "ALL" },
                     { label: "Active", value: "Active" },
-                    { label: "Hospitalized", value: "Hospitalized" },
                     { label: "On Hold", value: "On Hold" },
                     { label: "Discharged", value: "Discharged" },
                   ].map((option) => (
@@ -763,11 +789,9 @@ export function AdminClientDirectory() {
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border whitespace-nowrap ${client.status === "Active"
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : client.status === "Hospitalized"
+                            : client.status === "On Hold"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : client.status === "On Hold"
-                                ? "bg-sky-50 text-sky-700 border-sky-200"
-                                : "bg-slate-100 text-slate-600 border-slate-200"
+                              : "bg-slate-100 text-slate-600 border-slate-200"
                             }`}
                         >
                           {client.status}
@@ -933,16 +957,24 @@ export function AdminClientDirectory() {
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${client.status === "Active"
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                          : client.status === "Hospitalized"
+                          : client.status === "On Hold"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : client.status === "On Hold"
-                              ? "bg-sky-50 text-sky-700 border-sky-200"
-                              : "bg-slate-100 text-slate-600 border-slate-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
                           }`}
                       >
                         {client.status}
                       </span>
                     </div>
+
+                    {client.status === "On Hold" && (client.onHoldReason || client.expectedReturnDate) && (
+                      <div className="flex items-center justify-between py-1 border-b border-slate-100 gap-2">
+                        <span className="text-slate-500 font-medium">Hold Details</span>
+                        <span className="text-slate-700 font-semibold text-[11px] text-right">
+                          {client.onHoldReason || "On Hold"}
+                          {client.expectedReturnDate ? ` • Return ${formatShortDate(client.expectedReturnDate)}` : ""}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Risk Level Row */}
                     <div className="flex items-center justify-between py-1 border-b border-slate-100">

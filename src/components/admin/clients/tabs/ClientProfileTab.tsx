@@ -32,10 +32,15 @@ import {
   Stethoscope,
   ArrowRight,
 } from "lucide-react";
-import { ClientRecord } from "@/types/client";
+import { ClientRecord, ClientStatus, OnHoldReason } from "@/types/client";
 import { PortalRole } from "../AdminClientDetailView";
 import { toast } from "sonner";
-import { saveClientsToStorage, getClientsFromStorage, getClientDiagnosis } from "@/lib/clients/mockData";
+import {
+  saveClientsToStorage,
+  getClientsFromStorage,
+  getClientDiagnosis,
+  normalizeClientStatus,
+} from "@/lib/clients/mockData";
 import { getAdminReferralsFromStorage } from "@/lib/intake-referrals/adminIntakeReferralsData";
 
 interface ClientProfileTabProps {
@@ -81,7 +86,9 @@ export function ClientProfileTab({
     age: client.age || 8,
     ssn: client.ssn || `***-**-${(client.id.replace(/\D/g, "") || "1001").padStart(4, "0")}`,
     // Agency Info
-    status: client.agencyInfo?.status || client.status || "Active",
+    status: normalizeClientStatus(client.agencyInfo?.status || client.status),
+    onHoldReason: (client.onHoldReason || client.agencyInfo?.onHoldReason || "Hospital") as OnHoldReason,
+    expectedReturnDate: client.expectedReturnDate || client.agencyInfo?.expectedReturnDate || "",
     leadCreatedDate: client.agencyInfo?.leadCreatedDate || "03/15/22",
     initialAssessmentDate: client.agencyInfo?.initialAssessmentDate || "04/02/22",
     conversionDate: client.agencyInfo?.conversionDate || "04/10/22",
@@ -171,7 +178,9 @@ export function ClientProfileTab({
       dobYear: defaultDobYear,
       age: client.age || 8,
       ssn: client.ssn || `***-**-${(client.id.replace(/\D/g, "") || "1001").padStart(4, "0")}`,
-      status: client.agencyInfo?.status || client.status || "Active",
+      status: normalizeClientStatus(client.agencyInfo?.status || client.status),
+      onHoldReason: (client.onHoldReason || client.agencyInfo?.onHoldReason || "Hospital") as OnHoldReason,
+      expectedReturnDate: client.expectedReturnDate || client.agencyInfo?.expectedReturnDate || "",
       leadCreatedDate: client.agencyInfo?.leadCreatedDate || "03/15/22",
       initialAssessmentDate: client.agencyInfo?.initialAssessmentDate || "04/02/22",
       conversionDate: client.agencyInfo?.conversionDate || "04/10/22",
@@ -218,8 +227,13 @@ export function ClientProfileTab({
       dob: `${formData.dobYear}-08-06`,
       age: Number(formData.age) || client.age,
       ssn: formData.ssn,
+      status: normalizeClientStatus(formData.status) as ClientStatus,
+      onHoldReason: formData.status === "On Hold" ? formData.onHoldReason : undefined,
+      expectedReturnDate: formData.status === "On Hold" ? formData.expectedReturnDate || undefined : undefined,
       agencyInfo: {
         status: formData.status,
+        onHoldReason: formData.status === "On Hold" ? formData.onHoldReason : undefined,
+        expectedReturnDate: formData.status === "On Hold" ? formData.expectedReturnDate || undefined : undefined,
         leadCreatedDate: formData.leadCreatedDate,
         initialAssessmentDate: formData.initialAssessmentDate,
         conversionDate: formData.conversionDate,
@@ -675,7 +689,15 @@ export function ClientProfileTab({
                 <div className="flex justify-between items-center py-1">
                   <span className="text-[13px] font-medium text-slate-500">Current Care Status</span>
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-[#3D6B22] border border-emerald-200">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                        formData.status === "Active"
+                          ? "bg-emerald-50 text-[#3D6B22] border-emerald-200"
+                          : formData.status === "On Hold"
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                      }`}
+                    >
                       {formData.status}
                     </span>
                     {formData.effectiveEndDate && (
@@ -685,6 +707,21 @@ export function ClientProfileTab({
                     )}
                   </div>
                 </div>
+
+                {formData.status === "On Hold" && (
+                  <>
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-[13px] font-medium text-slate-500">On Hold Reason</span>
+                      <span className="text-sm font-semibold text-amber-800">{formData.onHoldReason}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-[13px] font-medium text-slate-500">Expected Return Date</span>
+                      <span className="text-sm font-semibold text-slate-800">
+                        {formData.expectedReturnDate || "Not specified"}
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-[13px] font-medium text-slate-500">Lead Created Date</span>
@@ -779,12 +816,11 @@ export function ClientProfileTab({
                   <div className="sm:col-span-8 flex flex-wrap items-center gap-2">
                     <select
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as ClientStatus })}
                       className="flex-1 px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:bg-white"
                     >
                       <option value="Active">Active</option>
-                      <option value="Hospitalized">Hospitalized</option>
-                      <option value="On Hold">On Hold (Start of Care Pending)</option>
+                      <option value="On Hold">On Hold</option>
                       <option value="Discharged">Discharged</option>
                     </select>
                     <button
@@ -796,6 +832,40 @@ export function ClientProfileTab({
                     </button>
                   </div>
                 </div>
+
+                {formData.status === "On Hold" && (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
+                      <label className="sm:col-span-4 text-[13px] font-medium text-slate-700">On Hold Reason</label>
+                      <div className="sm:col-span-8">
+                        <select
+                          value={formData.onHoldReason}
+                          onChange={(e) =>
+                            setFormData({ ...formData, onHoldReason: e.target.value as OnHoldReason })
+                          }
+                          className="w-full px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:bg-white"
+                        >
+                          <option value="Hospital">Hospital</option>
+                          <option value="Vacation">Vacation</option>
+                          <option value="Authorization pending">Authorization pending</option>
+                          <option value="Payment issue">Payment issue</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
+                      <label className="sm:col-span-4 text-[13px] font-medium text-slate-700">Expected Return Date</label>
+                      <div className="sm:col-span-8">
+                        <input
+                          type="date"
+                          value={formData.expectedReturnDate}
+                          onChange={(e) => setFormData({ ...formData, expectedReturnDate: e.target.value })}
+                          className="w-full px-3 py-1.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
                   <label className="sm:col-span-4 text-[13px] font-medium text-slate-700">Lead Created Date</label>

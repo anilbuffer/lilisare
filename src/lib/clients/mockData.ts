@@ -34,10 +34,12 @@ const CLIENT_RISK_DEFAULTS: Record<string, ClientRiskLevel> = {
 };
 
 export function normalizeClientStatus(status?: string): ClientStatus {
-  if (status === "Active" || status === "Hospitalized" || status === "On Hold" || status === "Discharged") {
+  if (status === "Active" || status === "On Hold" || status === "Discharged") {
     return status;
   }
-  if (status === "Onboarding") return "On Hold";
+  if (status === "Hospitalized" || status === "Hospitalization" || status === "Onboarding") {
+    return "On Hold";
+  }
   return "Active";
 }
 
@@ -56,7 +58,7 @@ export function getClientRiskLevel(client: ClientRecord): ClientRiskLevel {
   if (client.riskLevel) return client.riskLevel;
   if (CLIENT_RISK_DEFAULTS[client.id]) return CLIENT_RISK_DEFAULTS[client.id];
   const status = normalizeClientStatus(client.status);
-  if (status === "Hospitalized" || (client.readiness?.overallScore ?? 100) < 70) {
+  if ((status === "On Hold" && client.onHoldReason === "Hospital") || (client.readiness?.overallScore ?? 100) < 70) {
     return "High Risk";
   }
   if (status === "On Hold" || (client.attentionItems && client.attentionItems.length > 0)) {
@@ -66,9 +68,17 @@ export function getClientRiskLevel(client: ClientRecord): ClientRiskLevel {
 }
 
 function hydrateClientDefaults(client: ClientRecord): ClientRecord {
+  const rawStatus = client.status as string | undefined;
+  const normalizedStatus = normalizeClientStatus(rawStatus);
+  const onHoldReason =
+    normalizedStatus === "On Hold"
+      ? client.onHoldReason || (rawStatus === "Hospitalized" || rawStatus === "Hospitalization" ? "Hospital" : undefined)
+      : undefined;
+
   return {
     ...client,
-    status: normalizeClientStatus(client.status),
+    status: normalizedStatus,
+    onHoldReason,
     primaryDiagnosis: getClientDiagnosis(client),
     riskLevel: getClientRiskLevel(client),
   };
@@ -501,6 +511,8 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     gender: "Female",
     primaryLanguage: "English / Gujarati",
     status: "On Hold",
+    onHoldReason: "Authorization pending",
+    expectedReturnDate: "2026-12-10",
     careType: "Family Care",
     household: {
       id: "hh-1003",
@@ -666,6 +678,8 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     gender: "Male",
     primaryLanguage: "English",
     status: "On Hold",
+    onHoldReason: "Authorization pending",
+    expectedReturnDate: "2026-12-10",
     careType: "Family Friend Care",
     household: {
       id: "hh-1004",
@@ -989,6 +1003,8 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     gender: "Male",
     primaryLanguage: "English",
     status: "On Hold",
+    onHoldReason: "Authorization pending",
+    expectedReturnDate: "2026-12-10",
     careType: "Family Care",
     household: {
       id: "hh-1006",
@@ -1147,7 +1163,9 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     age: 80,
     gender: "Male",
     primaryLanguage: "Mandarin / English",
-    status: "Hospitalized",
+    status: "On Hold",
+    onHoldReason: "Hospital",
+    expectedReturnDate: "2026-12-04",
     careType: "Family Care",
     household: {
       id: "hh-1007",
@@ -1289,6 +1307,8 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     gender: "Female",
     primaryLanguage: "English / Cantonese",
     status: "On Hold",
+    onHoldReason: "Authorization pending",
+    expectedReturnDate: "2026-12-10",
     careType: "Family Care",
     household: {
       id: "hh-1008",

@@ -32,10 +32,8 @@ export function ClientsGrid({
     switch (status) {
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
-      case "Hospitalized":
-        return "bg-amber-50 text-amber-800 border-amber-200";
       case "On Hold":
-        return "bg-sky-50 text-sky-800 border-sky-200";
+        return "bg-amber-50 text-amber-800 border-amber-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:

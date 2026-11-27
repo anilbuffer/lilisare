@@ -21,6 +21,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { useSidebarCollapse } from "@/hooks/useSidebarCollapse";
 import { useAuth } from "@/hooks/useAuth";
+import { SidebarTooltip, useSidebarTooltip } from "@/components/layout/SidebarTooltip";
 import { mockOrganization, mockTeamMembers } from "@/lib/partner/mockData";
 
 const NAV_ITEMS = [
@@ -42,6 +43,7 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
   const router = useRouter();
   const { logout } = useAuth();
   const { isCollapsed, toggleCollapse } = useSidebarCollapse();
+  const { tooltip, showTooltip, hideTooltip } = useSidebarTooltip(isCollapsed);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -145,7 +147,10 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-600/80">
+        <nav
+          onScroll={hideTooltip}
+          className="flex-1 overflow-y-auto px-3 py-4 space-y-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-600/80"
+        >
           <ul className="space-y-1">
             {NAV_ITEMS.map((item) => {
               const isActive = activeItem === item.id;
@@ -162,8 +167,13 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
                   <Link
                     href={item.href}
                     onClick={() => {
+                      hideTooltip();
                       if (onClose) onClose();
                     }}
+                    onMouseEnter={(e) => showTooltip(e, item.name, isActive)}
+                    onMouseLeave={hideTooltip}
+                    onFocus={(e) => showTooltip(e, item.name, isActive)}
+                    onBlur={hideTooltip}
                     aria-label={isCollapsed ? item.name : undefined}
                     className={clsx(
                       "relative flex items-center rounded-xl text-sm font-medium transition-colors z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal h-10 px-3",
@@ -186,16 +196,6 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
                       </span>
                     </div>
                   </Link>
-
-                  {/* Tooltip for Mini View (Hover + Focus) */}
-                  {isCollapsed && (
-                    <div
-                      role="tooltip"
-                      className="absolute left-full ml-4 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-2xl border border-slate-700/80 whitespace-nowrap opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2 translate-x-1 group-hover:translate-x-0 group-focus-within:translate-x-0"
-                    >
-                      <span>{item.name}</span>
-                    </div>
-                  )}
                 </li>
               );
             })}
@@ -284,6 +284,7 @@ export function PartnerSidebar({ isOpen = false, onClose }: PartnerSidebarProps)
           </AnimatePresence>
         </div>
       </aside>
+      <SidebarTooltip tooltip={tooltip} />
     </>
   );
 }

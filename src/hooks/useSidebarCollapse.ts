@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "lilisare_sidebar_user_override_v4";
-export const LARGE_DESKTOP_BREAKPOINT = 1280;
+export const LARGE_DESKTOP_BREAKPOINT = 1366;
 
 // Module-level persistent state so navigation between layouts retains the exact same state without flashing or fluctuating
 let currentCollapsed = false;
@@ -13,7 +13,7 @@ const listeners = new Set<() => void>();
 
 function getBreakpointMode(): "desktop" | "laptop" {
   if (typeof window === "undefined") return "desktop";
-  return window.innerWidth >= LARGE_DESKTOP_BREAKPOINT ? "desktop" : "laptop";
+  return window.innerWidth > LARGE_DESKTOP_BREAKPOINT ? "desktop" : "laptop";
 }
 
 function initializeState(): boolean {
@@ -33,8 +33,8 @@ function initializeState(): boolean {
   } catch {}
 
   // Defaults:
-  // Large Desktop (>= 1280px) -> expanded (currentCollapsed = false)
-  // Laptop (1024px - 1279px) -> collapsed mini-rail (currentCollapsed = true)
+  // Large Desktop (> 1366px) -> expanded (currentCollapsed = false)
+  // Laptop / Compact Desktop (<= 1366px) -> collapsed mini-rail (currentCollapsed = true)
   currentCollapsed = mode === "laptop";
   return currentCollapsed;
 }

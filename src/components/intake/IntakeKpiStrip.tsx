@@ -1,53 +1,63 @@
 "use client";
 
 import React from "react";
-import { Inbox, Sparkles, Clock, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { Inbox, Sparkles, AlertTriangle, CheckCircle2, ArrowUpRight } from "lucide-react";
 
 interface IntakeKpiStripProps {
+  openInquiries?: number;
   totalInquiries?: number;
-  newInquiries?: number;
-  inAssessment?: number;
+  urgentTriage?: number;
   converted?: number;
+  conversionRate?: string;
   activeFilter?: string;
-  onSelectKpiFilter?: (filterKey: "ALL" | "NEW" | "ASSESSMENT" | "CONVERTED") => void;
+  onSelectKpiFilter?: (filterKey: "ALL" | "URGENT" | "CONVERTED") => void;
 }
 
 export function IntakeKpiStrip({
-  totalInquiries = 79,
-  newInquiries = 24,
-  inAssessment = 21,
-  converted = 16,
+  openInquiries = 0,
+  totalInquiries = 0,
+  urgentTriage = 0,
+  converted = 0,
+  conversionRate = "0.0%",
   activeFilter = "ALL",
   onSelectKpiFilter = () => { },
 }: IntakeKpiStripProps) {
   const kpis = [
     {
+      id: "OPEN",
       key: "ALL" as const,
-      label: "Total Inquiries",
-      value: totalInquiries.toLocaleString(),
+      label: "Open Pipeline",
+      value: openInquiries.toLocaleString(),
+      sublabel: "New → Family Decision",
       icon: Inbox,
       iconBg: "bg-[#3D6B22]/10 text-[#3D6B22]",
     },
     {
-      key: "NEW" as const,
-      label: "New Inquiries",
-      value: newInquiries.toLocaleString(),
+      id: "RATE",
+      key: "CONVERTED" as const,
+      label: "Conversion Rate",
+      value: conversionRate,
+      sublabel: `${converted} of ${totalInquiries} referrals converted`,
       icon: Sparkles,
-      iconBg: "bg-amber-100 text-amber-800",
+      iconBg: "bg-[#E3F1D9] text-[#1E5622]",
     },
     {
-      key: "ASSESSMENT" as const,
-      label: "In Assessment",
-      value: inAssessment.toLocaleString(),
-      icon: Clock,
-      iconBg: "bg-sky-100 text-sky-700",
+      id: "URGENT",
+      key: "URGENT" as const,
+      label: "Urgent Triage",
+      value: urgentTriage.toLocaleString(),
+      sublabel: "Urgent open referrals",
+      icon: AlertTriangle,
+      iconBg: "bg-rose-100 text-rose-700",
     },
     {
+      id: "CONVERTED",
       key: "CONVERTED" as const,
       label: "Converted Clients",
       value: converted.toLocaleString(),
+      sublabel: "Enrolled to client roster",
       icon: CheckCircle2,
-      iconBg: "bg-[#E3F1D9] text-[#1E5622]",
+      iconBg: "bg-emerald-100 text-emerald-800",
     },
   ];
 
@@ -55,11 +65,11 @@ export function IntakeKpiStrip({
     <section aria-label="Key Performance Indicators" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
-        const isSelected = activeFilter === kpi.key;
+        const isSelected = activeFilter === kpi.key && kpi.id !== "RATE";
 
         return (
           <button
-            key={kpi.key}
+            key={kpi.id}
             type="button"
             onClick={() => onSelectKpiFilter(kpi.key)}
             className={`group text-left focus:outline-none cursor-pointer w-full bg-white backdrop-blur-xl rounded-xl lg:rounded-2xl p-4 sm:p-5 border transition-all duration-300 relative overflow-hidden flex flex-col justify-between ${isSelected
@@ -86,6 +96,9 @@ export function IntakeKpiStrip({
               </span>
               <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-[#3D6B22] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
             </div>
+            <span className="text-[11px] font-medium text-slate-400 mt-0.5">
+              {kpi.sublabel}
+            </span>
           </button>
         );
       })}

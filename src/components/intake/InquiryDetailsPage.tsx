@@ -416,19 +416,33 @@ export function InquiryDetailsPage({
 
         {/* Primary Action Control */}
         <div className="flex items-center gap-2.5 shrink-0">
-          <button
-            type="button"
-            onClick={() => setIsConvertModalOpen(true)}
-            disabled={inquiry.stage === "Converted"}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] disabled:opacity-60 disabled:cursor-not-allowed rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-          >
-            <span>
-              {inquiry.stage === "Converted"
-                ? "Converted to Onboarding"
-                : "Convert to Onboarding"}
-            </span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {inquiry.stage === "Converted" ? (
+            <Link
+              href={
+                inquiry.onboardingStatus?.clientProfileId
+                  ? `/intake/clients/${inquiry.onboardingStatus.clientProfileId}`
+                  : "/intake/clients"
+              }
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>
+                {inquiry.onboardingStatus?.clientProfileId
+                  ? `Converted to Client (${inquiry.onboardingStatus.clientProfileId})`
+                  : "Converted to Client"}
+              </span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsConvertModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+            >
+              <span>Convert to Client</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -459,8 +473,8 @@ export function InquiryDetailsPage({
                     type="button"
                     onClick={() => handleUpdateStatus(stg)}
                     className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 cursor-pointer ${inquiry.stage === stg
-                        ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
-                        : "text-slate-800"
+                      ? "font-semibold text-[#3D6B22] bg-emerald-50/50"
+                      : "text-slate-800"
                       }`}
                   >
                     <span>{stg}</span>

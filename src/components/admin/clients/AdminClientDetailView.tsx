@@ -423,9 +423,13 @@ export function AdminClientDetailView({
                   client.originReferralId ||
                   getAdminReferralsFromStorage().find((r) => r.clientId === client.id)?.id;
                 if (!originId) return null;
+                const referralHref =
+                  currentRole === "intake" || originId.startsWith("INQ-")
+                    ? `/intake/pipeline/${originId}`
+                    : `/admin/intake-referrals/${originId}`;
                 return (
                   <Link
-                    href={`/admin/intake-referrals/${originId}`}
+                    href={referralHref}
                     className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition-colors"
                   >
                     <span>Originated from Referral #{originId}</span>

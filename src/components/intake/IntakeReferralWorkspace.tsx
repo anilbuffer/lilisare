@@ -36,17 +36,15 @@ export function IntakeReferralWorkspace() {
   // Filter States
   const [selectedStage, setSelectedStage] = useState<InquiryStage | null>(null);
   const [selectedDateRange, setSelectedDateRange] = useState<string>("30d");
-  const [activeKpiKey, setActiveKpiKey] = useState<"ALL" | "NEW" | "ASSESSMENT" | "CONVERTED">("ALL");
+  const [activeKpiKey, setActiveKpiKey] = useState<"ALL" | "URGENT" | "CONVERTED">("ALL");
 
   // Handlers for KPIs
-  const handleSelectKpiFilter = (key: "ALL" | "NEW" | "ASSESSMENT" | "CONVERTED") => {
+  const handleSelectKpiFilter = (key: "ALL" | "URGENT" | "CONVERTED") => {
     setActiveKpiKey(key);
     if (key === "ALL") {
       setSelectedStage(null);
-    } else if (key === "NEW") {
-      setSelectedStage("New Inquiry");
-    } else if (key === "ASSESSMENT") {
-      setSelectedStage("Needs Discussion");
+    } else if (key === "URGENT") {
+      setSelectedStage(null);
     } else if (key === "CONVERTED") {
       setSelectedStage("Converted");
     }
@@ -55,26 +53,30 @@ export function IntakeReferralWorkspace() {
   // Stage tab filter click in workspace
   const handleSelectStageFilter = (stage: InquiryStage | null) => {
     setSelectedStage(stage);
-    if (stage === "New Inquiry" || stage === "New Lead") setActiveKpiKey("NEW");
-    else if (stage === "Needs Discussion" || stage === "CMA Coordination" || stage === "In Assessment" || stage === "CM Coordination") setActiveKpiKey("ASSESSMENT");
-    else if (stage === "Converted") setActiveKpiKey("CONVERTED");
+    if (stage === "Converted") setActiveKpiKey("CONVERTED");
     else if (!stage) setActiveKpiKey("ALL");
   };
 
   // Computed dynamic KPI metrics from live synced inquiries
   const kpiCounts = useMemo(() => {
     const total = inquiries.length;
-    const newCount = inquiries.filter((i) => i.stage === "New Inquiry" || i.stage === "New Lead").length;
-    const inAssessmentCount = inquiries.filter(
-      (i) => i.stage === "Needs Discussion" || i.stage === "CMA Coordination" || i.stage === "In Assessment" || i.stage === "CM Coordination"
+    const openInquiries = inquiries.filter(
+      (i) => i.stage !== "Converted" && i.stage !== "Closed"
+    );
+    const openCount = openInquiries.length;
+    const urgentTriageCount = openInquiries.filter(
+      (i) => i.urgency === "Urgent" || i.urgency === "Immediate"
     ).length;
     const convertedCount = inquiries.filter((i) => i.stage === "Converted").length;
+    const conversionRate =
+      total > 0 ? `${((convertedCount / total) * 100).toFixed(1)}%` : "0.0%";
 
     return {
       total,
-      newCount,
-      inAssessmentCount,
+      openCount,
+      urgentTriageCount,
       convertedCount,
+      conversionRate,
     };
   }, [inquiries]);
 
@@ -135,10 +137,11 @@ export function IntakeReferralWorkspace() {
 
       {/* 02. KPI Overview (Four clean, dashboard-style cards) */}
       <IntakeKpiStrip
+        openInquiries={kpiCounts.openCount}
         totalInquiries={kpiCounts.total}
-        newInquiries={kpiCounts.newCount}
-        inAssessment={kpiCounts.inAssessmentCount}
+        urgentTriage={kpiCounts.urgentTriageCount}
         converted={kpiCounts.convertedCount}
+        conversionRate={kpiCounts.conversionRate}
         activeFilter={activeKpiKey}
         onSelectKpiFilter={handleSelectKpiFilter}
       />
@@ -148,6 +151,7 @@ export function IntakeReferralWorkspace() {
         inquiries={inquiries}
         selectedStageFilter={selectedStage}
         onSelectStageFilter={handleSelectStageFilter}
+        urgentOnly={activeKpiKey === "URGENT"}
         baseDetailsPath="/intake/pipeline"
       />
     </div>

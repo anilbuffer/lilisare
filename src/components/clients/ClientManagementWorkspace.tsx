@@ -31,11 +31,10 @@ import { toast } from "sonner";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
 export type ClientKanbanStage =
-  | "Registration"
-  | "Onboarding"
-  | "Pending Auth"
   | "Active"
-  | "On Hold / Discharged";
+  | "Hospitalized"
+  | "On Hold"
+  | "Discharged";
 
 export const CLIENT_KANBAN_STAGES: {
   id: ClientKanbanStage;
@@ -50,44 +49,8 @@ export const CLIENT_KANBAN_STAGES: {
   };
 }[] = [
     {
-      id: "Registration",
-      title: "Registration",
-      icon: Sparkles,
-      badge: {
-        bg: "bg-rose-50",
-        text: "text-rose-700",
-        border: "border-rose-200",
-        dot: "bg-rose-500",
-        headerBadge: "bg-rose-100 text-rose-800 border-rose-200",
-      },
-    },
-    {
-      id: "Onboarding",
-      title: "Onboarding",
-      icon: Clock,
-      badge: {
-        bg: "bg-amber-50",
-        text: "text-amber-800",
-        border: "border-amber-200",
-        dot: "bg-amber-500",
-        headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
-      },
-    },
-    {
-      id: "Pending Auth",
-      title: "Pending Auth",
-      icon: FileCheck2,
-      badge: {
-        bg: "bg-purple-50",
-        text: "text-purple-700",
-        border: "border-purple-200",
-        dot: "bg-purple-500",
-        headerBadge: "bg-purple-100 text-purple-800 border-purple-200",
-      },
-    },
-    {
       id: "Active",
-      title: "Active Care",
+      title: "Active",
       icon: CheckCircle2,
       badge: {
         bg: "bg-[#E3F1D9]",
@@ -98,8 +61,32 @@ export const CLIENT_KANBAN_STAGES: {
       },
     },
     {
-      id: "On Hold / Discharged",
-      title: "On Hold / Inactive",
+      id: "Hospitalized",
+      title: "Hospitalized",
+      icon: Clock,
+      badge: {
+        bg: "bg-amber-50",
+        text: "text-amber-800",
+        border: "border-amber-200",
+        dot: "bg-amber-500",
+        headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+      },
+    },
+    {
+      id: "On Hold",
+      title: "On Hold",
+      icon: FileCheck2,
+      badge: {
+        bg: "bg-sky-50",
+        text: "text-sky-800",
+        border: "border-sky-200",
+        dot: "bg-sky-500",
+        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
+      },
+    },
+    {
+      id: "Discharged",
+      title: "Discharged",
       icon: Archive,
       badge: {
         bg: "bg-slate-100",
@@ -122,19 +109,13 @@ export function resolveClientStage(
   if (overrides[client.id]) {
     return overrides[client.id];
   }
-  if (client.status === "Discharged" || client.status === "On Hold") {
-    return "On Hold / Discharged";
+  if (client.status === "Discharged") {
+    return "Discharged";
   }
-  if (client.readiness?.authorization === "Pending" || client.readiness?.authorization === "Missing") {
-    return "Pending Auth";
+  if (client.status === "On Hold" || client.status === "Onboarding") {
+    return "On Hold";
   }
-  if (client.status === "Onboarding") {
-    return "Onboarding";
-  }
-  if (client.status === "Active") {
-    return "Active";
-  }
-  return "Registration";
+  return "Active";
 }
 
 interface ClientManagementWorkspaceProps {
@@ -272,7 +253,7 @@ export function ClientManagementWorkspace({
     const targetClient = clients.find((c) => c.id === clientId);
     if (!targetClient) return;
 
-    if (targetStage === "On Hold / Discharged" && !perms.clients.canDischarge) {
+    if (targetStage === "Discharged" && !perms.clients.canDischarge) {
       toast.error("Client discharge and case closure require Agency Admin approval.");
       setActiveMenuId(null);
       return;
@@ -706,10 +687,12 @@ export function ClientManagementWorkspace({
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                     <th className="py-3.5 px-4">Client</th>
-                    <th className="py-3.5 px-4">Household</th>
-                    <th className="py-3.5 px-4">Caregiver</th>
-                    <th className="py-3.5 px-4">Program</th>
-                    <th className="py-3.5 px-4">Stage</th>
+                    <th className="py-3.5 px-4">Diagnosis</th>
+                    <th className="py-3.5 px-4">Status</th>
+                    <th className="py-3.5 px-4">Risk</th>
+                    <th className="py-3.5 px-4">Assigned Caregiver / RN</th>
+                    <th className="py-3.5 px-4">Next Visit</th>
+                    <th className="py-3.5 px-4">Authorization</th>
                     <th className="py-3.5 px-4 text-right">Action</th>
                   </tr>
                 </thead>
@@ -719,6 +702,25 @@ export function ClientManagementWorkspace({
                     const stageConfig = STAGE_CONFIG_MAP.get(stage);
                     const hasAttention =
                       client.attentionItems && client.attentionItems.length > 0;
+                    const diagnosis =
+                      client.carePlan?.careNeeds?.[0] ||
+                      client.carePlan?.program ||
+                      "Comprehensive In-Home Support";
+                    const riskLabel =
+                      (client.readiness?.overallScore ?? 100) < 70
+                        ? "High Risk"
+                        : hasAttention || client.status === "On Hold"
+                          ? "Medium Risk"
+                          : "Low Risk";
+                    const nextVisitLabel =
+                      stage === "Discharged"
+                        ? "Discharged"
+                        : stage === "Hospitalized"
+                          ? "Paused (Inpatient)"
+                          : stage === "On Hold"
+                            ? "Start of Care Pending"
+                            : client.carePlan?.frequency || "Scheduled";
+                    const authStatus = client.authorization?.status || "Pending Renewal";
 
                     return (
                       <tr
@@ -726,86 +728,97 @@ export function ClientManagementWorkspace({
                         onClick={() => router.push(`${cleanBasePath}/${client.id}`)}
                         className="group cursor-pointer hover:bg-slate-50/80 transition-colors"
                       >
-                        {/* Client Name & ID */}
-                        <td className="py-3 px-3.5">
+                        {/* Client Name */}
+                        <td className="py-3 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
-                              {client.avatarUrl ? (
-                                <img
-                                  src={client.avatarUrl}
-                                  alt={client.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center font-bold text-xs text-slate-600 bg-slate-200">
-                                  {client.name.charAt(0)}
-                                </div>
-                              )}
+                            <div className="w-7 h-7 rounded-full overflow-hidden bg-emerald-100/80 border border-emerald-200/60 shrink-0 flex items-center justify-center font-bold text-[10px] text-[#3e6b2b]">
+                              {client.name.charAt(0)}
                             </div>
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors">
-                              <span>{client.name}</span>
-                              {hasAttention && (
-                                <span title="Needs Attention" className="text-amber-600">
-                                  <ShieldAlert className="w-3.5 h-3.5" />
-                                </span>
-                              )}
-                            </div>
+                            <span className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors whitespace-nowrap">
+                              {client.name}
+                            </span>
                           </div>
                         </td>
 
-                        {/* Household */}
-                        <td className="py-3 px-3.5">
-                          <span className="font-semibold text-slate-800 truncate max-w-[150px] block">
-                            {client.household.name}
+                        {/* Diagnosis */}
+                        <td className="py-3 px-4">
+                          <span className="text-xs font-medium text-slate-700 block max-w-[200px] truncate">
+                            {diagnosis}
                           </span>
                         </td>
 
-                        {/* Caregiver */}
-                        <td className="py-3 px-3.5">
+                        {/* Status */}
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${stageConfig?.badge.bg ?? "bg-slate-100"
+                              } ${stageConfig?.badge.text ?? "text-slate-700"} ${stageConfig?.badge.border ?? "border-slate-200"
+                              }`}
+                          >
+                            <span>{stageConfig?.title ?? stage}</span>
+                          </span>
+                        </td>
+
+                        {/* Risk */}
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${
+                              riskLabel === "High Risk"
+                                ? "bg-rose-50 text-rose-700 border-rose-200"
+                                : riskLabel === "Medium Risk"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            }`}
+                          >
+                            {riskLabel}
+                          </span>
+                        </td>
+
+                        {/* Assigned Caregiver / RN */}
+                        <td className="py-3 px-4">
                           {client.assignedCareTeam.primaryCaregiver ? (
-                            <span className="font-semibold text-slate-800">
+                            <span className="font-semibold text-slate-800 whitespace-nowrap">
                               {client.assignedCareTeam.primaryCaregiver.name}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 whitespace-nowrap">
                               <AlertCircle className="w-3.5 h-3.5" />
                               Unassigned
                             </span>
                           )}
                         </td>
 
-                        {/* Program & Hours */}
-                        <td className="py-3 px-3.5">
-                          <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md inline-block">
-                            {formatShortProgram(client.carePlan.program)} · {client.carePlan.authorizedWeeklyHours}h/wk
+                        {/* Next Visit */}
+                        <td className="py-3 px-4">
+                          <span className="text-xs font-medium text-slate-600 whitespace-nowrap">
+                            {nextVisitLabel}
                           </span>
                         </td>
 
-                        {/* Stage Badge */}
-                        <td className="py-3 px-3.5">
+                        {/* Authorization Status */}
+                        <td className="py-3 px-4">
                           <span
-                            className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${stageConfig?.badge.bg ?? "bg-slate-100"
-                              } ${stageConfig?.badge.text ?? "text-slate-700"} ${stageConfig?.badge.border ?? "border-slate-200"
-                              }`}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border whitespace-nowrap ${
+                              authStatus === "Verified"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : authStatus === "Expiring Soon"
+                                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                                  : "bg-blue-50 text-blue-700 border-blue-200"
+                            }`}
                           >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${stageConfig?.badge.dot ?? "bg-slate-400"
-                                }`}
-                            />
-                            <span>{stageConfig?.title ?? stage}</span>
+                            {authStatus}
                           </span>
                         </td>
 
                         {/* Actions */}
                         <td
-                          className="py-3 px-3.5 text-right"
+                          className="py-3 px-4 text-right"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
                               onClick={() => router.push(`${cleanBasePath}/${client.id}`)}
-                              className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-[#F2F8EE] hover:text-[#3D6B22] border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer"
+                              className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-[#F2F8EE] hover:text-[#3D6B22] border border-slate-200 rounded-xl shadow-xs transition-colors cursor-pointer whitespace-nowrap"
                             >
                               Details
                             </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Users, UserCheck, Clock, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { Users, UserCheck, Building2, AlertTriangle, ArrowUpRight } from "lucide-react";
 import { ClientRecord } from "@/types/client";
 
 interface ClientKpiStripProps {
@@ -19,7 +19,10 @@ export function ClientKpiStrip({
 }: ClientKpiStripProps) {
   const totalCount = clients.length;
   const activeCount = clients.filter((c) => c.status === "Active").length;
-  const onboardingCount = clients.filter((c) => c.status === "Onboarding").length;
+  const highRiskCount = clients.filter(
+    (c) => (c.readiness?.overallScore ?? 100) < 70 || (c.attentionItems && c.attentionItems.length > 0)
+  ).length;
+  const hospitalizedCount = clients.filter((c) => c.status === "On Hold").length;
 
   const kpis = [
     {
@@ -31,24 +34,24 @@ export function ClientKpiStrip({
     },
     {
       id: "Active",
-      label: "Active Clients",
+      label: "Active Care",
       value: activeCount.toLocaleString(),
       icon: UserCheck,
       iconBg: "bg-[#E3F1D9] text-[#1E5622]",
     },
     {
-      id: "Onboarding",
-      label: "In Onboarding",
-      value: onboardingCount.toLocaleString(),
-      icon: Clock,
-      iconBg: "bg-amber-100 text-amber-800",
-    },
-    {
       id: "ATTENTION",
-      label: "Needs Attention",
-      value: needsAttentionCount.toLocaleString(),
+      label: "High Risk",
+      value: Math.max(highRiskCount, needsAttentionCount).toLocaleString(),
       icon: AlertTriangle,
       iconBg: "bg-rose-100 text-rose-700",
+    },
+    {
+      id: "Hospitalized",
+      label: "Hospitalized / On Hold",
+      value: hospitalizedCount.toLocaleString(),
+      icon: Building2,
+      iconBg: "bg-amber-100 text-amber-800",
     },
   ];
 

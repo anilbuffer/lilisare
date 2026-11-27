@@ -37,6 +37,7 @@ interface InquiryManagementWorkspaceProps {
   inquiries: InquiryRecord[];
   selectedStageFilter: InquiryStage | null;
   onSelectStageFilter: (stage: InquiryStage | null) => void;
+  urgentOnly?: boolean;
   baseDetailsPath?: string;
 }
 
@@ -165,6 +166,7 @@ export function InquiryManagementWorkspace({
   inquiries: initialInquiries,
   selectedStageFilter,
   onSelectStageFilter,
+  urgentOnly = false,
   baseDetailsPath = "/intake/pipeline",
 }: InquiryManagementWorkspaceProps) {
   const router = useRouter();
@@ -176,9 +178,23 @@ export function InquiryManagementWorkspace({
   }, [initialInquiries]);
 
   // View Mode: Supports both a proper Kanban board view and a List view
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
+  const [viewMode, setViewMode] = useState<"kanban" | "list">("list");
+  const [pipelineTab, setPipelineTab] = useState<"OPEN" | "CONVERTED" | "ARCHIVED">("OPEN");
   const [searchQuery, setSearchQuery] = useState("");
   const [tabFilter, setTabFilter] = useState<string>("ALL");
+  const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
+  const [sourceFilter, setSourceFilter] = useState<string>("ALL");
+
+  // Sync pipelineTab when KPI selects Converted or Urgent
+  useEffect(() => {
+    if (selectedStageFilter === "Converted") {
+      setPipelineTab("CONVERTED");
+    } else if (selectedStageFilter === "Closed") {
+      setPipelineTab("ARCHIVED");
+    } else if (urgentOnly) {
+      setPipelineTab("OPEN");
+    }
+  }, [selectedStageFilter, urgentOnly]);
 
   // Drag and drop state
   const [draggedInquiryId, setDraggedInquiryId] = useState<string | null>(null);
@@ -207,13 +223,38 @@ export function InquiryManagementWorkspace({
   const currentStage =
     selectedStageFilter || (tabFilter !== "ALL" ? (tabFilter as InquiryStage) : null);
 
-  // Filtered inquiries based on search and stage filter
+  // Filtered inquiries based on pipelineTab, search, stage, priority, and source
   const filteredInquiries = useMemo(() => {
     return items.filter((item) => {
       const itemStage = normalizeStage(item.stage);
 
+      if (pipelineTab === "OPEN") {
+        if (itemStage === "Converted" || itemStage === "Closed") return false;
+      } else if (pipelineTab === "CONVERTED") {
+        if (itemStage !== "Converted") return false;
+      } else if (pipelineTab === "ARCHIVED") {
+        if (itemStage !== "Closed") return false;
+      }
+
+      if (urgentOnly && item.urgency !== "Urgent" && item.urgency !== "Immediate") {
+        return false;
+      }
+
       if (currentStage && itemStage !== currentStage) {
         return false;
+      }
+
+      if (priorityFilter !== "ALL") {
+        const isUrgentItem = item.urgency === "Urgent" || item.urgency === "Immediate";
+        if (priorityFilter === "Urgent" && !isUrgentItem) return false;
+        if (priorityFilter === "Standard" && isUrgentItem) return false;
+      }
+
+      if (sourceFilter !== "ALL") {
+        const src = `${item.source} ${item.referralInfo?.source || ""} ${item.referralInfo?.organization || ""}`.toLowerCase();
+        if (sourceFilter === "Hospital" && !src.includes("hospital") && !src.includes("discharge")) return false;
+        if (sourceFilter === "Physician" && !src.includes("physician") && !src.includes("doctor") && !src.includes("clinic")) return false;
+        if (sourceFilter === "Family" && !src.includes("family") && !src.includes("self") && !src.includes("phone") && !src.includes("web")) return false;
       }
 
       if (searchQuery.trim()) {
@@ -240,7 +281,20 @@ export function InquiryManagementWorkspace({
 
       return true;
     });
-  }, [items, currentStage, searchQuery]);
+  }, [items, pipelineTab, urgentOnly, currentStage, priorityFilter, sourceFilter, searchQuery]);
+
+  const tabCounts = useMemo(() => {
+    let open = 0;
+    let converted = 0;
+    let archived = 0;
+    items.forEach((item) => {
+      const s = normalizeStage(item.stage);
+      if (s === "Converted") converted += 1;
+      else if (s === "Closed") archived += 1;
+      else open += 1;
+    });
+    return { open, converted, archived };
+  }, [items]);
 
   // Counts per stage for tabs and headers
   const stageCounts = useMemo(() => {
@@ -329,63 +383,116 @@ export function InquiryManagementWorkspace({
       {/* Unified Outer Container Card matching KPI and Dashboard container style (elevated, no mix with page BG) */}
       <div className="bg-white border border-slate-200/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-[0_6px_32px_rgba(0,0,0,0.06)] space-y-5">
         {/* Workspace Header & Toolbar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
-              Inquiry Management
-            </h2>
+        <div className="space-y-3 pb-4 border-b border-slate-100">
+          {/* Pipeline Tabs: Open Pipeline vs Converted vs Archived */}
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-1 overflow-x-auto">
+            {[
+              { key: "OPEN" as const, label: "Open Pipeline", count: tabCounts.open },
+              { key: "CONVERTED" as const, label: "Converted", count: tabCounts.converted },
+              { key: "ARCHIVED" as const, label: "Archived / Closed", count: tabCounts.archived },
+            ].map((tab) => {
+              const isActive = pipelineTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setPipelineTab(tab.key);
+                    setTabFilter("ALL");
+                    onSelectStageFilter(null);
+                  }}
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer ${isActive
+                    ? "border-[#3D6B22] text-[#3D6B22]"
+                    : "border-transparent text-slate-500 hover:text-slate-800"
+                    }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${isActive
+                      ? "bg-[#3D6B22]/10 text-[#3D6B22]"
+                      : "bg-slate-100 text-slate-600"
+                      }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64 md:w-72">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search inquiry, family, coordinator..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-xs"
-              />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+                Intake & Referral Pipeline
+              </h2>
             </div>
 
-            {/* Stage Filter Dropdown */}
-            <div className="relative" ref={stageDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsStageDropdownOpen(!isStageDropdownOpen)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
-                title="Filter inquiries by stage"
-              >
-                <Filter className="w-3.5 h-3.5 text-slate-500" />
-                <span className="text-slate-400 font-normal hidden sm:inline">Stage:</span>
-                <span className="flex items-center gap-1.5 font-bold text-slate-900 truncate max-w-[130px]">
-                  {currentStage ? (
-                    <>
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${STAGE_CONFIG_MAP.get(currentStage)?.badge.dot || "bg-slate-400"
-                          }`}
-                      />
-                      <span className="truncate">{currentStage}</span>
-                    </>
-                  ) : (
-                    "All Stages"
-                  )}
-                </span>
-                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 shrink-0">
-                  {currentStage ? stageCounts[currentStage] || 0 : items.length}
-                </span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isStageDropdownOpen ? "rotate-180" : ""
-                    }`}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Search Input */}
+              <div className="relative w-full sm:w-64 md:w-72">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search inquiry, family, coordinator..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50/70 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] transition-all shadow-xs"
                 />
-              </button>
+              </div>
 
-              {isStageDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100">
-                    <span>Filter by Stage</span>
-                    {currentStage && (
+              {/* Stage Filter Dropdown */}
+              <div className="relative" ref={stageDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsStageDropdownOpen(!isStageDropdownOpen)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                  title="Filter inquiries by stage"
+                >
+                  <Filter className="w-3.5 h-3.5 text-slate-500" />
+                  <span className="text-slate-400 font-normal hidden sm:inline">Stage:</span>
+                  <span className="flex items-center gap-1.5 font-bold text-slate-900 truncate max-w-[130px]">
+                    {currentStage ? (
+                      <>
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${STAGE_CONFIG_MAP.get(currentStage)?.badge.dot || "bg-slate-400"
+                            }`}
+                        />
+                        <span className="truncate">{currentStage}</span>
+                      </>
+                    ) : (
+                      "All Stages"
+                    )}
+                  </span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 shrink-0">
+                    {currentStage ? stageCounts[currentStage] || 0 : items.length}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isStageDropdownOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </button>
+
+                {isStageDropdownOpen && (
+                  <div className="absolute right-0 mt-1.5 w-60 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-40 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100">
+                      <span>Filter by Stage</span>
+                      {currentStage && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTabFilter("ALL");
+                            onSelectStageFilter(null);
+                            setIsStageDropdownOpen(false);
+                          }}
+                          className="text-[10px] text-rose-600 hover:underline font-semibold cursor-pointer"
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="py-1 max-h-72 overflow-y-auto">
+                      {/* All Stages Option */}
                       <button
                         type="button"
                         onClick={() => {
@@ -393,104 +500,114 @@ export function InquiryManagementWorkspace({
                           onSelectStageFilter(null);
                           setIsStageDropdownOpen(false);
                         }}
-                        className="text-[10px] text-rose-600 hover:underline font-semibold cursor-pointer"
+                        className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${!currentStage
+                          ? "bg-slate-50 font-bold text-slate-900"
+                          : "text-slate-700 hover:bg-slate-50"
+                          }`}
                       >
-                        Reset
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+                          <span>All Stages</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                            {items.length}
+                          </span>
+                          {!currentStage && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
+                        </div>
                       </button>
-                    )}
+
+                      {/* 7 Configured Stage Options */}
+                      {SEVEN_KANBAN_STAGES.map((col) => {
+                        const isSelected = currentStage === col.id;
+                        const count = stageCounts[col.id] || 0;
+
+                        return (
+                          <button
+                            key={col.id}
+                            type="button"
+                            onClick={() => {
+                              setTabFilter(col.id);
+                              onSelectStageFilter(col.id);
+                              setIsStageDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
+                              ? "bg-slate-50 font-bold text-slate-900"
+                              : "text-slate-700 hover:bg-slate-50"
+                              }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${col.badge.dot}`} />
+                              <span className="truncate">{col.title}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span
+                                className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${col.badge.headerBadge}`}
+                              >
+                                {count}
+                              </span>
+                              {isSelected && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+                )}
+              </div>
 
-                  <div className="py-1 max-h-72 overflow-y-auto">
-                    {/* All Stages Option */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTabFilter("ALL");
-                        onSelectStageFilter(null);
-                        setIsStageDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${!currentStage
-                        ? "bg-slate-50 font-bold text-slate-900"
-                        : "text-slate-700 hover:bg-slate-50"
-                        }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
-                        <span>All Stages</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                          {items.length}
-                        </span>
-                        {!currentStage && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
-                      </div>
-                    </button>
-
-                    {/* 7 Configured Stage Options */}
-                    {SEVEN_KANBAN_STAGES.map((col) => {
-                      const isSelected = currentStage === col.id;
-                      const count = stageCounts[col.id] || 0;
-
-                      return (
-                        <button
-                          key={col.id}
-                          type="button"
-                          onClick={() => {
-                            setTabFilter(col.id);
-                            onSelectStageFilter(col.id);
-                            setIsStageDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${isSelected
-                            ? "bg-slate-50 font-bold text-slate-900"
-                            : "text-slate-700 hover:bg-slate-50"
-                            }`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className={`w-2 h-2 rounded-full shrink-0 ${col.badge.dot}`} />
-                            <span className="truncate">{col.title}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span
-                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${col.badge.headerBadge}`}
-                            >
-                              {count}
-                            </span>
-                            {isSelected && <Check className="w-3.5 h-3.5 text-[#3D6B22]" />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* View Mode Toggle: Kanban Board vs List View */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
-              <button
-                type="button"
-                onClick={() => setViewMode("kanban")}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
-                  ? "bg-white text-[#3D6B22] shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
-                  }`}
-                title="Kanban Board View (7 Columns)"
+              {/* Priority Filter */}
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                aria-label="Filter by Priority"
+                className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
               >
-                <Kanban className="w-3.5 h-3.5" />
-                <span>Kanban</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("list")}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
-                  ? "bg-white text-[#3D6B22] shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
-                  }`}
-                title="List View"
+                <option value="ALL">Priority: All</option>
+                <option value="Urgent">Urgent / Immediate</option>
+                <option value="Standard">Normal</option>
+              </select>
+
+              {/* Source Filter */}
+              <select
+                value={sourceFilter}
+                onChange={(e) => setSourceFilter(e.target.value)}
+                aria-label="Filter by Source"
+                className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20"
               >
-                <List className="w-3.5 h-3.5" />
-                <span>List</span>
-              </button>
+                <option value="ALL">Source: All</option>
+                <option value="Hospital">Hospital Discharge</option>
+                <option value="Physician">Physician / Clinic</option>
+                <option value="Family">Family / Self</option>
+              </select>
+
+              {/* View Mode Toggle: Kanban Board vs List View */}
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("kanban")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                    }`}
+                  title="Kanban Board View (7 Columns)"
+                >
+                  <Kanban className="w-3.5 h-3.5" />
+                  <span>Kanban</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "list"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                    }`}
+                  title="List View"
+                >
+                  <List className="w-3.5 h-3.5" />
+                  <span>List</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -669,23 +786,27 @@ export function InquiryManagementWorkspace({
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-100/70 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                   <tr>
-                    <th className="py-3.5 px-4 pl-6">Family</th>
-                    <th className="py-3.5 px-3">Hours</th>
+                    <th className="py-3.5 px-4 pl-5">Prospect</th>
+                    <th className="py-3.5 px-3">Referral Source</th>
+                    <th className="py-3.5 px-3">Referral Date</th>
+                    <th className="py-3.5 px-3">Payer / Program</th>
+                    <th className="py-3.5 px-3">Requested Services</th>
+                    <th className="py-3.5 px-3">Priority</th>
                     <th className="py-3.5 px-3">Stage</th>
-                    <th className="py-3.5 px-3">Coordinator</th>
-                    <th className="py-3.5 px-4 pr-6 text-right">Action</th>
+                    <th className="py-3.5 px-3">Coordinator / RN</th>
+                    <th className="py-3.5 px-4 pr-5 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {filteredInquiries.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-10 text-center text-slate-400">
+                      <td colSpan={9} className="py-10 text-center text-slate-400">
                         <Inbox className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="text-xs font-medium text-slate-700">
-                          No inquiries found
+                          No referrals found
                         </p>
                         <p className="text-[11px] text-slate-400 mt-0.5">
-                          Try adjusting your search query or stage filter.
+                          Try adjusting your search query or filters.
                         </p>
                       </td>
                     </tr>
@@ -695,6 +816,10 @@ export function InquiryManagementWorkspace({
                       const colConfig =
                         STAGE_CONFIG_MAP.get(normStage) || SEVEN_KANBAN_STAGES[0];
                       const detailsHref = getDetailsHref(inquiry.id);
+                      const priorityLabel =
+                        inquiry.urgency === "Immediate" || inquiry.urgency === "Urgent"
+                          ? "Urgent"
+                          : "Normal";
 
                       return (
                         <tr
@@ -702,17 +827,42 @@ export function InquiryManagementWorkspace({
                           onClick={() => handleRowClick(inquiry.id)}
                           className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                         >
-                          <td className="py-3.5 px-4 pl-6">
+                          <td className="py-3.5 px-4 pl-5">
                             <Link
                               href={detailsHref}
-                              className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors block text-xs"
+                              className="font-bold text-slate-900 group-hover:text-[#3D6B22] transition-colors block text-xs whitespace-nowrap"
                             >
-                              {inquiry.familyName}
+                              {inquiry.familyInfo.clientInfo.name || inquiry.familyName}
                             </Link>
                           </td>
 
-                          <td className="py-3.5 px-3 font-semibold text-slate-800">
-                            {inquiry.careRequirements.hoursPerWeek} hrs/wk
+                          <td className="py-3.5 px-3 text-slate-700 font-medium whitespace-nowrap">
+                            {inquiry.referralInfo?.organization || inquiry.source}
+                          </td>
+
+                          <td className="py-3.5 px-3 text-slate-600 font-medium whitespace-nowrap">
+                            {inquiry.dateReceived}
+                          </td>
+
+                          <td className="py-3.5 px-3 text-slate-700 font-medium whitespace-nowrap">
+                            {formatShortProgram(inquiry.careRequirements.programInterest)}
+                          </td>
+
+                          <td className="py-3.5 px-3">
+                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20 whitespace-nowrap">
+                              {inquiry.careRequirements.careType || "In-Home Care"} · {inquiry.careRequirements.hoursPerWeek}h/wk
+                            </span>
+                          </td>
+
+                          <td className="py-3.5 px-3">
+                            <span
+                              className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${priorityLabel === "Urgent"
+                                ? "bg-rose-50 text-rose-700 border-rose-200"
+                                : "bg-slate-100 text-slate-700 border-slate-200"
+                                }`}
+                            >
+                              {priorityLabel}
+                            </span>
                           </td>
 
                           <td
@@ -737,22 +887,32 @@ export function InquiryManagementWorkspace({
                             </select>
                           </td>
 
-                          <td className="py-3.5 px-3 text-slate-800 font-medium">
+                          <td className="py-3.5 px-3 text-slate-800 font-medium whitespace-nowrap">
                             {inquiry.referralInfo.assignedCoordinator.name}
                           </td>
 
                           <td
-                            className="py-3.5 px-4 pr-6 text-right"
+                            className="py-3.5 px-4 pr-5 text-right"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="inline-flex items-center justify-end gap-1.5">
-                              <Link
-                                href={detailsHref}
-                                className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                              >
-                                <span>Details</span>
-                                <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
-                              </Link>
+                              {normStage === "Converted" && inquiry.onboardingStatus?.clientProfileId ? (
+                                <Link
+                                  href={`/intake/clients/${inquiry.onboardingStatus.clientProfileId}`}
+                                  className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+                                >
+                                  <span>Client Profile</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </Link>
+                              ) : (
+                                <Link
+                                  href={detailsHref}
+                                  className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-[#F2F8EE] border border-slate-200 hover:border-[#3D6B22]/40 text-slate-700 hover:text-[#3D6B22] rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                                >
+                                  <span>Details</span>
+                                  <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
+                                </Link>
+                              )}
                               <Link
                                 href={`${detailsHref.replace(/\/$/, "")}/edit`}
                                 title="Edit Inquiry"

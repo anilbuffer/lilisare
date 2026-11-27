@@ -7,6 +7,17 @@ export interface CaregiverTask {
   completedAt?: string;
   skipped?: boolean;
   skipReason?: string;
+  taskNote?: string;
+}
+
+export interface VisitVitals {
+  recordedAt: string;
+  temperatureF: string;
+  pulseBpm: string;
+  respirations: string;
+  bloodPressure: string;
+  bpLocation: "Left Arm" | "Right Arm" | "Left Wrist" | "Right Wrist";
+  o2Saturation: string;
 }
 
 export interface MedicationReminder {
@@ -22,9 +33,12 @@ export interface MedicationReminder {
 
 export interface Visit {
   id: string;
+  shiftNumber?: string;
   clientId: string;
   clientName: string;
   clientPhoto: string;
+  serviceName?: string;
+  serviceCode?: string;
   address: string;
   cityStateZip: string;
   phone: string;
@@ -42,10 +56,13 @@ export interface Visit {
   travelDistanceMiles?: number;
   tasks: CaregiverTask[];
   medications: MedicationReminder[];
+  vitals?: VisitVitals;
   visitNotes?: string;
+  generalNotes?: string;
   signatureUrl?: string;
   clientSigned?: boolean;
   unableToSignReason?: string;
+  certifiedAt?: string;
   photos?: { id: string; url: string; caption: string; isSensitive: boolean }[];
   mileageRecorded?: number;
   syncedOffline?: boolean;
@@ -192,40 +209,53 @@ export const INITIAL_CAREGIVER_PROFILE: CaregiverProfileData = {
 export const INITIAL_VISITS: Visit[] = [
   {
     id: "visit-101",
+    shiftNumber: "#420",
     clientId: "c-1",
     clientName: "Eleanor Ruth Whitfield",
     clientPhoto: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
+    serviceName: "CNA (Certified Nurse Aide)",
+    serviceCode: "T1019",
     address: "214 Maple Ridge Lane",
-    cityStateZip: "Cedar Falls, PA 19087",
+    cityStateZip: "Cedar Falls, IA 50613",
     phone: "(555) 981-4401",
-    scheduledStartTime: "08:30 AM",
-    scheduledEndTime: "12:30 PM",
+    scheduledStartTime: "09:30 AM",
+    scheduledEndTime: "12:00 PM",
     status: "Scheduled",
     clientCoords: { lat: 40.7128, lng: -74.0060 },
     distanceFromClientMiles: 0.05, // Inside 150m (approx 0.09 miles)
+    vitals: {
+      recordedAt: "09:45 AM",
+      temperatureF: "98.6",
+      pulseBpm: "75",
+      respirations: "16",
+      bloodPressure: "110/70",
+      bpLocation: "Left Arm",
+      o2Saturation: "95",
+    },
     tasks: [
-      { id: "t-1", category: "Personal Care", title: "Assist with morning shower & dressing", description: "Use shower chair & non-slip mat", completed: false },
-      { id: "t-2", category: "Personal Care", title: "Oral hygiene & hair grooming", completed: false },
-      { id: "t-3", category: "Meals", title: "Prepare low-sodium diabetic breakfast", description: "Oatmeal with fresh blueberries & poached egg", completed: false },
-      { id: "t-4", category: "Meals", title: "Ensure 500ml fresh water at bedside", completed: false },
-      { id: "t-5", category: "Household", title: "Light housekeeping & kitchen wipe down", completed: false },
-      { id: "t-6", category: "Household", title: "Change bed linens & wash laundry", completed: false },
-      { id: "t-7", category: "Health Monitoring", title: "Record morning blood pressure & pulse", description: "Target BP < 135/85 mmHg", completed: false },
-      { id: "t-8", category: "Mobility", title: "Assisted 20-min walking garden exercise", description: "Use 4-point cane for stability", completed: false },
-      { id: "t-9", category: "Companionship", title: "Engage in memory puzzle or reading activity", completed: false },
+      { id: "t-1", category: "Mobility", title: "Stand By Assist (Transfers & Ambulation)", description: "Use gait belt & 4-point cane for stability", completed: false },
+      { id: "t-2", category: "Personal Care", title: "Foot Care & Skin Inspection", description: "Check heels and ankles for redness or swelling", completed: false },
+      { id: "t-3", category: "Personal Care", title: "Hair Care & Morning Grooming", completed: false },
+      { id: "t-4", category: "Household", title: "Light Housekeeping & Kitchen Sanitation", completed: false },
+      { id: "t-5", category: "Meals", title: "Prepare low-sodium diabetic breakfast & hydration", description: "Oatmeal with fresh blueberries & 500ml water", completed: false },
+      { id: "t-6", category: "Health Monitoring", title: "Record Morning Vitals (BP, Pulse, Temp, O2)", description: "Target BP < 135/85 mmHg", completed: false },
+      { id: "t-7", category: "Companionship", title: "Client Dr. Appointment Escort / Check-in", description: "Confirm if scheduled appointment is today", completed: false },
     ],
     medications: [
-      { id: "m-1", medicationName: "Metformin", dosage: "500mg", scheduleTime: "09:00 AM", instructions: "Take with breakfast", status: "pending" },
-      { id: "m-2", medicationName: "Lisinopril", dosage: "10mg", scheduleTime: "09:00 AM", instructions: "Take with water", status: "pending" },
+      { id: "m-1", medicationName: "Metformin", dosage: "500mg", scheduleTime: "09:30 AM", instructions: "Take with breakfast", status: "pending" },
+      { id: "m-2", medicationName: "Lisinopril", dosage: "10mg", scheduleTime: "09:30 AM", instructions: "Take with water", status: "pending" },
     ]
   },
   {
     id: "visit-102",
+    shiftNumber: "#421",
     clientId: "cli-102",
     clientName: "Arthur Pendelton",
     clientPhoto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+    serviceName: "IHSS (In-Home Support Services)",
+    serviceCode: "S5130",
     address: "108 Ocean View Drive",
-    cityStateZip: "Springfield, IL 62708",
+    cityStateZip: "Springfield, OR 97477",
     phone: "(555) 621-9988",
     scheduledStartTime: "01:30 PM",
     scheduledEndTime: "04:30 PM",
@@ -246,11 +276,14 @@ export const INITIAL_VISITS: Visit[] = [
   },
   {
     id: "visit-103",
+    shiftNumber: "#422",
     clientId: "cli-103",
     clientName: "Margaret Higgins",
     clientPhoto: "https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&q=80&w=200",
+    serviceName: "EBD Waiver (Elderly, Blind, and Disabled)",
+    serviceCode: "EBD-WVR",
     address: "55 Pinecrest Way",
-    cityStateZip: "Springfield, IL 62711",
+    cityStateZip: "Springfield, OR 97477",
     phone: "(555) 774-1200",
     scheduledStartTime: "05:00 PM",
     scheduledEndTime: "07:00 PM",
@@ -266,30 +299,6 @@ export const INITIAL_VISITS: Visit[] = [
     ],
     medications: [
       { id: "m-301", medicationName: "Atorvastatin", dosage: "20mg", scheduleTime: "06:00 PM", instructions: "Take with evening meal", status: "pending" },
-    ]
-  },
-  {
-    id: "visit-104",
-    clientId: "ref-ew-001",
-    clientName: "Sarah Connor",
-    clientPhoto: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=200",
-    address: "909 Cybernetics Way",
-    cityStateZip: "Los Angeles, CA 90012",
-    phone: "(310) 555-0148",
-    scheduledStartTime: "09:00 AM",
-    scheduledEndTime: "01:00 PM",
-    status: "Scheduled",
-    clientCoords: { lat: 34.0522, lng: -118.2437 },
-    distanceFromClientMiles: 1.2,
-    travelTimeFromPreviousMin: 20,
-    travelDistanceMiles: 5.5,
-    tasks: [
-      { id: "t-401", category: "Personal Care", title: "Assist with morning mobility & ADLs", description: "Patient has severe Rheumatoid Arthritis, handle with care", completed: false },
-      { id: "t-402", category: "Meals", title: "Prepare anti-inflammatory lunch", completed: false },
-      { id: "t-403", category: "Health Monitoring", title: "Monitor pain levels", completed: false },
-    ],
-    medications: [
-      { id: "m-401", medicationName: "Pain Management Meds", dosage: "As prescribed", scheduleTime: "10:00 AM", instructions: "Check with patient if needed", status: "pending" },
     ]
   }
 ];

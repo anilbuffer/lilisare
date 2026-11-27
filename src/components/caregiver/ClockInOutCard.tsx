@@ -101,6 +101,24 @@ export function ClockInOutCard({
       {/* Decorative top accent line */}
       <div className={`absolute top-0 left-0 right-0 h-1.5 ${isClockedIn ? "bg-brand-teal animate-pulse" : "bg-blue-600"}`} />
 
+      {/* Prominent CLOCKED IN Banner */}
+      {isClockedIn && (
+        <div className="mb-5 -mx-6 -mt-6 px-6 py-3 bg-[#3D6B22] text-white flex flex-wrap items-center justify-between gap-2 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-ping" />
+            <span className="text-xs sm:text-sm font-extrabold tracking-wider uppercase">
+              CLOCKED IN
+            </span>
+            <span className="text-xs text-emerald-100 font-medium">
+              · {visit.clockInTime || "09:30 AM"} ({(visit.clockInMethod || "gps").toUpperCase()})
+            </span>
+          </div>
+          <span className="text-[11px] font-semibold bg-white/15 px-2.5 py-0.5 rounded-full border border-white/20">
+            Real-time EVV Synced to Agency
+          </span>
+        </div>
+      )}
+
       {/* Card Header & Client Info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-100">
         <div className="flex items-center gap-4">
@@ -118,16 +136,27 @@ export function ClockInOutCard({
             )}
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-gray-900">{visit.clientName}</h2>
-              <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-700">
-                MRN-88491
+              <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-[#E3F1D9] text-[#1E5622]">
+                {visit.serviceName || "CNA (Certified Nurse Aide)"} · {visit.serviceCode || "T1019"}
               </span>
             </div>
-            <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
-              <MapPin className="w-3.5 h-3.5 text-brand-teal shrink-0" />
-              <span>{visit.address}, {visit.cityStateZip}</span>
-            </p>
+            <div className="text-xs text-gray-500 flex flex-wrap items-center gap-2 mt-1">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-brand-teal shrink-0" />
+                <span>{visit.address}, {visit.cityStateZip}</span>
+              </span>
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(`${visit.address}, ${visit.cityStateZip}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-[#3D6B22] font-bold hover:underline bg-[#F2F8EE] px-2 py-0.5 rounded-md border border-[#C7E4B3]"
+              >
+                <Navigation className="w-3 h-3" />
+                Open in Maps
+              </a>
+            </div>
             <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
               <Phone className="w-3.5 h-3.5 text-blue-500 shrink-0" />
               <a href={`tel:${visit.phone}`} className="hover:underline font-medium text-gray-700">{visit.phone}</a>

@@ -11,6 +11,7 @@ interface VisitTaskChecklistProps {
   medications: MedicationReminder[];
   onToggleTask: (taskId: string) => void;
   onSkipTaskReason: (taskId: string, reason: string) => void;
+  onUpdateTaskNote?: (taskId: string, note: string) => void;
   onLogMedication: (medId: string, status: "reminded" | "took" | "declined" | "pending") => void;
 }
 
@@ -20,6 +21,7 @@ export function VisitTaskChecklist({
   medications,
   onToggleTask,
   onSkipTaskReason,
+  onUpdateTaskNote,
   onLogMedication,
 }: VisitTaskChecklistProps) {
   const [activeTab, setActiveTab] = useState<"all" | "meds">("all");
@@ -222,9 +224,9 @@ export function VisitTaskChecklist({
                                   className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-slate-200 z-30 p-1 space-y-1 text-xs"
                                 >
                                   <div className="px-2 py-1 font-bold text-[10px] text-gray-400 uppercase">
-                                    Reason for Skipping
+                                    Reason Not Completed
                                   </div>
-                                  {["Client declined", "N/A today", "Ran out of time", "Client sleeping"].map((r) => (
+                                  {["No Dr's appointment today", "Client declined", "N/A today", "Ran out of time", "Client sleeping"].map((r) => (
                                     <button
                                       key={r}
                                       type="button"
@@ -232,9 +234,10 @@ export function VisitTaskChecklist({
                                         onSkipTaskReason(t.id, r);
                                         setOpenSkipDropdownId(null);
                                       }}
-                                      className="w-full text-left px-2.5 py-1.5 hover:bg-amber-50 rounded-lg text-gray-700 hover:text-amber-900 font-medium transition-colors"
+                                      className="w-full text-left px-2.5 py-1.5 hover:bg-rose-50 rounded-lg text-gray-700 hover:text-rose-800 font-medium transition-colors flex items-center gap-1.5"
                                     >
-                                      {r}
+                                      <XCircle className="w-3 h-3 text-rose-500 shrink-0" />
+                                      <span>{r}</span>
                                     </button>
                                   ))}
                                 </motion.div>
@@ -246,6 +249,23 @@ export function VisitTaskChecklist({
 
                       {t.description && (
                         <p className="text-xs text-gray-500 mt-1 leading-snug">{t.description}</p>
+                      )}
+
+                      {t.skipped && (
+                        <div className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                          <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                          <span>Not Completed: {t.skipReason}</span>
+                        </div>
+                      )}
+
+                      {onUpdateTaskNote && (
+                        <input
+                          type="text"
+                          value={t.taskNote || ""}
+                          onChange={(e) => onUpdateTaskNote(t.id, e.target.value)}
+                          placeholder="Add ADL note (e.g., Was a little wobbly at times, needed breaks)..."
+                          className="mt-2 w-full px-2.5 py-1.5 text-[11px] bg-slate-50 border border-slate-200 rounded-lg text-slate-700 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#3D6B22]/30 focus:border-[#3D6B22]"
+                        />
                       )}
                     </div>
                   </div>

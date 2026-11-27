@@ -267,7 +267,7 @@ export function ClientMoreTab({
           title="Delete Client Record"
           description="Permanent deletion removes this client across both Agency Admin and Intake directories."
           icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
-          maxWidth="sm"
+          maxWidth="2xl"
         >
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             Are you sure you want to permanently delete{" "}
@@ -304,7 +304,7 @@ export function ClientMoreTab({
         title="Discharge & Archive Client Case"
         description="This action marks the client case as Inactive and terminates recurring shift schedules."
         icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
-        maxWidth="md"
+        maxWidth="2xl"
       >
         <form onSubmit={handleConfirmDischarge} className="space-y-4">
           <div>

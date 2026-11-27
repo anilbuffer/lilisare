@@ -7,6 +7,7 @@ import {
   PenTool,
   Navigation,
   CheckCircle2,
+  XCircle,
   Mic,
   MicOff,
   UploadCloud,
@@ -16,13 +17,16 @@ import {
   AlertCircle,
   ArrowRight,
   ArrowLeft,
+  ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Visit } from "@/lib/caregiver/caregiverPortalData";
+import { Visit, VisitVitals } from "@/lib/caregiver/caregiverPortalData";
 
 interface EndVisitModalProps {
   isOpen: boolean;
   visit: Visit;
+  vitals?: VisitVitals;
+  generalNotes?: string;
   onClose: () => void;
   onComplete: (data: {
     notes: string;
@@ -36,6 +40,8 @@ interface EndVisitModalProps {
 export function EndVisitModal({
   isOpen,
   visit,
+  vitals,
+  generalNotes,
   onClose,
   onComplete,
 }: EndVisitModalProps) {
@@ -480,21 +486,74 @@ export function EndVisitModal({
             </div>
           )}
 
-          {/* STEP 5: FINAL CONFIRMATION & SYNC */}
+          {/* STEP 5: FINAL REVIEW, CERTIFICATION & SIGN */}
           {step === 5 && (
-            <div className="space-y-4 text-center py-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-brand-teal mx-auto flex items-center justify-center shadow-lg">
-                <CheckCircle2 className="w-9 h-9" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                <div className="w-10 h-10 rounded-xl bg-[#E3F1D9] text-[#3D6B22] flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">Final Visit Summary &amp; Certification</h3>
+                  <p className="text-xs text-gray-500">
+                    Review EVV timestamps, ADL tasks, vitals, and observations before signing.
+                  </p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Ready to Complete Visit</h3>
-              <p className="text-xs text-gray-600 max-w-md mx-auto">
-                Timestamps, EVV location coordinates, care plan task completions, and signature data are ready to log.
-              </p>
 
-              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 font-medium max-w-md mx-auto text-left space-y-1">
-                <div>• Clock-out Timestamp: <strong className="">Today, 12:30:14 PM</strong></div>
-                <div>• EVV Sync Status: <strong className="text-brand-teal">Immediate Online Upload</strong></div>
-                <div>• Recorded Mileage: <strong>{mileage} miles</strong></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">EVV Shift Summary</span>
+                  <p className="font-semibold text-slate-800">Client: {visit.clientName}</p>
+                  <p className="text-slate-600">Clocked In: <strong>{visit.clockInTime || "09:30 AM"}</strong></p>
+                  <p className="text-slate-600">Client Signature: <strong>{hasSignature ? "Captured" : unableToSign ? `Unable (${unableReason})` : "Pending"}</strong></p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Vitals Recorded</span>
+                  {vitals ? (
+                    <p className="text-slate-700 leading-relaxed">
+                      {vitals.recordedAt} · Temp <strong>{vitals.temperatureF}°F</strong> · Pulse <strong>{vitals.pulseBpm} bpm</strong> · BP <strong>{vitals.bloodPressure}</strong> ({vitals.bpLocation}) · O2 <strong>{vitals.o2Saturation}%</strong>
+                    </p>
+                  ) : (
+                    <p className="text-slate-500">No vitals logged for this visit.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Checklist of Completed & Flagged Uncompleted Tasks */}
+              <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-2 text-xs max-h-44 overflow-y-auto">
+                <span className="text-[10px] font-bold uppercase text-slate-400">ADL &amp; Care Plan Checklist</span>
+                <div className="space-y-1.5">
+                  {visit.tasks.map((t) => (
+                    <div key={t.id} className="flex items-start gap-2">
+                      {t.completed ? (
+                        <CheckCircle2 className="w-4 h-4 text-[#3D6B22] shrink-0 mt-0.5" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      )}
+                      <div>
+                        <span className={`font-semibold ${t.completed ? "text-slate-800" : "text-rose-700"}`}>
+                          {t.title}
+                        </span>
+                        {t.taskNote && <p className="text-[11px] text-slate-500 italic">&ldquo;{t.taskNote}&rdquo;</p>}
+                        {!t.completed && t.skipReason && (
+                          <p className="text-[11px] text-rose-600 font-medium">Reason: {t.skipReason}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* General Observations */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                <span className="text-[10px] font-bold uppercase text-slate-400">General Observations</span>
+                <p className="text-slate-700 mt-1">{generalNotes || visitNote}</p>
+              </div>
+
+              {/* Caregiver Certification Statement */}
+              <div className="p-3 rounded-xl bg-[#F2F8EE] border border-[#C7E4B3] text-[11px] text-[#1E5622] font-medium">
+                <strong>Caregiver Certification:</strong> I certify that the EVV times, ADL tasks, vitals, and observations documented above accurately reflect the care delivered during this LiliSare visit.
               </div>
             </div>
           )}
@@ -502,7 +561,7 @@ export function EndVisitModal({
 
         {/* Modal Footer Controls */}
         <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-          {step > 1 && step < 5 ? (
+          {step > 1 && step <= 5 ? (
             <button
               type="button"
               onClick={() => setStep((prev) => (prev - 1) as any)}
@@ -528,10 +587,10 @@ export function EndVisitModal({
               type="button"
               onClick={handleFinalSubmit}
               disabled={isSubmitting}
-              className="px-6 py-3 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md flex items-center gap-2 transition-colors ml-auto"
+              className="px-6 py-3 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md flex items-center gap-2 transition-colors ml-auto cursor-pointer"
             >
               {isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-              <span>Complete & Submit Visit</span>
+              <span>SIGN &amp; Submit Visit</span>
             </button>
           )}
         </div>

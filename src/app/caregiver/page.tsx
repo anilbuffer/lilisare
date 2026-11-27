@@ -6,22 +6,38 @@ import { ClockInOutCard } from "@/components/caregiver/ClockInOutCard";
 import { TodayVisitsPanel } from "@/components/caregiver/TodayVisitsPanel";
 import { VisitTaskChecklist } from "@/components/caregiver/VisitTaskChecklist";
 import { EndVisitModal } from "@/components/caregiver/EndVisitModal";
-import { INITIAL_VISITS, Visit } from "@/lib/caregiver/caregiverPortalData";
+import { RecommendedOpenVisitsPanel } from "@/components/caregiver/RecommendedOpenVisitsPanel";
+import { INITIAL_VISITS, Visit, VisitVitals } from "@/lib/caregiver/caregiverPortalData";
 import {
   getVisitsFromStorage,
   subscribeToSchedulingSync,
   createCallOutForVisit,
 } from "@/lib/scheduling/schedulingStore";
+import {
+  getRecommendedOpenVisitsForCaregiver,
+  getCaregiverWeeklyHoursSummary,
+  getShiftRequestsFromStorage,
+  submitOpenVisitRequest,
+  hideOrDeclineOpenVisit,
+  subscribeToCaregiverSync,
+  syncCaregiverClockInToAgency,
+  syncCaregiverClockOutToAgency,
+  RecommendedOpenVisit,
+  WeeklyHoursSummary,
+  CaregiverShiftRequest,
+} from "@/lib/caregiver/caregiverSync";
 import { RealTimeVisit } from "@/types/scheduling";
 import { Modal } from "@/components/ui/Modal";
 import {
   FormLabel,
+  FormInput,
   FormSelect,
   FormTextarea,
   FormButtonPrimary,
   FormButtonCancel,
 } from "@/components/ui/FormControls";
 import { toast } from "sonner";
+import Link from "next/link";
 import {
   AlertCircle,
   Calendar,
@@ -33,6 +49,10 @@ import {
   AlertTriangle,
   CheckCircle2,
   ShieldCheck,
+  Activity,
+  MessageSquare,
+  ClipboardCheck,
+  Stethoscope,
 } from "lucide-react";
 
 export default function CaregiverTodayPage() {
@@ -42,15 +62,47 @@ export default function CaregiverTodayPage() {
   const [showEndModal, setShowEndModal] = useState<boolean>(false);
   const [activeView, setActiveView] = useState<"today" | "history">("today");
   const [syncedVisits, setSyncedVisits] = useState<RealTimeVisit[]>([]);
+  const [openVisits, setOpenVisits] = useState<RecommendedOpenVisit[]>([]);
+  const [weeklyHours, setWeeklyHours] = useState<WeeklyHoursSummary>({
+    currentHours: 6.5,
+    goalHours: 20,
+    currentPercent: 32.5,
+    pendingRequestHours: 0,
+  });
+  const [shiftRequests, setShiftRequests] = useState<CaregiverShiftRequest[]>([]);
   const [showCallOutModal, setShowCallOutModal] = useState(false);
   const [callOutVisitId, setCallOutVisitId] = useState("");
   const [callOutReason, setCallOutReason] = useState("Sudden Illness / Unable to Attend");
   const [callOutNotes, setCallOutNotes] = useState("");
 
+  // Vitals & General Observations state for active visit
+  const [vitals, setVitals] = useState<VisitVitals>({
+    recordedAt: "09:45 AM",
+    temperatureF: "98.6",
+    pulseBpm: "75",
+    respirations: "16",
+    bloodPressure: "110/70",
+    bpLocation: "Left Arm",
+    o2Saturation: "95",
+  });
+  const [generalNotes, setGeneralNotes] = useState<string>(
+    "Just woke up, walking around. Alert and calm, complaining of mild headache."
+  );
+
   useEffect(() => {
-    const load = () => setSyncedVisits(getVisitsFromStorage());
+    const load = () => {
+      setSyncedVisits(getVisitsFromStorage());
+      setOpenVisits(getRecommendedOpenVisitsForCaregiver("CG-101"));
+      setWeeklyHours(getCaregiverWeeklyHoursSummary("CG-101", 20, 6.5));
+      setShiftRequests(getShiftRequestsFromStorage());
+    };
     load();
-    return subscribeToSchedulingSync(load);
+    const unsubSched = subscribeToSchedulingSync(load);
+    const unsubCg = subscribeToCaregiverSync(load);
+    return () => {
+      unsubSched();
+      unsubCg();
+    };
   }, []);
 
   const activeVisit = visits.find((v) => v.id === activeVisitId) || visits[0];
@@ -97,8 +149,9 @@ export default function CaregiverTodayPage() {
     setCallOutNotes("");
   };
 
-  // Handle Clock In
+  // Handle Clock In (with real-time Agency EVV + Scheduling Sync)
   const handleClockIn = (method: "gps" | "ivr" | "fvv", reason?: string) => {
+    const clockInStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     setIsClockedIn(true);
     setVisits((prev) =>
       prev.map((v) =>
@@ -106,9 +159,41 @@ export default function CaregiverTodayPage() {
           ? {
             ...v,
             status: "In Progress",
-            clockInTime: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            clockInTime: clockInStr,
             clockInMethod: method,
             clockInReason: reason,
+          }
+          : v
+      )
+    );
+    syncCaregiverClockInToAgency({
+      visit: activeVisit,
+      clockInTime: clockInStr,
+      method,
+      reason,
+    });
+    toast.success(`CLOCKED IN at ${clockInStr}. Real-time EVV synced to Agency Scheduling & EVV Monitoring.`);
+  };
+
+  const handleRequestOpenVisit = (ov: RecommendedOpenVisit) => {
+    submitOpenVisitRequest(ov, "CG-101", "Maria Santos, CNA");
+    toast.success(`Shift request sent for ${ov.clientName} (${ov.dateLabel}). Agency Scheduler notified for review.`);
+  };
+
+  const handleDeclineOrHideOpenVisit = (visitId: string, action: "Decline" | "Hide") => {
+    hideOrDeclineOpenVisit(visitId, action);
+    toast.info(`Open visit ${action === "Decline" ? "declined" : "hidden"} from your recommendations.`);
+  };
+
+  const handleUpdateTaskNote = (taskId: string, note: string) => {
+    setVisits((prev) =>
+      prev.map((v) =>
+        v.id === activeVisitId
+          ? {
+            ...v,
+            tasks: v.tasks.map((t) =>
+              t.id === taskId ? { ...t, taskNote: note } : t
+            ),
           }
           : v
       )
@@ -180,7 +265,7 @@ export default function CaregiverTodayPage() {
     );
   };
 
-  // Handle End of Visit Completion
+  // Handle End of Visit Completion (with full Cross-Portal Sync)
   const handleCompleteVisit = (data: {
     notes: string;
     signatureUrl?: string;
@@ -188,6 +273,7 @@ export default function CaregiverTodayPage() {
     photos: any[];
     mileage: number;
   }) => {
+    const clockOutStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     setIsClockedIn(false);
     setShowEndModal(false);
     setVisits((prev) =>
@@ -196,8 +282,10 @@ export default function CaregiverTodayPage() {
           ? {
             ...v,
             status: "Completed",
-            clockOutTime: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            clockOutTime: clockOutStr,
             visitNotes: data.notes,
+            generalNotes,
+            vitals,
             signatureUrl: data.signatureUrl,
             unableToSignReason: data.unableToSignReason,
             photos: data.photos,
@@ -206,6 +294,15 @@ export default function CaregiverTodayPage() {
           : v
       )
     );
+    syncCaregiverClockOutToAgency({
+      visit: activeVisit,
+      clockOutTime: clockOutStr,
+      generalNotes: generalNotes || data.notes,
+      vitals,
+      signatureUrl: data.signatureUrl,
+      unableToSignReason: data.unableToSignReason,
+    });
+    toast.success("Visit signed & submitted! Synced to EVV Monitoring, Care Notes Review, Payroll & Billing Readiness.");
   };
 
   return (
@@ -263,11 +360,78 @@ export default function CaregiverTodayPage() {
           </div>
         </div>
 
+        {/* Clean Caregiver Quick Menu (Visits, Tasks, Communication, Documentation) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <button
+            type="button"
+            onClick={() => setActiveView("today")}
+            className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 hover:border-[#3D6B22] shadow-2xs text-left transition-all cursor-pointer"
+          >
+            <div className="w-9 h-9 rounded-lg bg-[#E3F1D9] text-[#3D6B22] flex items-center justify-center shrink-0">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-900">Visits</div>
+              <div className="text-[11px] text-slate-500">{visits.length} today · {openVisits.length} open</div>
+            </div>
+          </button>
+
+          <a
+            href="#adl-tasks-section"
+            className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 hover:border-[#3D6B22] shadow-2xs text-left transition-all"
+          >
+            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <ClipboardCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-900">Tasks</div>
+              <div className="text-[11px] text-slate-500">
+                {activeVisit.tasks.filter((t) => t.completed).length}/{activeVisit.tasks.length} ADLs
+              </div>
+            </div>
+          </a>
+
+          <Link
+            href="/caregiver/messages"
+            className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 hover:border-[#3D6B22] shadow-2xs text-left transition-all"
+          >
+            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <MessageSquare className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-900">Communication</div>
+              <div className="text-[11px] text-slate-500">Care Team &amp; Dispatch</div>
+            </div>
+          </Link>
+
+          <a
+            href="#vitals-documentation-section"
+            className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 hover:border-[#3D6B22] shadow-2xs text-left transition-all"
+          >
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+              <Stethoscope className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-slate-900">Documentation</div>
+              <div className="text-[11px] text-slate-500">Vitals &amp; Care Notes</div>
+            </div>
+          </a>
+        </div>
+
         {activeView === "today" ? (
           /* Desktop 2-Column Dashboard Layout */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Primary Column (Left/Center - 8 Cols on Desktop) */}
             <div className="lg:col-span-8 space-y-6">
+              {/* Recommended Open Visits & Preferred Weekly Hours */}
+              <RecommendedOpenVisitsPanel
+                openVisits={openVisits}
+                weeklyHours={weeklyHours}
+                shiftRequests={shiftRequests}
+                onRequestVisit={handleRequestOpenVisit}
+                onDeclineOrHideVisit={handleDeclineOrHideOpenVisit}
+              />
+
               {/* Clock-In / Clock-Out Card */}
               <ClockInOutCard
                 visit={activeVisit}
@@ -312,14 +476,125 @@ export default function CaregiverTodayPage() {
               </div>
 
               {/* Visit Task Checklist */}
-              <VisitTaskChecklist
-                clientName={activeVisit.clientName}
-                tasks={activeVisit.tasks}
-                medications={activeVisit.medications}
-                onToggleTask={handleToggleTask}
-                onSkipTaskReason={handleSkipTaskReason}
-                onLogMedication={handleLogMedication}
-              />
+              <div id="adl-tasks-section">
+                <VisitTaskChecklist
+                  clientName={activeVisit.clientName}
+                  tasks={activeVisit.tasks}
+                  medications={activeVisit.medications}
+                  onToggleTask={handleToggleTask}
+                  onSkipTaskReason={handleSkipTaskReason}
+                  onUpdateTaskNote={handleUpdateTaskNote}
+                  onLogMedication={handleLogMedication}
+                />
+              </div>
+
+              {/* Vitals (Where Authorized) & General Observations */}
+              <div id="vitals-documentation-section" className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Vitals Card */}
+                <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                    <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-[#3D6B22]" />
+                      <span>Clinical Vitals (Authorized)</span>
+                    </h3>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#E3F1D9] text-[#1E5622]">
+                      Synced to Care Notes
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 text-xs">
+                    <div>
+                      <FormLabel>Time</FormLabel>
+                      <FormInput
+                        value={vitals.recordedAt}
+                        onChange={(e) => setVitals({ ...vitals, recordedAt: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <FormLabel>Temperature (°F)</FormLabel>
+                      <FormInput
+                        value={vitals.temperatureF}
+                        onChange={(e) => setVitals({ ...vitals, temperatureF: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <FormLabel>Pulse (bpm)</FormLabel>
+                      <FormInput
+                        value={vitals.pulseBpm}
+                        onChange={(e) => setVitals({ ...vitals, pulseBpm: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <FormLabel>Respirations (/min)</FormLabel>
+                      <FormInput
+                        value={vitals.respirations}
+                        onChange={(e) => setVitals({ ...vitals, respirations: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <FormLabel>Blood Pressure</FormLabel>
+                      <FormInput
+                        value={vitals.bloodPressure}
+                        onChange={(e) => setVitals({ ...vitals, bloodPressure: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <FormLabel>BP Location</FormLabel>
+                      <FormSelect
+                        value={vitals.bpLocation}
+                        onChange={(e) =>
+                          setVitals({
+                            ...vitals,
+                            bpLocation: e.target.value as VisitVitals["bpLocation"],
+                          })
+                        }
+                      >
+                        <option value="Left Arm">Left Arm</option>
+                        <option value="Right Arm">Right Arm</option>
+                        <option value="Left Wrist">Left Wrist</option>
+                        <option value="Right Wrist">Right Wrist</option>
+                      </FormSelect>
+                    </div>
+                    <div className="col-span-2">
+                      <FormLabel>O2 Saturation (%)</FormLabel>
+                      <FormInput
+                        value={vitals.o2Saturation}
+                        onChange={(e) => setVitals({ ...vitals, o2Saturation: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* General Observations Card */}
+                <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between space-y-3">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                      <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#3D6B22]" />
+                        <span>General Observations</span>
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                        Required
+                      </span>
+                    </div>
+                    <div>
+                      <FormLabel>Client Condition &amp; Shift Observations</FormLabel>
+                      <FormTextarea
+                        rows={6}
+                        value={generalNotes}
+                        onChange={(e) => setGeneralNotes(e.target.value)}
+                        placeholder="Describe client mood, mobility, appetite, or any new symptoms..."
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowEndModal(true)}
+                    className="w-full py-2.5 px-4 rounded-xl bg-[#3D6B22] hover:bg-[#345C1D] text-white text-xs font-bold shadow-sm transition-colors cursor-pointer"
+                  >
+                    Review Summary, Client Signature &amp; Sign Out
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Secondary Side Panel (Right - 4 Cols on Desktop) */}
@@ -377,6 +652,8 @@ export default function CaregiverTodayPage() {
       <EndVisitModal
         isOpen={showEndModal}
         visit={activeVisit}
+        vitals={vitals}
+        generalNotes={generalNotes}
         onClose={() => setShowEndModal(false)}
         onComplete={handleCompleteVisit}
       />

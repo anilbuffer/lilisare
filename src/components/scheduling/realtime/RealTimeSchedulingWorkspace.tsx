@@ -59,6 +59,12 @@ import {
   computeClientHoursInsights,
   computeCaregiverOvertimeInsights,
 } from "@/lib/scheduling/schedulingStore";
+import {
+  getShiftRequestsFromStorage,
+  reviewOpenVisitRequest,
+  subscribeToCaregiverSync,
+  CaregiverShiftRequest,
+} from "@/lib/caregiver/caregiverSync";
 import { VISIT_STATUS_PALETTE } from "./statusPalette";
 import { VisitInspectorDrawer } from "./VisitInspectorDrawer";
 import { RecommendCaregiverModal } from "./RecommendCaregiverModal";
@@ -152,6 +158,7 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
   }>({});
   const [recommendVisit, setRecommendVisit] = useState<RealTimeVisit | null>(null);
   const [broadcastVisit, setBroadcastVisit] = useState<RealTimeVisit | null>(null);
+  const [shiftRequests, setShiftRequests] = useState<CaregiverShiftRequest[]>([]);
 
   // Initial load + cross-portal real-time sync subscription
   useEffect(() => {
@@ -162,6 +169,7 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
       setHouseholds(ctx.households);
       const rawVisits = getVisitsFromStorage();
       setCallOuts(getCallOutsFromStorage());
+      setShiftRequests(getShiftRequestsFromStorage());
       // Compute dynamic conflicts cleanly
       const enriched = rawVisits.map((v) => ({
         ...v,
@@ -178,7 +186,13 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
     const unsub = subscribeToSchedulingSync(() => {
       loadAll();
     });
-    return unsub;
+    const unsubCg = subscribeToCaregiverSync(() => {
+      loadAll();
+    });
+    return () => {
+      unsub();
+      unsubCg();
+    };
   }, []);
 
   // 7-day columns for active week
@@ -828,6 +842,70 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
             <Users className="w-5 h-5 text-amber-600 shrink-0" />
           </Link>
         </div>
+
+        {/* Pending Caregiver Open-Shift Requests (Agency Approval Queue) */}
+        {shiftRequests.filter((r) => r.status === "Pending Agency Review").length > 0 && (
+          <div className="bg-white rounded-xl p-4 border border-[#C7E4B3] bg-[#F2F8EE]/60 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#3D6B22] text-white">
+                  Caregiver Shift Requests
+                </span>
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                  Pending Agency Review ({shiftRequests.filter((r) => r.status === "Pending Agency Review").length})
+                </h3>
+              </div>
+              <span className="text-[11px] text-slate-500">
+                Open Visit → Caregiver Requests → Agency Reviews → Assignment Published
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {shiftRequests
+                .filter((r) => r.status === "Pending Agency Review")
+                .map((req) => (
+                  <div
+                    key={req.id}
+                    className="p-3 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900">{req.caregiverName}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-[#E3F1D9] text-[#1E5622] text-[10px] font-bold">
+                          {req.matchLabel} · {req.matchScore}%
+                        </span>
+                      </div>
+                      <p className="text-slate-600">
+                        Client: <strong>{req.clientName}</strong> ({req.shiftNumber}) · {req.date} {req.startTime}–{req.endTime} ({req.hours}h)
+                      </p>
+                      <p className="text-[11px] text-slate-500">{req.serviceName} ({req.serviceCode})</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          reviewOpenVisitRequest(req.id, "decline", perms.actorName);
+                          toast.info(`Declined shift request from ${req.caregiverName}.`);
+                        }}
+                        className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold cursor-pointer"
+                      >
+                        Decline
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          reviewOpenVisitRequest(req.id, "approve", perms.actorName);
+                          toast.success(`Approved & Published! ${req.clientName} assigned to ${req.caregiverName}.`);
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-[#3D6B22] hover:bg-[#345C1D] text-white font-bold shadow-xs cursor-pointer"
+                      >
+                        Approve &amp; Publish
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
 
         {/* ================================================================= */}
         {/* 02. TOOLBAR ROW                                                   */}

@@ -14,6 +14,7 @@ import {
   Home,
   Receipt,
   ShieldAlert,
+  AlertTriangle,
   CheckSquare,
   Award,
   GraduationCap,
@@ -294,6 +295,8 @@ const getNavGroups = (role?: string): NavGroup[] => {
       items: [
         { name: "Authorizations", icon: ClipboardCheck, id: "authorizations" },
         { name: "Scheduling", icon: Calendar, id: "scheduling" },
+        { name: "Open Shift Coverage", icon: AlertTriangle, id: "scheduling-coverage" },
+        { name: "Scheduling Insights", icon: BarChart3, id: "scheduling-insights" },
         { name: "EVV Visits", icon: MapPin, id: "evv-visits" },
         { name: "Care Notes", icon: FileText, id: "care-notes" },
         { name: "Clinical & Supervisory", icon: Stethoscope, id: "clinical-supervisory" },
@@ -636,6 +639,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (id === "households") return safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/households" : "/admin/households";
     if (id === "authorizations") return "/admin/authorizations";
     if (id === "scheduling") return safeUser?.role === "CLIENT" || safeUser?.role === "FAMILY" ? "/portal/schedule" : safeUser?.role === "INTAKE_COORDINATOR" ? "/intake/scheduling" : "/admin/scheduling";
+    if (id === "scheduling-coverage") return "/admin/scheduling/coverage";
+    if (id === "scheduling-insights") return "/admin/scheduling/insights";
     if (id === "evv-visits") return "/admin/evv-visits";
     if (id === "care-notes") return "/admin/care-notes";
     if (id === "clinical-supervisory") return "/admin/clinical";

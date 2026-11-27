@@ -25,6 +25,9 @@ import {
   Trash2,
   Calendar,
   SlidersHorizontal,
+  TrendingUp,
+  PhoneCall,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -33,6 +36,7 @@ import {
   CaregiverMatchScore,
   VisitBroadcastRecord,
   SchedulingGridSettings,
+  CallOutRecord,
 } from "@/types/scheduling";
 import { ClientRecord } from "@/types/client";
 import { CaregiverRecord } from "@/types/caregiver";
@@ -48,6 +52,12 @@ import {
   formatHoursShort,
   computeVisitConflicts,
   createBroadcastRecord,
+  getCallOutsFromStorage,
+  getEvvThresholdRules,
+  getOvertimeRules,
+  evaluateVisitEvvOperationalStatus,
+  computeClientHoursInsights,
+  computeCaregiverOvertimeInsights,
 } from "@/lib/scheduling/schedulingStore";
 import { VISIT_STATUS_PALETTE } from "./statusPalette";
 import { VisitInspectorDrawer } from "./VisitInspectorDrawer";
@@ -96,6 +106,7 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [caregivers, setCaregivers] = useState<CaregiverRecord[]>([]);
   const [households, setHouseholds] = useState<Household[]>([]);
+  const [callOuts, setCallOuts] = useState<CallOutRecord[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
   // Week date state (anchored to Nov 23, 2026 Monday of the current week 2026-11-25)
@@ -150,6 +161,7 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
       setCaregivers(ctx.caregivers);
       setHouseholds(ctx.households);
       const rawVisits = getVisitsFromStorage();
+      setCallOuts(getCallOutsFromStorage());
       // Compute dynamic conflicts cleanly
       const enriched = rawVisits.map((v) => ({
         ...v,
@@ -394,6 +406,37 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
     persistVisits([newVisit, ...visits]);
     setSelectedVisitId(newVisit.id);
   };
+
+  const handleCreateVisits = (newVisits: RealTimeVisit[]) => {
+    if (newVisits.length === 0) return;
+    persistVisits([...newVisits, ...visits]);
+    setSelectedVisitId(newVisits[0].id);
+  };
+
+  const operationalSummary = useMemo(() => {
+    const evvRules = getEvvThresholdRules();
+    const otRules = getOvertimeRules();
+    const activeVisits = visits.filter((v) => !v.isRemoved);
+    const evvAlerts = activeVisits.filter((v) => {
+      const ev = evaluateVisitEvvOperationalStatus(v, evvRules);
+      return ev.severity === "warning" || ev.severity === "critical";
+    });
+    const unresolvedCallOuts = callOuts.filter(
+      (c) => c.status === "Open" || c.status === "Candidates Reviewed"
+    );
+    const clientInsights = computeClientHoursInsights(activeVisits, clients);
+    const overAuthClients = clientInsights.filter((c) => c.status === "Over Auth");
+    const cgInsights = computeCaregiverOvertimeInsights(activeVisits, caregivers, otRules);
+    const otCaregivers = cgInsights.filter(
+      (c) => c.status === "Overtime" || c.status === "Approaching OT"
+    );
+    return {
+      evvAlertsCount: evvAlerts.length,
+      unresolvedCallOutsCount: unresolvedCallOuts.length,
+      overAuthClientsCount: overAuthClients.length,
+      otCaregiversCount: otCaregivers.length,
+    };
+  }, [visits, callOuts, clients, caregivers]);
 
   const handleDeleteOrRemoveVisit = (visitId: string) => {
     const target = visits.find((v) => v.id === visitId);
@@ -669,7 +712,26 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
             </div>
 
             {/* Right: Connected Workflows & Add visit */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href="/admin/scheduling/coverage"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all cursor-pointer"
+              >
+                <PhoneCall className="w-3.5 h-3.5" />
+                <span>Coverage</span>
+                {operationalSummary.unresolvedCallOutsCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-extrabold">
+                    {operationalSummary.unresolvedCallOutsCount}
+                  </span>
+                )}
+              </Link>
+              <Link
+                href="/admin/scheduling/insights"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
+              >
+                <TrendingUp className="w-3.5 h-3.5 text-[#3D6B22]" />
+                <span>Insights &amp; OT</span>
+              </Link>
               <Link
                 href="/admin/evv-visits/"
                 className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 transition-all shadow-[0_6px_32px_rgba(0,0,0,0.06)] hover:text-slate-900 cursor-pointer"
@@ -698,8 +760,77 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
             </div>
           </div>
 
-          {/* ================================================================= */}
-          {/* 02. TOOLBAR ROW                                                   */}
+        {/* ================================================================= */}
+        {/* 01B. REAL-TIME OPERATIONAL QUESTIONS STRIP                        */}
+        {/* ================================================================= */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Link
+            href="/admin/evv-visits/"
+            className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-amber-300 transition-all flex items-center justify-between gap-3"
+          >
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Missing / Late Visits
+              </p>
+              <p className="text-lg font-extrabold text-amber-600 mt-0.5">
+                {operationalSummary.evvAlertsCount} Alert{operationalSummary.evvAlertsCount === 1 ? "" : "s"}
+              </p>
+              <p className="text-[11px] text-slate-500">Evaluated via payer EVV rules</p>
+            </div>
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+          </Link>
+
+          <Link
+            href="/admin/scheduling/coverage"
+            className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-rose-300 transition-all flex items-center justify-between gap-3"
+          >
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Call-Out Coverage
+              </p>
+              <p className="text-lg font-extrabold text-rose-600 mt-0.5">
+                {operationalSummary.unresolvedCallOutsCount} Unresolved
+              </p>
+              <p className="text-[11px] text-slate-500">Requires agency approval</p>
+            </div>
+            <PhoneCall className="w-5 h-5 text-rose-500 shrink-0" />
+          </Link>
+
+          <Link
+            href="/admin/scheduling/insights"
+            className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-[#3D6B22]/40 transition-all flex items-center justify-between gap-3"
+          >
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Clients Over Auth
+              </p>
+              <p className="text-lg font-extrabold text-slate-900 mt-0.5">
+                {operationalSummary.overAuthClientsCount} Client{operationalSummary.overAuthClientsCount === 1 ? "" : "s"}
+              </p>
+              <p className="text-[11px] text-slate-500">Scheduled &gt; authorised hours</p>
+            </div>
+            <TrendingUp className="w-5 h-5 text-[#3D6B22] shrink-0" />
+          </Link>
+
+          <Link
+            href="/admin/scheduling/insights"
+            className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-amber-300 transition-all flex items-center justify-between gap-3"
+          >
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Overtime Risk
+              </p>
+              <p className="text-lg font-extrabold text-amber-700 mt-0.5">
+                {operationalSummary.otCaregiversCount} Caregiver{operationalSummary.otCaregiversCount === 1 ? "" : "s"}
+              </p>
+              <p className="text-[11px] text-slate-500">Approaching / exceeding OT rule</p>
+            </div>
+            <Users className="w-5 h-5 text-amber-600 shrink-0" />
+          </Link>
+        </div>
+
+        {/* ================================================================= */}
+        {/* 02. TOOLBAR ROW                                                   */}
           {/* ================================================================= */}
           <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-slate-100">
             <div className="flex flex-wrap items-center gap-2">
@@ -1545,6 +1676,7 @@ export function RealTimeSchedulingWorkspace({ portal }: RealTimeSchedulingWorksp
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           onCreateVisit={handleCreateVisit}
+          onCreateVisits={handleCreateVisits}
           clients={clients}
           caregivers={caregivers}
           defaultClientId={addModalDefaults.clientId}

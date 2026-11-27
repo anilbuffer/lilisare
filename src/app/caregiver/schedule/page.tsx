@@ -25,6 +25,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar } from "@/components/ui/Avatar";
 import { useRouter } from "next/navigation";
+import { getVisitsFromStorage, createCallOutForVisit } from "@/lib/scheduling/schedulingStore";
+import { toast } from "sonner";
 
 export default function CaregiverSchedulePage() {
   const router = useRouter();
@@ -100,6 +102,18 @@ export default function CaregiverSchedulePage() {
 
   const handleCallOffSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const allVisits = getVisitsFromStorage();
+    const target = allVisits.find((v) => !v.isRemoved && v.status === "Scheduled" && v.caregiverId);
+    if (target) {
+      createCallOutForVisit(
+        target,
+        "Caregiver",
+        callOffReason,
+        "Submitted from Caregiver Schedule",
+        target.caregiverName || "Caregiver"
+      );
+      toast.warning(`Call-off submitted for ${target.clientName}. Agency coverage desk notified.`);
+    }
     setCallOffSubmitted(true);
     setTimeout(() => {
       setCallOffSubmitted(false);

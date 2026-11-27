@@ -4,6 +4,14 @@ import {
   CaregiverMatchScore,
   VisitBroadcastRecord,
   ConflictType,
+  RecurrencePattern,
+  RecurringEditScope,
+  CallOutRecord,
+  EvvScheduleThresholdRule,
+  OperationalEvvEvaluation,
+  OvertimeRuleConfig,
+  ClientHoursInsight,
+  CaregiverOvertimeInsight,
 } from "@/types/scheduling";
 import { getClientsFromStorage, INITIAL_CLIENTS } from "@/lib/clients/mockData";
 import { getCaregiversFromStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
@@ -2549,3 +2557,727 @@ export const MODIFICATION_REASONS: string[] = [
   "Caregiver Late / Missed Clock-In",
   "Weekend Respite Coverage",
 ];
+
+// ============================================================================
+// A. RECURRING VISITS & SPLIT SHIFTS ENGINE
+// ============================================================================
+
+export interface RecurringGenerationOptions {
+  baseVisit: Omit<
+    RealTimeVisit,
+    "id" | "shiftNumber" | "date" | "startTime" | "endTime" | "billableHours" | "payableHours" | "scheduledHours"
+  >;
+  pattern: RecurrencePattern;
+  startDate: string;
+  endDate: string;
+  weekdays: number[]; // 0=Sun..6=Sat
+  intervalWeeks?: number;
+  exceptionDates?: string[];
+  segments: Array<{ startTime: string; endTime: string; splitLabel?: string }>;
+}
+
+/**
+ * Expands a recurring pattern (and optional split-shift segments) into individual RealTimeVisit records.
+ * Preserves each split shift as an independent record so EVV, care notes, and billing track separately.
+ */
+export function generateRecurringVisitInstances(
+  options: RecurringGenerationOptions
+): RealTimeVisit[] {
+  const {
+    baseVisit,
+    pattern,
+    startDate,
+    endDate,
+    weekdays,
+    intervalWeeks = 1,
+    exceptionDates = [],
+    segments,
+  } = options;
+
+  const exceptionSet = new Set(exceptionDates.map((d) => d.trim()).filter(Boolean));
+  const targetDates: string[] = [];
+
+  if (pattern === "one-time") {
+    if (!exceptionSet.has(startDate)) {
+      targetDates.push(startDate);
+    }
+  } else {
+    const start = new Date(`${startDate}T12:00:00`);
+    const end = new Date(`${endDate || startDate}T12:00:00`);
+    const maxDays = 90; // safety cap for client-side generation
+    let dayCount = 0;
+
+    for (let cur = new Date(start); cur <= end && dayCount < maxDays; cur.setDate(cur.getDate() + 1)) {
+      dayCount++;
+      const iso = cur.toISOString().split("T")[0];
+      if (exceptionSet.has(iso)) continue;
+
+      if (pattern === "daily") {
+        targetDates.push(iso);
+      } else {
+        // weekly or custom
+        const diffDays = Math.floor((cur.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+        const weekIndex = Math.floor(diffDays / 7);
+        if (weekIndex % Math.max(1, intervalWeeks) === 0 && weekdays.includes(cur.getDay())) {
+          targetDates.push(iso);
+        }
+      }
+    }
+  }
+
+  const seriesId = pattern !== "one-time" ? `SER-${Date.now()}` : undefined;
+  const results: RealTimeVisit[] = [];
+  let seq = Math.floor(450 + Math.random() * 400);
+
+  for (const dateIso of targetDates) {
+    const splitGroupId = segments.length > 1 ? `SPL-${dateIso}-${seq}` : undefined;
+    segments.forEach((seg, idx) => {
+      const dur = calculateDurationHours(seg.startTime, seg.endTime);
+      if (dur <= 0) return;
+      seq++;
+      const splitLabel =
+        segments.length > 1
+          ? seg.splitLabel || `Split ${idx + 1} of ${segments.length}`
+          : undefined;
+
+      results.push({
+        ...baseVisit,
+        id: `VIS-${Date.now().toString().slice(-5)}-${seq}`,
+        shiftNumber: `#${seq}`,
+        date: dateIso,
+        startTime: seg.startTime,
+        endTime: seg.endTime,
+        billableHours: dur,
+        payableHours: dur,
+        scheduledHours: dur,
+        seriesId,
+        recurrencePattern: pattern,
+        recurrenceWeekdays: pattern !== "one-time" ? weekdays : undefined,
+        recurrenceStartDate: pattern !== "one-time" ? startDate : undefined,
+        recurrenceEndDate: pattern !== "one-time" ? endDate : undefined,
+        recurrenceExceptionDates: exceptionDates.length > 0 ? exceptionDates : undefined,
+        splitGroupId,
+        splitLabel,
+      });
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Applies an edit to a single visit, this-and-future visits in a series, or the entire series.
+ */
+export function applyRecurringVisitEdit(
+  allVisits: RealTimeVisit[],
+  targetVisit: RealTimeVisit,
+  updatedFields: Partial<RealTimeVisit>,
+  scope: RecurringEditScope,
+  actorName: string,
+  actorRole: string
+): RealTimeVisit[] {
+  const seriesId = targetVisit.seriesId;
+  const shouldUpdate = (v: RealTimeVisit) => {
+    if (scope === "this_visit" || !seriesId) return v.id === targetVisit.id;
+    if (v.seriesId !== seriesId) return false;
+    if (scope === "this_and_future") return v.date >= targetVisit.date;
+    return true; // entire_series
+  };
+
+  return allVisits.map((v) => {
+    if (!shouldUpdate(v)) return v;
+    const nextStart = updatedFields.startTime ?? v.startTime;
+    const nextEnd = updatedFields.endTime ?? v.endTime;
+    const nextHours = calculateDurationHours(nextStart, nextEnd);
+    const next: RealTimeVisit = {
+      ...v,
+      ...updatedFields,
+      // Keep each visit's own date unless editing a single visit
+      date: scope === "this_visit" ? updatedFields.date ?? v.date : v.date,
+      scheduledHours: nextHours,
+      billableHours: updatedFields.billableHours ?? nextHours,
+      payableHours: updatedFields.payableHours ?? nextHours,
+      isModifiedFromSchedule: true,
+      isSeriesException: scope === "this_visit" && Boolean(seriesId) ? true : v.isSeriesException,
+      auditTrail: [
+        {
+          id: `aud-${Date.now()}-${v.id}`,
+          timestamp: new Date().toLocaleString(),
+          actor: actorName,
+          actorRole,
+          action:
+            scope === "this_visit"
+              ? "Updated Single Visit"
+              : scope === "this_and_future"
+                ? "Updated This & Future Series Visits"
+                : "Updated Entire Recurring Series",
+          details: `Schedule ${nextStart}–${nextEnd}, Caregiver: ${updatedFields.caregiverName ?? v.caregiverName ?? "Unassigned"}`,
+        },
+        ...(v.auditTrail || []),
+      ],
+    };
+    return next;
+  });
+}
+
+// ============================================================================
+// B. LAST-MINUTE CALL-OUTS & OPEN SHIFT COVERAGE
+// ============================================================================
+
+export const CALLOUT_STORAGE_KEY = "lilisare_coverage_callouts_v1";
+
+export const INITIAL_CALLOUTS: CallOutRecord[] = [
+  {
+    id: "CO-9001",
+    visitId: "VIS-1007",
+    shiftNumber: "#407",
+    date: "2026-11-27",
+    startTime: "09:00",
+    endTime: "13:00",
+    clientId: "CL-1002",
+    clientName: "Arthur Pendelton",
+    householdName: "Pendelton Household",
+    address: "118 Maple Lane, Eugene, OR 97401",
+    serviceName: "Personal Care & Dementia Support",
+    requiredSkills: ["Dementia Care", "Personal Care", "CPR & First Aid"],
+    originalCaregiverId: "CG-104",
+    originalCaregiverName: "Marcus Vance",
+    reportedBy: "Caregiver",
+    reportedAt: "2026-11-27 06:45 AM",
+    reason: "Sudden Illness / Fever",
+    notes: "Caregiver reported flu symptoms early morning and requested immediate coverage.",
+    status: "Open",
+    assignmentHistory: [
+      {
+        id: "coh-1",
+        timestamp: "2026-11-27 06:45 AM",
+        actor: "Marcus Vance (Caregiver App)",
+        action: "Call-Out Reported",
+        caregiverId: "CG-104",
+        caregiverName: "Marcus Vance",
+        details: "Visit #407 flagged for agency replacement coverage. Auto-assignment disabled.",
+      },
+    ],
+  },
+  {
+    id: "CO-9002",
+    visitId: "VIS-1012",
+    shiftNumber: "#412",
+    date: "2026-11-27",
+    startTime: "14:00",
+    endTime: "18:00",
+    clientId: "CL-1001",
+    clientName: "Leo Miller",
+    householdName: "Miller Household",
+    address: "742 Evergreen Terrace, Springfield, OR 97477",
+    serviceName: "CES Waiver (Children's Extensive Support)",
+    requiredSkills: ["Pediatric Care", "Sensory Support"],
+    originalCaregiverId: "CG-107",
+    originalCaregiverName: "Clara Jenkins",
+    reportedBy: "Agency Staff",
+    reportedAt: "2026-11-27 08:10 AM",
+    reason: "Family Emergency / Transit Delay",
+    notes: "Afternoon split shift requires qualified pediatric coverage. Parent notified.",
+    status: "Candidates Reviewed",
+    assignmentHistory: [
+      {
+        id: "coh-2",
+        timestamp: "2026-11-27 08:10 AM",
+        actor: "Dana Jenkins, MSW",
+        action: "Call-Out Recorded",
+        caregiverId: "CG-107",
+        caregiverName: "Clara Jenkins",
+        details: "Flagged afternoon split shift for coverage review.",
+      },
+      {
+        id: "coh-3",
+        timestamp: "2026-11-27 08:25 AM",
+        actor: "Dana Jenkins, MSW",
+        action: "Candidates Screened",
+        details: "Shortlisted eligible active caregivers with Pediatric Care clearance.",
+      },
+    ],
+  },
+];
+
+export function getCallOutsFromStorage(): CallOutRecord[] {
+  if (typeof window === "undefined") return INITIAL_CALLOUTS;
+  try {
+    const raw = window.localStorage.getItem(CALLOUT_STORAGE_KEY);
+    if (!raw) {
+      window.localStorage.setItem(CALLOUT_STORAGE_KEY, JSON.stringify(INITIAL_CALLOUTS));
+      return INITIAL_CALLOUTS;
+    }
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : INITIAL_CALLOUTS;
+  } catch {
+    return INITIAL_CALLOUTS;
+  }
+}
+
+export function saveCallOutsToStorage(records: CallOutRecord[]): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(CALLOUT_STORAGE_KEY, JSON.stringify(records));
+  window.dispatchEvent(new Event(SCHEDULING_SYNC_EVENT));
+}
+
+export function createCallOutForVisit(
+  visit: RealTimeVisit,
+  reportedBy: "Caregiver" | "Agency Staff",
+  reason: string,
+  notes: string,
+  actorName: string
+): CallOutRecord {
+  const existingVisits = getVisitsFromStorage();
+  const updatedVisits = existingVisits.map((v) =>
+    v.id === visit.id
+      ? {
+          ...v,
+          status: "Unassigned" as VisitStatus,
+          caregiverId: null,
+          caregiverName: null,
+          isModifiedFromSchedule: true,
+          modificationReason: `Call-Out: ${reason}`,
+          auditTrail: [
+            {
+              id: `aud-co-${Date.now()}`,
+              timestamp: new Date().toLocaleString(),
+              actor: actorName,
+              actorRole: reportedBy,
+              action: "Call-Out Flagged for Replacement Coverage",
+              reason,
+              details: `Original caregiver ${visit.caregiverName || "Unassigned"} removed. Pending agency approval for replacement.`,
+            },
+            ...(v.auditTrail || []),
+          ],
+        }
+      : v
+  );
+  saveVisitsToStorage(updatedVisits);
+
+  const newCallOut: CallOutRecord = {
+    id: `CO-${Date.now().toString().slice(-4)}`,
+    visitId: visit.id,
+    shiftNumber: visit.shiftNumber,
+    date: visit.date,
+    startTime: visit.startTime,
+    endTime: visit.endTime,
+    clientId: visit.clientId,
+    clientName: visit.clientName,
+    householdName: visit.householdName,
+    address: visit.address,
+    serviceName: visit.serviceName,
+    requiredSkills: visit.requiredSkills,
+    originalCaregiverId: visit.caregiverId,
+    originalCaregiverName: visit.caregiverName || "Unassigned",
+    reportedBy,
+    reportedAt: new Date().toLocaleString(),
+    reason,
+    notes,
+    status: "Open",
+    assignmentHistory: [
+      {
+        id: `coh-${Date.now()}`,
+        timestamp: new Date().toLocaleString(),
+        actor: actorName,
+        action: "Call-Out Reported",
+        caregiverId: visit.caregiverId,
+        caregiverName: visit.caregiverName,
+        details: `${reason}${notes ? ` — ${notes}` : ""}`,
+      },
+    ],
+  };
+
+  const callOuts = getCallOutsFromStorage();
+  saveCallOutsToStorage([newCallOut, ...callOuts]);
+  return newCallOut;
+}
+
+export function assignReplacementCaregiver(
+  callOutId: string,
+  caregiver: CaregiverRecord,
+  actorName: string
+): void {
+  const callOuts = getCallOutsFromStorage();
+  const target = callOuts.find((c) => c.id === callOutId);
+  if (!target) return;
+
+  const visits = getVisitsFromStorage();
+  const updatedVisits = visits.map((v) =>
+    v.id === target.visitId
+      ? {
+          ...v,
+          caregiverId: caregiver.id,
+          caregiverName: caregiver.name,
+          caregiverClass: `${caregiver.type} (${caregiver.employmentClassification})`,
+          caregiverRegion: caregiver.personalInfo?.address?.city || "Springfield",
+          status: "Scheduled" as VisitStatus,
+          isModifiedFromSchedule: true,
+          modificationReason: "Replacement Assigned (Call-Out Coverage)",
+          auditTrail: [
+            {
+              id: `aud-rep-${Date.now()}`,
+              timestamp: new Date().toLocaleString(),
+              actor: actorName,
+              actorRole: "Agency Scheduler",
+              action: "Replacement Caregiver Assigned",
+              details: `Assigned ${caregiver.name} to replace ${target.originalCaregiverName} (${target.reason}).`,
+            },
+            ...(v.auditTrail || []),
+          ],
+        }
+      : v
+  );
+  saveVisitsToStorage(updatedVisits);
+
+  const updatedCallOuts = callOuts.map((c) =>
+    c.id === callOutId
+      ? {
+          ...c,
+          status: "Assigned" as const,
+          replacementCaregiverId: caregiver.id,
+          replacementCaregiverName: caregiver.name,
+          assignedAt: new Date().toLocaleString(),
+          assignedBy: actorName,
+          assignmentHistory: [
+            {
+              id: `coh-rep-${Date.now()}`,
+              timestamp: new Date().toLocaleString(),
+              actor: actorName,
+              action: "Replacement Approved & Assigned",
+              caregiverId: caregiver.id,
+              caregiverName: caregiver.name,
+              details: `Agency approved replacement: ${caregiver.name} notified with client & visit instructions.`,
+            },
+            ...c.assignmentHistory,
+          ],
+        }
+      : c
+  );
+  saveCallOutsToStorage(updatedCallOuts);
+}
+
+// ============================================================================
+// C. EVV OPERATIONAL THRESHOLDS & LATE / MISSING VISIT EVALUATION
+// ============================================================================
+
+export const EVV_THRESHOLDS_KEY = "lilisare_evv_schedule_thresholds_v1";
+
+export const DEFAULT_EVV_THRESHOLD_RULES: EvvScheduleThresholdRule[] = [
+  {
+    id: "rule-ces",
+    programName: "CES Waiver",
+    lateGraceMinutes: 15,
+    missingStartAlertMinutes: 30,
+    earlyDepartureThresholdMinutes: 15,
+    requireGpsOrIvr: true,
+  },
+  {
+    id: "rule-medicaid",
+    programName: "Medicaid",
+    lateGraceMinutes: 10,
+    missingStartAlertMinutes: 25,
+    earlyDepartureThresholdMinutes: 15,
+    requireGpsOrIvr: true,
+  },
+  {
+    id: "rule-private",
+    programName: "Private Duty",
+    lateGraceMinutes: 20,
+    missingStartAlertMinutes: 45,
+    earlyDepartureThresholdMinutes: 20,
+    requireGpsOrIvr: false,
+  },
+];
+
+export function getEvvThresholdRules(): EvvScheduleThresholdRule[] {
+  if (typeof window === "undefined") return DEFAULT_EVV_THRESHOLD_RULES;
+  try {
+    const raw = window.localStorage.getItem(EVV_THRESHOLDS_KEY);
+    if (!raw) return DEFAULT_EVV_THRESHOLD_RULES;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_EVV_THRESHOLD_RULES;
+  } catch {
+    return DEFAULT_EVV_THRESHOLD_RULES;
+  }
+}
+
+export function saveEvvThresholdRules(rules: EvvScheduleThresholdRule[]): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(EVV_THRESHOLDS_KEY, JSON.stringify(rules));
+  window.dispatchEvent(new Event(SCHEDULING_SYNC_EVENT));
+}
+
+function parseTimeToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+/**
+ * Evaluates a visit's expected schedule timing vs actual EVV events using configurable payer/program rules.
+ * Never treats a visit as missed merely because the caregiver hasn't clocked in at the exact scheduled minute.
+ */
+export function evaluateVisitEvvOperationalStatus(
+  visit: RealTimeVisit,
+  rules: EvvScheduleThresholdRule[] = DEFAULT_EVV_THRESHOLD_RULES,
+  referenceDate = "2026-11-27",
+  referenceTime = "10:15"
+): OperationalEvvEvaluation {
+  const matchedRule =
+    rules.find((r) =>
+      visit.serviceName.toLowerCase().includes(r.programName.toLowerCase())
+    ) || rules[0];
+
+  if (visit.status === "Missed") {
+    return {
+      alertType: "Incomplete / Missed Visit",
+      severity: "critical",
+      varianceMinutes: 0,
+      message: "Visit marked missed / incomplete — requires supervisor follow-up.",
+      ruleApplied: matchedRule.programName,
+    };
+  }
+
+  if (visit.evvStatus === "Exception") {
+    return {
+      alertType: "Verification Pending",
+      severity: "warning",
+      varianceMinutes: 0,
+      message: "EVV exception or telemetry unavailable — verification pending.",
+      ruleApplied: matchedRule.programName,
+    };
+  }
+
+  const schedStart = parseTimeToMinutes(visit.startTime);
+  const schedEnd = parseTimeToMinutes(visit.endTime);
+
+  // Check completed / in-progress actual clock-in
+  if (visit.clockInActual) {
+    const actualStart = parseTimeToMinutes(visit.clockInActual);
+    const startVariance = actualStart - schedStart;
+
+    if (visit.clockOutActual) {
+      const actualEnd = parseTimeToMinutes(visit.clockOutActual);
+      const earlyBy = schedEnd - actualEnd;
+      if (earlyBy > matchedRule.earlyDepartureThresholdMinutes) {
+        return {
+          alertType: "Early Departure Review",
+          severity: "warning",
+          varianceMinutes: -earlyBy,
+          message: `Ended ${earlyBy}m earlier than scheduled (threshold ${matchedRule.earlyDepartureThresholdMinutes}m).`,
+          ruleApplied: matchedRule.programName,
+        };
+      }
+    }
+
+    if (startVariance > matchedRule.lateGraceMinutes) {
+      return {
+        alertType: "Late Clock-In",
+        severity: "warning",
+        varianceMinutes: startVariance,
+        message: `Clocked in +${startVariance}m after scheduled start (grace ${matchedRule.lateGraceMinutes}m).`,
+        ruleApplied: matchedRule.programName,
+      };
+    }
+
+    return {
+      alertType: "On Time",
+      severity: "ok",
+      varianceMinutes: startVariance,
+      message: "EVV clock-in within payer tolerance.",
+      ruleApplied: matchedRule.programName,
+    };
+  }
+
+  // Visit has not started yet — compare against reference time on referenceDate
+  if (visit.date === referenceDate && visit.status === "Scheduled") {
+    const nowMins = parseTimeToMinutes(referenceTime);
+    const lateBy = nowMins - schedStart;
+
+    if (lateBy >= matchedRule.missingStartAlertMinutes) {
+      return {
+        alertType: "Missing-Start Alert",
+        severity: "critical",
+        varianceMinutes: lateBy,
+        message: `No EVV clock-in ${lateBy}m past scheduled start (alert threshold ${matchedRule.missingStartAlertMinutes}m).`,
+        ruleApplied: matchedRule.programName,
+      };
+    }
+
+    if (lateBy > 0) {
+      return {
+        alertType: "Potentially Late",
+        severity: "warning",
+        varianceMinutes: lateBy,
+        message: `Not started (+${lateBy}m past start, within ${matchedRule.missingStartAlertMinutes}m alert window).`,
+        ruleApplied: matchedRule.programName,
+      };
+    }
+  }
+
+  if (visit.date < referenceDate && visit.status === "Scheduled") {
+    return {
+      alertType: "Incomplete / Missed Visit",
+      severity: "critical",
+      varianceMinutes: 0,
+      message: "Past scheduled date without EVV completion.",
+      ruleApplied: matchedRule.programName,
+    };
+  }
+
+  return {
+    alertType: "On Time",
+    severity: "info",
+    varianceMinutes: 0,
+    message: "Scheduled — awaiting visit start.",
+    ruleApplied: matchedRule.programName,
+  };
+}
+
+// ============================================================================
+// E. SCHEDULING INSIGHTS: AUTHORIZED HOURS VS SCHEDULED & OVERTIME RULES
+// ============================================================================
+
+export const OVERTIME_RULES_KEY = "lilisare_overtime_rules_v1";
+
+export const DEFAULT_OVERTIME_RULES: OvertimeRuleConfig[] = [
+  {
+    id: "ot-w2-ft",
+    employmentType: "W-2 Full-Time",
+    weeklyOvertimeThresholdHours: 40,
+    dailyOvertimeThresholdHours: 8,
+    warningThresholdPercent: 85,
+    enabled: true,
+  },
+  {
+    id: "ot-w2-pt",
+    employmentType: "W-2 Part-Time",
+    weeklyOvertimeThresholdHours: 30,
+    dailyOvertimeThresholdHours: 8,
+    warningThresholdPercent: 85,
+    enabled: true,
+  },
+  {
+    id: "ot-1099",
+    employmentType: "1099 Contractor",
+    weeklyOvertimeThresholdHours: 45,
+    dailyOvertimeThresholdHours: 10,
+    warningThresholdPercent: 90,
+    enabled: true,
+  },
+];
+
+export function getOvertimeRules(): OvertimeRuleConfig[] {
+  if (typeof window === "undefined") return DEFAULT_OVERTIME_RULES;
+  try {
+    const raw = window.localStorage.getItem(OVERTIME_RULES_KEY);
+    if (!raw) return DEFAULT_OVERTIME_RULES;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_OVERTIME_RULES;
+  } catch {
+    return DEFAULT_OVERTIME_RULES;
+  }
+}
+
+export function saveOvertimeRules(rules: OvertimeRuleConfig[]): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(OVERTIME_RULES_KEY, JSON.stringify(rules));
+  window.dispatchEvent(new Event(SCHEDULING_SYNC_EVENT));
+}
+
+export function computeClientHoursInsights(
+  visits: RealTimeVisit[],
+  clients: ClientRecord[]
+): ClientHoursInsight[] {
+  const activeVisits = visits.filter((v) => !v.isRemoved);
+  return clients
+    .map((client) => {
+      const clientVisits = activeVisits.filter((v) => v.clientId === client.id);
+      const scheduledWeeklyHours = clientVisits.reduce((acc, v) => acc + v.scheduledHours, 0);
+      const completedHours = clientVisits
+        .filter((v) => v.status === "Completed" || v.status === "Verified")
+        .reduce((acc, v) => acc + v.scheduledHours, 0);
+      const authorizedWeeklyHours =
+        clientVisits[0]?.authorizedWeeklyCap ||
+        client.carePlan?.authorizedWeeklyHours ||
+        40;
+      const varianceHours = Math.round((scheduledWeeklyHours - authorizedWeeklyHours) * 10) / 10;
+
+      const status: ClientHoursInsight["status"] =
+        varianceHours > 0
+          ? "Over Auth"
+          : scheduledWeeklyHours >= authorizedWeeklyHours * 0.85
+            ? "Approaching Cap"
+            : "Within Auth";
+
+      return {
+        clientId: client.id,
+        clientName: client.name,
+        householdName: client.household?.name || `${client.name} Household`,
+        authorizationNumber: client.authorization?.authNumber || clientVisits[0]?.authorizationNumber || "AUTH-PENDING",
+        authorizedWeeklyHours,
+        scheduledWeeklyHours: Math.round(scheduledWeeklyHours * 10) / 10,
+        completedHours: Math.round(completedHours * 10) / 10,
+        varianceHours,
+        status,
+        visitCount: clientVisits.length,
+      };
+    })
+    .filter((item) => item.visitCount > 0 || item.varianceHours > 0)
+    .sort((a, b) => b.varianceHours - a.varianceHours);
+}
+
+export function computeCaregiverOvertimeInsights(
+  visits: RealTimeVisit[],
+  caregivers: CaregiverRecord[],
+  rules: OvertimeRuleConfig[] = DEFAULT_OVERTIME_RULES
+): CaregiverOvertimeInsight[] {
+  const activeVisits = visits.filter((v) => !v.isRemoved && v.caregiverId);
+  return caregivers
+    .filter((cg) => cg.status === "Active")
+    .map((cg) => {
+      const cgVisits = activeVisits.filter((v) => v.caregiverId === cg.id);
+      const scheduledHours = Math.round(cgVisits.reduce((acc, v) => acc + v.scheduledHours, 0) * 10) / 10;
+      const actualWorkedHours = Math.round(
+        cgVisits
+          .filter((v) => v.status === "Completed" || v.status === "Verified" || v.status === "In-Progress")
+          .reduce((acc, v) => acc + v.scheduledHours, 0) * 10
+      ) / 10;
+
+      const matchedRule =
+        rules.find((r) =>
+          r.enabled &&
+          (cg.employmentClassification.toLowerCase().includes("1099")
+            ? r.employmentType.includes("1099")
+            : cg.employmentClassification.toLowerCase().includes("part")
+              ? r.employmentType.includes("Part-Time")
+              : r.employmentType.includes("Full-Time"))
+        ) || rules[0];
+
+      const threshold = matchedRule?.weeklyOvertimeThresholdHours || 40;
+      const warningPct = matchedRule?.warningThresholdPercent || 85;
+      const overtimeHours = Math.max(0, Math.round((scheduledHours - threshold) * 10) / 10);
+      const utilizationPercent = Math.round((scheduledHours / threshold) * 100);
+
+      const status: CaregiverOvertimeInsight["status"] =
+        scheduledHours > threshold
+          ? "Overtime"
+          : utilizationPercent >= warningPct
+            ? "Approaching OT"
+            : "Normal";
+
+      return {
+        caregiverId: cg.id,
+        caregiverName: cg.name,
+        employmentClassification: cg.employmentClassification,
+        scheduledHours,
+        actualWorkedHours,
+        weeklyThresholdHours: threshold,
+        overtimeHours,
+        utilizationPercent,
+        status,
+        visitCount: cgVisits.length,
+      };
+    })
+    .sort((a, b) => b.utilizationPercent - a.utilizationPercent);
+}

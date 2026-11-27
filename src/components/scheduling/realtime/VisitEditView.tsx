@@ -20,6 +20,7 @@ import {
   VisitStatus,
   ClockLocationType,
   CareNoteStatus,
+  RecurringEditScope,
 } from "@/types/scheduling";
 import { ClientRecord } from "@/types/client";
 import { CaregiverRecord } from "@/types/caregiver";
@@ -35,6 +36,7 @@ import {
   ALL_VISIT_STATUSES,
   MODIFICATION_REASONS,
   computeVisitConflicts,
+  applyRecurringVisitEdit,
 } from "@/lib/scheduling/schedulingStore";
 
 interface VisitEditViewProps {
@@ -92,6 +94,11 @@ export function VisitEditView({ visitId, portal }: VisitEditViewProps) {
   const [payableHours, setPayableHours] = useState(0);
   const [memo, setMemo] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
+  const [clientInstructions, setClientInstructions] = useState("");
+  const [visitInstructions, setVisitInstructions] = useState("");
+  const [partialCompletion, setPartialCompletion] = useState(false);
+  const [partialReason, setPartialReason] = useState("");
+  const [editScope, setEditScope] = useState<RecurringEditScope>("this_visit");
 
   useEffect(() => {
     const load = () => {
@@ -137,6 +144,10 @@ export function VisitEditView({ visitId, portal }: VisitEditViewProps) {
         setPayableHours(found.payableHours);
         setMemo(found.memo);
         setInternalNotes(found.internalNotes);
+        setClientInstructions(found.clientInstructions || "");
+        setVisitInstructions(found.visitInstructions || "");
+        setPartialCompletion(Boolean(found.partialCompletion));
+        setPartialReason(found.partialReason || "");
       }
     };
     queueMicrotask(load);
@@ -273,20 +284,57 @@ export function VisitEditView({ visitId, portal }: VisitEditViewProps) {
         : visit.payableHours,
       memo: memo.trim(),
       internalNotes: internalNotes.trim(),
+      clientInstructions: clientInstructions.trim() || undefined,
+      visitInstructions: visitInstructions.trim() || undefined,
+      partialCompletion,
+      partialReason: partialCompletion ? partialReason.trim() || undefined : undefined,
       auditTrail: [auditEntry, ...(visit.auditTrail || [])],
     };
 
     const exists = allVisits.some((v) => v.id === updated.id);
-    const nextList = exists
-      ? allVisits.map((v) => (v.id === updated.id ? updated : v))
-      : [updated, ...allVisits];
+    let nextList: RealTimeVisit[];
+    if (exists && visit.seriesId && editScope !== "this_visit") {
+      nextList = applyRecurringVisitEdit(
+        allVisits,
+        visit,
+        {
+          status,
+          modificationReason,
+          startTime,
+          endTime,
+          caregiverId: updated.caregiverId,
+          caregiverName: updated.caregiverName,
+          caregiverClass: updated.caregiverClass,
+          serviceId: updated.serviceId,
+          serviceCode: updated.serviceCode,
+          serviceName: updated.serviceName,
+          memo: updated.memo,
+          clientInstructions: updated.clientInstructions,
+          visitInstructions: updated.visitInstructions,
+          clockInLocation,
+          clockOutLocation,
+        },
+        editScope,
+        perms.actorName,
+        perms.roleLabel
+      );
+    } else {
+      nextList = exists
+        ? allVisits.map((v) => (v.id === updated.id ? updated : v))
+        : [updated, ...allVisits];
+    }
+
     const withConflicts = nextList.map((v) => ({
       ...v,
       conflicts: computeVisitConflicts(v, nextList),
     }));
 
     saveVisitsToStorage(withConflicts);
-    toast.success(`Visit ${updated.id} (${updated.clientName}) updated successfully!`);
+    toast.success(
+      visit.seriesId && editScope !== "this_visit"
+        ? `Updated ${editScope === "this_and_future" ? "this & future visits" : "entire recurring series"}!`
+        : `Visit ${updated.id} (${updated.clientName}) updated successfully!`
+    );
     router.push(`/${portal}/scheduling/${updated.id}/`);
   };
 
@@ -316,6 +364,42 @@ export function VisitEditView({ visitId, portal }: VisitEditViewProps) {
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
+        {visit.seriesId && (
+          <Card className="p-4 sm:p-5 border-amber-200 bg-amber-50/50 space-y-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">
+                  Recurring Visit Series ({visit.recurrencePattern || "weekly"})
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Choose whether your changes apply only to this date or across the recurring series.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {(
+                  [
+                    { id: "this_visit", label: "Only this visit" },
+                    { id: "this_and_future", label: "This & future visits" },
+                    { id: "entire_series", label: "Entire series" },
+                  ] as const
+                ).map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setEditScope(opt.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                      editScope === opt.id
+                        ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-xs"
+                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Card>
+        )}
         {/* Section 1: Schedule Window & Visit Status */}
         <Card className="p-5 sm:p-6 space-y-4">
           <FormSection
@@ -687,6 +771,24 @@ export function VisitEditView({ visitId, portal }: VisitEditViewProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
+              <FormLabel>Client-Specific Instructions (Caregiver Visible)</FormLabel>
+              <FormTextarea
+                rows={2}
+                placeholder="Standing care preferences, allergies, communication cues..."
+                value={clientInstructions}
+                onChange={(e) => setClientInstructions(e.target.value)}
+              />
+            </div>
+            <div>
+              <FormLabel>Visit-Specific Instructions</FormLabel>
+              <FormTextarea
+                rows={2}
+                placeholder="Shift-specific instructions for this visit..."
+                value={visitInstructions}
+                onChange={(e) => setVisitInstructions(e.target.value)}
+              />
+            </div>
+            <div>
               <FormLabel>Caregiver Shift Memo</FormLabel>
               <FormTextarea
                 rows={3}
@@ -702,6 +804,27 @@ export function VisitEditView({ visitId, portal }: VisitEditViewProps) {
                 onChange={(e) => setInternalNotes(e.target.value)}
               />
             </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center gap-3">
+            <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={partialCompletion}
+                onChange={(e) => setPartialCompletion(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 text-[#3D6B22] focus:ring-[#3D6B22]"
+              />
+              <span>Mark as Partial Visit Completion</span>
+            </label>
+            {partialCompletion && (
+              <div className="flex-1">
+                <FormInput
+                  placeholder="Reason for partial completion (e.g., Client requested early end for appointment)"
+                  value={partialReason}
+                  onChange={(e) => setPartialReason(e.target.value)}
+                />
+              </div>
+            )}
           </div>
         </Card>
 

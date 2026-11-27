@@ -1,4 +1,13 @@
+export type CanonicalPipelineStage =
+  | "New Referral"
+  | "Clinical Assessment"
+  | "Documents & Auth"
+  | "Ready for Staffing"
+  | "Enrolled"
+  | "Archived";
+
 export type InquiryStage =
+  | CanonicalPipelineStage
   | "New Inquiry"
   | "Contacted"
   | "Needs Discussion"

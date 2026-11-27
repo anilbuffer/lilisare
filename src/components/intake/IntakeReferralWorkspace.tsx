@@ -12,6 +12,8 @@ import {
 import {
   getIntakeInquiriesFromStorage,
   subscribeToIntakeSync,
+  normalizePipelineStage,
+  computeDaysInPipeline,
 } from "@/lib/intake/intakeSync";
 
 import { IntakePageHeader } from "./IntakePageHeader";
@@ -46,30 +48,42 @@ export function IntakeReferralWorkspace() {
     } else if (key === "URGENT") {
       setSelectedStage(null);
     } else if (key === "CONVERTED") {
-      setSelectedStage("Converted");
+      setSelectedStage("Enrolled");
     }
   };
 
   // Stage tab filter click in workspace
   const handleSelectStageFilter = (stage: InquiryStage | null) => {
     setSelectedStage(stage);
-    if (stage === "Converted") setActiveKpiKey("CONVERTED");
+    if (stage && normalizePipelineStage(stage) === "Enrolled") setActiveKpiKey("CONVERTED");
     else if (!stage) setActiveKpiKey("ALL");
   };
 
   // Computed dynamic KPI metrics from live synced inquiries
   const kpiCounts = useMemo(() => {
     const total = inquiries.length;
-    const openInquiries = inquiries.filter(
-      (i) => i.stage !== "Converted" && i.stage !== "Closed"
-    );
+    const openInquiries = inquiries.filter((i) => {
+      const s = normalizePipelineStage(i.stage);
+      return s !== "Enrolled" && s !== "Archived";
+    });
     const openCount = openInquiries.length;
     const urgentTriageCount = openInquiries.filter(
       (i) => i.urgency === "Urgent" || i.urgency === "Immediate"
     ).length;
-    const convertedCount = inquiries.filter((i) => i.stage === "Converted").length;
+    const convertedCount = inquiries.filter(
+      (i) => normalizePipelineStage(i.stage) === "Enrolled"
+    ).length;
     const conversionRate =
       total > 0 ? `${((convertedCount / total) * 100).toFixed(1)}%` : "0.0%";
+    const avgDaysVal =
+      total > 0
+        ? (
+            inquiries.reduce(
+              (sum, i) => sum + computeDaysInPipeline(i.dateReceivedRaw, i.dateReceived),
+              0
+            ) / total
+          ).toFixed(1)
+        : "0.0";
 
     return {
       total,
@@ -77,6 +91,7 @@ export function IntakeReferralWorkspace() {
       urgentTriageCount,
       convertedCount,
       conversionRate,
+      intakeVelocity: `${avgDaysVal} days`,
     };
   }, [inquiries]);
 
@@ -142,6 +157,7 @@ export function IntakeReferralWorkspace() {
         urgentTriage={kpiCounts.urgentTriageCount}
         converted={kpiCounts.convertedCount}
         conversionRate={kpiCounts.conversionRate}
+        intakeVelocity={kpiCounts.intakeVelocity}
         activeFilter={activeKpiKey}
         onSelectKpiFilter={handleSelectKpiFilter}
       />

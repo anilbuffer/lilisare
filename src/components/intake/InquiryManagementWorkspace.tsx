@@ -8,6 +8,7 @@ import {
   Search,
   Kanban,
   List,
+  LayoutGrid,
   ArrowRight,
   ArrowUpRight,
   ChevronDown,
@@ -16,10 +17,9 @@ import {
   FilterX,
   Inbox,
   Sparkles,
-  PhoneCall,
-  MessageSquare,
+  Stethoscope,
   FileCheck2,
-  ThumbsUp,
+  UserCheck,
   CheckCircle2,
   Archive,
   GripVertical,
@@ -31,6 +31,7 @@ import {
   getIntakeInquiriesFromStorage,
   convertInquiryToLiveEntities,
   syncInquiryStageToAdmin,
+  normalizePipelineStage,
 } from "@/lib/intake/intakeSync";
 
 interface InquiryManagementWorkspaceProps {
@@ -41,8 +42,8 @@ interface InquiryManagementWorkspaceProps {
   baseDetailsPath?: string;
 }
 
-// 7 Required Columns for the Kanban Board
-export const SEVEN_KANBAN_STAGES: {
+// Canonical 5 Pipeline Stages + Archived
+export const PIPELINE_STAGES: {
   id: InquiryStage;
   title: string;
   icon: React.ElementType;
@@ -55,8 +56,8 @@ export const SEVEN_KANBAN_STAGES: {
   };
 }[] = [
     {
-      id: "New Inquiry",
-      title: "New Inquiry",
+      id: "New Referral",
+      title: "New Referral",
       icon: Sparkles,
       badge: {
         bg: "bg-rose-50",
@@ -67,21 +68,21 @@ export const SEVEN_KANBAN_STAGES: {
       },
     },
     {
-      id: "Contacted",
-      title: "Contacted",
-      icon: PhoneCall,
+      id: "Clinical Assessment",
+      title: "Clinical Assessment",
+      icon: Stethoscope,
       badge: {
-        bg: "bg-amber-50",
-        text: "text-amber-800",
-        border: "border-amber-200",
-        dot: "bg-amber-500",
-        headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+        bg: "bg-blue-50",
+        text: "text-blue-800",
+        border: "border-blue-200",
+        dot: "bg-blue-600",
+        headerBadge: "bg-blue-100 text-blue-800 border-blue-200",
       },
     },
     {
-      id: "Needs Discussion",
-      title: "Needs Discussion",
-      icon: MessageSquare,
+      id: "Documents & Auth",
+      title: "Documents & Auth",
+      icon: FileCheck2,
       badge: {
         bg: "bg-purple-50",
         text: "text-purple-700",
@@ -91,21 +92,9 @@ export const SEVEN_KANBAN_STAGES: {
       },
     },
     {
-      id: "CMA Coordination",
-      title: "CMA Coordination",
-      icon: FileCheck2,
-      badge: {
-        bg: "bg-sky-50",
-        text: "text-sky-800",
-        border: "border-sky-200",
-        dot: "bg-sky-600",
-        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
-      },
-    },
-    {
-      id: "Family Decision",
-      title: "Family Decision",
-      icon: ThumbsUp,
+      id: "Ready for Staffing",
+      title: "Ready for Staffing",
+      icon: UserCheck,
       badge: {
         bg: "bg-teal-50",
         text: "text-teal-800",
@@ -115,8 +104,8 @@ export const SEVEN_KANBAN_STAGES: {
       },
     },
     {
-      id: "Converted",
-      title: "Converted",
+      id: "Enrolled",
+      title: "Enrolled",
       icon: CheckCircle2,
       badge: {
         bg: "bg-[#E3F1D9]",
@@ -127,8 +116,8 @@ export const SEVEN_KANBAN_STAGES: {
       },
     },
     {
-      id: "Closed",
-      title: "Closed",
+      id: "Archived",
+      title: "Archived",
       icon: Archive,
       badge: {
         bg: "bg-slate-100",
@@ -141,15 +130,12 @@ export const SEVEN_KANBAN_STAGES: {
   ];
 
 const STAGE_CONFIG_MAP = new Map(
-  SEVEN_KANBAN_STAGES.map((col) => [col.id, col])
+  PIPELINE_STAGES.map((col) => [col.id, col])
 );
 
-// Normalizes legacy or aliased stage names into one of the 7 Kanban stages
+// Normalizes legacy or aliased stage names into one of the canonical pipeline stages
 export function normalizeStage(stage: InquiryStage): InquiryStage {
-  if (stage === "New Lead") return "New Inquiry";
-  if (stage === "In Assessment") return "Needs Discussion";
-  if (stage === "CM Coordination") return "CMA Coordination";
-  return stage;
+  return normalizePipelineStage(stage);
 }
 
 const formatShortProgram = (program: string): string => {
@@ -177,19 +163,20 @@ export function InquiryManagementWorkspace({
     setItems(initialInquiries);
   }, [initialInquiries]);
 
-  // View Mode: Supports both a proper Kanban board view and a List view
-  const [viewMode, setViewMode] = useState<"kanban" | "list">("list");
+  // View Mode: Supports List, Grid, and Kanban Board views
+  const [viewMode, setViewMode] = useState<"kanban" | "list" | "grid">("list");
   const [pipelineTab, setPipelineTab] = useState<"OPEN" | "CONVERTED" | "ARCHIVED">("OPEN");
   const [searchQuery, setSearchQuery] = useState("");
   const [tabFilter, setTabFilter] = useState<string>("ALL");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
   const [sourceFilter, setSourceFilter] = useState<string>("ALL");
 
-  // Sync pipelineTab when KPI selects Converted or Urgent
+  // Sync pipelineTab when KPI selects Enrolled or Urgent
   useEffect(() => {
-    if (selectedStageFilter === "Converted") {
+    const normSelected = selectedStageFilter ? normalizeStage(selectedStageFilter) : null;
+    if (normSelected === "Enrolled") {
       setPipelineTab("CONVERTED");
-    } else if (selectedStageFilter === "Closed") {
+    } else if (normSelected === "Archived") {
       setPipelineTab("ARCHIVED");
     } else if (urgentOnly) {
       setPipelineTab("OPEN");
@@ -229,11 +216,11 @@ export function InquiryManagementWorkspace({
       const itemStage = normalizeStage(item.stage);
 
       if (pipelineTab === "OPEN") {
-        if (itemStage === "Converted" || itemStage === "Closed") return false;
+        if (itemStage === "Enrolled" || itemStage === "Archived") return false;
       } else if (pipelineTab === "CONVERTED") {
-        if (itemStage !== "Converted") return false;
+        if (itemStage !== "Enrolled") return false;
       } else if (pipelineTab === "ARCHIVED") {
-        if (itemStage !== "Closed") return false;
+        if (itemStage !== "Archived") return false;
       }
 
       if (urgentOnly && item.urgency !== "Urgent" && item.urgency !== "Immediate") {
@@ -289,8 +276,8 @@ export function InquiryManagementWorkspace({
     let archived = 0;
     items.forEach((item) => {
       const s = normalizeStage(item.stage);
-      if (s === "Converted") converted += 1;
-      else if (s === "Closed") archived += 1;
+      if (s === "Enrolled") converted += 1;
+      else if (s === "Archived") archived += 1;
       else open += 1;
     });
     return { open, converted, archived };
@@ -299,7 +286,7 @@ export function InquiryManagementWorkspace({
   // Counts per stage for tabs and headers
   const stageCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    SEVEN_KANBAN_STAGES.forEach((col) => {
+    PIPELINE_STAGES.forEach((col) => {
       counts[col.id] = 0;
     });
     items.forEach((item) => {
@@ -320,31 +307,32 @@ export function InquiryManagementWorkspace({
     router.push(getDetailsHref(id));
   };
 
-  // Move inquiry between stages (used by drag & drop and quick menu)
+  // Move inquiry between stages (used by drag & drop, inline select, and quick menu)
   const handleMoveStage = (inquiryId: string, targetStage: InquiryStage) => {
     const targetItem = items.find((i) => i.id === inquiryId);
     if (!targetItem) return;
 
     const currentNormalized = normalizeStage(targetItem.stage);
-    if (currentNormalized === targetStage) return;
+    const targetNormalized = normalizeStage(targetStage);
+    if (currentNormalized === targetNormalized) return;
 
-    if (targetStage === "Converted") {
+    if (targetNormalized === "Enrolled") {
       convertInquiryToLiveEntities(inquiryId);
       const reloaded = getIntakeInquiriesFromStorage();
       setItems(reloaded);
       setActiveMenuId(null);
       toast.success(
-        `Converted ${targetItem.familyName} and synchronized with Agency Admin (Client, Caregiver, & Household created)!`
+        `Enrolled ${targetItem.familyInfo.clientInfo.name || targetItem.familyName} as Active Client & synced with Agency Admin!`
       );
     } else {
       const updated = items.map((i) =>
-        i.id === inquiryId ? { ...i, stage: targetStage } : i
+        i.id === inquiryId ? { ...i, stage: targetNormalized } : i
       );
       setItems(updated);
       saveIntakeInquiriesToStorage(updated);
-      syncInquiryStageToAdmin(inquiryId, targetStage);
+      syncInquiryStageToAdmin(inquiryId, targetNormalized, targetItem.familyInfo.clientInfo.name);
       setActiveMenuId(null);
-      toast.success(`Moved ${targetItem.familyName} to "${targetStage}"`);
+      toast.success(`Moved ${targetItem.familyInfo.clientInfo.name || targetItem.familyName} to "${targetNormalized}"`);
     }
   };
 
@@ -551,8 +539,8 @@ export function InquiryManagementWorkspace({
                         </div>
                       </button>
 
-                      {/* 7 Configured Stage Options */}
-                      {SEVEN_KANBAN_STAGES.map((col) => {
+                      {/* Canonical Pipeline Stage Options */}
+                      {PIPELINE_STAGES.map((col) => {
                         const isSelected = currentStage === col.id;
                         const count = stageCounts[col.id] || 0;
 
@@ -615,20 +603,8 @@ export function InquiryManagementWorkspace({
                 <option value="Family">Family / Self</option>
               </select>
 
-              {/* View Mode Toggle: Kanban Board vs List View */}
+              {/* View Mode Toggle: List vs Grid vs Kanban Board */}
               <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("kanban")}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
-                    ? "bg-white text-[#3D6B22] shadow-xs"
-                    : "text-slate-500 hover:text-slate-900"
-                    }`}
-                  title="Kanban Board View (7 Columns)"
-                >
-                  <Kanban className="w-3.5 h-3.5" />
-                  <span>Kanban</span>
-                </button>
                 <button
                   type="button"
                   onClick={() => setViewMode("list")}
@@ -641,22 +617,46 @@ export function InquiryManagementWorkspace({
                   <List className="w-3.5 h-3.5" />
                   <span>List</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "grid"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                    }`}
+                  title="Grid View"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Grid</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("kanban")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${viewMode === "kanban"
+                    ? "bg-white text-[#3D6B22] shadow-xs"
+                    : "text-slate-500 hover:text-slate-900"
+                    }`}
+                  title="Kanban Board View"
+                >
+                  <Kanban className="w-3.5 h-3.5" />
+                  <span>Kanban</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content Area: Kanban Board vs List View */}
+        {/* Main Content Area: Kanban Board vs Grid View vs List View */}
         {viewMode === "kanban" ? (
-          /* PROPER KANBAN BOARD VIEW (7 Columns with clean, scannable cards) */
+          /* PROPER KANBAN BOARD VIEW (5 Canonical Stages) */
           <div className="w-full overflow-x-auto pb-3 pt-1 no-scrollbar sm:scrollbar-thin">
             <div className="flex gap-3.5 min-w-max items-start">
-              {SEVEN_KANBAN_STAGES.filter((col) => {
+              {PIPELINE_STAGES.filter((col) => {
                 if (pipelineTab === "OPEN") {
-                  return col.id !== "Converted" && col.id !== "Closed";
+                  return col.id !== "Enrolled" && col.id !== "Archived";
                 }
-                if (pipelineTab === "CONVERTED") return col.id === "Converted";
-                return col.id === "Closed";
+                if (pipelineTab === "CONVERTED") return col.id === "Enrolled";
+                return col.id === "Archived";
               }).map((col) => {
                 const columnInquiries = filteredInquiries.filter(
                   (i) => normalizeStage(i.stage) === col.id
@@ -777,7 +777,7 @@ export function InquiryManagementWorkspace({
                                         <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1">
                                           Move Stage
                                         </div>
-                                        {SEVEN_KANBAN_STAGES.map((s) => {
+                                        {PIPELINE_STAGES.map((s) => {
                                           const isCurrent =
                                             normalizeStage(inquiry.stage) === s.id;
                                           return (
@@ -819,6 +819,119 @@ export function InquiryManagementWorkspace({
               })}
             </div>
           </div>
+        ) : viewMode === "grid" ? (
+          /* GRID VIEW */
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
+            {filteredInquiries.length === 0 ? (
+              <div className="col-span-full bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+                <Inbox className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+                <p className="font-semibold text-slate-600 text-sm">No referrals found</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Adjust search query or filters to display records.
+                </p>
+              </div>
+            ) : (
+              filteredInquiries.map((inquiry) => {
+                const normStage = normalizeStage(inquiry.stage);
+                const colConfig = STAGE_CONFIG_MAP.get(normStage) || PIPELINE_STAGES[0];
+                const detailsHref = getDetailsHref(inquiry.id);
+                const isUrgent =
+                  inquiry.urgency === "Immediate" || inquiry.urgency === "Urgent";
+                const priorityLabel = isUrgent ? "Urgent" : "Standard";
+                const services = Array.isArray(inquiry.careRequirements.careType)
+                  ? inquiry.careRequirements.careType
+                  : [inquiry.careRequirements.careType || "In-Home Care"];
+
+                return (
+                  <div
+                    key={inquiry.id}
+                    onClick={() => handleRowClick(inquiry.id)}
+                    className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between cursor-pointer group"
+                  >
+                    <div className="p-4 sm:p-5 space-y-3.5">
+                      {/* Header Row */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#3D6B22] transition-colors tracking-tight truncate">
+                            {inquiry.familyInfo.clientInfo.name || inquiry.familyName}
+                          </h3>
+                          <div className="text-xs text-slate-400 font-medium mt-0.5">
+                            {inquiry.id} • {inquiry.familyInfo.clientInfo.age}yo{" "}
+                            {inquiry.familyInfo.clientInfo.gender || ""}
+                          </div>
+                        </div>
+
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${isUrgent
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                            }`}
+                        >
+                          {priorityLabel}
+                        </span>
+                      </div>
+
+                      {/* Program & Source */}
+                      <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs space-y-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-slate-700 truncate">
+                            {formatShortProgram(inquiry.careRequirements.programInterest)}
+                          </span>
+                          <span className="text-[11px] text-slate-500 font-medium shrink-0">
+                            {inquiry.dateReceived}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate">
+                          Source: {inquiry.referralInfo?.organization || inquiry.source}
+                        </div>
+                      </div>
+
+                      {/* Requested Services */}
+                      <div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                          Requested Services
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {services.map((svc, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20"
+                            >
+                              {svc}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="p-4 sm:p-5 pt-3 border-t border-slate-100 bg-slate-50/40 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-[10px] font-semibold text-slate-400 block">
+                          Status
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded-full border mt-0.5 ${colConfig.badge.bg} ${colConfig.badge.text} ${colConfig.badge.border}`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${colConfig.badge.dot}`} />
+                          <span>{normStage}</span>
+                        </span>
+                      </div>
+
+                      <Link
+                        href={detailsHref}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#3D6B22] group-hover:translate-x-0.5 transition-transform"
+                      >
+                        <span>Review Referral</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         ) : (
           /* LIST VIEW */
           <div className="bg-slate-50/50 border border-slate-200 rounded-2xl shadow-2xs overflow-hidden">
@@ -832,7 +945,7 @@ export function InquiryManagementWorkspace({
                     <th className="py-3.5 px-3">Payer / Program</th>
                     <th className="py-3.5 px-3">Requested Services</th>
                     <th className="py-3.5 px-3">Priority</th>
-                    <th className="py-3.5 px-3">Stage</th>
+                    <th className="py-3.5 px-3">Status</th>
                     <th className="py-3.5 px-3">Coordinator / RN</th>
                     <th className="py-3.5 px-4 pr-5 text-right">Action</th>
                   </tr>
@@ -854,12 +967,15 @@ export function InquiryManagementWorkspace({
                     filteredInquiries.map((inquiry) => {
                       const normStage = normalizeStage(inquiry.stage);
                       const colConfig =
-                        STAGE_CONFIG_MAP.get(normStage) || SEVEN_KANBAN_STAGES[0];
+                        STAGE_CONFIG_MAP.get(normStage) || PIPELINE_STAGES[0];
                       const detailsHref = getDetailsHref(inquiry.id);
                       const priorityLabel =
                         inquiry.urgency === "Immediate" || inquiry.urgency === "Urgent"
                           ? "Urgent"
-                          : "Normal";
+                          : "Standard";
+                      const services = Array.isArray(inquiry.careRequirements.careType)
+                        ? inquiry.careRequirements.careType
+                        : [inquiry.careRequirements.careType || "In-Home Care"];
 
                       return (
                         <tr
@@ -889,9 +1005,16 @@ export function InquiryManagementWorkspace({
                           </td>
 
                           <td className="py-3.5 px-3">
-                            <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20 whitespace-nowrap">
-                              {inquiry.careRequirements.careType || "In-Home Care"} · {inquiry.careRequirements.hoursPerWeek}h/wk
-                            </span>
+                            <div className="flex flex-wrap gap-1 max-w-[220px]">
+                              {services.map((svc, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#E8F2E4] text-[#1E5622] border border-[#3D6B22]/20 whitespace-nowrap"
+                                >
+                                  {svc}
+                                </span>
+                              ))}
+                            </div>
                           </td>
 
                           <td className="py-3.5 px-3">
@@ -919,7 +1042,7 @@ export function InquiryManagementWorkspace({
                               }
                               className={`text-[11px] font-bold px-2 py-0.5 rounded-full border cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#3D6B22] ${colConfig.badge.bg} ${colConfig.badge.text} ${colConfig.badge.border}`}
                             >
-                              {SEVEN_KANBAN_STAGES.map((s) => (
+                              {PIPELINE_STAGES.map((s) => (
                                 <option key={s.id} value={s.id}>
                                   {s.title}
                                 </option>
@@ -936,7 +1059,7 @@ export function InquiryManagementWorkspace({
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="inline-flex items-center justify-end gap-1.5">
-                              {normStage === "Converted" && inquiry.onboardingStatus?.clientProfileId ? (
+                              {normStage === "Enrolled" && inquiry.onboardingStatus?.clientProfileId ? (
                                 <Link
                                   href={`/intake/clients/${inquiry.onboardingStatus.clientProfileId}`}
                                   className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"

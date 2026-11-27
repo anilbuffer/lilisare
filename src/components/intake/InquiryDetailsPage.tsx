@@ -38,6 +38,7 @@ import {
   archiveReferralAcrossStores,
   deleteReferralAcrossStores,
   subscribeToIntakeSync,
+  normalizePipelineStage,
 } from "@/lib/intake/intakeSync";
 import { InquiryProfileTab } from "./InquiryProfileTab";
 import { ContactFamilyModal } from "./modals/ContactFamilyModal";
@@ -68,16 +69,22 @@ const INQUIRY_TABS: DomainTabItem<InquiryTabType>[] = [
 ];
 
 const STAGE_SOLID_BG: Record<InquiryStage, string> = {
+  "New Referral": "bg-rose-500",
+  "Clinical Assessment": "bg-blue-600",
+  "Documents & Auth": "bg-purple-600",
+  "Ready for Staffing": "bg-teal-600",
+  Enrolled: "bg-[#3D6B22]",
+  Archived: "bg-slate-500",
   "New Inquiry": "bg-rose-500",
   Contacted: "bg-amber-500",
-  "Needs Discussion": "bg-purple-600",
-  "CMA Coordination": "bg-sky-600",
+  "Needs Discussion": "bg-blue-600",
+  "CMA Coordination": "bg-purple-600",
   "Family Decision": "bg-teal-600",
   Converted: "bg-[#3D6B22]",
   Closed: "bg-slate-500",
   "New Lead": "bg-rose-500",
-  "In Assessment": "bg-sky-600",
-  "CM Coordination": "bg-indigo-600",
+  "In Assessment": "bg-blue-600",
+  "CM Coordination": "bg-purple-600",
 };
 
 export function InquiryDetailsPage({
@@ -147,11 +154,12 @@ export function InquiryDetailsPage({
   };
 
   const stagesList: InquiryStage[] = [
-    "New Lead",
-    "Contacted",
-    "In Assessment",
-    "CM Coordination",
-    "Converted",
+    "New Referral",
+    "Clinical Assessment",
+    "Documents & Auth",
+    "Ready for Staffing",
+    "Enrolled",
+    "Archived",
   ];
 
   const handleAddNote = (e: React.FormEvent) => {
@@ -217,7 +225,7 @@ export function InquiryDetailsPage({
   ) => {
     persistInquiry((prev) => ({
       ...prev,
-      stage: "In Assessment",
+      stage: "Clinical Assessment",
       assessmentStatus: "Scheduled",
       assessmentDetails: {
         scheduledDate: details.scheduledDate,
@@ -238,7 +246,7 @@ export function InquiryDetailsPage({
         ...prev.timeline,
       ],
     }));
-    syncInquiryStageToAdmin(inquiryId, "In Assessment");
+    syncInquiryStageToAdmin(inquiryId, "Clinical Assessment");
   };
 
   const handleConfirmAssignment = (
@@ -271,24 +279,30 @@ export function InquiryDetailsPage({
   };
 
   const handleUpdateStatus = (newStage: InquiryStage) => {
+    const normalized = normalizePipelineStage(newStage);
+    if (normalized === "Enrolled") {
+      setIsStatusDropdownOpen(false);
+      handleConfirmConversion(inquiry.id);
+      return;
+    }
     persistInquiry((prev) => ({
       ...prev,
-      stage: newStage,
+      stage: normalized,
       timeline: [
         {
           id: `t-${Date.now()}`,
           type: "status_change",
           author: perms.actorName,
           timestamp: "Just now",
-          title: `Stage Updated to ${newStage}`,
-          details: `Inquiry status changed to ${newStage}.`,
+          title: `Stage Updated to ${normalized}`,
+          details: `Inquiry status changed to ${normalized}.`,
         },
         ...prev.timeline,
       ],
     }));
-    syncInquiryStageToAdmin(inquiry.id, newStage);
+    syncInquiryStageToAdmin(inquiry.id, normalized, inquiry.familyInfo.clientInfo.name);
     setIsStatusDropdownOpen(false);
-    toast.success(`Stage updated to ${newStage}`);
+    toast.success(`Stage updated to ${normalized}`);
   };
 
   const handleToggleDocStatus = (docId: string) => {
@@ -320,7 +334,7 @@ export function InquiryDetailsPage({
     } else {
       persistInquiry((prev) => ({
         ...prev,
-        stage: "Converted",
+        stage: "Enrolled",
         onboardingStatus: {
           converted: true,
           convertedAt: new Date().toISOString(),

@@ -153,7 +153,7 @@ export function NewReferralFullPage({
       const newInquiry: InquiryRecord = {
         id: randomId,
         familyName: `The ${familyLastName} Family`,
-        stage: "New Inquiry",
+        stage: "New Referral",
         dateReceived: "Just now",
         dateReceivedRaw: new Date().toISOString(),
         source: referralSource,

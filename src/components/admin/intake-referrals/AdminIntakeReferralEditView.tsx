@@ -23,6 +23,7 @@ import {
   saveAdminReferralsToStorage,
 } from "@/lib/intake-referrals/adminIntakeReferralsData";
 import { LILISARE_SERVICES } from "@/lib/services";
+import { syncAdminReferralToIntake } from "@/lib/intake/intakeSync";
 import { toast } from "sonner";
 
 interface AdminIntakeReferralEditViewProps {
@@ -165,6 +166,7 @@ export function AdminIntakeReferralEditView({
     } else {
       saveAdminReferralsToStorage([updated, ...all]);
     }
+    syncAdminReferralToIntake(updated);
 
     toast.success(`Referral ${updated.id} (${updated.patientName}) updated successfully!`);
     router.push(`/admin/intake-referrals/${referral.id}`);

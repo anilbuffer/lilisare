@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Filter, Building2, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { InquiryRecord } from "@/types/intake";
+import { normalizePipelineStage } from "@/lib/intake/intakeSync";
 
 interface IntakePipelineFunnelCardProps {
   inquiries: InquiryRecord[];
@@ -14,11 +15,11 @@ export function IntakePipelineFunnelCard({ inquiries }: IntakePipelineFunnelCard
   const total = inquiries.length || 1;
 
   const stages = [
-    { name: "New Inquiries", stage: "New Inquiry", color: "bg-[#C2D9C8]" },
-    { name: "Contacted", stage: "Contacted", color: "bg-[#93C573]" },
-    { name: "In Assessment", stage: "Needs Discussion", color: "bg-[#5B8E32]" },
-    { name: "CMA Coordination", stage: "CMA Coordination", color: "bg-[#3D6B22]" },
-    { name: "Converted to Care", stage: "Converted", color: "bg-[#1B3414]" },
+    { name: "New Referral", stage: "New Referral", color: "bg-[#C2D9C8]" },
+    { name: "Clinical Assessment", stage: "Clinical Assessment", color: "bg-[#93C573]" },
+    { name: "Documents & Auth", stage: "Documents & Auth", color: "bg-[#5B8E32]" },
+    { name: "Ready for Staffing", stage: "Ready for Staffing", color: "bg-[#3D6B22]" },
+    { name: "Enrolled", stage: "Enrolled", color: "bg-[#1B3414]" },
   ];
 
   const hospitalCount = inquiries.filter((i) => i.source === "Hospital Discharge").length;
@@ -47,7 +48,7 @@ export function IntakePipelineFunnelCard({ inquiries }: IntakePipelineFunnelCard
         {/* Funnel Bars */}
         <div className="space-y-2.5">
           {stages.map((st) => {
-            const count = inquiries.filter((i) => i.stage === st.stage).length;
+            const count = inquiries.filter((i) => normalizePipelineStage(i.stage) === st.stage).length;
             const pct = Math.max(14, Math.round((count / total) * 100));
 
             return (

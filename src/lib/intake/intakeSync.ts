@@ -1,7 +1,14 @@
 "use client";
 
-import { InquiryRecord } from "@/types/intake";
+import { CanonicalPipelineStage, InquiryRecord } from "@/types/intake";
 import { INITIAL_INQUIRIES } from "./mockIntakeData";
+import {
+  AdminIntakeReferralItem,
+  ReferralPriority,
+  ReferralStatus,
+  getAdminReferralsFromStorage,
+  saveAdminReferralsToStorage,
+} from "@/lib/intake-referrals/adminIntakeReferralsData";
 import {
   getClientsFromStorage,
   saveClientsToStorage,
@@ -24,6 +31,58 @@ import { enrichClientWith17Domains } from "@/lib/clients/enterpriseClientEnriche
 
 export const INTAKE_STORAGE_KEY = "lilisare_intake_inquiries";
 export const INTAKE_SYNC_EVENT = "lilisare_intake_sync";
+
+/**
+ * Normalize any legacy or current stage/status string into the 5 canonical pipeline stages + Archived
+ */
+export function normalizePipelineStage(stage?: string): CanonicalPipelineStage {
+  switch (stage) {
+    case "New Referral":
+    case "New Inquiry":
+    case "New Lead":
+    case "Contacted":
+      return "New Referral";
+    case "Clinical Assessment":
+    case "Needs Discussion":
+    case "In Assessment":
+      return "Clinical Assessment";
+    case "Documents & Auth":
+    case "CMA Coordination":
+    case "CM Coordination":
+      return "Documents & Auth";
+    case "Ready for Staffing":
+    case "Family Decision":
+      return "Ready for Staffing";
+    case "Enrolled":
+    case "Converted":
+      return "Enrolled";
+    case "Archived":
+    case "Closed":
+      return "Archived";
+    default:
+      return "New Referral";
+  }
+}
+
+/**
+ * Compute days in pipeline for Intake Velocity KPI
+ */
+export function computeDaysInPipeline(dateReceivedRaw?: string, dateReceived?: string): number {
+  if (dateReceivedRaw) {
+    const parsed = Date.parse(dateReceivedRaw);
+    if (!Number.isNaN(parsed)) {
+      const diff = Math.max(0, Math.round((Date.now() - parsed) / (1000 * 60 * 60 * 24)));
+      return Math.min(diff, 45); // keep mock dates bounded realistically
+    }
+  }
+  if (!dateReceived) return 1;
+  const lower = dateReceived.toLowerCase();
+  if (lower.includes("today")) return 0;
+  if (lower.includes("yesterday")) return 1;
+  const match = lower.match(/(\d+)\s*day/);
+  if (match) return Number(match[1]) || 1;
+  return 3;
+}
 
 /**
  * Retrieve inquiries with local storage persistence
@@ -520,7 +579,7 @@ export function convertInquiryToLiveEntities(
   const updatedInquiries = [...inquiries];
   updatedInquiries[index] = {
     ...inquiry,
-    stage: "Converted",
+    stage: "Enrolled",
     onboardingStatus: {
       converted: true,
       convertedAt: new Date().toISOString(),
@@ -585,40 +644,281 @@ export function convertInquiryToLiveEntities(
 /**
  * Sync an Inquiry stage change from Intake Coordinator to Agency Admin Referrals store
  */
-export function syncInquiryStageToAdmin(inquiryId: string, newStage: string): void {
+export function syncInquiryStageToAdmin(inquiryId: string, newStage: string, patientName?: string): void {
   if (typeof window === "undefined") return;
   try {
-    const statusMap: Record<string, string> = {
-      "New Inquiry": "New Referral",
-      "New Lead": "New Referral",
-      "Contacted": "New Referral",
-      "Needs Discussion": "Clinical Assessment",
-      "In Assessment": "Clinical Assessment",
-      "CMA Coordination": "Documents & Auth",
-      "CM Coordination": "Documents & Auth",
-      "Family Decision": "Ready for Staffing",
-      "Converted": "Enrolled",
-      "Closed": "Archived",
-    };
-    const mappedStatus = statusMap[newStage] || "New Referral";
-    const adminRaw = localStorage.getItem("lilisare_admin_referrals_v1");
-    if (!adminRaw) return;
-    const adminList = JSON.parse(adminRaw);
-    if (!Array.isArray(adminList)) return;
+    const mappedStatus = normalizePipelineStage(newStage) as ReferralStatus;
+    const adminList = getAdminReferralsFromStorage();
     const numericSuffix = inquiryId.replace(/\D/g, "");
-    const updated = adminList.map((ref: { id?: string }) => {
-      if (
-        ref.id?.toLowerCase() === inquiryId.toLowerCase() ||
-        (numericSuffix && ref.id?.endsWith(`-${numericSuffix}`))
-      ) {
+    let matched = false;
+    const updated = adminList.map((ref) => {
+      const isMatch =
+        ref.id.toLowerCase() === inquiryId.toLowerCase() ||
+        (numericSuffix && ref.id.endsWith(`-${numericSuffix}`)) ||
+        (patientName && ref.patientName.toLowerCase() === patientName.trim().toLowerCase());
+      if (isMatch) {
+        matched = true;
         return { ...ref, status: mappedStatus };
       }
       return ref;
     });
-    localStorage.setItem("lilisare_admin_referrals_v1", JSON.stringify(updated));
-    window.dispatchEvent(new CustomEvent(INTAKE_SYNC_EVENT, { detail: { timestamp: Date.now() } }));
+    if (matched) {
+      saveAdminReferralsToStorage(updated);
+    }
   } catch (err) {
     console.error("Failed to sync inquiry stage to admin referrals", err);
+  }
+}
+
+/**
+ * Sync an Admin Referral status change to Intake Coordinator Inquiries store
+ */
+export function syncAdminStatusToIntake(referralId: string, newStatus: string, patientName?: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const mappedStage = normalizePipelineStage(newStatus);
+    const inquiries = getIntakeInquiriesFromStorage();
+    const numericSuffix = referralId.replace(/\D/g, "");
+    let matched = false;
+    const updated = inquiries.map((inq) => {
+      const isMatch =
+        inq.id.toLowerCase() === referralId.toLowerCase() ||
+        (numericSuffix && inq.id.endsWith(`-${numericSuffix}`)) ||
+        (patientName && inq.familyInfo.clientInfo.name.toLowerCase() === patientName.trim().toLowerCase());
+      if (isMatch) {
+        matched = true;
+        return {
+          ...inq,
+          stage: mappedStage,
+          onboardingStatus:
+            mappedStage === "Enrolled"
+              ? { ...inq.onboardingStatus, converted: true, convertedAt: inq.onboardingStatus?.convertedAt || new Date().toISOString() }
+              : inq.onboardingStatus,
+        };
+      }
+      return inq;
+    });
+    if (matched) {
+      saveIntakeInquiriesToStorage(updated);
+    }
+  } catch (err) {
+    console.error("Failed to sync admin referral status to intake", err);
+  }
+}
+
+/**
+ * Upsert an Admin Referral record into the Intake Coordinator Inquiries store
+ */
+export function syncAdminReferralToIntake(referral: AdminIntakeReferralItem): void {
+  if (typeof window === "undefined") return;
+  try {
+    const inquiries = getIntakeInquiriesFromStorage();
+    const numericSuffix = referral.id.replace(/\D/g, "");
+    const mappedStage = normalizePipelineStage(referral.status);
+    const mappedUrgency: InquiryRecord["urgency"] =
+      referral.priority === "Urgent" ? "Urgent" : referral.priority === "High" ? "Urgent" : "Normal";
+
+    const existingIdx = inquiries.findIndex(
+      (inq) =>
+        inq.id.toLowerCase() === referral.id.toLowerCase() ||
+        (numericSuffix && inq.id.endsWith(`-${numericSuffix}`)) ||
+        inq.familyInfo.clientInfo.name.toLowerCase() === referral.patientName.trim().toLowerCase()
+    );
+
+    if (existingIdx !== -1) {
+      const existing = inquiries[existingIdx];
+      inquiries[existingIdx] = {
+        ...existing,
+        stage: mappedStage,
+        urgency: mappedUrgency,
+        familyInfo: {
+          ...existing.familyInfo,
+          phone: referral.phone || existing.familyInfo.phone,
+          email: referral.email || existing.familyInfo.email,
+          householdLocation: {
+            ...existing.familyInfo.householdLocation,
+            address: referral.address || existing.familyInfo.householdLocation.address,
+            city: referral.city || existing.familyInfo.householdLocation.city,
+            zip: referral.zip || existing.familyInfo.householdLocation.zip,
+          },
+          clientInfo: {
+            ...existing.familyInfo.clientInfo,
+            name: referral.patientName,
+            age: referral.age || existing.familyInfo.clientInfo.age,
+            gender: referral.gender || existing.familyInfo.clientInfo.gender,
+          },
+        },
+        referralInfo: {
+          ...existing.referralInfo,
+          organization: referral.referralSource || existing.referralInfo.organization,
+          assignedCoordinator: {
+            ...existing.referralInfo.assignedCoordinator,
+            name: referral.assignedCoordinator || existing.referralInfo.assignedCoordinator.name,
+          },
+        },
+        careRequirements: {
+          ...existing.careRequirements,
+          careType: referral.requestedServices.length > 0 ? referral.requestedServices : existing.careRequirements.careType,
+          programInterest: referral.program || existing.careRequirements.programInterest,
+          hoursPerWeek: referral.estimatedHoursPerWeek || existing.careRequirements.hoursPerWeek,
+          supportRequirements: referral.triageNotes || existing.careRequirements.supportRequirements,
+          targetStartDate: referral.targetStartDate || existing.careRequirements.targetStartDate,
+        },
+      };
+      saveIntakeInquiriesToStorage(inquiries);
+    } else {
+      const lastName = referral.patientName.trim().split(/\s+/).pop() || "Family";
+      const newInquiry: InquiryRecord = {
+        id: referral.id,
+        familyName: `The ${lastName} Family`,
+        stage: mappedStage,
+        dateReceived: referral.receivedDate || "Today",
+        dateReceivedRaw: new Date().toISOString(),
+        source: referral.referralSource.toLowerCase().includes("hospital")
+          ? "Hospital Discharge"
+          : referral.referralSource.toLowerCase().includes("physician") || referral.referralSource.toLowerCase().includes("clinic")
+            ? "Physician"
+            : "Referral",
+        branch: "North Metro Branch",
+        urgency: mappedUrgency,
+        familyInfo: {
+          primaryContact: referral.referralSourceContact || referral.patientName,
+          relationship: "Primary Contact",
+          phone: referral.phone || "(555) 123-4567",
+          email: referral.email || "",
+          preferredContactMethod: "Phone",
+          householdLocation: {
+            address: referral.address || "100 LiliSare Care Way",
+            city: referral.city || "Springfield",
+            state: "PA",
+            zip: referral.zip || "19087",
+            branch: "North Metro Branch",
+          },
+          clientInfo: {
+            name: referral.patientName,
+            age: referral.age || 70,
+            relationship: "Care Recipient",
+            gender: referral.gender || "Female",
+          },
+        },
+        referralInfo: {
+          source: "Referral",
+          organization: referral.referralSource,
+          dateReceived: referral.receivedDate || "Today",
+          assignedCoordinator: {
+            name: referral.assignedCoordinator || "Maria Santos, BSN",
+            role: "Intake Coordinator",
+          },
+        },
+        careRequirements: {
+          careType: referral.requestedServices.length > 0 ? referral.requestedServices : ["Home Health Aide"],
+          supportRequirements: referral.triageNotes || referral.primaryDiagnosis,
+          preferredLocation: "Client's Home",
+          programInterest: referral.program,
+          hoursPerWeek: referral.estimatedHoursPerWeek || 25,
+          targetStartDate: referral.targetStartDate,
+        },
+        documents: [],
+        missingInformation: [],
+        assessmentStatus: mappedStage === "Clinical Assessment" ? "Scheduled" : "Not Scheduled",
+        timeline: [
+          {
+            id: `t-${Date.now()}`,
+            type: "system",
+            author: "System Sync",
+            timestamp: "Just now",
+            title: "Referral Created",
+            details: `Referral ${referral.id} for ${referral.patientName} synced from Agency Admin.`,
+          },
+        ],
+      };
+      saveIntakeInquiriesToStorage([newInquiry, ...inquiries]);
+    }
+  } catch (err) {
+    console.error("Failed to sync admin referral to intake", err);
+  }
+}
+
+/**
+ * Upsert an Intake Inquiry record into the Agency Admin Referrals store
+ */
+export function syncInquiryToAdminReferral(inquiry: InquiryRecord): void {
+  if (typeof window === "undefined") return;
+  try {
+    const adminList = getAdminReferralsFromStorage();
+    const numericSuffix = inquiry.id.replace(/\D/g, "");
+    const mappedStatus = normalizePipelineStage(inquiry.stage) as ReferralStatus;
+    const mappedPriority: ReferralPriority =
+      inquiry.urgency === "Immediate" || inquiry.urgency === "Urgent" ? "Urgent" : "Standard";
+    const clientName = inquiry.familyInfo.clientInfo.name || inquiry.familyName;
+
+    const existingIdx = adminList.findIndex(
+      (r) =>
+        r.id.toLowerCase() === inquiry.id.toLowerCase() ||
+        (numericSuffix && r.id.endsWith(`-${numericSuffix}`)) ||
+        r.patientName.toLowerCase() === clientName.trim().toLowerCase()
+    );
+
+    if (existingIdx !== -1) {
+      const existing = adminList[existingIdx];
+      adminList[existingIdx] = {
+        ...existing,
+        patientName: clientName,
+        age: inquiry.familyInfo.clientInfo.age || existing.age,
+        gender: inquiry.familyInfo.clientInfo.gender || existing.gender,
+        phone: inquiry.familyInfo.phone || existing.phone,
+        email: inquiry.familyInfo.email || existing.email,
+        address: inquiry.familyInfo.householdLocation.address || existing.address,
+        city: inquiry.familyInfo.householdLocation.city || existing.city,
+        zip: inquiry.familyInfo.householdLocation.zip || existing.zip,
+        referralSource: inquiry.referralInfo?.organization || inquiry.source || existing.referralSource,
+        program: inquiry.careRequirements.programInterest || existing.program,
+        requestedServices:
+          inquiry.careRequirements.careType.length > 0
+            ? inquiry.careRequirements.careType
+            : existing.requestedServices,
+        priority: mappedPriority,
+        status: mappedStatus,
+        triageNotes: inquiry.careRequirements.supportRequirements || existing.triageNotes,
+        assignedCoordinator:
+          inquiry.referralInfo?.assignedCoordinator?.name || existing.assignedCoordinator,
+        estimatedHoursPerWeek: inquiry.careRequirements.hoursPerWeek || existing.estimatedHoursPerWeek,
+      };
+      saveAdminReferralsToStorage(adminList);
+    } else {
+      const newAdminRef: AdminIntakeReferralItem = {
+        id: inquiry.id,
+        patientName: clientName,
+        age: inquiry.familyInfo.clientInfo.age || 70,
+        gender: inquiry.familyInfo.clientInfo.gender || "Female",
+        phone: inquiry.familyInfo.phone || "(555) 123-4567",
+        email: inquiry.familyInfo.email || "",
+        address: inquiry.familyInfo.householdLocation.address || "100 LiliSare Care Way",
+        city: inquiry.familyInfo.householdLocation.city || "Springfield",
+        zip: inquiry.familyInfo.householdLocation.zip || "19087",
+        referralSource: inquiry.referralInfo?.organization || inquiry.source,
+        referralSourceContact: inquiry.familyInfo.primaryContact,
+        program: inquiry.careRequirements.programInterest,
+        requestedServices:
+          inquiry.careRequirements.careType.length > 0
+            ? inquiry.careRequirements.careType
+            : ["Home Health Aide"],
+        priority: mappedPriority,
+        status: mappedStatus,
+        receivedDate: inquiry.dateReceived || "Today",
+        daysInPipeline: computeDaysInPipeline(inquiry.dateReceivedRaw, inquiry.dateReceived),
+        primaryDiagnosis: inquiry.careRequirements.supportRequirements || "Pending clinical review",
+        triageNotes: inquiry.careRequirements.supportRequirements || "Synced from Intake Coordinator pipeline.",
+        assignedCoordinator: inquiry.referralInfo?.assignedCoordinator?.name || "Elena Rostova",
+        insuranceVerified: false,
+        payerName: inquiry.careRequirements.programInterest,
+        targetStartDate: inquiry.careRequirements.targetStartDate || "Within 7 days",
+        estimatedHoursPerWeek: inquiry.careRequirements.hoursPerWeek || 20,
+      };
+      saveAdminReferralsToStorage([newAdminRef, ...adminList]);
+    }
+  } catch (err) {
+    console.error("Failed to sync inquiry to admin referral", err);
   }
 }
 
@@ -756,11 +1056,12 @@ export function getSyncedIntakeMetrics() {
   const caregivers = getCaregiversFromStorage();
 
   // Pillar 1: Intake & Referrals
-  const newInquiries = inquiries.filter((i) => i.stage === "New Inquiry" || i.stage === "New Lead");
-  const inAssessment = inquiries.filter(
-    (i) => i.stage === "Needs Discussion" || i.stage === "CMA Coordination" || i.stage === "In Assessment"
-  );
-  const converted = inquiries.filter((i) => i.stage === "Converted");
+  const newInquiries = inquiries.filter((i) => normalizePipelineStage(i.stage) === "New Referral");
+  const inAssessment = inquiries.filter((i) => {
+    const s = normalizePipelineStage(i.stage);
+    return s === "Clinical Assessment" || s === "Documents & Auth";
+  });
+  const converted = inquiries.filter((i) => normalizePipelineStage(i.stage) === "Enrolled");
   const hospitalDischarges = inquiries.filter((i) => i.source === "Hospital Discharge");
   const urgentCount = inquiries.filter((i) => i.urgency === "Immediate" || i.urgency === "Urgent");
 

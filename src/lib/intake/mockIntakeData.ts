@@ -2,43 +2,37 @@ import { InquiryRecord, FollowUpTask, RecentActivityItem, PipelineStageCount } f
 
 export const PIPELINE_STAGE_DATA: PipelineStageCount[] = [
   {
-    stage: "New Inquiry",
+    stage: "New Referral",
     count: 24,
     percentageOfMax: 100,
-    description: "Awaiting first contact",
+    description: "Awaiting initial triage & outreach",
   },
   {
-    stage: "Contacted",
-    count: 18,
-    percentageOfMax: 75,
-    description: "Initial discovery & engagement",
-  },
-  {
-    stage: "Needs Discussion",
+    stage: "Clinical Assessment",
     count: 14,
     percentageOfMax: 58.3,
-    description: "Clinical & care discussion pending",
+    description: "RN clinical & home safety assessment",
   },
   {
-    stage: "CMA Coordination",
+    stage: "Documents & Auth",
     count: 11,
     percentageOfMax: 45.8,
-    description: "Case manager & payer authorization",
+    description: "Documents, consents & payer authorization",
   },
   {
-    stage: "Family Decision",
+    stage: "Ready for Staffing",
     count: 8,
     percentageOfMax: 33.3,
-    description: "Care proposal review with family",
+    description: "Cleared for caregiver matching",
   },
   {
-    stage: "Converted",
+    stage: "Enrolled",
     count: 16,
     percentageOfMax: 66.7,
-    description: "Qualified & transferred to onboarding",
+    description: "Admitted to active client roster",
   },
   {
-    stage: "Closed",
+    stage: "Archived",
     count: 6,
     percentageOfMax: 25,
     description: "Archived or referred to external provider",
@@ -49,7 +43,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1042",
     familyName: "The Miller Family",
-    stage: "New Inquiry",
+    stage: "New Referral",
     dateReceived: "Today",
     dateReceivedRaw: "2026-11-19T09:15:00Z",
     source: "Website",
@@ -145,7 +139,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1041",
     familyName: "Eleanor & Arthur Vance",
-    stage: "Needs Discussion",
+    stage: "Clinical Assessment",
     dateReceived: "Yesterday",
     dateReceivedRaw: "2026-11-18T14:20:00Z",
     source: "Phone",
@@ -239,7 +233,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1040",
     familyName: "The Davis Household",
-    stage: "Contacted",
+    stage: "New Referral",
     dateReceived: "Yesterday",
     dateReceivedRaw: "2026-11-18T10:05:00Z",
     source: "Referral",
@@ -328,7 +322,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1039",
     familyName: "The Henderson Family",
-    stage: "CMA Coordination",
+    stage: "Documents & Auth",
     dateReceived: "2 days ago",
     dateReceivedRaw: "2026-11-17T11:45:00Z",
     source: "Case Manager",
@@ -431,7 +425,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1038",
     familyName: "The Williams Family",
-    stage: "Converted",
+    stage: "Enrolled",
     dateReceived: "3 days ago",
     dateReceivedRaw: "2026-11-16T08:30:00Z",
     source: "Hospital Discharge",
@@ -528,7 +522,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1037",
     familyName: "The Gomez Household",
-    stage: "New Inquiry",
+    stage: "New Referral",
     dateReceived: "3 days ago",
     dateReceivedRaw: "2026-11-16T14:10:00Z",
     source: "Website",
@@ -605,7 +599,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1036",
     familyName: "The Chen Household",
-    stage: "Family Decision",
+    stage: "Ready for Staffing",
     dateReceived: "4 days ago",
     dateReceivedRaw: "2026-11-15T16:00:00Z",
     source: "Physician",
@@ -681,7 +675,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1035",
     familyName: "The Taylor Family",
-    stage: "Needs Discussion",
+    stage: "Clinical Assessment",
     dateReceived: "4 days ago",
     dateReceivedRaw: "2026-11-15T11:25:00Z",
     source: "Referral",
@@ -759,7 +753,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1034",
     familyName: "The Martinez Family",
-    stage: "CMA Coordination",
+    stage: "Documents & Auth",
     dateReceived: "5 days ago",
     dateReceivedRaw: "2026-11-14T09:40:00Z",
     source: "Case Manager",
@@ -852,7 +846,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1033",
     familyName: "The Robinson Family",
-    stage: "Converted",
+    stage: "Enrolled",
     dateReceived: "6 days ago",
     dateReceivedRaw: "2026-11-13T13:00:00Z",
     source: "Referral",
@@ -925,7 +919,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
   {
     id: "INQ-1032",
     familyName: "The Foster Family",
-    stage: "Closed",
+    stage: "Archived",
     dateReceived: "7 days ago",
     dateReceivedRaw: "2026-11-12T10:00:00Z",
     source: "Phone",

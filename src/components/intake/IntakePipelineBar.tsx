@@ -26,6 +26,12 @@ interface IntakePipelineBarProps {
 }
 
 const STAGE_ICONS: Record<InquiryStage, React.ElementType> = {
+  "New Referral": Sparkles,
+  "Clinical Assessment": Stethoscope,
+  "Documents & Auth": FileText,
+  "Ready for Staffing": CheckCircle2,
+  "Enrolled": CheckCircle2,
+  "Archived": Inbox,
   "New Inquiry": Sparkles,
   "Contacted": PhoneCall,
   "Needs Discussion": Stethoscope,
@@ -39,6 +45,30 @@ const STAGE_ICONS: Record<InquiryStage, React.ElementType> = {
 };
 
 const STAGE_BAR_COLORS: Record<InquiryStage, { bar: string; badge: string }> = {
+  "New Referral": {
+    bar: "bg-[#FF6E61]",
+    badge: "bg-rose-50 text-rose-700 border-rose-200",
+  },
+  "Clinical Assessment": {
+    bar: "bg-[#2563EB]",
+    badge: "bg-blue-50 text-blue-800 border-blue-200",
+  },
+  "Documents & Auth": {
+    bar: "bg-[#A855F7]",
+    badge: "bg-purple-50 text-purple-700 border-purple-200",
+  },
+  "Ready for Staffing": {
+    bar: "bg-[#0D9488]",
+    badge: "bg-teal-50 text-teal-800 border-teal-200",
+  },
+  "Enrolled": {
+    bar: "bg-[#3D6B22]",
+    badge: "bg-emerald-50 text-[#1E5622] border-emerald-200",
+  },
+  "Archived": {
+    bar: "bg-slate-400",
+    badge: "bg-slate-100 text-slate-600 border-slate-200",
+  },
   "New Inquiry": {
     bar: "bg-[#FF6E61]",
     badge: "bg-rose-50 text-rose-700 border-rose-200",

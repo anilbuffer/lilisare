@@ -45,6 +45,7 @@ import {
   archiveReferralAcrossStores,
   deleteReferralAcrossStores,
   subscribeToIntakeSync,
+  syncAdminStatusToIntake,
 } from "@/lib/intake/intakeSync";
 import { getClientsFromStorage, saveClientsToStorage } from "@/lib/clients/mockData";
 import { getHouseholdsFromStorage, saveHouseholdsToStorage } from "@/lib/households/mockData";
@@ -223,6 +224,7 @@ export function AdminIntakeReferralDetailView({
     const all = getAdminReferralsFromStorage();
     const updated = all.map((r) => (r.id === referral.id ? { ...r, status: newStatus } : r));
     saveAdminReferralsToStorage(updated);
+    syncAdminStatusToIntake(referral.id, newStatus, referral.patientName);
     setReferral({ ...referral, status: newStatus });
     setIsStatusDropdownOpen(false);
     toast.success(`Referral status updated to ${newStatus}`);

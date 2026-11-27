@@ -41,16 +41,22 @@ interface InquiryDetailViewProps {
 }
 
 const STAGE_STYLES: Record<InquiryRecord["stage"], { bg: string; text: string; border: string }> = {
+  "New Referral": { bg: "bg-[#FEF2F2]", text: "text-[#B91C1C]", border: "border-[#FECACA]" },
+  "Clinical Assessment": { bg: "bg-[#EFF6FF]", text: "text-[#1D4ED8]", border: "border-[#BFDBFE]" },
+  "Documents & Auth": { bg: "bg-[#F3E8FF]", text: "text-[#6B21A8]", border: "border-[#E9D5FF]" },
+  "Ready for Staffing": { bg: "bg-[#CCFBF1]", text: "text-[#115E59]", border: "border-[#99F6E4]" },
+  "Enrolled": { bg: "bg-[#E3F1D9]", text: "text-[#1E5622]", border: "border-[#C7E4B3]" },
+  "Archived": { bg: "bg-slate-100", text: "text-slate-600", border: "border-slate-200" },
   "New Inquiry": { bg: "bg-[#FEF2F2]", text: "text-[#B91C1C]", border: "border-[#FECACA]" },
   "Contacted": { bg: "bg-[#FEF3C7]", text: "text-[#9A5B00]", border: "border-[#FDE68A]" },
-  "Needs Discussion": { bg: "bg-[#F3E8FF]", text: "text-[#6B21A8]", border: "border-[#E9D5FF]" },
-  "CMA Coordination": { bg: "bg-[#E0F2FE]", text: "text-[#0369A1]", border: "border-[#BAE6FD]" },
+  "Needs Discussion": { bg: "bg-[#EFF6FF]", text: "text-[#1D4ED8]", border: "border-[#BFDBFE]" },
+  "CMA Coordination": { bg: "bg-[#F3E8FF]", text: "text-[#6B21A8]", border: "border-[#E9D5FF]" },
   "Family Decision": { bg: "bg-[#CCFBF1]", text: "text-[#115E59]", border: "border-[#99F6E4]" },
   "Converted": { bg: "bg-[#E3F1D9]", text: "text-[#1E5622]", border: "border-[#C7E4B3]" },
   "Closed": { bg: "bg-slate-100", text: "text-slate-600", border: "border-slate-200" },
   "New Lead": { bg: "bg-[#FEF2F2]", text: "text-[#B91C1C]", border: "border-[#FECACA]" },
-  "In Assessment": { bg: "bg-[#E0F2FE]", text: "text-[#0369A1]", border: "border-[#BAE6FD]" },
-  "CM Coordination": { bg: "bg-[#EEF2FF]", text: "text-[#4338CA]", border: "border-[#C7D2FE]" },
+  "In Assessment": { bg: "bg-[#EFF6FF]", text: "text-[#1D4ED8]", border: "border-[#BFDBFE]" },
+  "CM Coordination": { bg: "bg-[#F3E8FF]", text: "text-[#6B21A8]", border: "border-[#E9D5FF]" },
 };
 
 export function InquiryDetailView({
@@ -77,11 +83,12 @@ export function InquiryDetailView({
   };
 
   const stagesList: InquiryRecord["stage"][] = [
-    "New Lead",
-    "Contacted",
-    "In Assessment",
-    "CM Coordination",
-    "Converted",
+    "New Referral",
+    "Clinical Assessment",
+    "Documents & Auth",
+    "Ready for Staffing",
+    "Enrolled",
+    "Archived",
   ];
 
   return (

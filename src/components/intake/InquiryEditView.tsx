@@ -25,6 +25,8 @@ import {
   getIntakeInquiriesFromStorage,
   saveIntakeInquiriesToStorage,
   syncInquiryStageToAdmin,
+  syncInquiryToAdminReferral,
+  normalizePipelineStage,
 } from "@/lib/intake/intakeSync";
 import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
@@ -65,7 +67,7 @@ export function InquiryEditView({
   const [caregiverName, setCaregiverName] = useState("");
   const [caregiverRelationship, setCaregiverRelationship] = useState("");
 
-  const [stage, setStage] = useState<InquiryStage>("New Inquiry");
+  const [stage, setStage] = useState<InquiryStage>("New Referral");
   const [urgency, setUrgency] = useState<InquiryRecord["urgency"]>("Normal");
   const [source, setSource] = useState<ReferralSourceType>("Website");
   const [organization, setOrganization] = useState("");
@@ -106,7 +108,7 @@ export function InquiryEditView({
       setCaregiverName(found.familyInfo.potentialCaregiver?.name || "");
       setCaregiverRelationship(found.familyInfo.potentialCaregiver?.relationship || "");
 
-      setStage(found.stage);
+      setStage(normalizePipelineStage(found.stage));
       setUrgency(found.urgency);
       setSource(found.source);
       setOrganization(found.referralInfo.organization);
@@ -226,7 +228,7 @@ export function InquiryEditView({
     } else {
       saveIntakeInquiriesToStorage([updated, ...all]);
     }
-    syncInquiryStageToAdmin(updated.id, updated.stage);
+    syncInquiryToAdminReferral(updated);
 
     toast.success(`Inquiry ${updated.id} updated successfully!`);
     router.push(`${cleanBase}/${inquiry.id}`);
@@ -449,13 +451,12 @@ export function InquiryEditView({
                 value={stage}
                 onChange={(e) => setStage(e.target.value as InquiryStage)}
               >
-                <option value="New Inquiry">New Inquiry</option>
-                <option value="Contacted">Contacted</option>
-                <option value="Needs Discussion">Needs Discussion</option>
-                <option value="CMA Coordination">CMA Coordination</option>
-                <option value="Family Decision">Family Decision</option>
-                <option value="Converted">Converted</option>
-                <option value="Closed">Closed</option>
+                <option value="New Referral">New Referral</option>
+                <option value="Clinical Assessment">Clinical Assessment</option>
+                <option value="Documents & Auth">Documents & Auth</option>
+                <option value="Ready for Staffing">Ready for Staffing</option>
+                <option value="Enrolled">Enrolled</option>
+                <option value="Archived">Archived</option>
               </FormSelect>
             </div>
             <div>

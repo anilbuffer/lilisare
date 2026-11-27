@@ -755,7 +755,7 @@ export default function HrPayrollPage() {
           {/* Export Button */}
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="px-4 py-2.5 bg-brand-teal hover:bg-brand-teal/90 text-white text-xs font-semibold rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] shadow-brand-teal/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export Payroll</span>

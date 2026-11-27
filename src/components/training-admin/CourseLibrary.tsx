@@ -121,7 +121,7 @@ export function CourseLibrary() {
         </div>
         <Link
           href="/training-admin/courses/builder"
-          className="flex items-center gap-2 bg-brand-teal text-white text-sm px-4 py-2.5 rounded-full font-medium shadow-[0_4px_24px_rgba(0,0,0,0.04)] shadow-brand-teal/20 hover:bg-brand-teal/90 active:scale-95 transition-all"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           Create New Course

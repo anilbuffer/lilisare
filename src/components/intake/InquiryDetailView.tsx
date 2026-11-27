@@ -200,7 +200,7 @@ export function InquiryDetailView({
             <button
               type="button"
               onClick={() => onConvertToOnboarding(inquiry)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-xs cursor-pointer ml-auto xl:ml-0"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
             >
               <span>Convert to Onboarding</span>
               <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />

@@ -115,7 +115,7 @@ export function PatientHeader({ patient }: PatientHeaderProps) {
             )}
             <button
               onClick={() => setModalState("schedule")}
-              className="inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-emerald-600 active:scale-95 transition-all text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shadow-[0_6px_32px_rgba(0,0,0,0.04)] hover:shadow-[0_6px_32px_rgba(0,0,0,0.06)]">
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto">
               <Calendar className="w-4 h-4 shrink-0" />
               <span className="truncate">Schedule Assessment</span>
             </button>

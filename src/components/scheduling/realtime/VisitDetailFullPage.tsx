@@ -506,7 +506,7 @@ export function VisitDetailFullPage({
           {/* Primary Action: Edit Visit (Standardized to LiliSare detail pages) */}
           <Link
             href={`/${portal}/scheduling/${visit.id}/edit/`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all cursor-pointer whitespace-nowrap active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
           >
             <Edit3 className="w-4 h-4 text-emerald-100" />
             <span>Edit Visit</span>

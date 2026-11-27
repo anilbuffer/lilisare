@@ -139,7 +139,7 @@ export default function PayrollPage() {
             </button>
             <button
               onClick={() => setIsExportOpen(true)}
-              className="flex items-center gap-2 bg-brand-teal text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-brand-teal/90 transition-colors shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
             >
               <Download className="w-4 h-4" />
               Export Payroll

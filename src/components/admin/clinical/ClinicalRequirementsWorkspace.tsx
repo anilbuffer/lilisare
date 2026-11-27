@@ -353,7 +353,7 @@ export function ClinicalRequirementsWorkspace() {
             {canCreateReq && (
               <Link
                 href="/admin/clinical/requirements/new/"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>New Requirement</span>

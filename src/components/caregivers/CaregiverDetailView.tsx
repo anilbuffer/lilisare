@@ -361,7 +361,7 @@ export function CaregiverDetailView({
           {/* Primary CTA: Edit Profile */}
           <Link
             href={`${baseBackPath}/${caregiver.id}/edit`}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#2C5217] active:scale-[0.98] transition-all rounded-xl shadow-[0_2px_8px_rgba(61,107,34,0.2)] hover:shadow-[0_4px_12px_rgba(61,107,34,0.25)] cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap self-start sm:self-auto"
           >
             <span>Edit Profile</span>
             <ArrowRight className="w-3.5 h-3.5 stroke-[2.2]" />

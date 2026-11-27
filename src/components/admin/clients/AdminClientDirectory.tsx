@@ -25,8 +25,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ClientRecord } from "@/types/client";
-import { getClientsFromStorage } from "@/lib/clients/mockData";
+import { ClientRecord, ClientStatus, ClientRiskLevel } from "@/types/client";
+import {
+  getClientsFromStorage,
+  getClientDiagnosis,
+  getClientRiskLevel,
+  normalizeClientStatus,
+} from "@/lib/clients/mockData";
 import { subscribeToIntakeSync, deleteClientFromStorage } from "@/lib/intake/intakeSync";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import { Modal } from "@/components/ui/Modal";
@@ -38,8 +43,8 @@ export interface AdminClientItem {
   name: string;
   age: number;
   gender: string;
-  status: "Active" | "Hospitalized" | "On Hold" | "Discharged";
-  riskLevel: "High Risk" | "Medium Risk" | "Low Risk";
+  status: ClientStatus;
+  riskLevel: ClientRiskLevel;
   primaryDiagnosis: string;
   assignedCaregiver: string;
   nextVisit: string;
@@ -69,7 +74,7 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     name: "Jackson Vance",
     age: 6,
     gender: "Male",
-    status: "On Hold",
+    status: "Onboarding",
     riskLevel: "Medium Risk",
     primaryDiagnosis: "Developmental Mobility Delay, Sensory Support",
     assignedCaregiver: "Maria Santos, BSN",
@@ -203,7 +208,7 @@ export function AdminClientDirectory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [riskFilter, setRiskFilter] = useState<string>("ALL");
-  const [activeKpiKey, setActiveKpiKey] = useState<"TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED" | "ON_HOLD">("TOTAL");
+  const [activeKpiKey, setActiveKpiKey] = useState<"TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED">("TOTAL");
 
   // Pagination State: max 10 entries per page
   const [currentPage, setCurrentPage] = useState(1);
@@ -227,27 +232,9 @@ export function AdminClientDirectory() {
         if (Array.isArray(stored) && stored.length > 0) {
           const mapped: AdminClientItem[] = stored.map((c) => {
             const seedMatch = SEED_ADMIN_CLIENTS.find((s) => s.id === c.id);
-            const diagnosis =
-              seedMatch?.primaryDiagnosis ||
-              c.carePlan?.careNeeds?.[0] ||
-              c.carePlan?.program ||
-              "Comprehensive In-Home Support";
-
-            let risk: "High Risk" | "Medium Risk" | "Low Risk" = "Low Risk";
-            if (c.readiness?.overallScore && c.readiness.overallScore < 70) {
-              risk = "High Risk";
-            } else if (c.readiness?.documents === "Review needed" || c.status === "On Hold") {
-              risk = "Medium Risk";
-            } else if (seedMatch) {
-              risk = seedMatch.riskLevel;
-            }
-
-            let mappedStatus: AdminClientItem["status"] = "Active";
-            if (c.status === "Discharged") mappedStatus = "Discharged";
-            else if (c.status === "Onboarding" || c.status === "On Hold") {
-              mappedStatus = seedMatch?.status === "Hospitalized" ? "Hospitalized" : "On Hold";
-            } else if (c.status === "Active") mappedStatus = "Active";
-            else if (seedMatch?.status) mappedStatus = seedMatch.status;
+            const diagnosis = getClientDiagnosis(c);
+            const risk = getClientRiskLevel(c);
+            const mappedStatus = normalizeClientStatus(c.status);
 
             const assignedCaregiver =
               c.assignedCareTeam?.primaryCaregiver?.name ||
@@ -256,14 +243,15 @@ export function AdminClientDirectory() {
               "Unassigned";
 
             const nextVisit =
-              seedMatch?.nextVisit ||
-              (mappedStatus === "Discharged"
+              mappedStatus === "Discharged"
                 ? "Discharged"
                 : mappedStatus === "Hospitalized"
                   ? "Paused (Inpatient)"
-                  : mappedStatus === "On Hold"
+                  : mappedStatus === "Onboarding"
                     ? "Start of Care Pending"
-                    : c.carePlan?.frequency || "Scheduled");
+                    : seedMatch?.nextVisit && seedMatch.status === "Active"
+                      ? seedMatch.nextVisit
+                      : c.carePlan?.frequency || "Scheduled";
 
             const authRaw = c.authorization?.status;
             const authorizationStatus: AdminClientItem["authorizationStatus"] =
@@ -325,9 +313,8 @@ export function AdminClientDirectory() {
     const active = items.filter((i) => i.status === "Active").length;
     const highRisk = items.filter((i) => i.riskLevel === "High Risk").length;
     const hospitalized = items.filter((i) => i.status === "Hospitalized").length;
-    const onHold = items.filter((i) => i.status === "On Hold").length;
 
-    return { total, active, highRisk, hospitalized, onHold };
+    return { total, active, highRisk, hospitalized };
   }, [items]);
 
   // Filter clients based on search, status dropdown, risk dropdown, and active KPI card
@@ -380,7 +367,7 @@ export function AdminClientDirectory() {
   }, [filteredClients, currentPage, pageSize]);
 
   // KPI card click handler
-  const handleKpiCardClick = (key: "TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED" | "ON_HOLD") => {
+  const handleKpiCardClick = (key: "TOTAL" | "ACTIVE" | "HIGH_RISK" | "HOSPITALIZED") => {
     setActiveKpiKey(key);
     setCurrentPage(1);
     if (key === "TOTAL") {
@@ -388,12 +375,13 @@ export function AdminClientDirectory() {
       setRiskFilter("ALL");
     } else if (key === "ACTIVE") {
       setStatusFilter("Active");
+      setRiskFilter("ALL");
     } else if (key === "HIGH_RISK") {
-      setStatusFilter("High Risk");
+      setStatusFilter("ALL");
+      setRiskFilter("High Risk");
     } else if (key === "HOSPITALIZED") {
       setStatusFilter("Hospitalized");
-    } else if (key === "ON_HOLD") {
-      setStatusFilter("On Hold");
+      setRiskFilter("ALL");
     }
   };
 
@@ -430,9 +418,9 @@ export function AdminClientDirectory() {
       </div>
 
       {/* =========================================================================
-          2. EXECUTIVE KPI CARDS (Matches Reference 1 - 5 Filter Cards)
+          2. EXECUTIVE KPI CARDS (4 Core Roster KPIs)
          ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Card 1: Total Clients */}
         <div
           onClick={() => handleKpiCardClick("TOTAL")}
@@ -471,7 +459,7 @@ export function AdminClientDirectory() {
           </div>
         </div>
 
-        {/* Card 3: High Risk Alert */}
+        {/* Card 3: High Risk */}
         <div
           onClick={() => handleKpiCardClick("HIGH_RISK")}
           className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "HIGH_RISK"
@@ -480,7 +468,7 @@ export function AdminClientDirectory() {
             }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-500">High Risk Alert</span>
+            <span className="text-xs font-medium text-slate-500">High Risk</span>
             <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600">
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -506,25 +494,6 @@ export function AdminClientDirectory() {
           </div>
           <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             {kpis.hospitalized}
-          </div>
-        </div>
-
-        {/* Card 5: On Hold */}
-        <div
-          onClick={() => handleKpiCardClick("ON_HOLD")}
-          className={`cursor-pointer bg-white rounded-xl lg:rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 relative overflow-hidden ${activeKpiKey === "ON_HOLD"
-            ? "border-[#3D6B22] shadow-md ring-2 ring-[#3D6B22]/15"
-            : "border-slate-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300"
-            }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-500">On Hold</span>
-            <div className="w-7 h-7 rounded-lg bg-slate-100/80 border border-slate-200/80 flex items-center justify-center text-slate-600">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-            {kpis.onHold}
           </div>
         </div>
       </div>
@@ -591,8 +560,8 @@ export function AdminClientDirectory() {
                   {[
                     { label: "All Clients", value: "ALL" },
                     { label: "Active", value: "Active" },
+                    { label: "Onboarding", value: "Onboarding" },
                     { label: "Hospitalized", value: "Hospitalized" },
-                    { label: "On Hold", value: "On Hold" },
                     { label: "Discharged", value: "Discharged" },
                   ].map((option) => (
                     <button
@@ -744,7 +713,7 @@ export function AdminClientDirectory() {
                     Status
                   </th>
                   <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Risk
+                    Risk Level
                   </th>
                   <th className="py-3.5 px-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Assigned Caregiver / RN
@@ -796,8 +765,8 @@ export function AdminClientDirectory() {
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : client.status === "Hospitalized"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : client.status === "On Hold"
-                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                              : client.status === "Onboarding"
+                                ? "bg-sky-50 text-sky-700 border-sky-200"
                                 : "bg-slate-100 text-slate-600 border-slate-200"
                             }`}
                         >
@@ -966,8 +935,8 @@ export function AdminClientDirectory() {
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : client.status === "Hospitalized"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : client.status === "On Hold"
-                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                            : client.status === "Onboarding"
+                              ? "bg-sky-50 text-sky-700 border-sky-200"
                               : "bg-slate-100 text-slate-600 border-slate-200"
                           }`}
                       >

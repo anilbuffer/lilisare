@@ -24,9 +24,11 @@ import {
   getClientById,
   getClientsFromStorage,
   saveClientsToStorage,
+  getClientDiagnosis,
+  getClientRiskLevel,
 } from "@/lib/clients/mockData";
 import { MOCK_HOUSEHOLDS } from "@/lib/households/mockData";
-import { ClientRecord, CareArrangementType, ClientStatus } from "@/types/client";
+import { ClientRecord, CareArrangementType, ClientStatus, ClientRiskLevel } from "@/types/client";
 import { LILISARE_SERVICES } from "@/lib/services";
 import { toast } from "sonner";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
@@ -48,6 +50,8 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
   const [gender, setGender] = useState("");
   const [primaryLanguage, setPrimaryLanguage] = useState("");
   const [status, setStatus] = useState<ClientStatus>("Active");
+  const [riskLevel, setRiskLevel] = useState<ClientRiskLevel>("Low Risk");
+  const [primaryDiagnosis, setPrimaryDiagnosis] = useState("");
   const [careType, setCareType] = useState<CareArrangementType>("Family Care");
 
   // Contact
@@ -82,6 +86,8 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
       setGender(found.gender);
       setPrimaryLanguage(found.primaryLanguage);
       setStatus(found.status);
+      setRiskLevel(getClientRiskLevel(found));
+      setPrimaryDiagnosis(getClientDiagnosis(found));
       setCareType(found.careType);
 
       setContactName(found.primaryContact.name);
@@ -138,6 +144,8 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
       gender,
       primaryLanguage,
       status: safeStatus,
+      riskLevel,
+      primaryDiagnosis: primaryDiagnosis.trim() || client.primaryDiagnosis,
       careType,
       primaryContact: {
         ...client.primaryContact,
@@ -279,11 +287,35 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
               >
                 <option value="Active">Active (Receiving Care)</option>
                 <option value="Onboarding">Onboarding (Setup in Progress)</option>
-                <option value="On Hold">On Hold (Services Paused)</option>
+                <option value="Hospitalized">Hospitalized (Inpatient Hold)</option>
                 {perms.clients.canDischarge && (
                   <option value="Discharged">Discharged (Formally Ended)</option>
                 )}
               </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">Risk Level</label>
+              <select
+                value={riskLevel}
+                onChange={(e) => setRiskLevel(e.target.value as ClientRiskLevel)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-bold"
+              >
+                <option value="Low Risk">Low Risk</option>
+                <option value="Medium Risk">Medium Risk</option>
+                <option value="High Risk">High Risk</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">Primary Diagnosis</label>
+              <input
+                type="text"
+                value={primaryDiagnosis}
+                onChange={(e) => setPrimaryDiagnosis(e.target.value)}
+                placeholder="e.g. Congestive Heart Failure, Mobility Support"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+              />
             </div>
 
             <div>

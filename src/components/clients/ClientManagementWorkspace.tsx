@@ -26,15 +26,17 @@ import {
   Inbox,
   UserCheck,
 } from "lucide-react";
-import { ClientRecord } from "@/types/client";
+import { ClientRecord, ClientStatus } from "@/types/client";
+import {
+  getClientDiagnosis,
+  getClientRiskLevel,
+  getClientsFromStorage,
+  saveClientsToStorage,
+} from "@/lib/clients/mockData";
 import { toast } from "sonner";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
-export type ClientKanbanStage =
-  | "Active"
-  | "Hospitalized"
-  | "On Hold"
-  | "Discharged";
+export type ClientKanbanStage = ClientStatus;
 
 export const CLIENT_KANBAN_STAGES: {
   id: ClientKanbanStage;
@@ -61,6 +63,18 @@ export const CLIENT_KANBAN_STAGES: {
       },
     },
     {
+      id: "Onboarding",
+      title: "Onboarding",
+      icon: FileCheck2,
+      badge: {
+        bg: "bg-sky-50",
+        text: "text-sky-800",
+        border: "border-sky-200",
+        dot: "bg-sky-500",
+        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
+      },
+    },
+    {
       id: "Hospitalized",
       title: "Hospitalized",
       icon: Clock,
@@ -70,18 +84,6 @@ export const CLIENT_KANBAN_STAGES: {
         border: "border-amber-200",
         dot: "bg-amber-500",
         headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
-      },
-    },
-    {
-      id: "On Hold",
-      title: "On Hold",
-      icon: FileCheck2,
-      badge: {
-        bg: "bg-sky-50",
-        text: "text-sky-800",
-        border: "border-sky-200",
-        dot: "bg-sky-500",
-        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
       },
     },
     {
@@ -109,12 +111,9 @@ export function resolveClientStage(
   if (overrides[client.id]) {
     return overrides[client.id];
   }
-  if (client.status === "Discharged") {
-    return "Discharged";
-  }
-  if (client.status === "On Hold" || client.status === "Onboarding") {
-    return "On Hold";
-  }
+  if (client.status === "Discharged") return "Discharged";
+  if (client.status === "Hospitalized") return "Hospitalized";
+  if (client.status === "Onboarding") return "Onboarding";
   return "Active";
 }
 
@@ -201,7 +200,9 @@ export function ClientManagementWorkspace({
       const stage = resolveClientStage(client, stageOverrides);
 
       // Selected stage dropdown / tab filter
-      if (selectedStatusFilter === "ATTENTION") {
+      if (selectedStatusFilter === "HIGH_RISK") {
+        if (getClientRiskLevel(client) !== "High Risk") return false;
+      } else if (selectedStatusFilter === "ATTENTION") {
         if (!client.attentionItems || client.attentionItems.length === 0) return false;
       } else if (selectedStatusFilter && selectedStatusFilter !== "ALL") {
         if (stage !== selectedStatusFilter) {
@@ -223,13 +224,17 @@ export function ClientManagementWorkspace({
         const matchesCaregiver =
           client.assignedCareTeam.primaryCaregiver?.name.toLowerCase().includes(query) ?? false;
         const matchesProgram = client.carePlan.program.toLowerCase().includes(query);
+        const matchesDiagnosis = getClientDiagnosis(client).toLowerCase().includes(query);
+        const matchesRisk = getClientRiskLevel(client).toLowerCase().includes(query);
 
         if (
           !matchesName &&
           !matchesId &&
           !matchesHousehold &&
           !matchesCaregiver &&
-          !matchesProgram
+          !matchesProgram &&
+          !matchesDiagnosis &&
+          !matchesRisk
         ) {
           return false;
         }
@@ -266,6 +271,17 @@ export function ClientManagementWorkspace({
       ...prev,
       [clientId]: targetStage,
     }));
+    const allClients = getClientsFromStorage();
+    const updatedClients = allClients.map((c) =>
+      c.id === clientId
+        ? {
+            ...c,
+            status: targetStage,
+            updatedAtRelative: "Just now",
+          }
+        : c
+    );
+    saveClientsToStorage(updatedClients);
     setActiveMenuId(null);
     toast.success(`Moved ${targetClient.name} to "${targetStage}"`);
   };
@@ -305,9 +321,9 @@ export function ClientManagementWorkspace({
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
       case "Onboarding":
-        return "bg-[#FEF3C7] text-[#9A5B00] border-[#9A5B00]/20";
-      case "On Hold":
-        return "bg-slate-100 text-slate-700 border-slate-300";
+        return "bg-sky-50 text-sky-800 border-sky-200";
+      case "Hospitalized":
+        return "bg-amber-50 text-amber-800 border-amber-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:
@@ -590,16 +606,23 @@ export function ClientManagementWorkspace({
                                   )}
                                 </div>
 
-                                {/* Row 2: Connected Household */}
-                                <p className="text-xs text-slate-500 truncate flex items-center gap-1">
-                                  <Home className="w-3 h-3 text-slate-400 shrink-0" />
-                                  <span className="truncate">{client.household.name}</span>
+                                {/* Row 2: Primary Diagnosis */}
+                                <p className="text-xs text-slate-600 truncate">
+                                  {getClientDiagnosis(client)}
                                 </p>
 
-                                {/* Row 3: Authorized Hours */}
+                                {/* Row 3: Risk Level & Authorized Hours */}
                                 <div className="mt-2.5 flex items-center justify-between text-[11px]">
-                                  <span className="text-[10px] text-slate-500 font-medium">
-                                    Authorized Hours
+                                  <span
+                                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                      getClientRiskLevel(client) === "High Risk"
+                                        ? "bg-rose-50 text-rose-700 border-rose-200"
+                                        : getClientRiskLevel(client) === "Medium Risk"
+                                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    }`}
+                                  >
+                                    {getClientRiskLevel(client)}
                                   </span>
                                   <span className="text-[10px] text-slate-700 font-semibold shrink-0">
                                     {client.carePlan.authorizedWeeklyHours}h/wk
@@ -689,7 +712,7 @@ export function ClientManagementWorkspace({
                     <th className="py-3.5 px-4">Client</th>
                     <th className="py-3.5 px-4">Diagnosis</th>
                     <th className="py-3.5 px-4">Status</th>
-                    <th className="py-3.5 px-4">Risk</th>
+                    <th className="py-3.5 px-4">Risk Level</th>
                     <th className="py-3.5 px-4">Assigned Caregiver / RN</th>
                     <th className="py-3.5 px-4">Next Visit</th>
                     <th className="py-3.5 px-4">Authorization</th>
@@ -700,24 +723,14 @@ export function ClientManagementWorkspace({
                   {filteredClients.map((client) => {
                     const stage = resolveClientStage(client, stageOverrides);
                     const stageConfig = STAGE_CONFIG_MAP.get(stage);
-                    const hasAttention =
-                      client.attentionItems && client.attentionItems.length > 0;
-                    const diagnosis =
-                      client.carePlan?.careNeeds?.[0] ||
-                      client.carePlan?.program ||
-                      "Comprehensive In-Home Support";
-                    const riskLabel =
-                      (client.readiness?.overallScore ?? 100) < 70
-                        ? "High Risk"
-                        : hasAttention || client.status === "On Hold"
-                          ? "Medium Risk"
-                          : "Low Risk";
+                    const diagnosis = getClientDiagnosis(client);
+                    const riskLabel = getClientRiskLevel(client);
                     const nextVisitLabel =
                       stage === "Discharged"
                         ? "Discharged"
                         : stage === "Hospitalized"
                           ? "Paused (Inpatient)"
-                          : stage === "On Hold"
+                          : stage === "Onboarding"
                             ? "Start of Care Pending"
                             : client.carePlan?.frequency || "Scheduled";
                     const authStatus = client.authorization?.status || "Pending Renewal";

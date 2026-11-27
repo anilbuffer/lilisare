@@ -57,9 +57,9 @@ export function ClientContextualDrawer({
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
       case "Onboarding":
-        return "bg-[#FEF3C7] text-[#9A5B00] border-[#9A5B00]/20";
-      case "On Hold":
-        return "bg-slate-100 text-slate-700 border-slate-300";
+        return "bg-sky-50 text-sky-800 border-sky-200";
+      case "Hospitalized":
+        return "bg-amber-50 text-amber-800 border-amber-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:

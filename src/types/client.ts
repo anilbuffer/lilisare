@@ -1,4 +1,6 @@
-export type ClientStatus = "Active" | "Onboarding" | "On Hold" | "Discharged";
+export type ClientStatus = "Active" | "Onboarding" | "Hospitalized" | "Discharged";
+
+export type ClientRiskLevel = "High Risk" | "Medium Risk" | "Low Risk";
 
 export type CareArrangementType =
   | "Family Care"
@@ -209,6 +211,8 @@ export interface ClientRecord {
   gender: string;
   primaryLanguage: string;
   status: ClientStatus;
+  riskLevel?: ClientRiskLevel;
+  primaryDiagnosis?: string;
   careType: CareArrangementType;
   household: ConnectedHouseholdInfo;
   primaryContact: ClientPrimaryContact;

@@ -2,9 +2,77 @@ import {
   ClientRecord,
   ClientAttentionItem,
   ClientStatus,
+  ClientRiskLevel,
   CareArrangementType,
 } from "@/types/client";
 import { JOHNNY_CASH_CLIENT, enrichClientWith17Domains } from "./enterpriseClientEnricher";
+
+const CLIENT_DIAGNOSIS_DEFAULTS: Record<string, string> = {
+  "CL-1001": "Autism Spectrum Disorder (Level 2), Sensory Processing",
+  "CL-1002": "s/p right hip ORIF, early-stage vascular dementia",
+  "CL-1003": "Severe Rheumatoid Arthritis, managing chronic pain",
+  "CL-1004": "Developmental Mobility Delay, Sensory Support",
+  "CL-1005": "Early-onset dementia, Acute Respiratory Infection",
+  "CL-1006": "General debility",
+  "CL-1007": "Congestive Heart Failure (NYHA Class II), Hypertension",
+  "CL-1008": "General Debility, Mild Cognitive Impairment",
+  "CL-1009": "Type 2 Diabetes, Diabetic Neuropathy, Mobility Impairment",
+  "CL-1010": "Parkinsonian Tremor, Peripheral Neuropathy",
+};
+
+const CLIENT_RISK_DEFAULTS: Record<string, ClientRiskLevel> = {
+  "CL-1001": "Medium Risk",
+  "CL-1002": "High Risk",
+  "CL-1003": "High Risk",
+  "CL-1004": "Medium Risk",
+  "CL-1005": "High Risk",
+  "CL-1006": "Low Risk",
+  "CL-1007": "Medium Risk",
+  "CL-1008": "Low Risk",
+  "CL-1009": "High Risk",
+  "CL-1010": "High Risk",
+};
+
+export function normalizeClientStatus(status?: string): ClientStatus {
+  if (status === "Active" || status === "Onboarding" || status === "Hospitalized" || status === "Discharged") {
+    return status;
+  }
+  if (status === "On Hold") return "Onboarding";
+  return "Active";
+}
+
+export function getClientDiagnosis(client: ClientRecord): string {
+  return (
+    client.primaryDiagnosis ||
+    CLIENT_DIAGNOSIS_DEFAULTS[client.id] ||
+    client.healthcare?.diagnoses?.[0]?.description ||
+    client.carePlan?.careNeeds?.[0] ||
+    client.carePlan?.program ||
+    "Comprehensive In-Home Support"
+  );
+}
+
+export function getClientRiskLevel(client: ClientRecord): ClientRiskLevel {
+  if (client.riskLevel) return client.riskLevel;
+  if (CLIENT_RISK_DEFAULTS[client.id]) return CLIENT_RISK_DEFAULTS[client.id];
+  const status = normalizeClientStatus(client.status);
+  if (status === "Hospitalized" || (client.readiness?.overallScore ?? 100) < 70) {
+    return "High Risk";
+  }
+  if (status === "Onboarding" || (client.attentionItems && client.attentionItems.length > 0)) {
+    return "Medium Risk";
+  }
+  return "Low Risk";
+}
+
+function hydrateClientDefaults(client: ClientRecord): ClientRecord {
+  return {
+    ...client,
+    status: normalizeClientStatus(client.status),
+    primaryDiagnosis: getClientDiagnosis(client),
+    riskLevel: getClientRiskLevel(client),
+  };
+}
 
 export const INITIAL_CLIENTS: ClientRecord[] = [
   {
@@ -1079,7 +1147,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     age: 80,
     gender: "Male",
     primaryLanguage: "Mandarin / English",
-    status: "On Hold",
+    status: "Hospitalized",
     careType: "Family Care",
     household: {
       id: "hh-1007",
@@ -1498,12 +1566,13 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
 
 // Helper to get all clients with localStorage persistence
 export function getClientsFromStorage(): ClientRecord[] {
-  if (typeof window === "undefined") return INITIAL_CLIENTS;
+  if (typeof window === "undefined") return INITIAL_CLIENTS.map(hydrateClientDefaults);
   try {
     const stored = localStorage.getItem("lilisare_clients_records");
     if (!stored) {
-      localStorage.setItem("lilisare_clients_records", JSON.stringify(INITIAL_CLIENTS));
-      return INITIAL_CLIENTS;
+      const hydrated = INITIAL_CLIENTS.map(hydrateClientDefaults);
+      localStorage.setItem("lilisare_clients_records", JSON.stringify(hydrated));
+      return hydrated;
     }
     const parsed = JSON.parse(stored);
     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -1511,11 +1580,11 @@ export function getClientsFromStorage(): ClientRecord[] {
       if (!parsed.some((c: ClientRecord) => c.id === "CL-1010")) {
         parsed.push(JOHNNY_CASH_CLIENT);
       }
-      return parsed;
+      return parsed.map(hydrateClientDefaults);
     }
-    return INITIAL_CLIENTS;
+    return INITIAL_CLIENTS.map(hydrateClientDefaults);
   } catch {
-    return INITIAL_CLIENTS;
+    return INITIAL_CLIENTS.map(hydrateClientDefaults);
   }
 }
 
@@ -1535,15 +1604,15 @@ export function saveClientsToStorage(clients: ClientRecord[]): void {
 
 export function getClientById(id: string): ClientRecord | undefined {
   if (id === "CL-1010" || id.toLowerCase() === "johnny-cash") {
-    return JOHNNY_CASH_CLIENT;
+    return hydrateClientDefaults(JOHNNY_CASH_CLIENT);
   }
   const clients = getClientsFromStorage();
   const found = clients.find((c) => c.id === id || c.id.toLowerCase() === id.toLowerCase());
   if (found) {
-    return enrichClientWith17Domains(found);
+    return hydrateClientDefaults(enrichClientWith17Domains(found));
   }
   if (id === "[id]" || id === "default") {
-    return JOHNNY_CASH_CLIENT;
+    return hydrateClientDefaults(JOHNNY_CASH_CLIENT);
   }
   return undefined;
 }

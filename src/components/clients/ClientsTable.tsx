@@ -16,6 +16,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
+import { getClientDiagnosis, getClientRiskLevel } from "@/lib/clients/mockData";
 
 interface ClientsTableProps {
   clients: ClientRecord[];
@@ -44,13 +45,25 @@ export function ClientsTable({
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
       case "Onboarding":
-        return "bg-[#FEF3C7] text-[#9A5B00] border-[#9A5B00]/20";
-      case "On Hold":
-        return "bg-slate-100 text-slate-700 border-slate-300";
+        return "bg-sky-50 text-sky-800 border-sky-200";
+      case "Hospitalized":
+        return "bg-amber-50 text-amber-800 border-amber-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:
         return "bg-slate-100 text-slate-700 border-slate-200";
+    }
+  };
+
+  const getRiskBadge = (riskLevel: string) => {
+    switch (riskLevel) {
+      case "High Risk":
+        return "bg-rose-50 text-rose-700 border-rose-200";
+      case "Medium Risk":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case "Low Risk":
+      default:
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
     }
   };
 
@@ -75,11 +88,11 @@ export function ClientsTable({
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               <th className="py-3.5 px-4">Client</th>
+              <th className="py-3.5 px-4">Diagnosis</th>
               <th className="py-3.5 px-4">Household</th>
-              <th className="py-3.5 px-4">Care Type</th>
               <th className="py-3.5 px-4">Assigned Caregiver</th>
-              <th className="py-3.5 px-4">Readiness</th>
               <th className="py-3.5 px-4">Status</th>
+              <th className="py-3.5 px-4">Risk Level</th>
               <th className="py-3.5 px-4">Updated</th>
               <th className="py-3.5 px-4 text-right">Action</th>
             </tr>
@@ -142,25 +155,20 @@ export function ClientsTable({
                       </div>
                     </td>
 
+                    {/* Diagnosis */}
+                    <td className="py-3.5 px-4">
+                      <span className="text-xs font-medium text-slate-700 block max-w-[210px] truncate">
+                        {getClientDiagnosis(client)}
+                      </span>
+                    </td>
+
                     {/* Connected Household */}
                     <td className="py-3.5 px-4">
                       <div className="flex flex-col">
                         <span className="font-semibold text-slate-800 text-xs truncate max-w-[170px]">
                           {client.household.name}
                         </span>
-
                       </div>
-                    </td>
-
-                    {/* Care Type */}
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${getCareTypeBadge(
-                          client.careType
-                        )}`}
-                      >
-                        {client.careType}
-                      </span>
                     </td>
 
                     {/* Assigned Caregiver */}
@@ -170,7 +178,6 @@ export function ClientsTable({
                           <span className="font-semibold text-slate-800 text-xs">
                             {client.assignedCareTeam.primaryCaregiver.name}
                           </span>
-
                         </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
@@ -180,53 +187,25 @@ export function ClientsTable({
                       )}
                     </td>
 
-                    {/* Readiness Indicators */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          title={`Profile: ${client.readiness.clientProfile}`}
-                          className={`w-2 h-2 rounded-full ${client.readiness.clientProfile === "Complete"
-                            ? "bg-emerald-500"
-                            : "bg-amber-500"
-                            }`}
-                        />
-                        <span
-                          title={`Care: ${client.readiness.careArrangement}`}
-                          className={`w-2 h-2 rounded-full ${client.readiness.careArrangement === "Complete"
-                            ? "bg-emerald-500"
-                            : "bg-amber-500"
-                            }`}
-                        />
-                        <span
-                          title={`Docs: ${client.readiness.documents}`}
-                          className={`w-2 h-2 rounded-full ${client.readiness.documents === "Verified"
-                            ? "bg-emerald-500"
-                            : "bg-amber-500"
-                            }`}
-                        />
-                        <span
-                          title={`Auth: ${client.readiness.authorization}`}
-                          className={`w-2 h-2 rounded-full ${client.readiness.authorization === "Verified"
-                            ? "bg-emerald-500"
-                            : client.readiness.authorization === "Expiring"
-                              ? "bg-rose-500"
-                              : "bg-amber-500"
-                            }`}
-                        />
-                        <span className="text-[11px]  font-bold text-slate-600 ml-1">
-                          {client.readiness.overallScore ?? 85}%
-                        </span>
-                      </div>
-                    </td>
-
                     {/* Status */}
                     <td className="py-3.5 px-4">
                       <span
-                        className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${getStatusBadge(
+                        className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${getStatusBadge(
                           client.status
                         )}`}
                       >
                         {client.status}
+                      </span>
+                    </td>
+
+                    {/* Risk Level */}
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${getRiskBadge(
+                          getClientRiskLevel(client)
+                        )}`}
+                      >
+                        {getClientRiskLevel(client)}
                       </span>
                     </td>
 

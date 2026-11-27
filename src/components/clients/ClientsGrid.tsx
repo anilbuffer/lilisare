@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { ClientRecord } from "@/types/client";
+import { getClientDiagnosis, getClientRiskLevel } from "@/lib/clients/mockData";
 
 interface ClientsGridProps {
   clients: ClientRecord[];
@@ -32,13 +33,25 @@ export function ClientsGrid({
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
       case "Onboarding":
-        return "bg-[#FEF3C7] text-[#9A5B00] border-[#9A5B00]/20";
-      case "On Hold":
-        return "bg-slate-100 text-slate-700 border-slate-300";
+        return "bg-sky-50 text-sky-800 border-sky-200";
+      case "Hospitalized":
+        return "bg-amber-50 text-amber-800 border-amber-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:
         return "bg-slate-100 text-slate-700 border-slate-200";
+    }
+  };
+
+  const getRiskBadge = (riskLevel: string) => {
+    switch (riskLevel) {
+      case "High Risk":
+        return "bg-rose-50 text-rose-700 border-rose-200";
+      case "Medium Risk":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case "Low Risk":
+      default:
+        return "bg-emerald-50 text-emerald-700 border-emerald-200";
     }
   };
 
@@ -122,20 +135,28 @@ export function ClientsGrid({
                 </span>
               </div>
 
-              {/* Badges strip: Care Type & Household */}
+              {/* Badges strip: Risk Level & Household */}
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getCareTypeBadge(
-                    client.careType
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getRiskBadge(
+                    getClientRiskLevel(client)
                   )}`}
                 >
-                  {client.careType}
+                  {getClientRiskLevel(client)}
                 </span>
 
                 <div className="flex items-center gap-1 text-[11px] text-slate-600 font-medium bg-slate-50 px-2 py-0.5 rounded-full border border-slate-200">
                   <Home className="w-3 h-3 text-slate-400" />
                   <span className="truncate max-w-[130px]">{client.household.name}</span>
                 </div>
+              </div>
+
+              {/* Diagnosis snippet */}
+              <div className="mt-2.5 text-xs">
+                <span className="text-[11px] text-slate-400">Diagnosis: </span>
+                <span className="font-semibold text-slate-800 line-clamp-1">
+                  {getClientDiagnosis(client)}
+                </span>
               </div>
 
               {/* Care Team & Hours snippet */}

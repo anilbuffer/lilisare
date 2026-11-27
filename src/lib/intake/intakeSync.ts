@@ -212,6 +212,11 @@ export function convertInquiryToLiveEntities(
         primaryLanguage: inquiry.familyInfo.clientInfo.primaryLanguage || "English",
         ssn: `***-**-${randomSuffix}`,
         status: "Active",
+        riskLevel: "Medium Risk",
+        primaryDiagnosis:
+          inquiry.careRequirements?.careType?.[0] ||
+          inquiry.careRequirements?.programInterest ||
+          "Comprehensive In-Home Support",
         careType: "Family Care",
         household: {
           id: newHouseholdId,

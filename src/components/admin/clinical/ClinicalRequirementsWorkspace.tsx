@@ -15,8 +15,6 @@ import {
 import { toast } from "sonner";
 import { Pagination } from "@/components/ui/Pagination";
 import {
-  CLINICAL_AGENCIES,
-  CLINICAL_PROGRAMS,
   DEMO_TODAY,
   exportClinicalCsv,
   getClinicalDetailHref,
@@ -25,7 +23,6 @@ import {
 } from "@/lib/admin/clinicalSupervisoryStore";
 import {
   ClinicalRequirement,
-  DocumentationStatus,
   RequirementStatus,
 } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
@@ -42,17 +39,12 @@ export function ClinicalRequirementsWorkspace() {
     getClinicalRequirements()
   );
 
-  // Filters
+  // Filters (aligned with table columns: Client, Visit Type, Assigned Professional, Next Due Date, Status)
   const [searchTerm, setSearchTerm] = useState("");
-  const [agencyFilter, setAgencyFilter] = useState("all");
-  const [programFilter, setProgramFilter] = useState("all");
   const [clientFilter, setClientFilter] = useState("all");
-  const [serviceFilter, setServiceFilter] = useState("all");
   const [visitTypeFilter, setVisitTypeFilter] = useState("all");
-  const [profTypeFilter, setProfTypeFilter] = useState("all");
+  const [professionalFilter, setProfessionalFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [docStatusFilter, setDocStatusFilter] = useState<string>("all");
-  const [assignmentFilter, setAssignmentFilter] = useState<"all" | "assigned" | "unassigned">("all");
   const [dueScopeOverride, setDueScopeOverride] = useState<{
     sourceFilter: string;
     value: string;
@@ -88,28 +80,36 @@ export function ClinicalRequirementsWorkspace() {
     () => Array.from(new Set(requirements.map((r) => r.clientName))).sort(),
     [requirements]
   );
-  const uniqueServices = useMemo(
-    () => Array.from(new Set(requirements.map((r) => r.serviceName))).sort(),
-    [requirements]
-  );
   const uniqueVisitTypes = useMemo(
     () => Array.from(new Set(requirements.map((r) => r.visitType))).sort(),
+    [requirements]
+  );
+  const uniqueProfessionals = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          requirements
+            .map((r) => r.assignedProfessionalName)
+            .filter((name): name is string => Boolean(name))
+        )
+      ).sort(),
     [requirements]
   );
 
   const filtered = useMemo(() => {
     return requirements
       .filter((r) => {
-        if (agencyFilter !== "all" && r.agencyId !== agencyFilter) return false;
-        if (programFilter !== "all" && r.programName !== programFilter) return false;
         if (clientFilter !== "all" && r.clientName !== clientFilter) return false;
-        if (serviceFilter !== "all" && r.serviceName !== serviceFilter) return false;
         if (visitTypeFilter !== "all" && r.visitType !== visitTypeFilter) return false;
-        if (profTypeFilter !== "all" && r.professionalType !== profTypeFilter) return false;
+        if (professionalFilter === "unassigned" && r.assignedProfessionalId) return false;
+        if (
+          professionalFilter !== "all" &&
+          professionalFilter !== "unassigned" &&
+          r.assignedProfessionalName !== professionalFilter
+        ) {
+          return false;
+        }
         if (statusFilter !== "all" && r.status !== statusFilter) return false;
-        if (docStatusFilter !== "all" && r.documentationStatus !== docStatusFilter) return false;
-        if (assignmentFilter === "assigned" && !r.assignedProfessionalId) return false;
-        if (assignmentFilter === "unassigned" && r.assignedProfessionalId) return false;
 
         if (dueScopeFilter === "due_month") {
           if (r.nextDueDate < "2026-11-01" || r.nextDueDate > "2026-11-30") return false;
@@ -122,7 +122,7 @@ export function ClinicalRequirementsWorkspace() {
 
         if (searchTerm.trim()) {
           const t = searchTerm.toLowerCase();
-          const hay = `${r.id} ${r.clientName} ${r.clientId} ${r.serviceName} ${r.visitType} ${r.assignedProfessionalName || "unassigned"} ${r.programName}`.toLowerCase();
+          const hay = `${r.id} ${r.clientName} ${r.clientId} ${r.visitType} ${r.assignedProfessionalName || "unassigned"} ${r.nextDueDate} ${r.status}`.toLowerCase();
           if (!hay.includes(t)) return false;
         }
         return true;
@@ -135,15 +135,10 @@ export function ClinicalRequirementsWorkspace() {
       });
   }, [
     requirements,
-    agencyFilter,
-    programFilter,
     clientFilter,
-    serviceFilter,
     visitTypeFilter,
-    profTypeFilter,
+    professionalFilter,
     statusFilter,
-    docStatusFilter,
-    assignmentFilter,
     dueScopeFilter,
     searchTerm,
     sortKey,
@@ -193,15 +188,10 @@ export function ClinicalRequirementsWorkspace() {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setAgencyFilter("all");
-    setProgramFilter("all");
     setClientFilter("all");
-    setServiceFilter("all");
     setVisitTypeFilter("all");
-    setProfTypeFilter("all");
+    setProfessionalFilter("all");
     setStatusFilter("all");
-    setDocStatusFilter("all");
-    setAssignmentFilter("all");
     setDueScopeFilter("all");
     setCurrentPage(1);
     toast.info("Filters cleared");
@@ -241,7 +231,7 @@ export function ClinicalRequirementsWorkspace() {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search Requirement ID, client, service, RN/supervisor..."
+              placeholder="Search client, visit type, assigned professional..."
               className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22]"
             />
           </div>
@@ -275,42 +265,8 @@ export function ClinicalRequirementsWorkspace() {
           </div>
         </div>
 
-        {/* Multi-Facet Filter Grid */}
+        {/* Column-Aligned Filter Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-2 border-t border-slate-100">
-          <select
-            aria-label="Filter by Agency"
-            value={agencyFilter}
-            onChange={(e) => {
-              setAgencyFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">All Agencies</option>
-            {CLINICAL_AGENCIES.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label="Filter by Program"
-            value={programFilter}
-            onChange={(e) => {
-              setProgramFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">All Programs</option>
-            {CLINICAL_PROGRAMS.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-
           <select
             aria-label="Filter by Client"
             value={clientFilter}
@@ -324,23 +280,6 @@ export function ClinicalRequirementsWorkspace() {
             {uniqueClients.map((c) => (
               <option key={c} value={c}>
                 {c}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label="Filter by Service"
-            value={serviceFilter}
-            onChange={(e) => {
-              setServiceFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">All Services</option>
-            {uniqueServices.map((s) => (
-              <option key={s} value={s}>
-                {s}
               </option>
             ))}
           </select>
@@ -363,23 +302,40 @@ export function ClinicalRequirementsWorkspace() {
           </select>
 
           <select
-            aria-label="Filter by Professional Type"
-            value={profTypeFilter}
+            aria-label="Filter by Assigned Professional"
+            value={professionalFilter}
             onChange={(e) => {
-              setProfTypeFilter(e.target.value);
+              setProfessionalFilter(e.target.value);
               setCurrentPage(1);
             }}
             className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
           >
-            <option value="all">All Professional Types</option>
-            <option value="RN">RN</option>
-            <option value="Clinical Supervisor">Clinical Supervisor</option>
-            <option value="Field Supervisor">Field Supervisor</option>
-            <option value="Qualified Non-RN Supervisor">Qualified Non-RN Supervisor</option>
+            <option value="all">All Professionals</option>
+            <option value="unassigned">Unassigned</option>
+            {uniqueProfessionals.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
           </select>
 
           <select
-            aria-label="Filter by Requirement Status"
+            aria-label="Filter by Next Due Date"
+            value={dueScopeFilter}
+            onChange={(e) => {
+              setDueScopeFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
+          >
+            <option value="all">All Due Dates</option>
+            <option value="due_month">Due This Month (Nov)</option>
+            <option value="overdue">Overdue Only</option>
+            <option value="upcoming">Upcoming Only</option>
+          </select>
+
+          <select
+            aria-label="Filter by Status"
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
@@ -387,7 +343,7 @@ export function ClinicalRequirementsWorkspace() {
             }}
             className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
           >
-            <option value="all">All Requirement Statuses</option>
+            <option value="all">All Statuses</option>
             {(
               [
                 "Active",
@@ -405,61 +361,6 @@ export function ClinicalRequirementsWorkspace() {
                 {s}
               </option>
             ))}
-          </select>
-
-          <select
-            aria-label="Filter by Documentation Status"
-            value={docStatusFilter}
-            onChange={(e) => {
-              setDocStatusFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">All Documentation Statuses</option>
-            {(
-              [
-                "Not Started",
-                "Pending",
-                "Submitted",
-                "Incomplete",
-                "Correction Requested",
-                "Complete",
-              ] as DocumentationStatus[]
-            ).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label="Filter by Assignment"
-            value={assignmentFilter}
-            onChange={(e) => {
-              setAssignmentFilter(e.target.value as "all" | "assigned" | "unassigned");
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">Assigned &amp; Unassigned</option>
-            <option value="assigned">Assigned Only</option>
-            <option value="unassigned">Unassigned Only</option>
-          </select>
-
-          <select
-            aria-label="Filter by Due Window"
-            value={dueScopeFilter}
-            onChange={(e) => {
-              setDueScopeFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">All Due Dates</option>
-            <option value="due_month">Due This Month (Nov)</option>
-            <option value="overdue">Overdue Only</option>
-            <option value="upcoming">Upcoming Only</option>
           </select>
         </div>
       </div>

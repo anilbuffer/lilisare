@@ -16,9 +16,7 @@ import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "@/hooks/useAuth";
 import { resolveClinicalActor } from "@/lib/admin/clinicalAuthGuard";
 import {
-  CLINICAL_AGENCIES,
   CLINICAL_PROFESSIONALS,
-  CLINICAL_PROGRAMS,
   DEMO_TODAY,
   getClinicalDetailHref,
   getClinicalVisits,
@@ -54,12 +52,11 @@ export function ClinicalScheduleWorkspace() {
   const [calMode, setCalMode] = useState<"day" | "week" | "month">("week");
   const [anchorDate, setAnchorDate] = useState<Date>(() => new Date(2026, 10, 26));
 
-  // Filters
-  const [profFilter, setProfFilter] = useState("all");
-  const [agencyFilter, setAgencyFilter] = useState("all");
-  const [programFilter, setProgramFilter] = useState("all");
-  const [visitTypeFilter, setVisitTypeFilter] = useState("all");
+  // Filters (aligned with table columns: Client, Visit Type, Assigned Professional, Date & Time, Status)
   const [clientFilter, setClientFilter] = useState("all");
+  const [visitTypeFilter, setVisitTypeFilter] = useState("all");
+  const [profFilter, setProfFilter] = useState("all");
+  const [dateScopeFilter, setDateScopeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
   // Schedule Modal for Unscheduled Visits
@@ -95,21 +92,31 @@ export function ClinicalScheduleWorkspace() {
 
   const filteredVisits = useMemo(() => {
     return visits.filter((v) => {
-      if (profFilter !== "all" && v.professionalId !== profFilter) return false;
-      if (agencyFilter !== "all" && v.agencyId !== agencyFilter) return false;
-      if (programFilter !== "all" && v.programName !== programFilter) return false;
-      if (visitTypeFilter !== "all" && v.visitType !== visitTypeFilter) return false;
       if (clientFilter !== "all" && v.clientName !== clientFilter) return false;
+      if (visitTypeFilter !== "all" && v.visitType !== visitTypeFilter) return false;
+      if (profFilter === "unassigned" && v.professionalId) return false;
+      if (
+        profFilter !== "all" &&
+        profFilter !== "unassigned" &&
+        v.professionalId !== profFilter
+      ) {
+        return false;
+      }
+      if (dateScopeFilter !== "all") {
+        const visitDate = v.scheduledDate || v.dueDate;
+        if (dateScopeFilter === "today" && visitDate !== DEMO_TODAY) return false;
+        if (dateScopeFilter === "upcoming" && visitDate < DEMO_TODAY) return false;
+        if (dateScopeFilter === "past" && visitDate >= DEMO_TODAY) return false;
+      }
       if (statusFilter !== "all" && v.visitStatus !== statusFilter) return false;
       return true;
     });
   }, [
     visits,
-    profFilter,
-    agencyFilter,
-    programFilter,
-    visitTypeFilter,
     clientFilter,
+    visitTypeFilter,
+    profFilter,
+    dateScopeFilter,
     statusFilter,
   ]);
 
@@ -249,46 +256,18 @@ export function ClinicalScheduleWorkspace() {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-3 border-t border-slate-100">
+        {/* Column-Aligned Filter Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-3 border-t border-slate-100">
           <select
-            aria-label="Filter by Professional"
-            value={profFilter}
-            onChange={(e) => setProfFilter(e.target.value)}
+            aria-label="Filter by Client"
+            value={clientFilter}
+            onChange={(e) => setClientFilter(e.target.value)}
             className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
           >
-            <option value="all">All Professionals</option>
-            {CLINICAL_PROFESSIONALS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label="Filter by Agency"
-            value={agencyFilter}
-            onChange={(e) => setAgencyFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">All Agencies</option>
-            {CLINICAL_AGENCIES.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            aria-label="Filter by Program"
-            value={programFilter}
-            onChange={(e) => setProgramFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
-          >
-            <option value="all">All Programs</option>
-            {CLINICAL_PROGRAMS.map((p) => (
-              <option key={p} value={p}>
-                {p}
+            <option value="all">All Clients</option>
+            {uniqueClients.map((c) => (
+              <option key={c} value={c}>
+                {c}
               </option>
             ))}
           </select>
@@ -308,17 +287,30 @@ export function ClinicalScheduleWorkspace() {
           </select>
 
           <select
-            aria-label="Filter by Client"
-            value={clientFilter}
-            onChange={(e) => setClientFilter(e.target.value)}
+            aria-label="Filter by Assigned Professional"
+            value={profFilter}
+            onChange={(e) => setProfFilter(e.target.value)}
             className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
           >
-            <option value="all">All Clients</option>
-            {uniqueClients.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            <option value="all">All Professionals</option>
+            <option value="unassigned">Unassigned</option>
+            {CLINICAL_PROFESSIONALS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
               </option>
             ))}
+          </select>
+
+          <select
+            aria-label="Filter by Date & Time"
+            value={dateScopeFilter}
+            onChange={(e) => setDateScopeFilter(e.target.value)}
+            className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
+          >
+            <option value="all">All Dates</option>
+            <option value="today">Today</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="past">Past / Overdue</option>
           </select>
 
           <select
@@ -327,9 +319,10 @@ export function ClinicalScheduleWorkspace() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700"
           >
-            <option value="all">All Visit Statuses</option>
+            <option value="all">All Statuses</option>
             <option value="Scheduled">Scheduled</option>
             <option value="Rescheduled">Rescheduled</option>
+            <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
             <option value="Missed">Missed</option>
             <option value="Unscheduled">Unscheduled</option>

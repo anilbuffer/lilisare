@@ -313,8 +313,8 @@ export function ClinicalOverviewWorkspace() {
       </div>
 
       {/* 2. Attention Required Operational Queue */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all duration-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-[#ff6900]/10 border border-[#ff6900]/20 flex items-center justify-center text-[#ff6900] shrink-0">
               <Flame className="w-4 h-4" />
@@ -359,10 +359,10 @@ export function ClinicalOverviewWorkspace() {
                       highlightHover
                     />
                   </td>
-                  <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[200px]">
+                  <td className="py-3.5 px-4 whitespace-nowrap truncate max-w-[190px]">
                     {item.visitType}
                   </td>
-                  <td className="py-3.5 px-4 font-mono font-semibold text-slate-700 whitespace-nowrap">
+                  <td className="py-3.5 px-4 font-mono whitespace-nowrap">
                     {item.dueDate}
                   </td>
                   <td className="py-3.5 px-4 whitespace-nowrap">

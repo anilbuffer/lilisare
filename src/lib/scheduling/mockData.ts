@@ -34,10 +34,10 @@ export interface Shift {
 
 export const mockCaregivers: Caregiver[] = [
   { id: 'c1', name: 'Mabel Ortiz', credentials: ['HHA', 'Hoyer'], rating: 4.8, distanceMiles: 2.1 },
-  { id: 'c2', name: 'George Patel', credentials: ['CNA'], rating: 4.5, distanceMiles: 1.5 },
+  { id: 'c2', name: 'George Dawson', credentials: ['CNA'], rating: 4.5, distanceMiles: 1.5 },
   { id: 'c3', name: 'Maria Alvarez', credentials: ['HHA', 'Dementia'], rating: 4.9, distanceMiles: 3.0 },
   { id: 'c4', name: 'James Okafor', credentials: ['CNA', 'Diabetes'], rating: 4.7, distanceMiles: 4.2 },
-  { id: 'c5', name: 'Priya Shah', credentials: ['HHA', 'Post-op'], rating: 4.6, distanceMiles: 0.8 },
+  { id: 'c5', name: 'Natalie Foster', credentials: ['HHA', 'Post-op'], rating: 4.6, distanceMiles: 0.8 },
   { id: 'c6', name: 'Devon Brooks', credentials: ['CNA', 'Hoyer'], rating: 4.4, distanceMiles: 5.1 },
   { id: 'c7', name: 'Aisha Nguyen', credentials: ['HHA', 'Dementia'], rating: 4.8, distanceMiles: 2.5 },
   { id: 'c8', name: 'Robert Chen', credentials: ['CNA'], rating: 4.7, distanceMiles: 1.9 },
@@ -63,7 +63,7 @@ export const mockShifts: Shift[] = [
   {
     id: 's2',
     patientId: 'cl2',
-    patientName: 'George Patel',
+    patientName: 'George Dawson',
     patientAddress: '331 Wyckoff Ave, Bust',
     requiredSkills: ['CNA'],
     startTime: '2026-07-08T15:00:00Z',
@@ -84,7 +84,7 @@ export const mockShifts: Shift[] = [
     status: 'Pending Confirmation',
     region: 'Brooklyn',
     assignedCaregiverId: 'c5',
-    assignedCaregiverName: 'Priya Shah',
+    assignedCaregiverName: 'Natalie Foster',
     shiftNumber: '#54'
   },
   {

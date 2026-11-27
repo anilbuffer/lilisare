@@ -546,14 +546,39 @@ export function AdminIntakeReferralDetailView({
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0 border-t xl:border-t-0 pt-3.5 xl:pt-0 border-slate-100">
+        {/* Primary Action Control */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          {referral.status !== "Enrolled" ? (
+            <button
+              type="button"
+              onClick={handleConvertToClient}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-100" />
+              <span>Admit as Active Client</span>
+            </button>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span>Client Enrolled</span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* 02b. Secondary Referral Actions Card */}
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Referral Workflow Actions</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Update intake stage, edit referral record, or manage status</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           {/* Status Dropdown */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
             >
               <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
               <span>{referral.status}</span>
@@ -587,7 +612,7 @@ export function AdminIntakeReferralDetailView({
 
           <Link
             href={`/admin/intake-referrals/${referral.id}/edit`}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer whitespace-nowrap"
           >
             <Edit3 className="w-4 h-4 text-slate-400" />
             <span>Edit Referral</span>
@@ -599,7 +624,7 @@ export function AdminIntakeReferralDetailView({
               <button
                 type="button"
                 onClick={handleArchiveReferral}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
               >
                 <Archive className="w-4 h-4 text-slate-400" />
                 <span>Archive</span>
@@ -610,27 +635,11 @@ export function AdminIntakeReferralDetailView({
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
             >
               <Trash2 className="w-4 h-4" />
               <span>Delete</span>
             </button>
-          )}
-
-          {referral.status !== "Enrolled" ? (
-            <button
-              type="button"
-              onClick={handleConvertToClient}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-            >
-              <CheckCircle2 className="w-4 h-4 text-emerald-100" />
-              <span>Admit as Active Client</span>
-            </button>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Client Enrolled</span>
-            </span>
           )}
         </div>
       </div>

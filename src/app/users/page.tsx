@@ -6,6 +6,7 @@ import { UsersTab } from "@/components/rbac/UsersTab";
 import { RolesPermissionsTab } from "@/components/rbac/RolesPermissionsTab";
 import { UserAuditModal } from "@/components/rbac/UserAuditModal";
 import { Card } from "@/components/ui/Card";
+import { ResponsiveDomainTabStrip } from "@/components/ui/ResponsiveDomainTabStrip";
 import {
   Users as UsersIcon,
   ShieldCheck,
@@ -117,43 +118,17 @@ function UserManagementContent() {
         </Card>
       </div>
 
-      {/* Tab Navigation Container (Matches SettingsPage styling) */}
-      <div className="flex items-center p-1.5 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-2xl overflow-x-auto border border-slate-200 w-full sm:w-max max-w-full">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          const Icon = tab.icon;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as "users" | "roles")}
-              className={`relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl flex items-center gap-2.5 ${isActive
-                ? "text-brand-teal"
-                : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/50"
-                }`}
-            >
-              <Icon className="w-4 h-4 relative z-10" />
-              <span className="relative z-10">{tab.label}</span>
-              <span
-                className={`relative z-10 text-xs px-2 py-0.5 rounded-full font-bold ${isActive
-                  ? "bg-brand-teal/15 text-brand-teal"
-                  : "bg-slate-100 text-slate-600"
-                  }`}
-              >
-                {tab.count}
-              </span>
-              {isActive && (
-                <motion.div
-                  layoutId="users-tab-indicator"
-                  className="absolute inset-0 bg-brand-teal/10 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-brand-teal/20"
-                  initial={false}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                />
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Tab Navigation Container (Space-Aware Responsive Tab Strip) */}
+      <ResponsiveDomainTabStrip
+        tabs={tabs.map((tab) => ({
+          id: tab.id as "users" | "roles",
+          label: tab.label,
+          badge: String(tab.count),
+        }))}
+        activeTab={activeTab}
+        onSelectTab={(t) => setActiveTab(t)}
+        ariaLabel="User management sections"
+      />
 
       {/* Tab Contents */}
       <div className="relative w-full">

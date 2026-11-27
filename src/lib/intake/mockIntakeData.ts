@@ -495,7 +495,7 @@ export const INITIAL_INQUIRIES: InquiryRecord[] = [
     },
     documents: [
       { id: "doc-51", name: "Piedmont Discharge Summary", status: "Received", uploadedDate: "Nov 16, 2026", required: true, category: "Clinical" },
-      { id: "doc-52", name: "DMA-6 Signed by Dr. Patel", status: "Received", uploadedDate: "Nov 17, 2026", required: true, category: "Clinical" },
+      { id: "doc-52", name: "DMA-6 Signed by Dr. Carter", status: "Received", uploadedDate: "Nov 17, 2026", required: true, category: "Clinical" },
       { id: "doc-53", name: "Signed LiliSare Service Agreement", status: "Received", uploadedDate: "Nov 18, 2026", required: true, category: "Legal" },
       { id: "doc-54", name: "Prior Authorization Approval #GA-7712", status: "Received", uploadedDate: "Nov 18, 2026", required: true, category: "Financial" },
     ],

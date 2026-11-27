@@ -19,7 +19,7 @@ export function RouteComparisonModal({ isOpen, onClose, visit, caregivers, onAss
   const recommendations = [
     {
       caregiverId: caregivers[0]?.id || 'c1',
-      name: caregivers[0]?.name || 'Priya Patel',
+      name: caregivers[0]?.name || 'Claire Harrison',
       role: 'RN',
       skillMatch: 98,
       isBestFit: true,

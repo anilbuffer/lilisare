@@ -414,13 +414,36 @@ export function InquiryDetailsPage({
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0 border-t xl:border-t-0 pt-3.5 xl:pt-0 border-slate-100">
+        {/* Primary Action Control */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsConvertModalOpen(true)}
+            disabled={inquiry.stage === "Converted"}
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] disabled:opacity-60 disabled:cursor-not-allowed rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+          >
+            <span>
+              {inquiry.stage === "Converted"
+                ? "Converted to Onboarding"
+                : "Convert to Onboarding"}
+            </span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* 02b. Secondary Inquiry Actions Card */}
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Inquiry Workflow Actions</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Advance pipeline stage, edit inquiry details, or manage record</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
             <button
               type="button"
               onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
             >
               <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
               <span>{inquiry.stage}</span>
@@ -452,7 +475,7 @@ export function InquiryDetailsPage({
 
           <Link
             href={editHref}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer whitespace-nowrap"
           >
             <Edit3 className="w-4 h-4 text-slate-400" />
             <span>Edit Inquiry</span>
@@ -464,7 +487,7 @@ export function InquiryDetailsPage({
               <button
                 type="button"
                 onClick={handleArchiveInquiry}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
               >
                 <Archive className="w-4 h-4 text-slate-400" />
                 <span>Archive</span>
@@ -475,26 +498,12 @@ export function InquiryDetailsPage({
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
             >
               <Trash2 className="w-4 h-4" />
               <span>Delete</span>
             </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => setIsConvertModalOpen(true)}
-            disabled={inquiry.stage === "Converted"}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] disabled:opacity-60 disabled:cursor-not-allowed rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-          >
-            <span>
-              {inquiry.stage === "Converted"
-                ? "Converted to Onboarding"
-                : "Convert to Onboarding"}
-            </span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
         </div>
       </div>
 

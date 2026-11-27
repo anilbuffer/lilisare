@@ -45,7 +45,7 @@ export function ClientRecentActivitySection({
       id: "act-1",
       clientId: "CL-1001",
       title: "COPPA & HIPAA parental consent uploaded",
-      actor: "Dev Patel (Parent)",
+      actor: "David Bennett (Parent)",
       timestamp: "2 hours ago",
       type: "consent",
     },

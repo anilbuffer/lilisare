@@ -213,7 +213,7 @@ export const mockPatients: Record<string, Patient> = {
 
     careTeam: {
       pcp: "Dr. Amanda Chen",
-      specialists: ["Dr. Robert Patel (Cardiology)"],
+      specialists: ["Dr. Robert Carter (Cardiology)"],
       caseManager: { name: "Sarah Jenkins", avatarUrl: "" },
       primaryCaregivers: [
         { name: "Maria Santos, CNA", avatarUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200" }

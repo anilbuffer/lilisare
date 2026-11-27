@@ -842,7 +842,7 @@ export function EvvVisitDetailView({
                 Caregiver Statement & Proof
               </h3>
               <p className="text-slate-600">
-                Caregiver Priya Sharma provided confirmation that shift started in building courtyard before entering Apt 4B.
+                Caregiver Hannah Miller provided confirmation that shift started in building courtyard before entering Apt 4B.
               </p>
               <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200 text-emerald-800">
                 ✓ Caregiver digital timesheet received and matches documented tasks.
@@ -1108,7 +1108,7 @@ export function EvvVisitDetailView({
             {[
               {
                 time: "2026-11-25 08:07:12 AM UTC",
-                actor: "Priya Sharma (Caregiver Mobile GPS)",
+                actor: "Hannah Miller (Caregiver Mobile GPS)",
                 event: "EVV_CAPTURE",
                 desc: "Clock-In captured via Mobile GPS at 08:07 AM (185 ft from registered address 418 Oakridge Terrace).",
                 badge: "bg-blue-50 text-blue-700 border-blue-200",
@@ -1129,7 +1129,7 @@ export function EvvVisitDetailView({
               },
               {
                 time: "2026-11-25 12:02:40 PM UTC",
-                actor: "Priya Sharma (Caregiver Mobile GPS)",
+                actor: "Hannah Miller (Caregiver Mobile GPS)",
                 event: "CLOCK_OUT_VERIFIED",
                 desc: "Clock-Out captured via Mobile GPS at 12:02 PM (45 ft from registered address, inside geofence).",
                 badge: "bg-emerald-50 text-emerald-700 border-emerald-200",

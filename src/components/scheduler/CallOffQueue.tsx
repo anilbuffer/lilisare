@@ -42,12 +42,12 @@ const defaultCallOffs: CallOffItem[] = [
     calledOffAt: "10 mins ago",
     suggestedReplacements: [
       { id: "c3", name: "Maria Alvarez", rating: 4.9, distanceMiles: 1.2, credentials: ["HHA", "Dementia"] },
-      { id: "c5", name: "Priya Shah", rating: 4.6, distanceMiles: 2.0, credentials: ["HHA", "Post-op"] },
+      { id: "c5", name: "Natalie Foster", rating: 4.6, distanceMiles: 2.0, credentials: ["HHA", "Post-op"] },
     ],
   },
   {
     id: "co-2",
-    caregiverName: "George Patel",
+    caregiverName: "George Dawson",
     patientName: "Frank Delaney",
     timeUntilStart: "3h 10m",
     reason: "Sudden illness / Fever",
@@ -95,7 +95,7 @@ export function CallOffQueue({ onReassign }: CallOffQueueProps) {
       calledOffAt: "Just now",
       suggestedReplacements: [
         { id: "c9", name: "Eleanor Whitaker", rating: 4.9, distanceMiles: 1.8, credentials: ["HHA", "Dementia"] },
-        { id: "c2", name: "George Patel", rating: 4.5, distanceMiles: 2.4, credentials: ["CNA"] },
+        { id: "c2", name: "George Dawson", rating: 4.5, distanceMiles: 2.4, credentials: ["CNA"] },
       ],
     };
 

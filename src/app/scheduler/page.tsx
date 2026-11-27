@@ -52,7 +52,7 @@ const defaultUnfilledShifts: UnfilledShiftItem[] = [
   },
   {
     id: "s2",
-    patientName: "George Patel",
+    patientName: "George Dawson",
     patientAddress: "331 Wyckoff Ave, Brooklyn",
     timeWindow: "3:00 PM - 7:00 PM",
     requiredSkills: ["CNA"],

@@ -23,7 +23,7 @@ const initialClaims: Claim[] = [
   { id: "CLM-10232", patient: "Robert Alvarez", amount: 1820, payer: "Medicaid", status: "Draft", date: "Oct 11", age: "" },
   { id: "CLM-10201", patient: "Aiko Tanaka", amount: 3120, payer: "Private Pay", status: "Submitted", date: "", age: "6d in submitted" },
   { id: "CLM-10202", patient: "Thomas Becker", amount: 4260, payer: "Commercial", status: "Submitted", date: "", age: "7d in submitted" },
-  { id: "CLM-10203", patient: "Priya Patel", amount: 1590, payer: "Medicaid", status: "Submitted", date: "", age: "9d in submitted" },
+  { id: "CLM-10203", patient: "Claire Harrison", amount: 1590, payer: "Medicaid", status: "Submitted", date: "", age: "9d in submitted" },
   { id: "CLM-10188", patient: "Devon Price", amount: 2985, payer: "Medicare", status: "Pending", date: "", age: "18d in pending" },
   { id: "CLM-10189", patient: "Rachel Kim", amount: 2110, payer: "Medicaid", status: "Pending", date: "", age: "20d in pending" },
   { id: "CLM-10190", patient: "Carlos Mendez", amount: 5210, payer: "Commercial", status: "Pending", date: "", age: "23d in pending" },

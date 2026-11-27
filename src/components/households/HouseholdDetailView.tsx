@@ -297,8 +297,8 @@ export function HouseholdDetailView({
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0 border-t lg:border-t-0 pt-3.5 lg:pt-0 border-slate-100">
+        {/* Primary Action Control */}
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             type="button"
             onClick={() => setIsScheduleModalOpen(true)}
@@ -307,10 +307,19 @@ export function HouseholdDetailView({
             <CalendarPlus className="w-4 h-4 text-emerald-100" />
             <span>Schedule Visit</span>
           </button>
+        </div>
+      </div>
 
+      {/* 02b. Secondary Household Actions Card */}
+      <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Household Management Actions</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Edit household details, authorization links, or lifecycle status</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             href={editHref}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer"
           >
             <Edit3 className="w-4 h-4 text-slate-400" />
             <span>Edit Household</span>
@@ -319,7 +328,7 @@ export function HouseholdDetailView({
           {perms.households.canApproveAuthorization && (
             <Link
               href="/admin/authorizations"
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-[#3D6B22] bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200 rounded-xl shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-[#3D6B22] bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200 rounded-xl shadow-2xs transition-all cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>Manage Auth</span>
@@ -330,7 +339,7 @@ export function HouseholdDetailView({
             <button
               type="button"
               onClick={() => setIsDeleteModalOpen(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 rounded-xl shadow-2xs transition-all cursor-pointer"
             >
               <Trash2 className="w-4 h-4" />
               <span>Delete</span>

@@ -14,6 +14,7 @@ import { CommunicationTab } from "@/components/patients/tabs/CommunicationTab";
 import { ChronologyTab } from "./tabs/ChronologyTab";
 import { AssessmentsTab } from "@/components/patients/tabs/AssessmentsTab";
 import { useAuth } from "@/hooks/useAuth";
+import { ResponsiveDomainTabStrip } from "@/components/ui/ResponsiveDomainTabStrip";
 
 const allTabs = [
   { id: "overview", label: "Overview" },
@@ -57,28 +58,13 @@ function PatientTabsContent({ patient }: { patient: Patient }) {
   return (
     <div className="w-full">
       {/* Tab Navigation */}
-      <div className="flex items-center gap-1 p-1 sm:p-1.5 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] rounded-2xl mb-4 overflow-x-auto no-scrollbar border border-slate-200/90 w-full max-w-full">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`relative px-3.5 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap rounded-xl shrink-0 ${isActive ? "text-brand-teal font-bold" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/60"
-                }`}
-            >
-              <span className="relative z-10">{tab.label}</span>
-              {isActive && (
-                <motion.div
-                  layoutId="patient-tab-indicator"
-                  className="absolute inset-0 bg-brand-teal/10 rounded-xl border border-brand-teal/20 shadow-[0_6px_32px_rgba(0,0,0,0.04)]"
-                  initial={false}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                />
-              )}
-            </button>
-          );
-        })}
+      <div className="mb-4">
+        <ResponsiveDomainTabStrip
+          tabs={tabs}
+          activeTab={activeTab}
+          onSelectTab={handleTabChange}
+          ariaLabel="Client record sections"
+        />
       </div>
 
       {/* Tab Content */}

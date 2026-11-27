@@ -10,6 +10,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { useAuth } from "@/hooks/useAuth";
+import { ResponsiveDomainTabStrip } from "@/components/ui/ResponsiveDomainTabStrip";
 
 type Tab = "overview" | "medications" | "todos";
 
@@ -43,59 +44,16 @@ export default function PortalCarePlanPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center p-1.5 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-2xl overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300 border border-slate-200 w-full sm:w-max max-w-full">
-        <button
-          onClick={() => setActiveTab("overview")}
-          className={clsx(
-            "relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl",
-            activeTab === "overview" ? "text-brand-teal" : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
-          )}
-        >
-          <span className="relative z-10">Overview & Tasks</span>
-          {activeTab === "overview" && (
-            <motion.div
-              layoutId="careplan-tab-indicator"
-              className="absolute inset-0 bg-brand-teal/10 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-brand-teal/20"
-              initial={false}
-              transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-            />
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab("medications")}
-          className={clsx(
-            "relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl",
-            activeTab === "medications" ? "text-brand-teal" : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
-          )}
-        >
-          <span className="relative z-10">Medications</span>
-          {activeTab === "medications" && (
-            <motion.div
-              layoutId="careplan-tab-indicator"
-              className="absolute inset-0 bg-brand-teal/10 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-brand-teal/20"
-              initial={false}
-              transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-            />
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab("todos")}
-          className={clsx(
-            "relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl",
-            activeTab === "todos" ? "text-brand-teal" : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
-          )}
-        >
-          <span className="relative z-10">{isClient ? "My Reminders" : "Things You Can Help With"}</span>
-          {activeTab === "todos" && (
-            <motion.div
-              layoutId="careplan-tab-indicator"
-              className="absolute inset-0 bg-brand-teal/10 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] border border-brand-teal/20"
-              initial={false}
-              transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-            />
-          )}
-        </button>
-      </div>
+      <ResponsiveDomainTabStrip
+        tabs={[
+          { id: "overview", label: "Overview & Tasks" },
+          { id: "medications", label: "Medications" },
+          { id: "todos", label: isClient ? "My Reminders" : "Things You Can Help With" },
+        ]}
+        activeTab={activeTab}
+        onSelectTab={(t) => setActiveTab(t)}
+        ariaLabel="Care plan sections"
+      />
 
       <AnimatePresence mode="wait">
         {activeTab === "overview" && (

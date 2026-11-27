@@ -845,7 +845,7 @@ export function EvvSubmissionsWorkspace() {
                       visit_id: "EVV-2026-003",
                       individual_receiving: "Sarah Johnson",
                       medicaid_id: "•••-••-8814",
-                      individual_providing: "Priya Sharma",
+                      individual_providing: "Hannah Miller",
                       caregiver_npi: "1982736450",
                       service_code: "T1019",
                       date_of_service: "2026-11-25",

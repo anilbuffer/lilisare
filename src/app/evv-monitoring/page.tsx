@@ -15,6 +15,7 @@ import { OffenderRow } from "./_components/OffenderRow";
 import { BillingRiskCard } from "./_components/BillingRiskCard";
 import { SubmissionDashboard } from "./_components/Submissions/SubmissionDashboard";
 import { AggregatorConfig } from "@/components/billing/evv/AggregatorConfig";
+import { ResponsiveDomainTabStrip } from "@/components/ui/ResponsiveDomainTabStrip";
 
 const donutData = [
   { name: "Wrong GPS location", value: 45 },
@@ -114,67 +115,18 @@ export default function EVVMonitoringPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center p-1.5 bg-white/80 backdrop-blur-md shadow-[0_2px_12px_rgba(0,0,0,0.03)] rounded-2xl overflow-x-auto border border-slate-200 w-full max-w-full mb-4 no-scrollbar">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={`relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl ${activeTab === "overview" ? "text-brand-teal" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/60"
-              }`}
-          >
-            <span className="relative z-10">Overview</span>
-            {activeTab === "overview" && (
-              <motion.div
-                layoutId="evv-tab"
-                className="absolute inset-0 bg-brand-teal/10 rounded-xl border border-brand-teal/20"
-                initial={false}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-              />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("exceptions")}
-            className={`relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl ${activeTab === "exceptions" ? "text-brand-teal" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/60"
-              }`}
-          >
-            <span className="relative z-10">Exceptions Queue</span>
-            {activeTab === "exceptions" && (
-              <motion.div
-                layoutId="evv-tab"
-                className="absolute inset-0 bg-brand-teal/10 rounded-xl border border-brand-teal/20"
-                initial={false}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-              />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("submissions")}
-            className={`relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl ${activeTab === "submissions" ? "text-brand-teal" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/60"
-              }`}
-          >
-            <span className="relative z-10">State Submissions</span>
-            {activeTab === "submissions" && (
-              <motion.div
-                layoutId="evv-tab"
-                className="absolute inset-0 bg-brand-teal/10 rounded-xl border border-brand-teal/20"
-                initial={false}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-              />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("config")}
-            className={`relative px-4 py-2.5 text-sm font-semibold transition-colors whitespace-nowrap rounded-xl ${activeTab === "config" ? "text-brand-teal" : "text-slate-500 hover:text-slate-800 hover:bg-slate-100/60"
-              }`}
-          >
-            <span className="relative z-10">State Config & Connectors</span>
-            {activeTab === "config" && (
-              <motion.div
-                layoutId="evv-tab"
-                className="absolute inset-0 bg-brand-teal/10 rounded-xl border border-brand-teal/20"
-                initial={false}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-              />
-            )}
-          </button>
+        <div className="mb-4">
+          <ResponsiveDomainTabStrip
+            tabs={[
+              { id: "overview", label: "Overview" },
+              { id: "exceptions", label: "Exceptions Queue" },
+              { id: "submissions", label: "State Submissions" },
+              { id: "config", label: "State Config & Connectors" },
+            ]}
+            activeTab={activeTab}
+            onSelectTab={(t) => setActiveTab(t)}
+            ariaLabel="EVV monitoring sections"
+          />
         </div>
 
         {/* Tab 1: Overview */}

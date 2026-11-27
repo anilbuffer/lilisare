@@ -195,7 +195,7 @@ export function LiveMap({
         { id: 4, name: "Paris Saint-Germain Store", type: "shopping", x: 20, y: 85 },
         { id: 5, name: "Vaishali Diamond", type: "shopping", x: 42, y: 15 },
         { id: 6, name: "Dishes", type: "food", x: 62, y: 40 },
-        { id: 7, name: "Rahul Patel, DPM", type: "medical", x: 45, y: 55 },
+        { id: 7, name: "Dr. Brian Palmer, DPM", type: "medical", x: 45, y: 55 },
         { id: 8, name: "KBL, LLP", type: "office", x: 5, y: 50 },
         { id: 9, name: "Läderach", type: "food", x: 8, y: 38 },
       ].map(poi => (

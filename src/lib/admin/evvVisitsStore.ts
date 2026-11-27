@@ -208,7 +208,7 @@ export const INITIAL_EVV_RULES: EvvToleranceRule[] = [
 ];
 
 export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
-  // 1. EW-2026-003 / EVV-2026-003: Sarah Johnson & Priya Sharma (Location Mismatch, Completed Today, GPS)
+  // 1. EW-2026-003 / EVV-2026-003: Sarah Johnson & Hannah Miller (Location Mismatch, Completed Today, GPS)
   {
     id: "EVV-2026-003",
     displayId: "EW-2026-003",
@@ -224,7 +224,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
     householdId: "hh-2041",
     householdName: "Johnson Residence",
     caregiverId: "CG-1084",
-    caregiverName: "Priya Sharma",
+    caregiverName: "Hannah Miller",
     caregiverInitials: "PS",
     caregiverRole: "HHA",
     caregiverPhone: "(614) 555-1084",
@@ -296,7 +296,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
       individualReceiving: { verified: true, value: "Sarah Johnson (CL-2041 • •••-••-8814)" },
       dateOfService: { verified: true, value: "2026-11-25 (Today)" },
       locationOfService: { verified: false, value: "418 Oakridge Terrace, Apt 4B, Columbus, OH (185 ft from anchor)" },
-      individualProviding: { verified: true, value: "Priya Sharma (CG-1084 • HHA)" },
+      individualProviding: { verified: true, value: "Hannah Miller (CG-1084 • HHA)" },
       timeBeginsAndEnds: { verified: true, value: "08:07 AM – 12:02 PM (Sched: 08:00 AM - 12:00 PM)" },
     },
     tasksCompleted: ["Bathing / Hygiene", "Meal Preparation", "Medication Reminder", "Light Housekeeping"],
@@ -326,7 +326,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
       {
         id: "t-003-1",
         timestamp: "2026-11-25 08:07 AM",
-        actor: "Priya Sharma",
+        actor: "Hannah Miller",
         actorRole: "Caregiver (Mobile GPS)",
         event: "EVV_CAPTURE",
         details: "Clock-In captured via Mobile GPS at 08:07 AM (185 ft from registered address).",
@@ -755,7 +755,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
     timeline: [],
   },
 
-  // 8. EW-2026-008 / EVV-2026-008: Dorothy Vance & Jessica Patel (Completed Today, Exception, Fixed, Time Variance)
+  // 8. EW-2026-008 / EVV-2026-008: Dorothy Vance & Jessica Parker (Completed Today, Exception, Fixed, Time Variance)
   {
     id: "EVV-2026-008",
     displayId: "EW-2026-008",
@@ -769,7 +769,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
     clientAddress: "620 Olentangy River Rd, Columbus, OH 43212",
     clientMedicaidId: "•••-••-2039",
     caregiverId: "CG-1088",
-    caregiverName: "Jessica Patel",
+    caregiverName: "Jessica Parker",
     caregiverInitials: "JP",
     caregiverRole: "CNA",
     caregiverPhone: "(614) 555-7890",
@@ -816,7 +816,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
       individualReceiving: { verified: true, value: "Dorothy Vance" },
       dateOfService: { verified: true, value: "2026-11-25" },
       locationOfService: { verified: true, value: "620 Olentangy River Rd, Columbus, OH" },
-      individualProviding: { verified: true, value: "Jessica Patel (CG-1088)" },
+      individualProviding: { verified: true, value: "Jessica Parker (CG-1088)" },
       timeBeginsAndEnds: { verified: false, value: "09:24 AM – 12:02 PM (Variance: 24m late)" },
     },
     tasksCompleted: ["Medication Reminder", "Bathing / Hygiene"],
@@ -897,7 +897,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
     timeline: [],
   },
 
-  // 10. EW-2026-010 / EVV-2026-010: Helen Brooks & Priya Sharma (In Progress Today, Verified, GPS)
+  // 10. EW-2026-010 / EVV-2026-010: Helen Brooks & Hannah Miller (In Progress Today, Verified, GPS)
   {
     id: "EVV-2026-010",
     displayId: "EW-2026-010",
@@ -911,7 +911,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
     clientAddress: "900 Morse Rd, Columbus, OH 43229",
     clientMedicaidId: "•••-••-2048",
     caregiverId: "CG-1084",
-    caregiverName: "Priya Sharma",
+    caregiverName: "Hannah Miller",
     caregiverInitials: "PS",
     caregiverRole: "HHA",
     caregiverPhone: "(614) 555-1084",
@@ -953,7 +953,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
       individualReceiving: { verified: true, value: "Helen Brooks" },
       dateOfService: { verified: true, value: "2026-11-25" },
       locationOfService: { verified: true, value: "900 Morse Rd, Columbus, OH" },
-      individualProviding: { verified: true, value: "Priya Sharma (CG-1084)" },
+      individualProviding: { verified: true, value: "Hannah Miller (CG-1084)" },
       timeBeginsAndEnds: { verified: true, value: "Clock-in 02:01 PM (Shift active)" },
     },
     tasksCompleted: ["Nutritional snack prep"],
@@ -1033,7 +1033,7 @@ export const SCREENSHOT_EVV_VISITS: EvvVisitRecord[] = [
 function createInitialVisits(): EvvVisitRecord[] {
   const visits: EvvVisitRecord[] = [...SCREENSHOT_EVV_VISITS];
 
-  // 1. Illustrative Record 1: Rahul Sharma, Client John Smith
+  // 1. Illustrative Record 1: Ryan Mitchell, Client John Smith
   // 10:00 - 14:00, Actual: 10:01 - 14:02 (+1m / +2m -> WITHIN TOLERANCE)
   // Scenario A & F: Verified, Cleared for Billing, Cleared for Payroll
   visits.push({
@@ -1049,7 +1049,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     householdId: "hh-1007",
     householdName: "Smith Residence",
     caregiverId: "CG-101",
-    caregiverName: "Rahul Sharma",
+    caregiverName: "Ryan Mitchell",
     caregiverPhone: "(303) 555-8821",
     caregiverRole: "Certified Nurse Aide (CNA)",
     caregiverClassification: "W-2",
@@ -1113,7 +1113,7 @@ function createInitialVisits(): EvvVisitRecord[] {
       individualReceiving: { verified: true, value: "John Smith (CO-MED-994102)" },
       dateOfService: { verified: true, value: "2026-11-25" },
       locationOfService: { verified: true, value: "1284 Oakridge Ave, Denver, CO 80204 (Within geofence, 42ft)" },
-      individualProviding: { verified: true, value: "Rahul Sharma (CG-101)" },
+      individualProviding: { verified: true, value: "Ryan Mitchell (CG-101)" },
       timeBeginsAndEnds: { verified: true, value: "10:01 AM – 02:02 PM (4.02 hrs)" },
     },
     tasksCompleted: ["Assistance with transfers", "Bathing & hygiene", "Nutritional lunch meal prep", "Medication reminder"],
@@ -1141,7 +1141,7 @@ function createInitialVisits(): EvvVisitRecord[] {
       {
         id: "t-401-1",
         timestamp: "2026-11-25 10:01 AM",
-        actor: "Rahul Sharma",
+        actor: "Ryan Mitchell",
         actorRole: "Caregiver (Mobile GPS)",
         event: "Clock-in Verified",
         details: "GPS geofence match (42ft from service address).",
@@ -1150,7 +1150,7 @@ function createInitialVisits(): EvvVisitRecord[] {
       {
         id: "t-401-2",
         timestamp: "2026-11-25 02:02 PM",
-        actor: "Rahul Sharma",
+        actor: "Ryan Mitchell",
         actorRole: "Caregiver (Mobile GPS)",
         event: "Clock-out & Digital Signature Captured",
         details: "Client John Smith signed digitally on caregiver device.",
@@ -1168,7 +1168,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
   });
 
-  // 2. Illustrative Record 2: Priya Patel, Client Michael Brown
+  // 2. Illustrative Record 2: Claire Harrison, Client Michael Brown
   // In progress, Scheduled 09:00 - 13:00, Actual 08:58 - In Progress
   // Scenario B: Missing clock-out (>2 hrs overdue), Exception
   visits.push({
@@ -1184,7 +1184,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     householdId: "hh-1008",
     householdName: "Brown Household",
     caregiverId: "CG-103",
-    caregiverName: "Priya Patel",
+    caregiverName: "Claire Harrison",
     caregiverPhone: "(720) 555-4122",
     caregiverRole: "Home Health Aide (HHA)",
     caregiverClassification: "W-2",
@@ -1239,7 +1239,7 @@ function createInitialVisits(): EvvVisitRecord[] {
       individualReceiving: { verified: true, value: "Michael Brown (CO-MED-841920)" },
       dateOfService: { verified: true, value: "2026-11-25" },
       locationOfService: { verified: true, value: "450 Spruce St, Boulder, CO 80302 (Within geofence, 55ft)" },
-      individualProviding: { verified: true, value: "Priya Patel (CG-103)" },
+      individualProviding: { verified: true, value: "Claire Harrison (CG-103)" },
       timeBeginsAndEnds: { verified: false, value: "Clock-in 08:58 AM; Clock-out MISSING", notes: "Awaiting end time" },
     },
     tasksCompleted: ["Light housekeeping", "Laundry", "Trash removal"],
@@ -1258,7 +1258,7 @@ function createInitialVisits(): EvvVisitRecord[] {
         reviewerName: "Dana Jenkins, MSW",
         reviewerRole: "Agency Operations Admin",
         timestamp: "2026-11-25 01:45 PM",
-        note: "Sent mobile push notification reminder to Priya Patel to confirm shift completion and submit clock-out.",
+        note: "Sent mobile push notification reminder to Claire Harrison to confirm shift completion and submit clock-out.",
         action: "INVESTIGATION_STARTED",
       },
     ],
@@ -1266,7 +1266,7 @@ function createInitialVisits(): EvvVisitRecord[] {
       {
         id: "t-402-1",
         timestamp: "2026-11-25 08:58 AM",
-        actor: "Priya Patel",
+        actor: "Claire Harrison",
         actorRole: "Caregiver (Mobile GPS)",
         event: "Clock-in Captured",
         details: "GPS verified at 450 Spruce St. Geofence distance 55ft.",
@@ -1531,7 +1531,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     ],
   });
 
-  // 5. Illustrative Record 5: Marcus Vance, Client Sophia Patel
+  // 5. Illustrative Record 5: Marcus Vance, Client Sophia Bennett
   // Fixed Device / FOB Token
   visits.push({
     id: "EVV-2026-405",
@@ -1539,12 +1539,12 @@ function createInitialVisits(): EvvVisitRecord[] {
     date: DEMO_DATE,
     schedulingVisitId: "VIS-1009",
     clientId: "CL-1005",
-    clientName: "Sophia Patel",
+    clientName: "Sophia Bennett",
     clientPhone: "(303) 555-1940",
     clientAddress: "1940 Colorado Blvd, Denver, CO 80220",
     clientMedicaidId: "CO-MED-1005",
     householdId: "hh-1005",
-    householdName: "Patel Household",
+    householdName: "Bennett Household",
     caregiverId: "CG-106",
     caregiverName: "Marcus Vance",
     caregiverPhone: "(503) 555-8812",
@@ -1600,7 +1600,7 @@ function createInitialVisits(): EvvVisitRecord[] {
     },
     sixElements: {
       serviceType: { verified: true, value: "CES-WVR - Children's Extensive Support" },
-      individualReceiving: { verified: true, value: "Sophia Patel (CO-MED-1005)" },
+      individualReceiving: { verified: true, value: "Sophia Bennett (CO-MED-1005)" },
       dateOfService: { verified: true, value: "2026-11-25" },
       locationOfService: { verified: true, value: "1940 Colorado Blvd (Fixed In-Home FOB Unit #9042)" },
       individualProviding: { verified: true, value: "Marcus Vance (CG-106)" },
@@ -2404,7 +2404,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
     id: "SUB-2026-9810",
     visitId: "EVV-2026-401",
     clientName: "John Smith",
-    caregiverName: "Rahul Sharma",
+    caregiverName: "Ryan Mitchell",
     serviceName: "Personal Care (T1019)",
     serviceDate: DEMO_DATE,
     submissionTimestamp: "2026-11-25 02:15 PM",
@@ -2478,7 +2478,7 @@ export const INITIAL_EVV_SUBMISSIONS: EvvSubmissionRecord[] = [
   {
     id: "SUB-2026-9813",
     visitId: "EVV-2026-405",
-    clientName: "Sophia Patel",
+    clientName: "Sophia Bennett",
     caregiverName: "Marcus Vance",
     serviceName: "CES Waiver (CES-WVR)",
     serviceDate: DEMO_DATE,

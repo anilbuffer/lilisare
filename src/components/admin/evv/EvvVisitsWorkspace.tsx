@@ -816,7 +816,7 @@ export function EvvVisitsWorkspace() {
                       </div>
                       <div>
                         <div className="text-xs font-bold text-slate-900">
-                          Priya Sharma <span className="text-[10px] text-slate-400 font-medium">CG-1084</span>
+                          Hannah Miller <span className="text-[10px] text-slate-400 font-medium">CG-1084</span>
                         </div>
                         <div className="text-[11px] text-slate-500 font-medium">
                           Primary issue: Location Mismatch

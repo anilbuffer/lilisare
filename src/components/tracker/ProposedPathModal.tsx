@@ -52,7 +52,7 @@ export function ProposedPathModal({ isOpen, onClose, onApply }: ProposedPathModa
                     <span className="text-yellow-500">⚡</span> AI Proposed Path Optimization
                   </h2>
                   <p className="text-xs font-medium text-slate-500 mt-0.5">
-                    Re-ordering <strong className="text-slate-700">Priya Patel's</strong> route to avoid rush-hour traffic on Sunset Blvd.
+                    Re-ordering <strong className="text-slate-700">Claire Harrison's</strong> route to avoid rush-hour traffic on Sunset Blvd.
                   </p>
                 </div>
                 <button

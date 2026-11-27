@@ -184,7 +184,7 @@ export default function SchedulerTrackerPage() {
                       <span className="text-xl">🤖</span>
                     </div>
                     <div className="text-sm font-medium text-slate-200 leading-snug">
-                      <strong className="text-white">AI Recommendation:</strong> Re-ordering Priya Patel's 2nd & 3rd visit saves 18 mins of transit and avoids rush-hour traffic on Sunset Blvd.
+                      <strong className="text-white">AI Recommendation:</strong> Re-ordering Claire Harrison's 2nd & 3rd visit saves 18 mins of transit and avoids rush-hour traffic on Sunset Blvd.
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 mt-1">
@@ -197,7 +197,7 @@ export default function SchedulerTrackerPage() {
                     <button
                       onClick={() => {
                         setShowAICard(false);
-                        toast.success("Optimization applied to Priya Patel's route.");
+                        toast.success("Optimization applied to Claire Harrison's route.");
                       }}
                       className="px-3 py-1.5 text-xs font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 hover:bg-yellow-500 hover:text-slate-900 rounded transition-all flex items-center gap-1.5"
                     >
@@ -287,7 +287,7 @@ export default function SchedulerTrackerPage() {
         onApply={() => {
           setShowProposedPathModal(false);
           setShowAICard(false);
-          toast.success("Optimization applied to Priya Patel's route.");
+          toast.success("Optimization applied to Claire Harrison's route.");
         }}
       />
     </div>

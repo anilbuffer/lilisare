@@ -102,7 +102,7 @@ export function EditVisitModal({ isOpen, onClose, visit, onSave }: EditVisitModa
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-teal/20 focus:border-brand-teal transition-all bg-white"
             >
               <option value="">-- Unassigned --</option>
-              <option value="c1">Priya Patel (RN)</option>
+              <option value="c1">Claire Harrison (RN)</option>
               <option value="c2">Maria Santos (CNA)</option>
               <option value="c3">Marcus Johnson (LPN)</option>
             </select>

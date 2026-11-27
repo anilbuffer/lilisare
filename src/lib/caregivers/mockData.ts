@@ -1453,7 +1453,7 @@ export const INITIAL_CAREGIVERS: CaregiverRecord[] = [
   },
   {
     id: "CG-115",
-    name: "Dev Patel",
+    name: "David Bennett",
     avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=200",
     type: "Family Caregiver",
     status: "Pending",
@@ -1474,7 +1474,7 @@ export const INITIAL_CAREGIVERS: CaregiverRecord[] = [
       gender: "Male",
       languages: ["English", "Gujarati"],
       phone: "(541) 555-7788",
-      email: "dev.patel@example.com",
+      email: "david.bennett@example.com",
       address: {
         street: "312 Willow Creek Rd",
         city: "Springfield",
@@ -1482,7 +1482,7 @@ export const INITIAL_CAREGIVERS: CaregiverRecord[] = [
         zip: "97477",
       },
       emergencyContact: {
-        name: "Pooja Patel",
+        name: "Paula Bennett",
         relationship: "Spouse",
         phone: "(541) 555-7799",
       },
@@ -1499,7 +1499,7 @@ export const INITIAL_CAREGIVERS: CaregiverRecord[] = [
       linkedHousehold: {
         id: "hh-1003",
         code: "HH-1003",
-        name: "Patel / Lin Household",
+        name: "Bennett / Lin Household",
         address: "312 Willow Creek Rd, Springfield, OR 97477",
         phone: "(541) 555-7788",
         city: "Springfield",
@@ -1536,7 +1536,7 @@ export const INITIAL_CAREGIVERS: CaregiverRecord[] = [
         id: "CL-1003",
         name: "Maya Lin",
         householdId: "hh-1003",
-        householdName: "Patel / Lin Household",
+        householdName: "Bennett / Lin Household",
         relationship: "Daughter",
         weeklyAuthorizedHours: 32,
         scheduledWeeklyHours: 0,
@@ -1563,14 +1563,14 @@ export const INITIAL_CAREGIVERS: CaregiverRecord[] = [
     },
     attentionFlags: [
       {
-        id: "flg-patel-1",
+        id: "flg-bennett-1",
         title: "Screening pending",
         severity: "pending",
         category: "screening_pending",
         message: "State background review pending final clearance.",
       },
       {
-        id: "flg-patel-2",
+        id: "flg-bennett-2",
         title: "Training incomplete",
         severity: "action_required",
         category: "training_incomplete",
@@ -1957,7 +1957,7 @@ export const INITIAL_CAREGIVERS: CaregiverRecord[] = [
         zip: "97477",
       },
       emergencyContact: {
-        name: "Dev Patel",
+        name: "David Bennett",
         relationship: "Spouse",
         phone: "(541) 555-7788",
       },

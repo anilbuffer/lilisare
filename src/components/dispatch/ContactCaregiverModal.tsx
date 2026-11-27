@@ -22,7 +22,7 @@ export function ContactCaregiverModal({ isOpen, onClose, visit, onSend }: Contac
     }
   };
 
-  const caregiverName = visit.caregiverId === 'c1' ? 'Priya Patel' : visit.caregiverId === 'c2' ? 'Maria Santos' : 'Caregiver';
+  const caregiverName = visit.caregiverId === 'c1' ? 'Claire Harrison' : visit.caregiverId === 'c2' ? 'Maria Santos' : 'Caregiver';
 
   return (
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">

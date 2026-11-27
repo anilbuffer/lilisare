@@ -111,7 +111,7 @@ export function CareNotesReportsWorkspace({
 
   // Caregiver Leaderboard / Quality Scorecard
   const caregiversList = [
-    { name: "Priya Sharma (HHA)", submitted: 24, reviewed: 23, returned: 1, passRate: "95.8%", gaps: "None" },
+    { name: "Hannah Miller (HHA)", submitted: 24, reviewed: 23, returned: 1, passRate: "95.8%", gaps: "None" },
     { name: "Marcus Johnson (CNA)", submitted: 20, reviewed: 20, returned: 0, passRate: "100%", gaps: "None" },
     { name: "Sarah Jenkins (DCW)", submitted: 18, reviewed: 15, returned: 3, passRate: "83.3%", gaps: "Departure handoff omission" },
     { name: "David Kim (CNA)", submitted: 16, reviewed: 13, returned: 3, passRate: "81.2%", gaps: "Incomplete blood pressure readings" },

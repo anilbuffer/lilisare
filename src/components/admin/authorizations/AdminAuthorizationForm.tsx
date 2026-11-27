@@ -38,7 +38,7 @@ const CLIENT_OPTIONS = [
   { id: "CL-1002", name: "Marcus Whitfield", hhId: "hh-1002", hhName: "Whitfield Household", dob: "1954-08-20", phone: "(319) 555-3820" },
   { id: "CL-1003", name: "Lucas Santos", hhId: "hh-1003", hhName: "Santos Household", dob: "2019-03-12", phone: "(515) 555-0142" },
   { id: "CL-1004", name: "Raymond Chen", hhId: "hh-1004", hhName: "Chen Household", dob: "1960-11-14", phone: "(515) 555-0177" },
-  { id: "CL-1005", name: "Sophia Patel", hhId: "hh-1005", hhName: "Patel Household", dob: "1988-06-22", phone: "(303) 555-1940" },
+  { id: "CL-1005", name: "Sophia Bennett", hhId: "hh-1005", hhName: "Bennett Household", dob: "1988-06-22", phone: "(303) 555-1940" },
   { id: "CL-1006", name: "Evelyn Foster", hhId: "hh-1006", hhName: "Foster Household", dob: "1942-02-18", phone: "(303) 555-8800" },
   { id: "CL-1007", name: "John Smith", hhId: "hh-1007", hhName: "Smith Residence", dob: "1958-09-15", phone: "(303) 555-0142" },
 ];

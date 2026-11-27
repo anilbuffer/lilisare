@@ -96,7 +96,7 @@ export const MOCK_STAFF_STATUS: StaffTrainingStatus[] = [
   { id: "s4", name: "Rachel Kim", avatar: "RK", role: "HHA", coursesCompleted: 13, coursesTotal: 17, complianceScore: 76, certificationsExpiring: 2, lastActivity: "2d ago", status: "At risk", daysLeft: 41 },
   { id: "s5", name: "Maria Santos", avatar: "MS", role: "CNA", coursesCompleted: 14, coursesTotal: 17, complianceScore: 82, certificationsExpiring: 2, lastActivity: "Yesterday", status: "On track", daysOverdue: 3 },
   { id: "s6", name: "Carlos Mendez", avatar: "CM", role: "CNA", coursesCompleted: 15, coursesTotal: 17, complianceScore: 88, certificationsExpiring: 1, lastActivity: "5h ago", status: "On track" },
-  { id: "s7", name: "Priya Patel", avatar: "PP", role: "RN", coursesCompleted: 16, coursesTotal: 17, complianceScore: 94, certificationsExpiring: 1, lastActivity: "2h ago", status: "On track" },
+  { id: "s7", name: "Claire Harrison", avatar: "CH", role: "RN", coursesCompleted: 16, coursesTotal: 17, complianceScore: 94, certificationsExpiring: 1, lastActivity: "2h ago", status: "On track" },
   { id: "s8", name: "David Nguyen", avatar: "DN", role: "RN", coursesCompleted: 17, coursesTotal: 17, complianceScore: 100, certificationsExpiring: 0, lastActivity: "1h ago", status: "On track" },
 ];
 

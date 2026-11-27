@@ -270,7 +270,7 @@ export function VisitQueue({
                                 <div className="bg-slate-50 rounded border border-slate-200 divide-y divide-slate-100 text-[10px] overflow-hidden">
                                   <div className="p-1.5 flex justify-between items-center hover:bg-emerald-50 cursor-pointer transition-colors group" onClick={() => onAssign?.('c1', v.id)}>
                                     <div className="flex flex-col">
-                                      <span className="font-semibold text-slate-700 group-hover:text-emerald-700">Priya Patel (RN)</span>
+                                      <span className="font-semibold text-slate-700 group-hover:text-emerald-700">Claire Harrison (RN)</span>
                                       <span className="text-slate-500 text-[9px]">+0.8 mi detour, 98% skill match</span>
                                     </div>
                                     <span className="text-emerald-600 font-semibold text-[9px] bg-emerald-100/50 px-1.5 py-0.5 rounded border border-emerald-200">Best Fit</span>

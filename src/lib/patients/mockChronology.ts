@@ -13,7 +13,7 @@ export interface ChronologyEntry {
   timestamp: string; // ISO date string
   category: ChronologyCategory;
   summary: string;
-  author: string; // e.g. "Priya S. — RN"
+  author: string; // e.g. "Claire H. — RN"
   details?: string;
 }
 

@@ -56,6 +56,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ResponsiveDomainTabStrip } from "@/components/ui/ResponsiveDomainTabStrip";
 
 interface CareNoteDetailWorkspaceProps {
   noteId: string;
@@ -513,52 +514,29 @@ export function CareNoteDetailWorkspace({ noteId }: CareNoteDetailWorkspaceProps
       </div>
 
       {/* =========================================================================
-          02. VIEW SWITCHER TABS (Consistent with CareNotes Pill Tab Bar)
+          02. VIEW SWITCHER TABS (Space-Aware Responsive Tab Strip)
          ========================================================================= */}
-      <div className="bg-white rounded-xl lg:rounded-2xl border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] p-1.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setActiveTab("note")}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === "note"
-              ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
-              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-              }`}
-          >
-            <FileText className={`w-3.5 h-3.5 ${activeTab === "note" ? "text-white" : "text-slate-500"}`} />
-            <span>CURRENT NOTE CONTENT</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("history")}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === "history"
-              ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
-              : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-              }`}
-          >
-            <History className={`w-3.5 h-3.5 ${activeTab === "history" ? "text-white" : "text-slate-500"}`} />
-            <span>VERSION HISTORY ({note.versions?.length || 1})</span>
-          </button>
-          {note.versions && note.versions.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setActiveTab("compare")}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${activeTab === "compare"
-                ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/20"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
-            >
-              <SplitSquareVertical className={`w-3.5 h-3.5 ${activeTab === "compare" ? "text-white" : "text-slate-500"}`} />
-              <span>COMPARE VERSIONS (DIFF)</span>
-            </button>
-          )}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <ResponsiveDomainTabStrip
+            tabs={[
+              { id: "note", label: "Current Note Content" },
+              { id: "history", label: `Version History (${note.versions?.length || 1})` },
+              ...(note.versions && note.versions.length > 0
+                ? [{ id: "compare" as const, label: "Compare Versions (Diff)" }]
+                : []),
+            ]}
+            activeTab={activeTab}
+            onSelectTab={(t) => setActiveTab(t)}
+            ariaLabel="Care note sections"
+          />
         </div>
 
         {/* Caregiver simulation button (Demonstrating Release 2 / Resubmission lifecycle) */}
         <button
           type="button"
           onClick={() => setIsResubmitSimulationModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-xl transition-all shrink-0 cursor-pointer"
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:text-[#3D6B22] bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all shrink-0 cursor-pointer"
           title="Simulate caregiver resubmitting amended note"
         >
           <Layers className="w-3.5 h-3.5 text-[#3D6B22]" />

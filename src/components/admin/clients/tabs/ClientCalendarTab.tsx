@@ -713,7 +713,7 @@ export function ClientCalendarTab({
                           key={cell.key}
                           type="button"
                           onClick={() => setCurrentDate(cell.date)}
-                          className={`h-11 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
+                          className={`h-11 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer active:scale-95 ${
                             cell.isSelected
                               ? "bg-[#3D6B22] text-white border-[#3D6B22] shadow-sm"
                               : cell.isToday
@@ -741,6 +741,42 @@ export function ClientCalendarTab({
                       );
                     })}
                   </div>
+
+                  {/* Mobile Active Week Summary Strip */}
+                  {showWeeklySummary && (() => {
+                    const activeWeek = monthWeeks.find((w) =>
+                      w.days.some((d) => d.key === selectedDateKey)
+                    );
+                    if (!activeWeek) return null;
+                    return (
+                      <div className="grid grid-cols-4 gap-1.5 pt-1">
+                        <div className="p-2 rounded-xl bg-sky-50/70 border border-sky-200/80 text-center">
+                          <div className="text-[9px] font-bold uppercase text-sky-700">Sched</div>
+                          <div className="text-xs font-extrabold text-slate-900">
+                            {activeWeek.summary.sHours}h/{activeWeek.summary.sCount}
+                          </div>
+                        </div>
+                        <div className="p-2 rounded-xl bg-emerald-50/70 border border-[#3D6B22]/20 text-center">
+                          <div className="text-[9px] font-bold uppercase text-[#3D6B22]">Billed</div>
+                          <div className="text-xs font-extrabold text-slate-900">
+                            {activeWeek.summary.bHours}h/{activeWeek.summary.bCount}
+                          </div>
+                        </div>
+                        <div className="p-2 rounded-xl bg-blue-50/70 border border-blue-200/80 text-center">
+                          <div className="text-[9px] font-bold uppercase text-blue-700">In-Prog</div>
+                          <div className="text-xs font-extrabold text-slate-900">
+                            {activeWeek.summary.pHours}h/{activeWeek.summary.pCount}
+                          </div>
+                        </div>
+                        <div className="p-2 rounded-xl bg-rose-50/70 border border-rose-200/80 text-center">
+                          <div className="text-[9px] font-bold uppercase text-rose-700">Open</div>
+                          <div className="text-xs font-extrabold text-slate-900">
+                            {activeWeek.summary.uHours}h/{activeWeek.summary.uCount}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -815,7 +851,7 @@ export function ClientCalendarTab({
             {showDetails && (
               <div className="pt-2 space-y-2.5">
                 <div className="p-3 rounded-xl border border-slate-200 bg-slate-50/50">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
                     {legendItems.map((item) => {
                       const isActiveFilter = filterStatus === item.key;
                       return (
@@ -1104,7 +1140,7 @@ export function ClientCalendarTab({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block">
                   Clock-in Coordinates

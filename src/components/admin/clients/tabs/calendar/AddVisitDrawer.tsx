@@ -305,13 +305,18 @@ export function AddVisitDrawer({
       />
 
       <aside
-        className={`fixed inset-y-0 right-0 z-50 lg:static lg:z-auto bg-white border-l border-slate-200 lg:border lg:rounded-2xl shadow-2xl lg:shadow-[0_4px_24px_rgba(0,0,0,0.05)] flex flex-col overflow-hidden transition-all duration-200 ${
+        className={`fixed inset-x-0 bottom-0 top-8 sm:inset-y-0 sm:left-auto sm:right-0 z-50 lg:static lg:z-auto bg-white border-t sm:border-t-0 sm:border-l border-slate-200 lg:border rounded-t-3xl sm:rounded-none lg:rounded-2xl shadow-2xl lg:shadow-[0_4px_24px_rgba(0,0,0,0.05)] flex flex-col overflow-hidden transition-all duration-200 animate-in slide-in-from-bottom-6 sm:slide-in-from-right-6 lg:animate-none ${
           isExpanded
             ? "w-full sm:w-[540px] lg:w-[520px] xl:w-[580px]"
             : "w-full sm:w-[400px] lg:w-[360px] xl:w-[390px]"
-        } shrink-0 max-h-screen lg:max-h-[calc(100vh-140px)]`}
+        } shrink-0 max-h-[calc(100dvh-2rem)] sm:max-h-dvh lg:max-h-[calc(100vh-140px)]`}
         aria-label={editingVisit ? "Edit Visit Panel" : "Add Visit Panel"}
       >
+        {/* Mobile Sheet Handle */}
+        <div className="sm:hidden pt-2 pb-0.5 flex justify-center bg-white shrink-0">
+          <div className="w-10 h-1 rounded-full bg-slate-300" />
+        </div>
+
         {/* Top Header */}
         <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
           <div className="flex items-center gap-2.5">
@@ -409,7 +414,7 @@ export function AddVisitDrawer({
 
               {/* Start & End Time + Duration */}
               <div className="space-y-1.5">
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div className="p-2.5 rounded-xl border border-slate-200 bg-slate-50/40">
                     <span className="text-[10px] font-semibold text-slate-400 uppercase block mb-1">
                       Start
@@ -498,7 +503,7 @@ export function AddVisitDrawer({
               </div>
 
               {/* Clock In / Out Locations */}
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className="text-[10px] font-semibold text-[#3D6B22] block mb-1">
                     Clock In Location

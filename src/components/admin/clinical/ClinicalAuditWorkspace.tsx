@@ -14,6 +14,7 @@ import {
 import { ClinicalAuditEvent } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
 import { ClinicalAvatarName } from "./ClinicalBadges";
+import { Pagination } from "@/components/ui/Pagination";
 
 export function ClinicalAuditWorkspace() {
   const router = useRouter();
@@ -23,6 +24,12 @@ export function ClinicalAuditWorkspace() {
   const [searchTerm, setSearchTerm] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, actionFilter, roleFilter]);
 
   useEffect(() => {
     const load = () => setEvents(getClinicalAuditEvents());
@@ -171,7 +178,12 @@ export function ClinicalAuditWorkspace() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((evt) => {
+                filtered
+                  .slice(
+                    (Math.min(currentPage, Math.max(1, Math.ceil(filtered.length / pageSize))) - 1) * pageSize,
+                    Math.min(currentPage, Math.max(1, Math.ceil(filtered.length / pageSize))) * pageSize
+                  )
+                  .map((evt) => {
                   const detailHref = getClinicalAuditEventDetailHref(evt);
                   return (
                     <tr
@@ -219,6 +231,14 @@ export function ClinicalAuditWorkspace() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={Math.min(currentPage, Math.max(1, Math.ceil(filtered.length / pageSize)))}
+          totalPages={Math.max(1, Math.ceil(filtered.length / pageSize))}
+          totalItems={filtered.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="events"
+        />
       </div>
     </div>
   );

@@ -486,7 +486,7 @@ export function ClinicalRequirementsWorkspace() {
                   <button
                     type="button"
                     onClick={() => toggleSort("clientName")}
-                    className="inline-flex items-center gap-1 hover:text-slate-700 cursor-pointer"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider hover:text-slate-700 cursor-pointer"
                   >
                     <span>Client</span>
                     <ArrowUpDown className="w-3 h-3" />
@@ -496,7 +496,7 @@ export function ClinicalRequirementsWorkspace() {
                   <button
                     type="button"
                     onClick={() => toggleSort("visitType")}
-                    className="inline-flex items-center gap-1 hover:text-slate-700 cursor-pointer"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider hover:text-slate-700 cursor-pointer"
                   >
                     <span>Visit Type</span>
                     <ArrowUpDown className="w-3 h-3" />
@@ -507,7 +507,7 @@ export function ClinicalRequirementsWorkspace() {
                   <button
                     type="button"
                     onClick={() => toggleSort("nextDueDate")}
-                    className="inline-flex items-center gap-1 hover:text-slate-700 cursor-pointer"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider hover:text-slate-700 cursor-pointer"
                   >
                     <span>Next Due Date</span>
                     <ArrowUpDown className="w-3 h-3" />
@@ -517,7 +517,7 @@ export function ClinicalRequirementsWorkspace() {
                   <button
                     type="button"
                     onClick={() => toggleSort("status")}
-                    className="inline-flex items-center gap-1 hover:text-slate-700 cursor-pointer"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider hover:text-slate-700 cursor-pointer"
                   >
                     <span>Status</span>
                     <ArrowUpDown className="w-3 h-3" />

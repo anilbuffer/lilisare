@@ -26,6 +26,7 @@ import {
   ResponsiveDomainTabStrip,
   DomainTabItem,
 } from "@/components/ui/ResponsiveDomainTabStrip";
+import { Pagination } from "@/components/ui/Pagination";
 
 type QueueCategory =
   | "all"
@@ -56,6 +57,12 @@ export function ClinicalReviewQueueWorkspace() {
   const [searchTerm, setSearchTerm] = useState("");
   const [docStatusFilter, setDocStatusFilter] = useState("all");
   const [reviewStatusFilter, setReviewStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category, searchTerm, docStatusFilter, reviewStatusFilter]);
 
   useEffect(() => {
     const load = () => {
@@ -322,7 +329,12 @@ export function ClinicalReviewQueueWorkspace() {
                   </td>
                 </tr>
               ) : (
-                queueRecords.map((v) => {
+                queueRecords
+                  .slice(
+                    (Math.min(currentPage, Math.max(1, Math.ceil(queueRecords.length / pageSize))) - 1) * pageSize,
+                    Math.min(currentPage, Math.max(1, Math.ceil(queueRecords.length / pageSize))) * pageSize
+                  )
+                  .map((v) => {
                   const rev = reviews.find((r) => r.visitId === v.id);
                   return (
                     <tr
@@ -372,6 +384,14 @@ export function ClinicalReviewQueueWorkspace() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={Math.min(currentPage, Math.max(1, Math.ceil(queueRecords.length / pageSize)))}
+          totalPages={Math.max(1, Math.ceil(queueRecords.length / pageSize))}
+          totalItems={queueRecords.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="records"
+        />
       </div>
     </div>
   );

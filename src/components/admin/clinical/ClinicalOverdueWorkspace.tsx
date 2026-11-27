@@ -25,6 +25,7 @@ import {
 import { ClinicalSubNav } from "./ClinicalSubNav";
 import { ClinicalAvatarName, PriorityBadge } from "./ClinicalBadges";
 import { CreateFollowUpModal } from "./ClinicalActionModals";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   ResponsiveDomainTabStrip,
   DomainTabItem,
@@ -65,6 +66,12 @@ export function ClinicalOverdueWorkspace() {
   );
   const [pickFollowUpOpen, setPickFollowUpOpen] = useState(false);
   const [followUpTarget, setFollowUpTarget] = useState<ClinicalVisit | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeSection]);
 
   useEffect(() => {
     const load = () => {
@@ -248,7 +255,12 @@ export function ClinicalOverdueWorkspace() {
                   </td>
                 </tr>
               ) : (
-                categorizedVisits.map((v) => {
+                categorizedVisits
+                  .slice(
+                    (Math.min(currentPage, Math.max(1, Math.ceil(categorizedVisits.length / pageSize))) - 1) * pageSize,
+                    Math.min(currentPage, Math.max(1, Math.ceil(categorizedVisits.length / pageSize))) * pageSize
+                  )
+                  .map((v) => {
                   const daysLate = calcDaysOverdue(v.dueDate);
                   return (
                     <tr
@@ -303,6 +315,14 @@ export function ClinicalOverdueWorkspace() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={Math.min(currentPage, Math.max(1, Math.ceil(categorizedVisits.length / pageSize)))}
+          totalPages={Math.max(1, Math.ceil(categorizedVisits.length / pageSize))}
+          totalItems={categorizedVisits.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="items"
+        />
       </div>
 
       {/* Active Follow-up Tasks & Mock Notification Log */}

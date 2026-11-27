@@ -292,7 +292,7 @@ export function ClinicalOverviewWorkspace() {
               className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 flex flex-col justify-between group"
             >
               <div className="flex items-start justify-between gap-2 mb-2.5">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider leading-snug">
+                <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider leading-snug">
                   {card.label}
                 </span>
                 <div

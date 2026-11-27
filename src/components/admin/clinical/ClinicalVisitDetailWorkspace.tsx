@@ -13,7 +13,6 @@ import {
   ExternalLink,
   FileText,
   FileWarning,
-  History,
   Lock,
   Paperclip,
   Plus,
@@ -306,22 +305,22 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
 
   const detailTabs: DomainTabItem<DetailSectionTab>[] = useMemo(
     () => [
-      { id: "all", label: "All Sections", minWidth: 112 },
-      { id: "client_req", label: "Client & Requirement", minWidth: 162 },
-      { id: "visit_schedule", label: "Visit & Schedule", minWidth: 138 },
-      { id: "documentation", label: "Documentation", minWidth: 130 },
-      { id: "review", label: "Clinical Review", minWidth: 135 },
+      { id: "all", label: "ALL SECTIONS", minWidth: 118 },
+      { id: "client_req", label: "CLIENT & REQUIREMENT", minWidth: 175 },
+      { id: "visit_schedule", label: "VISIT & SCHEDULE", minWidth: 150 },
+      { id: "documentation", label: "DOCUMENTATION", minWidth: 140 },
+      { id: "review", label: "CLINICAL REVIEW", minWidth: 145 },
       {
         id: "followups",
-        label: "Follow-ups",
+        label: "FOLLOW-UPS",
         badge: String(visitFollowUps.length),
-        minWidth: 120,
+        minWidth: 126,
       },
       {
         id: "audit",
-        label: "Audit History",
+        label: "AUDIT HISTORY",
         badge: String(visitAudit.length),
-        minWidth: 132,
+        minWidth: 140,
       },
     ],
     [visitFollowUps.length, visitAudit.length]
@@ -382,77 +381,74 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
   const showAudit = activeDetailTab === "all" || activeDetailTab === "audit";
 
   return (
-    <div className="w-full max-w-9xl mx-auto min-w-0 space-y-6 pb-12 animate-in fade-in duration-300">
-      {/* Top Back Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="w-full max-w-9xl mx-auto min-w-0 space-y-4 pb-16 animate-in fade-in duration-300">
+      {/* =========================================================================
+          TOP NAVIGATION BREADCRUMB
+         ========================================================================= */}
+      <div className="flex items-center justify-between gap-2">
         <Link
           href="/admin/clinical/requirements/"
-          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all cursor-pointer w-fit"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Clinical &amp; Supervisory</span>
         </Link>
-
-        <span className="text-xs font-semibold text-slate-500">
-          {visit.id} · Requirement {visit.requirementId}
-        </span>
       </div>
 
-      {/* Header Identity & Actions Card */}
-      <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-2 min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
-                {visit.id}
-              </span>
-              <span className="font-mono text-[11px] text-slate-500 font-medium">
-                Req: {visit.requirementId}
-              </span>
-              <PriorityBadge priority={visit.priority} />
-              <ClinicalVisitStatusBadge status={visit.visitStatus} />
+      {/* =========================================================================
+          01. HERO IDENTITY CARD
+         ========================================================================= */}
+      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-full bg-emerald-100/80 border border-emerald-200/60 flex items-center justify-center font-bold text-sm text-[#3D6B22] shrink-0">
+              {visit.clientName
+                .split(" ")
+                .filter(Boolean)
+                .map((p) => p[0])
+                .slice(0, 2)
+                .join("")
+                .toUpperCase()}
             </div>
 
-            <div className="flex items-center gap-3 pt-0.5">
-              <div className="w-10 h-10 rounded-full bg-[#3D6B22]/10 border border-[#3D6B22]/20 flex items-center justify-center font-bold text-sm text-[#3D6B22] shrink-0">
-                {visit.clientName
-                  .split(" ")
-                  .filter(Boolean)
-                  .map((p) => p[0])
-                  .slice(0, 2)
-                  .join("")}
-              </div>
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight leading-tight">
+            <div className="flex flex-col gap-1.5 min-w-0">
+              {/* Row 1: Client Name, Visit ID, Req ID, Visit Status & Priority pills */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                   {visit.clientName}
                 </h1>
-                <p className="text-xs text-slate-600 font-medium">
-                  {visit.visitType} · {visit.serviceName}
-                </p>
+                <span className="font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg text-xs border border-slate-200/80">
+                  {visit.id}
+                </span>
+                <span className="font-semibold text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-lg text-xs border border-slate-200/80">
+                  {visit.requirementId}
+                </span>
+                <ClinicalVisitStatusBadge status={visit.visitStatus} />
+                <PriorityBadge priority={visit.priority} />
               </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-0.5">
-              <span>{visit.agencyName}</span>
-              <span className="text-slate-300">•</span>
-              <span>{visit.programName}</span>
-              <span className="text-slate-300">•</span>
-              <span>
-                Due: <strong className="font-mono text-slate-800">{visit.dueDate}</strong>
-              </span>
-              <span className="text-slate-300">•</span>
-              <DeliveryMethodBadge method={visit.deliveryMethod} />
+              {/* Row 2: Program Badge & Visit Type/Service */}
+              <div className="mt-0.5 flex items-center gap-2.5 flex-wrap text-xs sm:text-sm text-slate-600">
+                <span className="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-[#3D6B22] border border-emerald-200/80">
+                  {visit.programName}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-50 text-slate-700 border border-slate-200">
+                  <span>
+                    {visit.visitType} · {visit.serviceName}
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* 1 or 2 Primary Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Right-Aligned Primary Action Buttons */}
+          <div className="flex items-center gap-2 self-start sm:self-center shrink-0 flex-wrap">
             <button
               type="button"
               onClick={() => setAssignOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs hover:text-slate-900 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs hover:text-slate-900 transition-all cursor-pointer"
             >
-              <UserCheck className="w-3.5 h-3.5 text-[#3D6B22]" />
+              <UserCheck className="w-4 h-4 text-[#3D6B22]" />
               <span>{visit.professionalId ? "Reassign" : "Assign Professional"}</span>
             </button>
 
@@ -460,9 +456,9 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
               <button
                 type="button"
                 onClick={() => setScheduleOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-sm shadow-[#3D6B22]/20 hover:shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                <CalendarPlus className="w-3.5 h-3.5" />
+                <CalendarPlus className="w-4 h-4" />
                 <span>{visit.scheduledDate ? "Reschedule Visit" : "Schedule Visit"}</span>
               </button>
             ) : (
@@ -472,15 +468,26 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   setEscalateDefault(false);
                   setFollowUpOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-md shadow-[#3D6B22]/20 transition-all active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl shadow-sm shadow-[#3D6B22]/20 hover:shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Add Follow-up</span>
               </button>
             )}
           </div>
         </div>
       </div>
+
+      {/* =========================================================================
+          02. RESPONSIVE DOMAIN TAB NAVIGATION STRIP
+         ========================================================================= */}
+      <ResponsiveDomainTabStrip
+        tabs={detailTabs}
+        activeTab={activeDetailTab}
+        onSelectTab={setActiveDetailTab}
+        ariaLabel="Clinical visit detail sections"
+        moreHeading="Detail Sections"
+      />
 
       {/* Top 4-Card Status & Operational Summary Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -649,19 +656,10 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
         </div>
       )}
 
-      {/* Detail Sections Space-Aware Overflow Tab Strip */}
-      <ResponsiveDomainTabStrip
-        tabs={detailTabs}
-        activeTab={activeDetailTab}
-        onSelectTab={setActiveDetailTab}
-        ariaLabel="Clinical visit detail sections"
-        moreHeading="Detail Sections"
-      />
-
       {/* Sections A, B, C Grid */}
       {(showClientReq || showVisitSchedule) && (
         <div
-          className={`grid grid-cols-1 gap-6 ${activeDetailTab === "all"
+          className={`grid grid-cols-1 gap-5 ${activeDetailTab === "all"
             ? "lg:grid-cols-3"
             : showClientReq && !showVisitSchedule
               ? "lg:grid-cols-2"
@@ -670,10 +668,11 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
         >
           {/* Client Overview */}
           {showClientReq && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-3 min-w-0">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h2 className="text-sm font-bold text-slate-900">
-                  Client Overview
+            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 min-w-0">
+              <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-slate-100 flex-wrap gap-2">
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
+                  <span>Client Overview</span>
                 </h2>
                 <Link
                   href={`/admin/clients/${visit.clientId}/`}
@@ -683,54 +682,54 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   <ExternalLink className="w-3 h-3" />
                 </Link>
               </div>
-              <dl className="space-y-2 text-xs">
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Client Name</dt>
-                  <dd className="font-semibold text-slate-900">{visit.clientName}</dd>
+              <dl className="divide-y divide-slate-100 text-xs">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Client Name</dt>
+                  <dd className="text-xs sm:text-sm font-bold text-slate-900 text-right">{visit.clientName}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Client ID</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Client ID</dt>
                   <dd className="font-mono font-semibold text-slate-800">{visit.clientId}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Date of Birth</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Date of Birth</dt>
                   <dd className="font-mono text-slate-700">
                     {clientRecord?.dob || "Restricted"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Agency</dt>
-                  <dd className="font-medium text-slate-800 text-right">{visit.agencyName}</dd>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Agency</dt>
+                  <dd className="font-semibold text-slate-800 text-right">{visit.agencyName}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Program</dt>
-                  <dd className="font-medium text-slate-800 text-right">{visit.programName}</dd>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Program</dt>
+                  <dd className="font-semibold text-slate-800 text-right">{visit.programName}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Active Service</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Active Service</dt>
                   <dd className="font-semibold text-slate-800 text-right">{visit.serviceName}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Authorization ID</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Authorization ID</dt>
                   <dd className="font-mono text-slate-700">
                     {requirement?.authorizationId || clientRecord?.authorization?.authNumber || "—"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Service Start Date</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Service Start Date</dt>
                   <dd className="font-mono text-slate-700">
                     {requirement?.serviceStartDate || "—"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Assigned Caregiver</dt>
-                  <dd className="font-medium text-slate-800">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Assigned Caregiver</dt>
+                  <dd className="font-semibold text-slate-800 text-right">
                     {clientRecord?.assignedCareTeam?.primaryCaregiver?.name || "Unassigned"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Case Manager</dt>
-                  <dd className="font-medium text-slate-800">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Case Manager</dt>
+                  <dd className="font-semibold text-slate-800 text-right">
                     {clientRecord?.assignedCareTeam?.caseManager?.name || "Unassigned"}
                   </dd>
                 </div>
@@ -740,13 +739,14 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
 
           {/* Requirement Information */}
           {showClientReq && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-3 min-w-0">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-slate-900">
-                    Requirement Information
+                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
+                    <span>Requirement Information</span>
                   </h2>
-                  <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+                  <span className="font-mono text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200/80">
                     Rule v{visit.ruleVersion}
                   </span>
                 </div>
@@ -773,18 +773,18 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   )}
                 </div>
               </div>
-              <dl className="space-y-2 text-xs">
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Requirement ID</dt>
+              <dl className="divide-y divide-slate-100 text-xs">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Requirement ID</dt>
                   <dd className="font-mono font-bold text-slate-900">{visit.requirementId}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Requirement Type</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Requirement Type</dt>
                   <dd className="font-semibold text-slate-900 text-right">{visit.visitCategory}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Applicable Rule</dt>
-                  <dd className="font-medium text-[#3D6B22] text-right">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Applicable Rule</dt>
+                  <dd className="font-semibold text-[#3D6B22] text-right">
                     <Link
                       href={`/admin/clinical/rules/${visit.ruleId}/`}
                       className="hover:underline"
@@ -793,34 +793,34 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                     </Link>
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Required Professional</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Required Professional</dt>
                   <dd className="font-semibold text-slate-800">{visit.professionalQualification}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Cadence Type</dt>
-                  <dd className="text-slate-800">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Cadence Type</dt>
+                  <dd className="font-semibold text-slate-800">
                     {requirement?.isRecurring ? "Recurring" : "Initial / One-Time"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Frequency</dt>
-                  <dd className="font-medium text-slate-800">{requirement?.frequency || "—"}</dd>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Frequency</dt>
+                  <dd className="font-semibold text-slate-800">{requirement?.frequency || "—"}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Last Completed</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Last Completed</dt>
                   <dd className="font-mono text-slate-700">
                     {requirement?.lastCompletedDate || "None"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Next Due Date</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Next Due Date</dt>
                   <dd className="font-mono font-bold text-slate-900">
                     {requirement?.nextDueDate || visit.dueDate}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Delivery Method</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Delivery Method</dt>
                   <dd>
                     <DeliveryMethodBadge method={visit.deliveryMethod} />
                   </dd>
@@ -831,11 +831,12 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
 
           {/* Visit Information */}
           {showVisitSchedule && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-3 min-w-0">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-slate-900">
-                    Visit Information
+                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
+                    <span>Visit Information</span>
                   </h2>
                   <ClinicalVisitStatusBadge status={visit.visitStatus} />
                 </div>
@@ -852,37 +853,37 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   )}
                 </div>
               </div>
-              <dl className="space-y-2 text-xs">
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Visit ID</dt>
+              <dl className="divide-y divide-slate-100 text-xs">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Visit ID</dt>
                   <dd className="font-mono font-bold text-slate-900">{visit.id}</dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Scheduled Date</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Scheduled Date</dt>
                   <dd className="font-mono font-semibold text-slate-800">
                     {visit.scheduledAt || "Not Scheduled"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Actual Visit Completed</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Actual Visit Completed</dt>
                   <dd className="font-mono text-slate-700">
                     {visit.completedAt || "Pending Completion"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Performing Professional</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Performing Professional</dt>
                   <dd className="font-semibold text-slate-900">
                     {visit.professionalName || "Unassigned"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Delivery &amp; Location</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Delivery &amp; Location</dt>
                   <dd className="text-slate-700 text-right max-w-[200px]">
                     {visit.deliveryMethod} · {visit.locationDetails}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2 pt-1">
-                  <dt className="text-slate-500">Linked Scheduling Record</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Linked Scheduling Record</dt>
                   <dd>
                     {visit.scheduledVisitId ? (
                       <Link
@@ -898,8 +899,8 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                   </dd>
                 </div>
                 {visit.careNoteId && (
-                  <div className="flex justify-between gap-2">
-                    <dt className="text-slate-500">Linked CareNote</dt>
+                  <div className="flex justify-between items-center gap-2 py-2">
+                    <dt className="text-[13px] font-medium text-slate-500">Linked CareNote</dt>
                     <dd>
                       <Link
                         href={`/admin/care-notes/${visit.careNoteId}/`}
@@ -920,23 +921,21 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
       {/* Grid: Documentation (Read-only findings) + Clinical Review */}
       {(showDocumentation || showReview) && (
         <div
-          className={`grid grid-cols-1 gap-6 ${showDocumentation && showReview ? "lg:grid-cols-12" : "lg:grid-cols-1"
+          className={`grid grid-cols-1 gap-5 ${showDocumentation && showReview ? "lg:grid-cols-12" : "lg:grid-cols-1"
             }`}
         >
           {/* Documentation */}
           {showDocumentation && (
             <div
               className={`${showReview ? "lg:col-span-7" : ""
-                } bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4 min-w-0`}
+                } bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-4 min-w-0`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">
-                    Documentation &amp; Evidence
+                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
+                    <span>Documentation &amp; Evidence</span>
                   </h2>
-                  <p className="text-xs text-slate-500">
-                    Submitted clinical findings are immutable by Agency Admin. Missing documentation can be requested below.
-                  </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <DocumentationStatusBadge status={visit.documentationStatus} />
@@ -1060,11 +1059,12 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
           {showReview && (
             <div
               className={`${showDocumentation ? "lg:col-span-5" : ""
-                } bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4 min-w-0`}
+                } bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-4 min-w-0`}
             >
-              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <h2 className="text-base font-bold text-slate-900">
-                  Clinical Review &amp; Sign-Off
+              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3.5 flex-wrap">
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
+                  <span>Clinical Review &amp; Sign-Off</span>
                 </h2>
                 <div className="flex items-center gap-2">
                   <ClinicalReviewStatusBadge status={visit.reviewStatus} />
@@ -1084,15 +1084,15 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                 </div>
               </div>
 
-              <dl className="space-y-2.5 text-xs">
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Assigned Reviewer</dt>
+              <dl className="divide-y divide-slate-100 text-xs">
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Assigned Reviewer</dt>
                   <dd className="font-semibold text-slate-900">
                     {review?.reviewerName || "Unassigned"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Days Pending Review</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Days Pending Review</dt>
                   <dd
                     className={`font-mono font-bold ${visit.daysPendingReview >= 5
                       ? "text-[#ff6900]"
@@ -1104,20 +1104,20 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
                     {visit.daysPendingReview} day(s)
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Review Date</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Review Date</dt>
                   <dd className="font-mono text-slate-700">
                     {review?.reviewedAt || "Pending"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Professional Sign-Off</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Professional Sign-Off</dt>
                   <dd className="font-mono font-semibold text-slate-800">
                     {review?.signOffTimestamp || "Awaiting Authorised RN"}
                   </dd>
                 </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Follow-up Required</dt>
+                <div className="flex justify-between items-center gap-2 py-2">
+                  <dt className="text-[13px] font-medium text-slate-500">Follow-up Required</dt>
                   <dd className="font-semibold text-slate-800">
                     {visit.followUpRequired ? "Yes" : "No"}
                   </dd>
@@ -1178,14 +1178,14 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
       {/* History, Activity & Follow-ups */}
       {(showAudit || showFollowUps) && (
         <div
-          className={`grid grid-cols-1 gap-6 ${showAudit && showFollowUps ? "lg:grid-cols-2" : "lg:grid-cols-1"
+          className={`grid grid-cols-1 gap-5 ${showAudit && showFollowUps ? "lg:grid-cols-2" : "lg:grid-cols-1"
             }`}
         >
           {showAudit && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4 min-w-0">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <History className="w-4 h-4 text-[#3D6B22]" />
+            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-4 min-w-0">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
                   <span>History &amp; Activity</span>
                 </h2>
                 <span className="text-[11px] font-semibold text-slate-400">
@@ -1227,10 +1227,11 @@ export function ClinicalVisitDetailWorkspace({ visitId }: { visitId: string }) {
           )}
 
           {showFollowUps && (
-            <div className="bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-4 min-w-0">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <h2 className="text-base font-bold text-slate-900">
-                  Operational Follow-up Tasks &amp; Reminders
+            <div className="bg-white rounded-xl lg:rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-200 space-y-4 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#3D6B22]" />
+                  <span>Operational Follow-up Tasks &amp; Reminders</span>
                 </h2>
                 <div className="flex flex-wrap items-center gap-1.5">
                   <button

@@ -38,6 +38,7 @@ import {
   VisitDeliveryMethod,
 } from "@/types/clinicalSupervisory";
 import { ClinicalSubNav } from "./ClinicalSubNav";
+import { Pagination } from "@/components/ui/Pagination";
 
 export function ClinicalRulesWorkspace() {
   const router = useRouter();
@@ -53,6 +54,12 @@ export function ClinicalRulesWorkspace() {
   const [serviceFilter, setServiceFilter] = useState("all");
   const [profTypeFilter, setProfTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, serviceFilter, profTypeFilter, statusFilter]);
 
   // Create New Rule Form State
   const [ruleName, setRuleName] = useState("");
@@ -333,7 +340,12 @@ export function ClinicalRulesWorkspace() {
                   </td>
                 </tr>
               ) : (
-                filteredRules.map((r) => {
+                filteredRules
+                  .slice(
+                    (Math.min(currentPage, Math.max(1, Math.ceil(filteredRules.length / pageSize))) - 1) * pageSize,
+                    Math.min(currentPage, Math.max(1, Math.ceil(filteredRules.length / pageSize))) * pageSize
+                  )
+                  .map((r) => {
                   const detailHref = getClinicalRuleDetailHref(r.id);
                   return (
                     <tr
@@ -408,6 +420,14 @@ export function ClinicalRulesWorkspace() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={Math.min(currentPage, Math.max(1, Math.ceil(filteredRules.length / pageSize)))}
+          totalPages={Math.max(1, Math.ceil(filteredRules.length / pageSize))}
+          totalItems={filteredRules.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          entryLabel="rules"
+        />
       </div>
 
       {/* Create Visit Rule Modal */}

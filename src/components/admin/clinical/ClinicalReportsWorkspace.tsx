@@ -32,6 +32,7 @@ import {
 } from "@/lib/admin/clinicalSupervisoryStore";
 import { ClinicalSubNav } from "./ClinicalSubNav";
 import { ClinicalAvatarName } from "./ClinicalBadges";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   ResponsiveDomainTabStrip,
   DomainTabItem,
@@ -80,6 +81,12 @@ export function ClinicalReportsWorkspace() {
   const [profFilter, setProfFilter] = useState("all");
   const [visitTypeFilter, setVisitTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeReport, dateRange, agencyFilter, programFilter, serviceFilter, profFilter, visitTypeFilter, statusFilter]);
 
   useEffect(() => {
     const load = () => {
@@ -547,7 +554,12 @@ export function ClinicalReportsWorkspace() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-[13px] text-slate-700">
-                {reportData.rows.map((row, idx) => (
+                {reportData.rows
+                  .slice(
+                    (Math.min(currentPage, Math.max(1, Math.ceil(reportData.rows.length / pageSize))) - 1) * pageSize,
+                    Math.min(currentPage, Math.max(1, Math.ceil(reportData.rows.length / pageSize))) * pageSize
+                  )
+                  .map((row, idx) => (
                   <tr
                     key={idx}
                     onClick={() => {
@@ -605,6 +617,16 @@ export function ClinicalReportsWorkspace() {
             </table>
           )}
         </div>
+        {reportData.rows.length > 0 && (
+          <Pagination
+            currentPage={Math.min(currentPage, Math.max(1, Math.ceil(reportData.rows.length / pageSize)))}
+            totalPages={Math.max(1, Math.ceil(reportData.rows.length / pageSize))}
+            totalItems={reportData.rows.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            entryLabel="rows"
+          />
+        )}
       </div>
     </div>
   );

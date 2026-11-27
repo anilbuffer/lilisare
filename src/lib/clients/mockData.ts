@@ -320,6 +320,211 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
         linkTab: "documents",
       },
     ],
+    planOfCareDetails: {
+      physicianSignedDate: "Oct 24, 2026",
+      nextReviewDate: "Dec 24, 2026",
+      rnSupervisor: "Evelyn Vance, RN BSN",
+      emergencyProtocol:
+        "Maintain calm sensory environment. For severe asthma/sensory distress, administer rescue inhaler per MAR and contact Sarah Miller (Mother & POA) within 10 minutes. Call 911 immediately for respiratory distress or unresponsiveness.",
+      riskFactors: [
+        "Sensory Overload",
+        "Elopement / Wandering Risk",
+        "Mild Asthma",
+        "Food Texture Sensitivity",
+      ],
+      goals: [
+        {
+          goal: "Demonstrate safe kitchen & mealtime routines with visual schedule cues",
+          targetDate: "Jan 30, 2027",
+          progress: "In Progress",
+        },
+        {
+          goal: "Complete morning personal hygiene routine with minimal verbal prompting",
+          targetDate: "Jan 15, 2027",
+          progress: "In Progress",
+        },
+      ],
+      interventions: [
+        "Use visual step-by-step picture cards during mealtime and hygiene transitions.",
+        "Provide sensory breaks every 45 minutes with weighted lap pad as needed.",
+      ],
+      challenges: [
+        {
+          id: "CHG-1001-1",
+          title: "Enhance Mealtime & Simple Food Preparation Skills",
+          status: "In Progress",
+          isActive: true,
+          outcomes: [
+            {
+              id: "OUT-1001-1",
+              description:
+                "Leo will demonstrate measurable improvement in his ability to participate safely in simple mealtime preparation with visual supports over the next 3 months.",
+              status: "In Progress",
+              effectiveDate: "10/09/2026",
+              isActive: true,
+            },
+          ],
+          goals: [
+            {
+              id: "GOL-1001-1",
+              description:
+                "Leo will demonstrate safe kitchen & table practices, including handwashing, using adaptive utensils, and clearing dishes with verbal prompting no more than once per session.",
+              currentProgress: "3.5 / 5",
+              baseline: "3. Moderate",
+              target: "5. Maximum",
+              targetDate: "2027-01-30",
+              status: "In Progress",
+              effectiveDate: "12/10/2026",
+              isActive: true,
+            },
+            {
+              id: "GOL-1001-2",
+              description:
+                "Leo will independently assemble a simple 3-step snack using visual recipe cards, completing the sequence safely 4 out of 5 sessions.",
+              currentProgress: "2.5 / 3",
+              baseline: "2. Minimal",
+              target: "3. Moderate",
+              targetDate: "2027-01-21",
+              status: "In Progress",
+              effectiveDate: "12/10/2026",
+              isActive: true,
+            },
+          ],
+          interventions: [
+            {
+              id: "INT-1001-1",
+              description:
+                "Provide structured instruction and hand-over-hand cueing using laminated visual recipe cards during daily afternoon snack prep.",
+              frequency: "Daily (Mon–Fri)",
+              instructions: "Review 3-step visual strip prior to starting; reinforce positive safety steps.",
+              status: "In Progress",
+              effectiveDate: "10/09/2026",
+              isActive: true,
+            },
+          ],
+          evaluations: [
+            {
+              id: "EVL-1001-1",
+              description:
+                "Progress reviewed monthly through family caregiver observations and RN sensory assessment. Team evaluates reduction in verbal prompts, consistency of handwashing, and Leo's comfort with mealtime transitions.",
+              status: "In Progress",
+              effectiveDate: "12/16/2026",
+              isActive: true,
+            },
+          ],
+        },
+        {
+          id: "CHG-1001-2",
+          title: "Improve Personal Hygiene and Self-Care Independence",
+          status: "In Progress",
+          isActive: true,
+          outcomes: [
+            {
+              id: "OUT-1001-2",
+              description:
+                "Leo will show consistent improvement in morning self-care routines and require less physical assistance over the next 3 months.",
+              status: "In Progress",
+              effectiveDate: "08/16/2026",
+              isActive: true,
+            },
+          ],
+          goals: [
+            {
+              id: "GOL-1001-3",
+              description:
+                "Leo will complete toothbrushing and face washing using a 2-minute visual timer with minimal caregiver cueing 5 out of 7 mornings.",
+              currentProgress: "3.0 / 4",
+              baseline: "2. Minimal",
+              target: "4. Supervised",
+              targetDate: "2027-01-15",
+              status: "In Progress",
+              effectiveDate: "11/04/2026",
+              isActive: true,
+            },
+          ],
+          interventions: [
+            {
+              id: "INT-1001-2",
+              description:
+                "Set visual sand timer in bathroom and play preferred calm transition audio during morning hygiene routine.",
+              frequency: "2x Daily (AM/PM)",
+              instructions: "Allow 2 minutes sensory warm-up before brushing; avoid rushing transitions.",
+              status: "In Progress",
+              effectiveDate: "08/16/2026",
+              isActive: true,
+            },
+          ],
+          evaluations: [
+            {
+              id: "EVL-1001-2",
+              description:
+                "Bi-weekly RN check-in with Sarah Miller confirms reduced sensory resistance during morning hygiene; continue visual timer reinforcement.",
+              status: "In Progress",
+              effectiveDate: "11/18/2026",
+              isActive: true,
+            },
+          ],
+        },
+      ],
+      pocReports: [
+        {
+          id: "POC-1001-1",
+          clientName: "Leo Miller",
+          practitioner: "Dr. Gregory House, MD",
+          practitionerFax: "1-541-555-8821",
+          certStart: "10/24/2026",
+          certEnd: "12/23/2026",
+          clinician: "Evelyn Vance, RN",
+          status: "Reviewer Accepted",
+          note: "CMS 485 initial pediatric certification approved.",
+          modifiedBy: "Evelyn Vance, RN",
+          modifiedDate: "10/25/2026",
+          sentDate: "10/24/2026",
+        },
+        {
+          id: "POC-1001-2",
+          clientName: "Leo Miller",
+          practitioner: "Dr. Gregory House, MD",
+          practitionerFax: "1-541-555-8821",
+          certStart: "12/24/2026",
+          certEnd: "02/22/2027",
+          clinician: "Evelyn Vance, RN",
+          status: "Fax Pending",
+          note: "60-day recertification packet queued for MD signature.",
+          modifiedBy: "Dana Jenkins",
+          modifiedDate: "11/26/2026",
+          sentDate: "11/25/2026",
+        },
+        {
+          id: "POC-1001-3",
+          clientName: "Leo Miller",
+          practitioner: "Dr. Maya Lin, MD",
+          practitionerFax: "1-541-555-3349",
+          certStart: "08/25/2026",
+          certEnd: "10/23/2026",
+          clinician: "Sarah Jenkins, RN",
+          status: "Returned Signed",
+          note: "Signed copy archived in clinical documents.",
+          modifiedBy: "Sarah Jenkins, RN",
+          modifiedDate: "09/02/2026",
+          sentDate: "08/26/2026",
+        },
+        {
+          id: "POC-1001-4",
+          clientName: "Leo Miller",
+          practitioner: "Dr. Gregory House, MD",
+          practitionerFax: "1-541-555-8821",
+          certStart: "06/26/2026",
+          certEnd: "08/24/2026",
+          clinician: "Sarah Jenkins, RN",
+          status: "Sent to Practitioner",
+          note: "Awaiting outpatient pediatric clinic fax confirmation.",
+          modifiedBy: "Evelyn Vance, RN",
+          modifiedDate: "07/01/2026",
+          sentDate: "06/27/2026",
+        },
+      ],
+    },
     updatedAt: "2026-11-19T08:30:00Z",
     updatedAtRelative: "Today, 08:30 AM",
   },

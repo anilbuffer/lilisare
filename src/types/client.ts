@@ -491,11 +491,15 @@ export interface ClientRecord {
     status: "Closed" | "Under Investigation" | "Review Required";
   }>;
   adls?: Array<{
+    id?: string;
     category: "ADL" | "IADL";
+    group?: string;
     name: string;
     level: "Independent" | "Supervision" | "Minimal Assist" | "Moderate Assist" | "Total Dependent";
     frequency: string;
     instructions: string;
+    instructionsEs?: string;
+    weeklySchedule?: AdlWeeklySchedule;
   }>;
   planOfCareDetails?: {
     goals: Array<{ goal: string; targetDate: string; progress: "In Progress" | "Achieved" | "Needs Adjustment" }>;
@@ -505,6 +509,8 @@ export interface ClientRecord {
     physicianSignedDate: string;
     nextReviewDate: string;
     rnSupervisor: string;
+    challenges?: CarePlanChallenge[];
+    pocReports?: PocReportEntry[];
   };
   attributes?: ClientAttributesRecord;
   forms?: Array<{
@@ -523,7 +529,101 @@ export type CalendarVisit = NonNullable<ClientRecord["calendarVisits"]>[number];
 export type ResponsibleParty = NonNullable<ClientRecord["responsibleParties"]>[number];
 export type TransactionRecord = NonNullable<ClientRecord["transactions"]>[number];
 export type IncidentReport = NonNullable<ClientRecord["incidents"]>[number];
+export type AdlDayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+export type AdlFrequencyType = "always" | "as_needed" | "specific_times" | "never";
+export type AdlTimeSlot = "Morning" | "Afternoon" | "Evening" | "Bedtime";
+
+export interface AdlDaySchedule {
+  type: AdlFrequencyType;
+  times?: AdlTimeSlot[];
+}
+
+export type AdlWeeklySchedule = Record<AdlDayKey, AdlDaySchedule>;
+
 export type AdlAssessmentItem = NonNullable<ClientRecord["adls"]>[number];
 export type AssessmentFormItem = NonNullable<ClientRecord["forms"]>[number];
 export type DocumentItem = ClientDocument;
+
+export type CarePlanItemStatus =
+  | "In Progress"
+  | "Achieved"
+  | "Completed"
+  | "On Hold"
+  | "Discontinued"
+  | "Inactive";
+
+export interface CarePlanOutcome {
+  id: string;
+  description: string;
+  status: CarePlanItemStatus;
+  effectiveDate: string;
+  isActive?: boolean;
+}
+
+export interface CarePlanGoalItem {
+  id: string;
+  description: string;
+  currentProgress: string;
+  baseline: string;
+  target: string;
+  targetDate: string;
+  status: CarePlanItemStatus;
+  effectiveDate: string;
+  isActive?: boolean;
+}
+
+export interface CarePlanInterventionItem {
+  id: string;
+  description: string;
+  frequency: string;
+  instructions: string;
+  status: CarePlanItemStatus;
+  effectiveDate: string;
+  isActive?: boolean;
+}
+
+export interface CarePlanEvaluationItem {
+  id: string;
+  description: string;
+  status: CarePlanItemStatus;
+  effectiveDate: string;
+  isActive?: boolean;
+}
+
+export interface CarePlanChallenge {
+  id: string;
+  title: string;
+  status: CarePlanItemStatus;
+  isActive?: boolean;
+  outcomes: CarePlanOutcome[];
+  goals: CarePlanGoalItem[];
+  interventions: CarePlanInterventionItem[];
+  evaluations: CarePlanEvaluationItem[];
+}
+
+export type PocReportStatus =
+  | "Reviewer Accepted"
+  | "Fax Pending"
+  | "Clinician Signed"
+  | "Sent to Practitioner"
+  | "Returned Unsigned"
+  | "Returned Signed"
+  | "Error";
+
+export interface PocReportEntry {
+  id: string;
+  clientName: string;
+  practitioner: string;
+  practitionerFax?: string;
+  certStart: string;
+  certEnd: string;
+  clinician: string;
+  status: PocReportStatus;
+  note?: string;
+  modifiedBy: string;
+  modifiedDate: string;
+  sentDate?: string;
+  sendManually?: boolean;
+}
+
 

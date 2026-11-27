@@ -29,11 +29,14 @@ import {
   Phone,
   Home,
   CalendarPlus,
+  Stethoscope,
+  ArrowRight,
 } from "lucide-react";
 import { ClientRecord } from "@/types/client";
 import { PortalRole } from "../AdminClientDetailView";
 import { toast } from "sonner";
-import { saveClientsToStorage, getClientsFromStorage } from "@/lib/clients/mockData";
+import { saveClientsToStorage, getClientsFromStorage, getClientDiagnosis } from "@/lib/clients/mockData";
+import { getAdminReferralsFromStorage } from "@/lib/intake-referrals/adminIntakeReferralsData";
 
 interface ClientProfileTabProps {
   client: ClientRecord;
@@ -711,6 +714,37 @@ export function ClientProfileTab({
                   <span className="text-[13px] font-medium text-slate-500">Referred By</span>
                   <span className="text-sm font-semibold text-slate-800">{formData.referredBy}</span>
                 </div>
+
+                <div className="flex justify-between items-start gap-4 py-1.5">
+                  <span className="text-[13px] font-medium text-slate-500 shrink-0">Primary Diagnosis</span>
+                  <span className="text-sm font-semibold text-slate-800 text-right inline-flex items-center gap-1.5">
+                    <Stethoscope className="w-3.5 h-3.5 text-[#3D6B22] shrink-0" />
+                    <span>{getClientDiagnosis(client)}</span>
+                  </span>
+                </div>
+
+                {(() => {
+                  const originId =
+                    client.originReferralId ||
+                    getAdminReferralsFromStorage().find((r) => r.clientId === client.id)?.id;
+                  if (!originId) return null;
+                  const referralHref =
+                    userRole === "intake" || originId.startsWith("INQ-")
+                      ? `/intake/pipeline/${originId}`
+                      : `/admin/intake-referrals/${originId}`;
+                  return (
+                    <div className="flex justify-between items-center py-1.5">
+                      <span className="text-[13px] font-medium text-slate-500">Originating Referral</span>
+                      <Link
+                        href={referralHref}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 transition-colors"
+                      >
+                        <span>Originated from Referral #{originId}</span>
+                        <ArrowRight className="w-3 h-3 text-slate-400" />
+                      </Link>
+                    </div>
+                  );
+                })()}
 
                 <div className="flex justify-between items-center py-1.5">
                   <span className="text-[13px] font-medium text-slate-500">Medicaid Number</span>

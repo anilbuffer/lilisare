@@ -200,6 +200,114 @@ export interface ClientAttributesRecord {
   specialInstructions?: string;
 }
 
+export interface BillingPayer {
+  id: string;
+  name: string;
+  status: "Active" | "Inactive";
+  requiresAuth: boolean;
+  eligibilityStatus: "Not requested" | "Verified" | "Pending" | "Ineligible";
+  verificationDate?: string;
+  defaultFax?: string;
+  contact?: string;
+  location?: string;
+}
+
+export interface EligibilityHistoryEntry {
+  id: string;
+  payerName: string;
+  checkedAt: string;
+  status: "Verified" | "Pending" | "Ineligible";
+  checkedBy: string;
+  notes?: string;
+}
+
+export interface AuthorizedServiceLine {
+  id: string;
+  code: string;
+  description: string;
+  modifiers: [string, string, string, string];
+  units: "mTU" | "Hours" | "Units" | "Visits";
+  maxTimeAllowed: number;
+  period: "Day" | "Week" | "2-week" | "Month" | "Auth Period";
+  startDate: string;
+  endDate: string;
+  status: "Current" | "Expired" | "Upcoming";
+}
+
+export interface BillingAuthorization {
+  id: string;
+  authNumber: string;
+  authType: "Per-Service Time" | "Shared Time";
+  payerId: string;
+  payerName: string;
+  icd10Codes: [string, string, string, string];
+  services: AuthorizedServiceLine[];
+}
+
+export interface PaymentResponsibilityItem {
+  id: string;
+  payerName: string;
+  responsibilityType: "Primary" | "Secondary" | "Copay" | "Client Share";
+  percentage: number;
+  fixedAmount?: number;
+  notes?: string;
+}
+
+export interface AssignedServiceItem {
+  id: string;
+  code: string;
+  description: string;
+  payer: string;
+  type: "Hourly" | "Per Visit" | "Daily" | "mTU";
+  billRate: number;
+  reqAuth: boolean;
+}
+
+export interface MaxHoursVisitItem {
+  id: string;
+  serviceCode: string;
+  maxHours: number;
+  maxVisits: number;
+  period: "Day" | "Week" | "2-week" | "Month";
+  startDate: string;
+  endDate: string;
+}
+
+export interface BillRateAdjustmentItem {
+  id: string;
+  code: string;
+  description: string;
+  payer: string;
+  type: "Hourly" | "Per Visit" | "Daily" | "mTU";
+  rate: number;
+  startDate: string;
+  endDate: string;
+}
+
+export interface ClientBillingConfig {
+  billingInfo: {
+    clientClass: string;
+    billingCycle: "Weekly" | "Bi-Weekly" | "Semi-Monthly" | "Monthly";
+    insurancePolicyNumber: string;
+    billingNotes: string;
+    billClient: boolean;
+    billOvertimeRates: boolean;
+    billHolidayRates: boolean;
+    payCaregiver: boolean;
+    hipaaReleaseSigned: boolean;
+    useMtuOnCalendar: boolean;
+    includeTotalOnSplitInvoices: "System Default (No)" | "System Default (Yes)" | "Yes" | "No";
+    servicesFilter: "All" | "Authorized Only" | "Authorized + Assigned";
+  };
+  payers: BillingPayer[];
+  eligibilityHistory: EligibilityHistoryEntry[];
+  authorizations: BillingAuthorization[];
+  paymentResponsibilities: PaymentResponsibilityItem[];
+  assignedServices: AssignedServiceItem[];
+  maxHoursAndVisits: MaxHoursVisitItem[];
+  billRateAdjustments: BillRateAdjustmentItem[];
+}
+
 export interface ClientRecord {
   id: string; // e.g. CL-1001
   originReferralId?: string; // e.g. REF-2026-1037
@@ -389,6 +497,7 @@ export interface ClientRecord {
     lastUpdated: string;
     signedBy?: string;
   }>;
+  billingConfig?: ClientBillingConfig;
 }
 
 // Convenience Type Aliases for 17 Modular Domains

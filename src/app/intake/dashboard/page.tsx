@@ -171,7 +171,7 @@ export default function IntakeDashboardPage() {
     );
     const newLeads = inquiries.filter((i) => i.stage === "New Inquiry" || i.stage === "New Lead");
     const converted = inquiries.filter((i) => i.stage === "Converted");
-    const onboardingClients = clients.filter((c) => c.status === "Onboarding");
+    const onboardingClients = clients.filter((c) => c.status === "On Hold");
     const bottleneckHouseholds = households.filter((h) => Boolean(h.triJourneyStatus?.bottleneckMessage));
     const clearedCaregivers = caregivers.filter(
       (c) => c.verificationChecklist?.screening === "Cleared"

@@ -1,4 +1,4 @@
-export type ClientStatus = "Active" | "Onboarding" | "Hospitalized" | "Discharged";
+export type ClientStatus = "Active" | "Hospitalized" | "On Hold" | "Discharged";
 
 export type ClientRiskLevel = "High Risk" | "Medium Risk" | "Low Risk";
 

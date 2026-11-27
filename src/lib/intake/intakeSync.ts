@@ -169,7 +169,7 @@ export function convertInquiryToLiveEntities(
   let createdCaregiver: CaregiverRecord | undefined;
   let createdHousehold: Household | undefined;
 
-  // 1. Create or link Client in Agency Admin (prevent duplicate by ID or name)
+  // 1. Create or link Client in Agency Admin (prevent duplicate by ID, originReferralId, or name)
   if (options.createClient) {
     const clients = getClientsFromStorage();
     const rawName = inquiry.familyInfo.clientInfo.name || "Client Name";
@@ -177,10 +177,18 @@ export function convertInquiryToLiveEntities(
       (c) =>
         (inquiry.onboardingStatus?.clientProfileId &&
           c.id.toLowerCase() === inquiry.onboardingStatus.clientProfileId.toLowerCase()) ||
+        (c.originReferralId &&
+          c.originReferralId.toLowerCase() === inquiry.id.toLowerCase()) ||
         c.name.trim().toLowerCase() === rawName.trim().toLowerCase()
     );
     if (existingClient) {
       createdClient = existingClient;
+      if (!existingClient.originReferralId) {
+        const updatedClients = clients.map((c) =>
+          c.id === existingClient.id ? { ...c, originReferralId: inquiry.id } : c
+        );
+        saveClientsToStorage(updatedClients);
+      }
     } else {
       const nameParts = rawName.trim().split(" ");
       const firstName = nameParts[0] || "Client";
@@ -580,6 +588,10 @@ export function convertInquiryToLiveEntities(
   };
   saveHouseholdsToStorage([createdHousehold, ...households]);
 
+  const resolvedClientId = createdClient?.id || newClientId;
+  const resolvedHouseholdCode = createdClient?.household?.code || newHouseholdCode;
+  const resolvedCaregiverId = createdCaregiver?.id || newCaregiverId;
+
   // 4. Update the Inquiry in Intake storage
   const updatedInquiries = [...inquiries];
   updatedInquiries[index] = {
@@ -588,8 +600,8 @@ export function convertInquiryToLiveEntities(
     onboardingStatus: {
       converted: true,
       convertedAt: new Date().toISOString(),
-      clientProfileId: newClientId,
-      caregiverProfileId: newCaregiverId,
+      clientProfileId: resolvedClientId,
+      caregiverProfileId: resolvedCaregiverId,
     },
     timeline: [
       {
@@ -599,7 +611,7 @@ export function convertInquiryToLiveEntities(
         authorRole: "Intake Coordinator",
         timestamp: "Just now",
         title: "Inquiry Converted & Synced to Agency Admin",
-        details: `Created Client ${newClientId}, Household ${newHouseholdCode}, and Caregiver ${newCaregiverId}.`,
+        details: `Linked Client ${resolvedClientId}, Household ${resolvedHouseholdCode}, and Caregiver ${resolvedCaregiverId}.`,
       },
       ...inquiry.timeline,
     ],
@@ -624,8 +636,8 @@ export function convertInquiryToLiveEntities(
             return {
               ...ref,
               status: "Enrolled",
-              clientId: newClientId,
-              householdCode: newHouseholdCode,
+              clientId: resolvedClientId,
+              householdCode: resolvedHouseholdCode,
             };
           }
           return ref;
@@ -643,6 +655,213 @@ export function convertInquiryToLiveEntities(
     client: createdClient,
     caregiver: createdCaregiver,
     household: createdHousehold,
+  };
+}
+
+/**
+ * Convert an Agency Admin Referral into a single canonical ClientRecord (no duplicates).
+ * If a matching Inquiry or ClientRecord already exists, it links/updates instead of duplicating.
+ */
+export function convertAdminReferralToLiveClient(referralId: string): {
+  success: boolean;
+  clientId?: string;
+  householdCode?: string;
+  alreadyExisted?: boolean;
+} {
+  if (typeof window === "undefined") return { success: false };
+
+  const referrals = getAdminReferralsFromStorage();
+  const referral = referrals.find((r) => r.id.toLowerCase() === referralId.toLowerCase());
+  if (!referral) return { success: false };
+
+  const numericSuffix = referral.id.replace(/\D/g, "");
+  const inquiries = getIntakeInquiriesFromStorage();
+  const matchedInquiry = inquiries.find(
+    (inq) =>
+      inq.id.toLowerCase() === referral.id.toLowerCase() ||
+      (numericSuffix && inq.id.endsWith(`-${numericSuffix}`)) ||
+      inq.familyInfo.clientInfo.name.trim().toLowerCase() === referral.patientName.trim().toLowerCase()
+  );
+
+  if (matchedInquiry) {
+    const conv = convertInquiryToLiveEntities(matchedInquiry.id);
+    if (conv.success && conv.client) {
+      return {
+        success: true,
+        clientId: conv.client.id,
+        householdCode: conv.client.household.code,
+        alreadyExisted: Boolean(matchedInquiry.onboardingStatus?.converted),
+      };
+    }
+  }
+
+  const clients = getClientsFromStorage();
+  const existingClient = clients.find(
+    (c) =>
+      (referral.clientId && c.id.toLowerCase() === referral.clientId.toLowerCase()) ||
+      (c.originReferralId && c.originReferralId.toLowerCase() === referral.id.toLowerCase()) ||
+      c.name.trim().toLowerCase() === referral.patientName.trim().toLowerCase()
+  );
+
+  let resolvedClientId: string;
+  let resolvedHouseholdCode: string;
+  let alreadyExisted = false;
+
+  if (existingClient) {
+    alreadyExisted = true;
+    resolvedClientId = existingClient.id;
+    resolvedHouseholdCode =
+      existingClient.household?.code || referral.householdCode || `HH-${numericSuffix || "1050"}`;
+    if (!existingClient.originReferralId) {
+      const updatedClients = clients.map((c) =>
+        c.id === existingClient.id ? { ...c, originReferralId: referral.id } : c
+      );
+      saveClientsToStorage(updatedClients);
+    }
+  } else {
+    resolvedClientId = referral.clientId || `CL-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
+    resolvedHouseholdCode =
+      referral.householdCode || `HH-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
+    const nameParts = referral.patientName.trim().split(/\s+/);
+    const firstName = nameParts[0] || "Client";
+    const lastName = nameParts.slice(1).join(" ") || "Recipient";
+    const newClient = enrichClientWith17Domains({
+      id: resolvedClientId,
+      originReferralId: referral.id,
+      firstName,
+      lastName,
+      name: referral.patientName,
+      preferredName: firstName,
+      dob: "1955-01-01",
+      age: referral.age || 70,
+      gender: referral.gender || "Female",
+      primaryLanguage: "English",
+      status: "Active",
+      riskLevel:
+        referral.priority === "Urgent" || referral.priority === "High" ? "High Risk" : "Medium Risk",
+      primaryDiagnosis: referral.primaryDiagnosis || referral.program || "Comprehensive In-Home Support",
+      careType: "Family Care",
+      household: {
+        id: resolvedHouseholdCode.toLowerCase(),
+        code: resolvedHouseholdCode,
+        name: `${lastName} Household`,
+        address: referral.address || "100 Main St",
+        city: referral.city || "Portland",
+        state: "PA",
+        zip: referral.zip || "97201",
+        phone: referral.phone || "(503) 555-0100",
+        totalMembersCount: 2,
+      },
+      primaryContact: {
+        name: referral.referralSourceContact || referral.patientName,
+        relationship: "Primary Contact",
+        phone: referral.phone || "(503) 555-0100",
+        email: referral.email || "contact@family.com",
+        preferredMethod: "Phone",
+      },
+      emergencyContact: {
+        name: referral.referralSourceContact || referral.patientName,
+        relationship: "Emergency Contact",
+        phone: referral.phone || "(503) 555-0100",
+      },
+      assignedCareTeam: {
+        primaryCaregiver: null,
+        familyContact: {
+          id: `FC-${Math.floor(200 + Math.random() * 50)}`,
+          name: referral.referralSourceContact || referral.patientName,
+          relationship: "Primary Family Contact",
+          phone: referral.phone || "(503) 555-0100",
+          email: referral.email,
+        },
+        onboardingCoordinator: referral.assignedCoordinator
+          ? {
+              id: "OC-ADMIN",
+              name: referral.assignedCoordinator,
+              email: "intake@lilisare.com",
+              phone: referral.phone || "(503) 555-0199",
+            }
+          : undefined,
+      },
+      readiness: {
+        clientProfile: "Complete",
+        careArrangement: "Complete",
+        documents: referral.insuranceVerified ? "Verified" : "Review needed",
+        authorization: referral.insuranceVerified ? "Verified" : "Pending",
+        overallScore: 90,
+      },
+      carePlan: {
+        program: referral.program || "In-Home Care Waiver",
+        approvedServices: referral.requestedServices?.length
+          ? referral.requestedServices
+          : ["Personal Care / ADL Support"],
+        authorizedWeeklyHours: referral.estimatedHoursPerWeek || 30,
+        scheduledWeeklyHours: 0,
+        hoursUsedThisWeek: 0,
+        effectiveDate: new Date().toISOString().slice(0, 10),
+        reviewDate: "2027-01-01",
+        needsReview: false,
+        frequency: "Monday – Friday",
+        careNeeds: referral.requestedServices?.length
+          ? referral.requestedServices
+          : [referral.primaryDiagnosis || "Comprehensive In-Home Support"],
+        specialInstructions: referral.triageNotes || "Converted from intake referral.",
+        mobilityNotes: referral.primaryDiagnosis || "Standard mobility supervision.",
+        dietaryRestrictions: "None reported",
+        allergies: [],
+        adlSupportNeeds: ["Bathing", "Dressing", "Meal Preparation"],
+      },
+      authorization: {
+        authNumber: `AUTH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        payer: referral.payerName || "State Medicaid Waiver",
+        status: referral.insuranceVerified ? "Verified" : "Pending Renewal",
+        startDate: new Date().toISOString().slice(0, 10),
+        expiryDate: "2027-06-30",
+        daysUntilExpiry: 200,
+        totalUnitsApproved: (referral.estimatedHoursPerWeek || 30) * 24,
+        unitsUsed: 0,
+        unitsRemaining: (referral.estimatedHoursPerWeek || 30) * 24,
+        weeklyHourCap: referral.estimatedHoursPerWeek || 30,
+        caseManagerName: referral.assignedCoordinator || "Assigned Case Manager",
+        caseManagerAgency: referral.payerName || "State Medicaid Agency",
+      },
+      documents: [],
+      householdMembers: [],
+      activity: [
+        {
+          id: `ACT-${Date.now()}`,
+          timestamp: "Just now",
+          type: "status_change",
+          author: "Agency Admin",
+          authorRole: "Operational Administrator",
+          title: `Enrolled from Referral ${referral.id}`,
+          details: `Referral ${referral.id} converted into active client record ${resolvedClientId}.`,
+        },
+      ],
+      attentionItems: [],
+      updatedAt: new Date().toISOString(),
+      updatedAtRelative: "Just now",
+    });
+    saveClientsToStorage([newClient, ...clients]);
+  }
+
+  const updatedReferrals = referrals.map((r) =>
+    r.id === referral.id
+      ? {
+          ...r,
+          status: "Enrolled" as ReferralStatus,
+          clientId: resolvedClientId,
+          householdCode: resolvedHouseholdCode,
+        }
+      : r
+  );
+  saveAdminReferralsToStorage(updatedReferrals);
+  syncAdminStatusToIntake(referral.id, "Enrolled", referral.patientName);
+
+  return {
+    success: true,
+    clientId: resolvedClientId,
+    householdCode: resolvedHouseholdCode,
+    alreadyExisted,
   };
 }
 
@@ -1072,7 +1291,7 @@ export function getSyncedIntakeMetrics() {
 
   // Pillar 2: Clients
   const activeClients = clients.filter((c) => c.status === "Active");
-  const onboardingClients = clients.filter((c) => c.status === "Onboarding");
+  const onboardingClients = clients.filter((c) => c.status === "On Hold");
   const pendingAuthClients = clients.filter(
     (c) => c.authorization?.status === "Pending Renewal" || c.readiness?.authorization === "Pending"
   );

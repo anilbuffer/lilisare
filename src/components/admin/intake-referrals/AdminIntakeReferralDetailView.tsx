@@ -40,8 +40,7 @@ import {
 } from "@/components/ui/ResponsiveDomainTabStrip";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 import {
-  convertInquiryToLiveEntities,
-  getIntakeInquiriesFromStorage,
+  convertAdminReferralToLiveClient,
   archiveReferralAcrossStores,
   deleteReferralAcrossStores,
   subscribeToIntakeSync,
@@ -242,207 +241,12 @@ export function AdminIntakeReferralDetailView({
   };
 
   const handleConvertToClient = () => {
-    const numericSuffix = referral.id.replace(/\D/g, "");
-    const inquiries = getIntakeInquiriesFromStorage();
-    const matchedInquiry = inquiries.find(
-      (inq) =>
-        inq.id.toLowerCase() === referral.id.toLowerCase() ||
-        (numericSuffix && inq.id.endsWith(`-${numericSuffix}`)) ||
-        inq.familyInfo.clientInfo.name.toLowerCase() === referral.patientName.toLowerCase()
-    );
+    const res = convertAdminReferralToLiveClient(referral.id);
+    if (!res.success || !res.clientId) return;
 
-    let createdClientId =
-      referral.clientId || `CL-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
-    let createdHouseholdCode =
-      referral.householdCode || `HH-${numericSuffix || Math.floor(1050 + Math.random() * 50)}`;
+    const createdClientId = res.clientId;
+    const createdHouseholdCode = res.householdCode || referral.householdCode || "";
 
-    if (matchedInquiry && !matchedInquiry.onboardingStatus?.converted) {
-      const conv = convertInquiryToLiveEntities(matchedInquiry.id);
-      if (conv.success && conv.client && conv.household) {
-        createdClientId = conv.client.id;
-        createdHouseholdCode = conv.household.code;
-      }
-    } else {
-      const clients = getClientsFromStorage();
-      const existingByName = clients.find(
-        (c) =>
-          c.id.toLowerCase() === createdClientId.toLowerCase() ||
-          c.name.toLowerCase() === referral.patientName.trim().toLowerCase()
-      );
-      if (existingByName) {
-        createdClientId = existingByName.id;
-        createdHouseholdCode = existingByName.household?.code || createdHouseholdCode;
-      } else {
-        const nameParts = referral.patientName.trim().split(/\s+/);
-        const firstName = nameParts[0] || "Client";
-        const lastName = nameParts.slice(1).join(" ") || "Recipient";
-        const newClient = enrichClientWith17Domains({
-          id: createdClientId,
-          originReferralId: referral.id,
-          firstName,
-          lastName,
-          name: referral.patientName,
-          preferredName: firstName,
-          dob: "1955-01-01",
-          age: referral.age || 70,
-          gender: referral.gender || "Female",
-          primaryLanguage: "English",
-          status: "Active",
-          careType: "Family Care",
-          household: {
-            id: createdHouseholdCode.toLowerCase(),
-            code: createdHouseholdCode,
-            name: `${lastName} Household`,
-            address: referral.address,
-            city: referral.city,
-            state: "PA",
-            zip: referral.zip,
-            phone: referral.phone,
-            totalMembersCount: 2,
-          },
-          primaryContact: {
-            name: referral.referralSourceContact || referral.patientName,
-            relationship: "Primary Contact",
-            phone: referral.phone,
-            email: referral.email,
-            preferredMethod: "Phone",
-          },
-          emergencyContact: {
-            name: referral.referralSourceContact || "Family Contact",
-            relationship: "Guardian / POA",
-            phone: referral.phone,
-          },
-          assignedCareTeam: {
-            primaryCaregiver: null,
-            familyContact: {
-              id: `FC-${numericSuffix || "100"}`,
-              name: referral.referralSourceContact || referral.patientName,
-              relationship: "Primary Family Contact",
-              phone: referral.phone,
-              email: referral.email,
-            },
-            onboardingCoordinator: {
-              id: "OC-ADMIN",
-              name: referral.assignedCoordinator,
-              email: "intake@lilisare.com",
-              phone: referral.phone,
-            },
-          },
-          readiness: {
-            clientProfile: "Complete",
-            careArrangement: "Pending",
-            documents: referral.insuranceVerified ? "Verified" : "Review needed",
-            authorization: referral.insuranceVerified ? "Verified" : "Pending",
-            overallScore: 80,
-          },
-          carePlan: {
-            program: referral.program,
-            approvedServices: referral.requestedServices,
-            authorizedWeeklyHours: referral.estimatedHoursPerWeek || 25,
-            scheduledWeeklyHours: 0,
-            hoursUsedThisWeek: 0,
-            effectiveDate: new Date().toISOString().slice(0, 10),
-            reviewDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-            needsReview: false,
-            frequency: "Weekly",
-            careNeeds: referral.requestedServices,
-            specialInstructions: referral.triageNotes,
-            mobilityNotes: referral.primaryDiagnosis,
-            dietaryRestrictions: "None",
-            allergies: [],
-            adlSupportNeeds: ["Personal Care"],
-          },
-          authorization: {
-            authNumber: `AUTH-${numericSuffix || "8841"}`,
-            payer: referral.payerName,
-            status: referral.insuranceVerified ? "Verified" : "Pending Renewal",
-            startDate: new Date().toISOString().slice(0, 10),
-            expiryDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-            daysUntilExpiry: 180,
-            totalUnitsApproved: (referral.estimatedHoursPerWeek || 25) * 24,
-            unitsUsed: 0,
-            unitsRemaining: (referral.estimatedHoursPerWeek || 25) * 24,
-            weeklyHourCap: referral.estimatedHoursPerWeek || 25,
-            caseManagerName: referral.assignedCoordinator || "Assigned Case Manager",
-            caseManagerAgency: referral.payerName || "State Medicaid DHS",
-          },
-          documents: [],
-          householdMembers: [],
-          activity: [],
-          attentionItems: [],
-          updatedAt: new Date().toISOString(),
-          updatedAtRelative: "Just now",
-        });
-        saveClientsToStorage([newClient, ...clients]);
-      }
-
-      const households = getHouseholdsFromStorage();
-      if (!households.some((h) => h.code.toLowerCase() === createdHouseholdCode.toLowerCase())) {
-        const lastName = referral.patientName.trim().split(/\s+/).pop() || "Family";
-        saveHouseholdsToStorage([
-          {
-            id: createdHouseholdCode.toLowerCase(),
-            code: createdHouseholdCode,
-            name: `${lastName} Household`,
-            address: referral.address,
-            city: referral.city,
-            state: "PA",
-            zip: referral.zip,
-            phone: referral.phone,
-            program: referral.program,
-            caseManager: {
-              name: referral.assignedCoordinator,
-              agency: referral.payerName,
-              email: "casemanager@lilisare.com",
-              phone: referral.phone,
-            },
-            client: {
-              id: createdClientId,
-              name: referral.patientName,
-              role: "client",
-              relationship: "Care Recipient",
-              status: "Active",
-              phone: referral.phone,
-              email: referral.email,
-            },
-            primaryCaregiver: {
-              id: "CG-PENDING",
-              name: "Caregiver Assignment Pending",
-              role: "caregiver",
-              relationship: "Pending Match",
-              status: "Onboarding",
-              phone: referral.phone,
-              email: referral.email,
-            },
-            authorizedHoursPerWeek: referral.estimatedHoursPerWeek || 25,
-            scheduledHoursPerWeek: 0,
-            authStatus: referral.insuranceVerified ? "Approved" : "Pending Review",
-            authExpiry: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-            triJourneyStatus: {
-              clientStage: "Authorized",
-              caregiverStage: "Registered",
-              opsStage: "Coordination",
-            },
-            evvComplianceRate: 0,
-            lastVisitDate: "Not Started",
-          },
-          ...households,
-        ]);
-      }
-    }
-
-    const all = getAdminReferralsFromStorage();
-    const updated = all.map((r) =>
-      r.id === referral.id
-        ? {
-          ...r,
-          status: "Enrolled" as ReferralStatus,
-          clientId: createdClientId,
-          householdCode: createdHouseholdCode,
-        }
-        : r
-    );
-    saveAdminReferralsToStorage(updated);
     setReferral({
       ...referral,
       status: "Enrolled",
@@ -450,7 +254,9 @@ export function AdminIntakeReferralDetailView({
       householdCode: createdHouseholdCode,
     });
     toast.success(
-      `${referral.patientName} admitted & synced to Client (${createdClientId}) and Household (${createdHouseholdCode})`
+      res.alreadyExisted
+        ? `${referral.patientName} linked to existing Client (${createdClientId}) — no duplicate created.`
+        : `${referral.patientName} admitted & synced to Client (${createdClientId}) and Household (${createdHouseholdCode})`
     );
 
     setNotesList((prev) => [

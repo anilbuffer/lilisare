@@ -432,14 +432,14 @@ export function AdminClientDetailView({
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : statusVal === "Hospitalized"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : statusVal === "Onboarding"
+                            : statusVal === "On Hold"
                               ? "bg-sky-50 text-sky-700 border-sky-200"
                               : "bg-slate-100 text-slate-600 border-slate-200"
                       }`}
                     >
                       <option value="Active">Active</option>
-                      <option value="Onboarding">Onboarding</option>
                       <option value="Hospitalized">Hospitalized</option>
+                      <option value="On Hold">On Hold (Start of Care Pending)</option>
                       {perms.clients.canDischarge && <option value="Discharged">Discharged</option>}
                     </select>
                     <span

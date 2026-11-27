@@ -63,18 +63,6 @@ export const CLIENT_KANBAN_STAGES: {
       },
     },
     {
-      id: "Onboarding",
-      title: "Onboarding",
-      icon: FileCheck2,
-      badge: {
-        bg: "bg-sky-50",
-        text: "text-sky-800",
-        border: "border-sky-200",
-        dot: "bg-sky-500",
-        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
-      },
-    },
-    {
       id: "Hospitalized",
       title: "Hospitalized",
       icon: Clock,
@@ -84,6 +72,18 @@ export const CLIENT_KANBAN_STAGES: {
         border: "border-amber-200",
         dot: "bg-amber-500",
         headerBadge: "bg-amber-100 text-amber-800 border-amber-200",
+      },
+    },
+    {
+      id: "On Hold",
+      title: "On Hold",
+      icon: FileCheck2,
+      badge: {
+        bg: "bg-sky-50",
+        text: "text-sky-800",
+        border: "border-sky-200",
+        dot: "bg-sky-500",
+        headerBadge: "bg-sky-100 text-sky-800 border-sky-200",
       },
     },
     {
@@ -113,7 +113,7 @@ export function resolveClientStage(
   }
   if (client.status === "Discharged") return "Discharged";
   if (client.status === "Hospitalized") return "Hospitalized";
-  if (client.status === "Onboarding") return "Onboarding";
+  if (client.status === "On Hold") return "On Hold";
   return "Active";
 }
 
@@ -320,10 +320,10 @@ export function ClientManagementWorkspace({
     switch (status) {
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
-      case "Onboarding":
-        return "bg-sky-50 text-sky-800 border-sky-200";
       case "Hospitalized":
         return "bg-amber-50 text-amber-800 border-amber-200";
+      case "On Hold":
+        return "bg-sky-50 text-sky-800 border-sky-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:
@@ -730,7 +730,7 @@ export function ClientManagementWorkspace({
                         ? "Discharged"
                         : stage === "Hospitalized"
                           ? "Paused (Inpatient)"
-                          : stage === "Onboarding"
+                          : stage === "On Hold"
                             ? "Start of Care Pending"
                             : client.carePlan?.frequency || "Scheduled";
                     const authStatus = client.authorization?.status || "Pending Renewal";

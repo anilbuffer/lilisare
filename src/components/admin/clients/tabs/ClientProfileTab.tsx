@@ -749,8 +749,8 @@ export function ClientProfileTab({
                       className="flex-1 px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 font-semibold focus:bg-white"
                     >
                       <option value="Active">Active</option>
-                      <option value="Onboarding">Onboarding</option>
                       <option value="Hospitalized">Hospitalized</option>
+                      <option value="On Hold">On Hold (Start of Care Pending)</option>
                       <option value="Discharged">Discharged</option>
                     </select>
                     <button

@@ -942,7 +942,7 @@ export function InquiryManagementWorkspace({
                     <th className="py-3.5 px-4 pl-5">Prospect</th>
                     <th className="py-3.5 px-3">Referral Source</th>
                     <th className="py-3.5 px-3">Referral Date</th>
-                    <th className="py-3.5 px-3">Payer / Program</th>
+                    <th className="py-3.5 px-3">Payer / Insurance</th>
                     <th className="py-3.5 px-3">Requested Services</th>
                     <th className="py-3.5 px-3">Priority</th>
                     <th className="py-3.5 px-3">Status</th>

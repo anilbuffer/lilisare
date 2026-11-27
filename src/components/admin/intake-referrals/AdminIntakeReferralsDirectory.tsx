@@ -41,8 +41,7 @@ import {
   deleteReferralAcrossStores,
   syncAdminReferralToIntake,
   syncAdminStatusToIntake,
-  convertInquiryToLiveEntities,
-  getIntakeInquiriesFromStorage,
+  convertAdminReferralToLiveClient,
 } from "@/lib/intake/intakeSync";
 import {
   AdminIntakeReferralItem,
@@ -327,31 +326,15 @@ export function AdminIntakeReferralsDirectory() {
   };
 
   const handleConvertToClient = (referral: AdminIntakeReferralItem) => {
-    const numericSuffix = referral.id.replace(/\D/g, "");
-    const inquiries = getIntakeInquiriesFromStorage();
-    const matchedInquiry = inquiries.find(
-      (inq) =>
-        inq.id.toLowerCase() === referral.id.toLowerCase() ||
-        (numericSuffix && inq.id.endsWith(`-${numericSuffix}`)) ||
-        inq.familyInfo.clientInfo.name.toLowerCase() === referral.patientName.toLowerCase()
-    );
-
-    if (matchedInquiry && !matchedInquiry.onboardingStatus?.converted) {
-      convertInquiryToLiveEntities(matchedInquiry.id);
+    const res = convertAdminReferralToLiveClient(referral.id);
+    if (res.success) {
       setItems(getAdminReferralsFromStorage());
-      toast.success(`${referral.patientName} successfully enrolled as Active Client & synced!`);
-      return;
+      toast.success(
+        res.alreadyExisted
+          ? `${referral.patientName} linked to existing Client (${res.clientId}) — no duplicate created.`
+          : `${referral.patientName} enrolled & converted to Client (${res.clientId})!`
+      );
     }
-
-    const updated = items.map((r) =>
-      r.id === referral.id
-        ? { ...r, status: "Enrolled" as ReferralStatus }
-        : r
-    );
-    setItems(updated);
-    saveAdminReferralsToStorage(updated);
-    syncAdminStatusToIntake(referral.id, "Enrolled", referral.patientName);
-    toast.success(`${referral.patientName} successfully admitted as Active Client`);
   };
 
   const handleMoveStatus = (referral: AdminIntakeReferralItem, newStatus: ReferralStatus) => {

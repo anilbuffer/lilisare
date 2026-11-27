@@ -34,10 +34,10 @@ const CLIENT_RISK_DEFAULTS: Record<string, ClientRiskLevel> = {
 };
 
 export function normalizeClientStatus(status?: string): ClientStatus {
-  if (status === "Active" || status === "Onboarding" || status === "Hospitalized" || status === "Discharged") {
+  if (status === "Active" || status === "Hospitalized" || status === "On Hold" || status === "Discharged") {
     return status;
   }
-  if (status === "On Hold") return "Onboarding";
+  if (status === "Onboarding") return "On Hold";
   return "Active";
 }
 
@@ -59,7 +59,7 @@ export function getClientRiskLevel(client: ClientRecord): ClientRiskLevel {
   if (status === "Hospitalized" || (client.readiness?.overallScore ?? 100) < 70) {
     return "High Risk";
   }
-  if (status === "Onboarding" || (client.attentionItems && client.attentionItems.length > 0)) {
+  if (status === "On Hold" || (client.attentionItems && client.attentionItems.length > 0)) {
     return "Medium Risk";
   }
   return "Low Risk";
@@ -500,7 +500,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     age: 14,
     gender: "Female",
     primaryLanguage: "English / Gujarati",
-    status: "Onboarding",
+    status: "On Hold",
     careType: "Family Care",
     household: {
       id: "hh-1003",
@@ -665,7 +665,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     age: 6,
     gender: "Male",
     primaryLanguage: "English",
-    status: "Onboarding",
+    status: "On Hold",
     careType: "Family Friend Care",
     household: {
       id: "hh-1004",
@@ -988,7 +988,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     age: 11,
     gender: "Male",
     primaryLanguage: "English",
-    status: "Onboarding",
+    status: "On Hold",
     careType: "Family Care",
     household: {
       id: "hh-1006",
@@ -1288,7 +1288,7 @@ export const INITIAL_CLIENTS: ClientRecord[] = [
     age: 9,
     gender: "Female",
     primaryLanguage: "English / Cantonese",
-    status: "Onboarding",
+    status: "On Hold",
     careType: "Family Care",
     household: {
       id: "hh-1008",

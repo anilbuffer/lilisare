@@ -44,10 +44,10 @@ export function ClientsTable({
     switch (status) {
       case "Active":
         return "bg-[#E3F1D9] text-[#1E5622] border-[#1E5622]/20";
-      case "Onboarding":
-        return "bg-sky-50 text-sky-800 border-sky-200";
       case "Hospitalized":
         return "bg-amber-50 text-amber-800 border-amber-200";
+      case "On Hold":
+        return "bg-sky-50 text-sky-800 border-sky-200";
       case "Discharged":
         return "bg-rose-50 text-rose-700 border-rose-200";
       default:
@@ -89,11 +89,11 @@ export function ClientsTable({
             <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               <th className="py-3.5 px-4">Client</th>
               <th className="py-3.5 px-4">Diagnosis</th>
-              <th className="py-3.5 px-4">Household</th>
-              <th className="py-3.5 px-4">Assigned Caregiver</th>
               <th className="py-3.5 px-4">Status</th>
-              <th className="py-3.5 px-4">Risk Level</th>
-              <th className="py-3.5 px-4">Updated</th>
+              <th className="py-3.5 px-4">Risk</th>
+              <th className="py-3.5 px-4">Assigned Caregiver / RN</th>
+              <th className="py-3.5 px-4">Next Visit</th>
+              <th className="py-3.5 px-4">Authorization</th>
               <th className="py-3.5 px-4 text-right">Action</th>
             </tr>
           </thead>
@@ -162,31 +162,6 @@ export function ClientsTable({
                       </span>
                     </td>
 
-                    {/* Connected Household */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-800 text-xs truncate max-w-[170px]">
-                          {client.household.name}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Assigned Caregiver */}
-                    <td className="py-3.5 px-4">
-                      {client.assignedCareTeam.primaryCaregiver ? (
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-800 text-xs">
-                            {client.assignedCareTeam.primaryCaregiver.name}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          Unassigned
-                        </span>
-                      )}
-                    </td>
-
                     {/* Status */}
                     <td className="py-3.5 px-4">
                       <span
@@ -198,7 +173,7 @@ export function ClientsTable({
                       </span>
                     </td>
 
-                    {/* Risk Level */}
+                    {/* Risk */}
                     <td className="py-3.5 px-4">
                       <span
                         className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${getRiskBadge(
@@ -209,9 +184,44 @@ export function ClientsTable({
                       </span>
                     </td>
 
-                    {/* Last Activity / Updated */}
-                    <td className="py-3.5 px-4 text-xs text-slate-500 whitespace-nowrap">
-                      {client.updatedAtRelative}
+                    {/* Assigned Caregiver / RN */}
+                    <td className="py-3.5 px-4">
+                      {client.assignedCareTeam.primaryCaregiver ? (
+                        <span className="font-semibold text-slate-800 text-xs whitespace-nowrap">
+                          {client.assignedCareTeam.primaryCaregiver.name}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 whitespace-nowrap">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          Unassigned
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Next Visit */}
+                    <td className="py-3.5 px-4 text-xs text-slate-600 font-medium whitespace-nowrap">
+                      {client.status === "Discharged"
+                        ? "Discharged"
+                        : client.status === "Hospitalized"
+                          ? "Paused (Inpatient)"
+                          : client.status === "On Hold"
+                            ? "Start of Care Pending"
+                            : client.carePlan?.frequency || "Scheduled"}
+                    </td>
+
+                    {/* Authorization Status */}
+                    <td className="py-3.5 px-4">
+                      <span
+                        className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border whitespace-nowrap ${
+                          client.authorization?.status === "Verified"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : client.authorization?.status === "Expiring Soon"
+                              ? "bg-amber-50 text-amber-700 border-amber-200"
+                              : "bg-blue-50 text-blue-700 border-blue-200"
+                        }`}
+                      >
+                        {client.authorization?.status || "Pending Renewal"}
+                      </span>
                     </td>
 
                     {/* Quick Action */}

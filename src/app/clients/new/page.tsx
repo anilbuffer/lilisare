@@ -606,6 +606,21 @@ export default function AddClientPage({ baseBackPath = "/clients" }: AddClientPa
       convertedFromInquiryId: creationPath === "convert" ? selectedInquiryId : undefined,
     };
 
+    const trimmedName = clientName.trim();
+    const duplicateClient = existingClients.find(
+      (c) =>
+        (creationPath === "convert" &&
+          selectedInquiryId &&
+          c.originReferralId?.toLowerCase() === selectedInquiryId.toLowerCase()) ||
+        (trimmedName && c.name.trim().toLowerCase() === trimmedName.toLowerCase())
+    );
+    if (duplicateClient) {
+      setCreatedClient(duplicateClient);
+      setCurrentStep(5);
+      toast.info(`${duplicateClient.name} already exists as ${duplicateClient.id} — opened existing record (no duplicate created).`);
+      return;
+    }
+
     const newRecord = enrichClientWith17Domains(baseRecord);
     const updatedList = [newRecord, ...existingClients];
     saveClientsToStorage(updatedList);

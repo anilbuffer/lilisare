@@ -286,8 +286,8 @@ export function ClientEditView({ clientId, baseBackPath = "/clients" }: ClientEd
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-bold"
               >
                 <option value="Active">Active (Receiving Care)</option>
-                <option value="Onboarding">Onboarding (Setup in Progress)</option>
                 <option value="Hospitalized">Hospitalized (Inpatient Hold)</option>
+                <option value="On Hold">On Hold (Start of Care Pending)</option>
                 {perms.clients.canDischarge && (
                   <option value="Discharged">Discharged (Formally Ended)</option>
                 )}

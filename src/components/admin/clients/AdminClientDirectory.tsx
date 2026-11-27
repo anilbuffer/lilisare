@@ -74,7 +74,7 @@ const SEED_ADMIN_CLIENTS: AdminClientItem[] = [
     name: "Jackson Vance",
     age: 6,
     gender: "Male",
-    status: "Onboarding",
+    status: "On Hold",
     riskLevel: "Medium Risk",
     primaryDiagnosis: "Developmental Mobility Delay, Sensory Support",
     assignedCaregiver: "Maria Santos, BSN",
@@ -247,7 +247,7 @@ export function AdminClientDirectory() {
                 ? "Discharged"
                 : mappedStatus === "Hospitalized"
                   ? "Paused (Inpatient)"
-                  : mappedStatus === "Onboarding"
+                  : mappedStatus === "On Hold"
                     ? "Start of Care Pending"
                     : seedMatch?.nextVisit && seedMatch.status === "Active"
                       ? seedMatch.nextVisit
@@ -560,8 +560,8 @@ export function AdminClientDirectory() {
                   {[
                     { label: "All Clients", value: "ALL" },
                     { label: "Active", value: "Active" },
-                    { label: "Onboarding", value: "Onboarding" },
                     { label: "Hospitalized", value: "Hospitalized" },
+                    { label: "On Hold", value: "On Hold" },
                     { label: "Discharged", value: "Discharged" },
                   ].map((option) => (
                     <button
@@ -765,7 +765,7 @@ export function AdminClientDirectory() {
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : client.status === "Hospitalized"
                               ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : client.status === "Onboarding"
+                              : client.status === "On Hold"
                                 ? "bg-sky-50 text-sky-700 border-sky-200"
                                 : "bg-slate-100 text-slate-600 border-slate-200"
                             }`}
@@ -935,7 +935,7 @@ export function AdminClientDirectory() {
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : client.status === "Hospitalized"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : client.status === "Onboarding"
+                            : client.status === "On Hold"
                               ? "bg-sky-50 text-sky-700 border-sky-200"
                               : "bg-slate-100 text-slate-600 border-slate-200"
                           }`}

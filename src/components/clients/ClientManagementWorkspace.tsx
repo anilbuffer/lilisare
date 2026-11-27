@@ -25,6 +25,9 @@ import {
   Archive,
   Inbox,
   UserCheck,
+  Edit3,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { ClientRecord, ClientStatus } from "@/types/client";
 import {
@@ -33,6 +36,8 @@ import {
   getClientsFromStorage,
   saveClientsToStorage,
 } from "@/lib/clients/mockData";
+import { deleteClientFromStorage } from "@/lib/intake/intakeSync";
+import { Modal } from "@/components/ui/Modal";
 import { toast } from "sonner";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
@@ -144,6 +149,7 @@ export function ClientManagementWorkspace({
   const perms = usePortalPermissions();
 
   const [viewMode, setViewMode] = useState<"kanban" | "list">(initialViewMode);
+  const [deleteTarget, setDeleteTarget] = useState<ClientRecord | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCareType, setSelectedCareType] = useState("ALL");
   const [stageOverrides, setStageOverrides] = useState<Record<string, ClientKanbanStage>>({});
@@ -819,6 +825,25 @@ export function ClientManagementWorkspace({
                             >
                               Details
                             </button>
+                            {perms.clients.canEdit && (
+                              <Link
+                                href={`${cleanBasePath}/${client.id}/edit`}
+                                title="Edit Client"
+                                className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 hover:bg-emerald-50/60 transition-colors cursor-pointer"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </Link>
+                            )}
+                            {perms.clients.canDelete && (
+                              <button
+                                type="button"
+                                onClick={() => setDeleteTarget(client)}
+                                title="Delete Client (Agency Admin)"
+                                className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                             <Link
                               href={`${cleanBasePath}/${client.id}`}
                               className="p-1.5 text-slate-400 hover:text-[#3D6B22] transition-colors rounded-xl hover:bg-[#F2F8EE]"
@@ -837,6 +862,43 @@ export function ClientManagementWorkspace({
           </div>
         )}
       </div>
+
+      {perms.clients.canDelete && (
+        <Modal
+          isOpen={Boolean(deleteTarget)}
+          onClose={() => setDeleteTarget(null)}
+          title="Delete Client Record"
+          description="Permanent deletion removes this client across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{deleteTarget?.name}</strong> ({deleteTarget?.id})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!deleteTarget) return;
+                deleteClientFromStorage(deleteTarget.id);
+                toast.success(`Client ${deleteTarget.name} permanently deleted.`);
+                setDeleteTarget(null);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
+      )}
     </section>
   );
 }

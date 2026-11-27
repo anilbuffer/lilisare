@@ -43,6 +43,7 @@ import {
   Tag,
   Smartphone,
   Trash2,
+  Edit3,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
@@ -76,6 +77,7 @@ import { CaregiverMyAgencyTab } from "./tabs/CaregiverMyAgencyTab";
 interface AdminCaregiverDetailViewProps {
   caregiverId: string;
   initialEditMode?: boolean;
+  baseBackPath?: string;
 }
 
 // 13 exact tabs matching the user's latest specification & attached references
@@ -149,6 +151,7 @@ function getStatusBadge(status: AdminCaregiverProfile["status"]) {
 export function AdminCaregiverDetailView({
   caregiverId,
   initialEditMode = false,
+  baseBackPath = "/admin/caregivers",
 }: AdminCaregiverDetailViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -362,7 +365,7 @@ export function AdminCaregiverDetailView({
       {/* 01. Back Navigation Link */}
       <div>
         <Link
-          href="/admin/caregivers"
+          href={baseBackPath}
           className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -428,6 +431,19 @@ export function AdminCaregiverDetailView({
           <p className="text-xs text-slate-500 mt-0.5">Direct communication and lifecycle controls</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {perms.caregivers.canEdit && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("profile");
+                setIsEditingProfile(true);
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer"
+            >
+              <Edit3 className="w-4 h-4 text-[#3D6B22]" />
+              <span>Edit Profile</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setIsContactModalOpen(true)}
@@ -566,6 +582,8 @@ export function AdminCaregiverDetailView({
             isEditing={isEditingProfile}
             onToggleEdit={setIsEditingProfile}
             onProfileUpdated={(updated) => setProfile(updated)}
+            canEdit={perms.caregivers.canEdit}
+            canEditEmployment={perms.caregivers.canEditEmployment}
           />
         )}
 
@@ -669,7 +687,7 @@ export function AdminCaregiverDetailView({
                 deleteCaregiverFromStorage(profile.id);
                 setIsDeleteModalOpen(false);
                 toast.success(`Caregiver ${profile.name} permanently deleted.`);
-                router.push("/admin/caregivers");
+                router.push(baseBackPath);
               }}
               className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
             >

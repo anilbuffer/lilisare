@@ -30,6 +30,7 @@ import {
   Inbox,
   Filter,
   Edit3,
+  Trash2,
 } from "lucide-react";
 import {
   MOCK_HOUSEHOLDS,
@@ -38,7 +39,8 @@ import {
   saveHouseholdsToStorage,
 } from "@/lib/households/mockData";
 import { LILISARE_SERVICES } from "@/lib/services";
-import { subscribeToIntakeSync } from "@/lib/intake/intakeSync";
+import { subscribeToIntakeSync, deleteHouseholdFromStorage } from "@/lib/intake/intakeSync";
+import { Modal } from "@/components/ui/Modal";
 import { toast } from "sonner";
 import { usePortalPermissions } from "@/lib/rbac/usePortalPermissions";
 
@@ -179,6 +181,7 @@ export default function HouseholdsPage({
   const [selectedProgram, setSelectedProgram] = useState("all");
   const [selectedTab, setSelectedTab] = useState<string>("ALL");
   const [viewMode, setViewMode] = useState<"kanban" | "list">(initialViewMode);
+  const [deleteTarget, setDeleteTarget] = useState<Household | null>(null);
   const [stageOverrides, setStageOverrides] = useState<Record<string, HouseholdKanbanStage>>({});
 
   // Dropdown states for header controls & stage filters
@@ -932,13 +935,25 @@ export default function HouseholdsPage({
                                 <span>Details</span>
                                 <ArrowRight className="w-3.5 h-3.5 text-[#3D6B22]" />
                               </Link>
-                              <Link
-                                href={`${cleanBasePath}/${hh.id}/edit`}
-                                title="Edit Household"
-                                className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 hover:bg-emerald-50/60 transition-colors cursor-pointer"
-                              >
-                                <Edit3 className="w-3.5 h-3.5" />
-                              </Link>
+                              {perms.households.canEdit && (
+                                <Link
+                                  href={`${cleanBasePath}/${hh.id}/edit`}
+                                  title="Edit Household"
+                                  className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 hover:bg-emerald-50/60 transition-colors cursor-pointer"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </Link>
+                              )}
+                              {perms.households.canDelete && (
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteTarget(hh)}
+                                  title="Delete Household (Agency Admin)"
+                                  className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -951,6 +966,44 @@ export default function HouseholdsPage({
           )}
         </div>
       </section>
+
+      {perms.households.canDelete && (
+        <Modal
+          isOpen={Boolean(deleteTarget)}
+          onClose={() => setDeleteTarget(null)}
+          title="Delete Household Record"
+          description="Permanent deletion removes this household across both Agency Admin and Intake directories."
+          icon={<AlertTriangle className="w-5 h-5 text-rose-600" />}
+          maxWidth="sm"
+        >
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            <strong className="text-slate-900">{deleteTarget?.name}</strong> ({deleteTarget?.id})?
+          </p>
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(null)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!deleteTarget) return;
+                deleteHouseholdFromStorage(deleteTarget.id);
+                setHouseholdsList((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+                toast.success(`Household ${deleteTarget.name} permanently deleted.`);
+                setDeleteTarget(null);
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm cursor-pointer"
+            >
+              Confirm Delete
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Home,
   Trash2,
+  Edit3,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ClientRecord, ClientStatus, ClientRiskLevel, OnHoldReason } from "@/types/client";
@@ -852,6 +853,15 @@ export function AdminClientDirectory() {
                             <span>View Profile</span>
                             <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                           </Link>
+                          {perms.clients.canEdit && (
+                            <Link
+                              href={`/admin/clients/${client.id}/edit`}
+                              title="Edit Client"
+                              className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 hover:bg-emerald-50/60 transition-colors cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
                           {perms.clients.canDelete && (
                             <button
                               type="button"
@@ -937,13 +947,28 @@ export function AdminClientDirectory() {
                               View Household
                             </Link>
                           )}
-                          <Link
-                            href={`/admin/clients/${client.id}/edit`}
-                            className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                            Edit Record
-                          </Link>
+                          {perms.clients.canEdit && (
+                            <Link
+                              href={`/admin/clients/${client.id}/edit`}
+                              className="w-full text-left px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                            >
+                              <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+                              Edit Record
+                            </Link>
+                          )}
+                          {perms.clients.canDelete && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveCardMenuId(null);
+                                setDeleteTarget(client);
+                              }}
+                              className="w-full text-left px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2 cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                              Delete Client
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>

@@ -38,6 +38,8 @@ interface CaregiverProfileTabProps {
   isEditing?: boolean;
   onToggleEdit?: (editing: boolean) => void;
   onProfileUpdated?: (updated: AdminCaregiverProfile) => void;
+  canEdit?: boolean;
+  canEditEmployment?: boolean;
 }
 
 export function CaregiverProfileTab({
@@ -45,6 +47,8 @@ export function CaregiverProfileTab({
   isEditing: externalIsEditing,
   onToggleEdit,
   onProfileUpdated,
+  canEdit = true,
+  canEditEmployment = true,
 }: CaregiverProfileTabProps) {
   // Local edit mode state (controlled or uncontrolled)
   const [internalIsEditing, setInternalIsEditing] = useState(false);
@@ -413,14 +417,16 @@ export function CaregiverProfileTab({
         {/* Action Controls */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {!isEditing ? (
-            <button
-              type="button"
-              onClick={() => handleStartEdit("all")}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl transition-all shadow-xs shadow-[#3D6B22]/20 active:scale-95 cursor-pointer"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>Edit Profile</span>
-            </button>
+            canEdit && (
+              <button
+                type="button"
+                onClick={() => handleStartEdit("all")}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#3D6B22] hover:bg-[#345C1D] rounded-xl transition-all shadow-xs shadow-[#3D6B22]/20 active:scale-95 cursor-pointer"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Edit Profile</span>
+              </button>
+            )
           ) : (
             <div className="flex items-center gap-2">
               <button
@@ -877,13 +883,17 @@ export function CaregiverProfileTab({
 
                 <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
                   <label className="sm:col-span-4 text-[13px] font-medium text-slate-700">
-                    Employment Type
+                    Employment Type{" "}
+                    {!canEditEmployment && (
+                      <span className="text-[10px] text-amber-700 font-semibold">(Admin Only)</span>
+                    )}
                   </label>
                   <div className="sm:col-span-8">
                     <select
                       value={formData.employmentType}
+                      disabled={!canEditEmployment}
                       onChange={(e) => setFormData({ ...formData, employmentType: e.target.value as any })}
-                      className="w-full px-3.5 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] text-slate-800"
+                      className="w-full px-3.5 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#3D6B22]/20 focus:border-[#3D6B22] text-slate-800 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <option value="W2">W-2 Employee</option>
                       <option value="1099">1099 Independent Contractor</option>

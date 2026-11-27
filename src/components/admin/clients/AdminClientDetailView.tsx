@@ -534,6 +534,16 @@ export function AdminClientDetailView({
                 </>
               );
             })()}
+            {perms.clients.canEdit && (
+              <Link
+                href={`${baseBackPath}/${client.id}/edit`}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-all cursor-pointer whitespace-nowrap"
+                title="Edit Client Profile"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-[#3D6B22]" />
+                <span>Edit Client</span>
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setIsScheduleModalOpen(true)}

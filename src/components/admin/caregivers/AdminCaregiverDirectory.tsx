@@ -33,6 +33,7 @@ import {
   ArrowDown,
   User,
   Trash2,
+  Edit3,
 } from "lucide-react";
 import { CaregiverRecord } from "@/types/caregiver";
 import { getCaregiversFromStorage, INITIAL_CAREGIVERS } from "@/lib/caregivers/mockData";
@@ -824,6 +825,15 @@ export function AdminCaregiverDirectory() {
                             <span>View Profile</span>
                             <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
                           </Link>
+                          {perms.caregivers.canEdit && (
+                            <Link
+                              href={`/admin/caregivers/${cg.id}/edit`}
+                              title="Edit Caregiver"
+                              className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-[#3D6B22] hover:border-[#3D6B22]/30 hover:bg-emerald-50/60 transition-colors cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </Link>
+                          )}
                           {perms.caregivers.canDelete && (
                             <button
                               type="button"
@@ -925,6 +935,15 @@ export function AdminCaregiverDirectory() {
                   </Link>
 
                   <div className="flex items-center gap-1">
+                    {perms.caregivers.canEdit && (
+                      <Link
+                        href={`/admin/caregivers/${cg.id}/edit`}
+                        className="p-2 rounded-xl text-slate-400 hover:text-[#3D6B22] hover:bg-emerald-50 border border-slate-200 transition-colors cursor-pointer"
+                        title="Edit caregiver"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </Link>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleOpenSchedule(cg)}
@@ -941,6 +960,16 @@ export function AdminCaregiverDirectory() {
                     >
                       <Mail className="w-4 h-4" />
                     </button>
+                    {perms.caregivers.canDelete && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(cg)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-colors cursor-pointer"
+                        title="Delete Caregiver (Agency Admin)"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

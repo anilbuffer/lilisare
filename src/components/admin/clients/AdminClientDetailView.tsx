@@ -626,11 +626,11 @@ export function AdminClientDetailView({
 
               {/* Collapsed Overflow Tabs Dropdown Menu (Directly adjacent to visible tabs without gap) */}
               {collapsedTabs.length > 0 && (
-                <div ref={moreDropdownRef} className="relative shrink-0">
+                <div ref={moreDropdownRef} className="relative min-w-0 shrink">
                   <button
                     type="button"
                     onClick={() => setIsMoreOpen(!isMoreOpen)}
-                    className={`px-3 sm:px-3.5 py-2 text-xs font-bold tracking-wide transition-all whitespace-nowrap rounded-xl cursor-pointer flex items-center gap-1.5 ${isMoreActive
+                    className={`max-w-full px-3 sm:px-3.5 py-2 text-xs font-bold tracking-wide transition-all whitespace-nowrap rounded-xl cursor-pointer flex items-center gap-1.5 ${isMoreActive
                       ? "bg-[#3D6B22] text-white shadow-sm shadow-[#3D6B22]/30 scale-[1.02]"
                       : isMoreOpen
                         ? "bg-slate-100 text-slate-900 border border-slate-300"
@@ -639,13 +639,13 @@ export function AdminClientDetailView({
                     aria-expanded={isMoreOpen}
                     aria-label="More navigation domains"
                   >
-                    <span>
+                    <span className="truncate">
                       {isMoreActive && activeCollapsedTab
                         ? `MORE: ${activeCollapsedTab.label}`
                         : `MORE (${collapsedTabs.length})`}
                     </span>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform duration-200 ${isMoreOpen ? "rotate-180" : ""
+                      className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${isMoreOpen ? "rotate-180" : ""
                         }`}
                     />
                   </button>

@@ -516,10 +516,35 @@ export interface ClientRecord {
   forms?: Array<{
     id: string;
     title: string;
-    type: "Waiver Assessment" | "Consent & Release" | "Clinical Assessment" | "Family Agreement";
-    status: "Completed & Signed" | "Pending Signature" | "Draft" | "Annual Renewal Due";
+    type:
+      | "Waiver Assessment"
+      | "Consent & Release"
+      | "Clinical Assessment"
+      | "Family Agreement"
+      | "Progress Note"
+      | "Evaluation"
+      | "Management Report";
+    status:
+      | "In Progress"
+      | "Complete"
+      | "none"
+      | "Completed & Signed"
+      | "Pending Signature"
+      | "Draft"
+      | "Annual Renewal Due";
     lastUpdated: string;
     signedBy?: string;
+    visitDate?: string;
+    linkedTo?: string;
+    createdAt?: string;
+    createdBy?: string;
+    modifiedAt?: string;
+    modifiedBy?: string;
+    expire?: "never" | "30 days" | "60 days" | "90 days" | "6 months" | "1 year";
+    isLocked?: boolean;
+    isDraftInProgress?: boolean;
+    notes?: string;
+    sections?: Array<{ label: string; value: string }>;
   }>;
   billingConfig?: ClientBillingConfig;
 }
